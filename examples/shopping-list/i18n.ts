@@ -1,4 +1,4 @@
-import { IntlTranslator } from 'phlox-js';
+import { IntlTranslator } from 'phlox-js/localization';
 import cs from './locales/cs.json';
 import en from './locales/en.json';
 

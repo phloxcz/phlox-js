@@ -3,10 +3,10 @@
  * so files with TSX do not import `h`.
  */
 
-import { Fragment, h } from './dom';
-import type { Child } from './dom';
-import type { ElementMap } from './jsx';
-import type { Component } from './component';
+import { Fragment, h } from './ui/dom';
+import type { Child } from './ui/dom';
+import type { ElementMap } from './ui/jsx';
+import type { Component } from './ui/component';
 
 export { Fragment };
 

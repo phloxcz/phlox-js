@@ -1,5 +1,5 @@
 import { describe, expect, test, vi } from 'vitest';
-import { Scope, batch, computed, effect, onCleanup, state, untrack } from '../src/reactive';
+import { Scope, batch, computed, effect, onCleanup, state, untrack } from '../src/reactive/reactive';
 
 describe('state', () => {
   test('reads and writes', () => {

@@ -4,7 +4,7 @@ Jak se s frameworkem pracuje. Popisuje jen to, co je už napsané a otestované.
 
 **Co zatím chybí:** persistentní parametry a adaptér pro Kendo.
 
-**Kde co je:** jádro se importuje z `phlox-js`, síť (RPC) z `phlox-js/net`, oprávnění a přihlášení z `phlox-js/security`.
+**Kde co je:** jádro (reaktivita, šablony, komponenty, presentery, aplikace, DI) se importuje z `phlox-js`. Volitelné části mají vlastní vstup: síť (RPC) `phlox-js/net`, přihlášení a oprávnění `phlox-js/security`, překlady `phlox-js/localization` a Vite plugin `phlox-js/vite`.
 
 Všechno níže je vidět pohromadě v ukázce [examples/shopping-list](../examples/shopping-list/main.ts).
 
@@ -338,6 +338,7 @@ Texty jsou v JSON souboru pro každý jazyk. Aplikace si vytvoří překladač a
 
 ```ts
 // i18n.ts
+import { IntlTranslator } from 'phlox-js/localization';
 import cs from './locales/cs.json';
 import en from './locales/en.json';
 

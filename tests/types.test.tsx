@@ -3,8 +3,8 @@
  * Regression from TraceJS, where IntrinsicElements was `any`.
  */
 import { expect, test } from 'vitest';
-import { Else, ElseIf, For, If } from '../src/flow';
-import { state } from '../src/reactive';
+import { Else, ElseIf, For, If } from '../src/ui/flow';
+import { state } from '../src/reactive/reactive';
 
 export function typeChecks() {
   const name = state('a');

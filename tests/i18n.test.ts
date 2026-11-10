@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, test, vi } from 'vitest';
-import { IntlTranslator, Translator } from '../src/index';
+import { IntlTranslator, Translator } from '../src/localization/index';
 
 const cs = {
   hello: 'Ahoj {name}',

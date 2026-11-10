@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { Container } from '../src/di';
+import { Container } from '../src/di/container';
 
 // Constructors below are autowired by the Vite plugin from vite.config.ts, there is no $inject written by hand.
 

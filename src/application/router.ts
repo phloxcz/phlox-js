@@ -3,12 +3,12 @@
  * Only one navigation runs at a time. A newer one waits for it and the running one gives up at its next step.
  */
 
-import { batch, state, untrack } from './reactive';
-import { createComponent, showDialog } from './component';
-import type { Component } from './component';
-import { Presenter } from './presenter';
-import type { LinkParams, Params, Route, RoutedDialog } from './presenter';
-import type { Class } from './di';
+import { batch, state, untrack } from '../reactive/reactive';
+import { createComponent, showDialog } from '../ui/component';
+import type { Component } from '../ui/component';
+import { Presenter } from '../ui/presenter';
+import type { LinkParams, Params, Route, RoutedDialog } from '../ui/presenter';
+import type { Class } from '../di/container';
 import type { Application } from './application';
 
 type AnyPresenter = Presenter<any, any>;

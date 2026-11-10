@@ -3,7 +3,7 @@
  * Later changes go directly to the nodes that depend on them.
  */
 
-import { Scope, effect, onCleanup, untrack } from './reactive';
+import { Scope, effect, onCleanup, untrack } from '../reactive/reactive';
 import type { Child } from './jsx';
 
 export type { Child, Reactive } from './jsx';

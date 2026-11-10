@@ -2,6 +2,25 @@
 
 Jak se pojmy z Nette převádějí do PhloxJS. Dokument vzniká postupně. Každá část říká, jestli je rozhodnutá, nebo čeká na autora.
 
+## Struktura kódu (rozhodnuto)
+
+Adresáře `src/` odpovídají jmenným prostorům Nette:
+
+| Adresář | Obsah | V Nette |
+|---|---|---|
+| `reactive/` | `state`, `computed`, `effect`, `Scope` | |
+| `ui/` | `Component`, `Presenter`, `RouteFrame`, šablony, `<If>`, `<For>`, dialogy | `Nette\Application\UI` |
+| `application/` | `Application`, `Router`, flash zprávy | `Nette\Application`, `Nette\Routing` |
+| `di/` | `Container`, Vite plugin pro autowiring | `Nette\DI` |
+| `localization/` | `Translator`, `IntlTranslator` | `Nette\Localization` |
+| `net/` | RPC klient a generátor typů | |
+| `security/` | `User`, `Identity`, `Permission` | `Nette\Security` |
+
+- **Šablony jsou v `ui/`,** ne zvlášť jako obdoba Latte. Jsou s komponentami těsně propojené (rozhodl autor).
+- **Flash zprávy:** `flashMessage()` je metoda presenteru jako v Nette, služba, která zprávy drží, patří k aplikaci.
+
+**Importy:** `phlox-js` dává to, co potřebuje každá obrazovka (reaktivita, šablony, komponenty, presentery, aplikace, DI). Volitelné části mají vlastní vstup: `phlox-js/net`, `phlox-js/security`, `phlox-js/localization` a `phlox-js/vite`. Každý vstup je jeden soubor (`src/index.ts`, `src/net/index.ts`...), ostatní soubory jsou vnitřní. Na kořeni `src/` zůstávají jen vstupy: `index.ts`, `vite.ts` a `jsx-runtime.ts`, který si podle názvu hledá kompilátor.
+
 ## Presenter a Component (rozhodnuto)
 
 | Třída | Kde se zobrazuje | Co umí navíc | V Nette |
@@ -164,7 +183,7 @@ Ten seznam je celé rozhraní mezi pluginem a kontejnerem. Bez pluginu jde napsa
 
 ### Stav
 
-Implementováno: kontejner v `src/di.ts`, plugin v `src/vite.ts` (`phlox()` ve `vite.config.ts`). Pokrývají je `tests/di.test.ts`: autowiring, abstraktní předek, zděděný konstruktor, parametr s výchozí hodnotou, instance jako služba, `use()`, běžná třída beze změny a chyby pro interface, skalár, generikum, nejednoznačnost, chybějící službu a cyklus. V prohlížeči ověřeno na ukázce přes dev server i v produkčním buildu, soubory `.tsx` fungují.
+Implementováno: kontejner v `src/di/container.ts`, plugin v `src/di/vite.ts` (import `phlox-js/vite`, `phlox()` ve `vite.config.ts`). Pokrývají je `tests/di.test.ts`: autowiring, abstraktní předek, zděděný konstruktor, parametr s výchozí hodnotou, instance jako služba, `use()`, běžná třída beze změny a chyby pro interface, skalár, generikum, nejednoznačnost, chybějící službu a cyklus. V prohlížeči ověřeno na ukázce přes dev server i v produkčním buildu, soubory `.tsx` fungují.
 
 **Známé nedostatky:**
 - Build vypisuje varování `IMPORT_IS_UNDEFINED` u tříd s parametrem typu interface z jiného souboru.
@@ -233,7 +252,7 @@ t('cart.items', { count })    // plurál přes Intl.PluralRules
 html('trial.exceeded')        // text s HTML, jen na výslovné vyžádání
 ```
 
-Implementováno v `src/i18n.ts` jako `Translator` a `IntlTranslator` (80 řádků), testy v `tests/i18n.test.ts`. `t` a `html` si aplikace exportuje ze svého překladače, viz `examples/shopping-list/i18n.ts`.
+Implementováno v `src/localization/translator.ts` (import `phlox-js/localization`) jako `Translator` a `IntlTranslator` (80 řádků), testy v `tests/i18n.test.ts`. `t` a `html` si aplikace exportuje ze svého překladače, viz `examples/shopping-list/i18n.ts`.
 
 ```json
 {
@@ -353,7 +372,7 @@ Props tak kontroluje kompilátor a výměnu řeší `<If>` nebo `state`. Příst
 
 ## Aplikace, presentery, router a dialogy (implementováno, čeká na review)
 
-Kód: `component.ts`, `presenter.ts`, `router.ts`, `application.ts`, `dialog.ts`. Použití popisuje [guide.md](guide.md). Tady jsou rozhodnutí, která vznikla až při implementaci, a jejich důvody.
+Kód: `ui/component.ts`, `ui/presenter.ts`, `ui/dialog.ts`, `application/router.ts`, `application/application.ts`. Použití popisuje [guide.md](guide.md). Tady jsou rozhodnutí, která vznikla až při implementaci, a jejich důvody.
 
 ### Komponenty
 
@@ -391,7 +410,7 @@ Kód: `component.ts`, `presenter.ts`, `router.ts`, `application.ts`, `dialog.ts`
 
 Kód je v `src/`, ukázka v `examples/shopping-list`. Spuštění: `npm test`, `npm run typecheck`, `npm run dev`.
 
-### Reaktivní jádro (`reactive.ts`)
+### Reaktivní jádro (`reactive/reactive.ts`)
 
 ```ts
 const count = state(1);
@@ -418,7 +437,7 @@ count.set(2);
 
 **Explicitní `state`, ne automaticky reaktivní pole (rozhodl autor):** pole třídy by šla udělat reaktivní přes `Proxy` jako ve Vue nebo MobX. Zamítnuto, protože bez kompilátoru by se šablony prodloužily (`{() => this.draft}` místo `{this.draft}`), zapomenutá funkce by byla tichá chyba, vnořené objekty a pole by přidaly do jádra stovky řádků a z kódu by nebylo poznat, co je reaktivní. Možný pozdější doplněk: pomocník pro převod celé struktury z API na `state` a zpět (obdoba `ko.mapping`), postavený nad `state`.
 
-### Renderer (`dom.ts`, `jsx.ts`)
+### Renderer (`ui/dom.ts`, `ui/jsx.ts`)
 
 Bez virtuálního DOMu: `h()` vrací jen šablonu (předpis). Skutečné uzly se vytvoří jednou, až při vložení šablony do stránky, a změny pak jdou přímo do uzlů, které na nich závisí. Funkce (i `state`, který je funkcí) v atributu nebo potomkovi je reaktivní.
 
@@ -437,7 +456,7 @@ Bez virtuálního DOMu: `h()` vrací jen šablonu (předpis). Skutečné uzly se
 
 **Zatím nepodporováno:** SVG. Prvky `<svg>` kompilátor odmítne, takže to neselže potichu. Doplní se, až bude potřeba.
 
-### `<If>` a `<For>` (`flow.ts`)
+### `<If>` a `<For>` (`ui/flow.ts`)
 
 **`<If>`** se píše jako `{if} … {elseif} … {else} … {/if}` v Latte. `<ElseIf />` a `<Else />` jsou oddělovače větví:
 

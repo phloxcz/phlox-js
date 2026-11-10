@@ -1,6 +1,6 @@
 /** The logged-in user, like Nette\Security\User. Login goes through an Authenticator, permissions through an Authorizator. */
 
-import { state } from '../reactive';
+import { state } from '../reactive/reactive';
 import { Authorizator } from './permission';
 
 /** Who is logged in. `token` is what the browser proves itself with to the server, it is not shown anywhere. */

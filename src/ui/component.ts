@@ -1,11 +1,11 @@
 /** Component: a class with its own state, life cycle and view. The base of presenters and dialogs. */
 
-import { Scope, getScope, state, untrack } from './reactive';
+import { Scope, getScope, state, untrack } from '../reactive/reactive';
 import { VIEW, insert } from './dom';
 import type { Child } from './dom';
 import { Dialogs } from './dialog';
-import type { Class } from './di';
-import type { Application } from './application';
+import type { Class } from '../di/container';
+import type { Application } from '../application/application';
 
 /** Keys under which a scope provides the application and the component that owns it. */
 export const APP = Symbol('application');

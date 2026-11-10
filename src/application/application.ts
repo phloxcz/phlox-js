@@ -1,14 +1,14 @@
 /** Application: starts the root presenter and the router. Together with the container it is the bootstrap. */
 
-import { Scope, state } from './reactive';
-import { Container } from './di';
-import type { Class } from './di';
-import { APP, createComponent, renderComponent } from './component';
-import { Dialogs, NativeDialogs } from './dialog';
-import type { Presenter } from './presenter';
+import { Scope, state } from '../reactive/reactive';
+import { Container } from '../di/container';
+import type { Class } from '../di/container';
+import { APP, createComponent, renderComponent } from '../ui/component';
+import { Dialogs, NativeDialogs } from '../ui/dialog';
+import type { Presenter } from '../ui/presenter';
 import { Router } from './router';
-import { Authenticator, User, UserStorage, userDefaults } from './security/user';
-import { Authorizator } from './security/permission';
+import { Authenticator, User, UserStorage, userDefaults } from '../security/user';
+import { Authorizator } from '../security/permission';
 
 export interface Flash {
   text: string;

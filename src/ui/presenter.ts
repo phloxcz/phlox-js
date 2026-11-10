@@ -1,9 +1,9 @@
 /** Presenter: a component that URL leads to. Presenters form a tree and split the URL among themselves. */
 
-import { getScope, state } from './reactive';
+import { getScope, state } from '../reactive/reactive';
 import type { Child } from './dom';
 import { COMPONENT, Component, renderComponent } from './component';
-import type { Class } from './di';
+import type { Class } from '../di/container';
 
 export type Params = Record<string, string>;
 export type LinkParams = Record<string, string | number | boolean | null | undefined>;

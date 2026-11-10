@@ -1,7 +1,7 @@
 /** Control flow in templates: If with ElseIf and Else, and For. */
 
-import { Scope, computed, effect, state, untrack } from './reactive';
-import type { Accessor, State } from './reactive';
+import { Scope, computed, effect, state, untrack } from '../reactive/reactive';
+import type { Accessor, State } from '../reactive/reactive';
 import { insert, templateOf } from './dom';
 import type { Child } from './dom';
 

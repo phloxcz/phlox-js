@@ -1,7 +1,7 @@
 import { describe, expect, test, vi } from 'vitest';
-import { render } from '../src/dom';
-import type { Child } from '../src/dom';
-import { state } from '../src/reactive';
+import { render } from '../src/ui/dom';
+import type { Child } from '../src/ui/dom';
+import { state } from '../src/reactive/reactive';
 
 function mount(view: () => Child): { root: HTMLElement; dispose: () => void } {
   const root = document.createElement('div');
