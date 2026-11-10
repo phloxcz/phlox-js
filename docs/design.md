@@ -190,7 +190,33 @@ export const services = new Container()
 
 ## Oprávnění (rozhodnuto)
 
-Přebírá se princip z Nette, ne kód z TraceJS: `User`, `Identity`, abstraktní `Authorizator` a `Permission` s rolemi, zdroji a privilegii. **Zatím není implementováno.**
+Přebírá se princip z Nette, ne kód z TraceJS: `User`, `Identity`, abstraktní `Authorizator` a `Permission` s rolemi, zdroji a privilegii.
+
+**Implementováno** v `src/security/` (import `phlox-js/security`), testy `tests/permission.test.ts` a `tests/user.test.tsx`. Rozhodnutí při implementaci:
+
+- **`Permission` hledá jako Nette:** zdroj před rodiči, role před rodiči (do hloubky, později přidaný rodič dřív) a před „všemi rolemi“, privilegium před „všemi privilegii“. Dotaz na všechna privilegia je kladný, jen když žádné konkrétní není zakázané. Neznámá role nebo zdroj je chyba.
+- **`Identity` má navíc `token`.** V prohlížeči se uživatel serveru prokazuje tokenem (viz `TokenStorage` v `phlox-api-sample`), Nette ho v identitě nepotřebuje.
+- **Výchozí úložiště je `sessionStorage`,** ne `localStorage`. Token tak nepřežije zavření panelu. Delší přihlášení je vědomá volba aplikace.
+- **Bez `Authenticator` a `Authorizator`** v kontejneru doplní `Application` náhrady, které při použití vyhodí chybu s návodem. Jako v Nette, kde chybějící authorizator hlásí výjimku.
+- **Ochrana presenterů je ve `startup()`,** žádný zvláštní mechanismus. Funguje, protože navigace se při `redirect()` vzdá dřív, než změní obrazovku.
+- **Po přihlášení a odhlášení** se obrazovky nepřestaví samy. Šablony reagují (metody `User` čtou `state`), ale data načtená ve `startup()` by zůstala. Aplikace přesměruje nebo zavolá `app.restart()`.
+
+## Síť: RPC (implementováno, čeká na review)
+
+`src/net/` (import `phlox-js/net`): klient `RpcClient` pro `phlox-rpc-api` a generátor typů z OpenRPC.
+
+- **Typy z dokumentu OpenRPC,** který `phlox-rpc-api` generuje při kompilaci kontejneru a publikuje na `/rpc/openrpc.json`. V PHP se tak nic nepřidává a typy vznikají ze stejného zdroje, podle kterého běží server. Generátor čte jen JSON Schema, kompilátor TypeScriptu nepotřebuje.
+- **Vygenerovaný soubor obsahuje třídu `RpcApi extends RpcClient<RpcMethods>`.** Autowiring generika nerozliší, vlastní třída se dá najít podle typu.
+- **`call('user.read', { id })`, ne `api.user.read({ id })`.** Odpovídá to JSON-RPC i `rpc.call` z Tracedu a nepotřebuje `Proxy`.
+- **Automatické dávky:** volání v jednom okamžiku (do konce mikroúlohy) jdou jedním požadavkem. Server zpracuje každé zvlášť, chyba jednoho neovlivní ostatní.
+- **Pojmenované parametry,** protože OpenRPC je popisuje jménem (`paramStructure: either`).
+- **Data a časy se nepřevádějí,** zůstávají textem. Převod by potřeboval znát schéma za běhu.
+- **Hlavičky jsou funkce,** aby se token četl při každém požadavku.
+- **Generátor je skript pro Node** (`npm run rpc:types`), Node 22.18+ ho spustí bez překladu.
+
+**Ověřeno naostro:** testy `tests/rpc-server.test.ts` proti spuštěnému `phlox-api-sample` (volání, dávka, chyby `-32601` a `-32602`). Generátor ze živé URL dal stejný výstup, jaký je uložený v `tests/fixtures/sample-rpc.ts`. Ty testy se bez proměnné `PHLOX_RPC_URL` přeskočí.
+
+**Neověřeno:** autorizované metody (`x-authorize`) a token, protože ukázka má přes RPC jen veřejnou metodu `stats.tasks`. Přihlášení přes RPC tedy zatím není vyzkoušené proti skutečnému serveru.
 
 Oprávnění v prohlížeči jen upravují UI: co se zobrazí a kam se dá přejít. Skutečnou kontrolu musí dělat server, protože kód v prohlížeči si uživatel může změnit.
 
@@ -357,10 +383,9 @@ Kód: `component.ts`, `presenter.ts`, `router.ts`, `application.ts`, `dialog.ts`
 
 ### Co zatím chybí
 
-- Persistentní parametry a oprávnění (`User`, `Authorizator`).
+- Persistentní parametry.
 - Zadržení odchodu s neuloženými změnami.
 - Aplikace v podadresáři (base path) a práce s `#hash`.
-- RPC klient a generování typů z PHP, to je náplň kanbanu.
 
 ## Reaktivní jádro a renderer (implementováno, čeká na review)
 

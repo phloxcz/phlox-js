@@ -2,7 +2,9 @@
 
 Jak se s frameworkem pracuje. Popisuje jen to, co je už napsané a otestované. Proč je co navržené tak, jak je, najdeš v [design.md](design.md).
 
-**Co zatím chybí:** oprávnění (`User`, `Authorizator`), persistentní parametry, RPC klient a adaptér pro Kendo.
+**Co zatím chybí:** persistentní parametry a adaptér pro Kendo.
+
+**Kde co je:** jádro se importuje z `phlox-js`, síť (RPC) z `phlox-js/net`, oprávnění a přihlášení z `phlox-js/security`.
 
 Všechno níže je vidět pohromadě v ukázce [examples/shopping-list](../examples/shopping-list/main.ts).
 
@@ -28,6 +30,9 @@ Všechno níže je vidět pohromadě v ukázce [examples/shopping-list](../examp
 | `{if}`, `{foreach}` | `<If>`, `<For>` |
 | `link()`, `n:href`, `redirect()`, `error()`, `flashMessage()` | stejně |
 | `Translator`, `{_'klíč'}` | `Translator`, `t('klíč')` |
+| `$this->user`, `User`, `SimpleIdentity` | `this.user`, `User`, `Identity` |
+| `Authenticator`, `Authorizator`, `Permission` | stejně |
+| volání API kontroleru z `phlox-rpc-api` | `await this.api.call('user.read', { id })` |
 
 **Hlavní rozdíl:** v Nette žije presenter jeden požadavek. Tady žije, dokud je na obrazovce, a obrazovku tvoří strom presenterů, mezi které se dělí URL.
 
@@ -47,7 +52,7 @@ void app.run(AppPresenter, document.getElementById('app')!);
 
 - **`app.onError`** dostane chyby z navigace a z metod životního cyklu. Výchozí je `console.error`, typicky je chceš i ukázat: `app.onError = error => app.flashes.add(String(error), 'error')`.
 - **`app.restart()`** postaví celý strom presenterů znovu na stejné URL. Hodí se po změně jazyka.
-- **`app.presenter`** je kořenový presenter, **`app.router`** router, **`app.flashes`** flash zprávy.
+- **`app.presenter`** je kořenový presenter, **`app.router`** router, **`app.flashes`** flash zprávy, **`app.user`** přihlášený uživatel.
 
 Projekt potřebuje ve `vite.config.ts` plugin kvůli autowiringu a v `tsconfig.json` nastavení TSX (viz Šablony):
 
@@ -373,6 +378,174 @@ void this.app.restart();
 ```
 
 **Jiný překladač:** `Translator` je abstraktní třída s metodou `translate(key, params)`, obdoba `Nette\Localization\Translator`. Služba, která ji potřebuje, si o ni řekne v konstruktoru, a v kontejneru jde `IntlTranslator` nahradit jinou implementací.
+
+## Volání serveru: RPC
+
+Klient pro JSON-RPC 2.0, na druhé straně je [phloxcz/rpc-api](https://github.com/phloxcz/rpc-api). Importuje se z `phlox-js/net`.
+
+### Typy z PHP
+
+Server publikuje popis svých metod (dokument OpenRPC) na `/rpc/openrpc.json`. Ve výchozím stavu jen v debug režimu, viz `documentation.expose` v README `phlox-rpc-api`. Z něj se vygenerují typy:
+
+```bash
+npm run rpc:types -- http://localhost:9079/rpc/openrpc.json src/api/rpc.ts
+npm run rpc:types -- api.json src/api/rpc.ts --class ShopApi    # ze souboru a s jiným názvem třídy
+```
+
+Vznikne soubor s rozhraními DTO, s popisem všech metod a s třídou `RpcApi`. Ručně se neupravuje, po změně API se vygeneruje znovu.
+
+### Použití
+
+```ts
+// services.ts
+import { RpcApi } from './api/rpc';
+
+export const services = new Container();
+services.add(new RpcApi('/rpc', {
+  headers: () => {
+    const token = services.get(User).token;
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  },
+}));
+```
+
+```ts
+class TasksPresenter extends Presenter {
+  tasks = state<TaskResource[]>([]);
+
+  constructor(private api: RpcApi) {
+    super();
+  }
+
+  override async startup() {
+    const page = await this.api.call('stats.tasks', { query: { pageSize: 20, sort: [{ field: 'dueDate' }] } });
+    this.tasks.set(page.data);
+  }
+}
+```
+
+- **Kompilátor hlídá** název metody, parametry i typ výsledku. Překlep v `'stats.task'` nebo `sort: [{ field: 'title' }]` je chyba kompilace.
+- **Parametry jsou pojmenované,** jako v PHP metodě. Když jsou všechny nepovinné, dají se vynechat: `this.api.call('stats.tasks')`.
+- **Data a časy přijdou jako text,** JSON jiný typ nezná. U pole s formátem `date` nebo `date-time` to říká komentář ve vygenerovaném souboru.
+- **Dávky jsou automatické:** volání ve stejném okamžiku, třeba přes `Promise.all`, odejdou na server jedním požadavkem. Vypíná se volbou `batch: false`.
+- **`notify()`** zavolá metodu bez čekání na výsledek. Server neodpoví nic, ani chybu.
+- **Session místo tokenu:** `new RpcApi('/rpc', { credentials: 'include' })`, prohlížeč pak posílá cookies i na jiný původ.
+- **Bez typů** jde použít přímo `new RpcClient('/rpc')`, `call()` pak bere libovolnou metodu a vrací `any`.
+
+### Chyby
+
+Každé selhání je `RpcError` s `code`, `message`, `method` a `data`. Nepovedené volání v dávce neovlivní ostatní.
+
+| `code` | Kdy |
+|---|---|
+| `401`, `403` | nepřihlášený uživatel, chybějící role |
+| `-32602` | neplatné parametry, podrobnosti v `error.data.fields` |
+| `-32601` | metoda neexistuje |
+| kód z `ApiException` | chyba aplikace na serveru |
+| HTTP stav | server odpověděl chybou HTTP |
+| `0` | požadavek nedošel nebo nepřišla odpověď |
+
+Konstanty jsou v `RpcErrorCode`. Odhlášení po vypršení tokenu jde vyřešit na jednom místě:
+
+```ts
+app.onError = error => {
+  if (error instanceof RpcError && error.code === RpcErrorCode.Unauthorized) {
+    app.user.logout();
+    void app.router.navigate('/sign/in');
+    return;
+  }
+  app.flashes.add(String(error), 'error');
+};
+```
+
+## Uživatel a oprávnění
+
+Jako `Nette\Security`: `User`, `Identity`, `Authenticator`, `Authorizator` a `Permission`. Importuje se z `phlox-js/security`.
+
+**Oprávnění v prohlížeči jen řídí, co se zobrazí.** Skutečnou kontrolu musí udělat server (`#[Authorize]` v `phlox-rpc-api`), protože kód v prohlížeči si uživatel může změnit.
+
+### Přihlášení
+
+`Authenticator` ověří jméno a heslo, typicky voláním API, a vrátí `Identity`:
+
+```ts
+class ApiAuthenticator extends Authenticator {
+  constructor(private api: RpcApi) {
+    super();
+  }
+
+  async authenticate(username: string, password: string): Promise<Identity> {
+    const result = await this.api.call('sign.in', { username, password });
+    return new Identity(result.id, result.roles, { name: result.name }, result.token);
+  }
+}
+
+services.add(ApiAuthenticator);
+```
+
+```ts
+await this.user.login(username, password);   // Authenticator, při chybě vyhodí výjimku
+await this.user.login(identity);             // přímo, třeba po registraci
+this.user.logout();
+```
+
+- **`Identity(id, roles, data, token)`** odpovídá `SimpleIdentity`. Navíc má `token`, kterým se prohlížeč prokazuje serveru. Pro hlavičku `Authorization` je dostupný jako `this.user.token`.
+- **Identita přežije obnovení stránky,** ukládá se do `sessionStorage`. Zavřením panelu se zapomene. Jiné úložiště: zaregistruj vlastní `UserStorage`, nebo `new BrowserUserStorage('klíč', () => localStorage)`.
+- **`this.user`** je dostupný v každé komponentě a presenteru, jinde přes DI: `constructor(private user: User)`.
+
+### Role a oprávnění
+
+```ts
+const acl = new Permission()
+  .addRole('guest')
+  .addRole('authenticated', 'guest')
+  .addRole('admin', 'authenticated')
+  .addResource('task')
+  .allow('guest', 'task', 'view')
+  .allow('authenticated', 'task', ['add', 'edit'])
+  .allow('admin');                      // všechno
+
+services.add(acl);
+```
+
+```ts
+this.user.isLoggedIn()
+this.user.isInRole('admin')
+this.user.isAllowed('task', 'edit')
+this.user.getIdentity()?.data.name
+```
+
+- **Role:** nepřihlášený má roli `guest`. Přihlášený bez rolí v identitě má `authenticated`. Názvy jdou změnit přes `user.guestRole` a `user.authenticatedRole`.
+- **Pravidla jsou jako v Nette:** `null` znamená všechny role, zdroje nebo privilegia. Role a zdroje dědí od rodičů a konkrétnější pravidlo vyhrává. Když role dědí od více rodičů a jejich pravidla si odporují, platí to od rodiče uvedeného později. Bez pravidla je odpověď ne.
+- **Podmínka u pravidla:** `allow('author', 'article', 'edit', () => article.authorId === user.getId())`.
+- **Vlastní `Authorizator`:** stačí třída s metodou `isAllowed(role, resource, privilege)`, zaregistrovaná v kontejneru.
+
+### V šabloně
+
+Metody `User` čtou `state`, takže se šablona po přihlášení i odhlášení aktualizuje sama:
+
+```tsx
+<If when={() => this.user.isAllowed('task', 'delete')}>
+  <button onClick={() => this.handleDelete()}>Smazat</button>
+</If>
+```
+
+### Chráněný presenter
+
+Jako v Nette se kontroluje ve `startup()`:
+
+```ts
+class AdminPresenter extends Presenter {
+  override startup() {
+    if (!this.user.isLoggedIn()) return this.redirect('/sign/in');
+    if (!this.user.isInRole('admin')) this.error(403);
+  }
+}
+```
+
+Přesměrování ze `startup()` nebo akce zastaví celou navigaci, takže chráněná obrazovka se neobjeví ani na okamžik. V `startup()` použij absolutní cestu: presenter v tu chvíli ještě neví, na jaké části URL sedí.
+
+Po přihlášení nebo odhlášení přesměruj (`this.redirect(...)`) nebo zavolej `this.app.restart()`, aby se obrazovky postavily znovu pro nového uživatele.
 
 ## Reaktivní hodnoty
 

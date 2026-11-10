@@ -7,6 +7,8 @@ import { APP, createComponent, renderComponent } from './component';
 import { Dialogs, NativeDialogs } from './dialog';
 import type { Presenter } from './presenter';
 import { Router } from './router';
+import { Authenticator, User, UserStorage, userDefaults } from './security/user';
+import { Authorizator } from './security/permission';
 
 export interface Flash {
   text: string;
@@ -31,6 +33,7 @@ export class FlashMessages {
 export class Application {
   readonly router: Router;
   readonly flashes: FlashMessages;
+  readonly user: User;
 
   /** The root presenter while the application is running. */
   presenter: Presenter<any, any> | null = null;
@@ -46,7 +49,12 @@ export class Application {
     container.add(this);
     if (!container.has(Dialogs)) container.add(NativeDialogs);
     if (!container.has(FlashMessages)) container.add(FlashMessages);
+    if (!container.has(UserStorage)) container.add(userDefaults.BrowserUserStorage);
+    if (!container.has(Authenticator)) container.add(userDefaults.MissingAuthenticator);
+    if (!container.has(Authorizator)) container.add(userDefaults.MissingAuthorizator);
+    if (!container.has(User)) container.add(User);
     this.flashes = container.get(FlashMessages);
+    this.user = container.get(User);
     this.router = new Router(this);
     container.add(this.router);
   }

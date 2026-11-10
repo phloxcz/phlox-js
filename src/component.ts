@@ -49,6 +49,11 @@ export abstract class Component<P extends object = {}, R = void> {
     creation = null;
   }
 
+  /** The logged-in user, like $this->user in Nette. */
+  get user() {
+    return this.app.user;
+  }
+
   /** Runs once after the component is created, before it is rendered. Load data here. */
   startup(): void | Promise<void> {}
 

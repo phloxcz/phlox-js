@@ -7,9 +7,11 @@
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "dev": "vite examples/shopping-list --config vite.config.ts",
-    "build:example": "vite build examples/shopping-list --config vite.config.ts"
+    "build:example": "vite build examples/shopping-list --config vite.config.ts",
+    "rpc:types": "node src/net/rpc-types.ts"
   },
   "devDependencies": {
+    "@types/node": "^26.6.6",
     "jsdom": "^29.1.1",
     "typescript": "^7.0.2",
     "vite": "^8.3.6",
