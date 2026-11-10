@@ -1,0 +1,38 @@
+{
+  "nav": {
+    "list": "Seznam",
+    "about": "O aplikaci"
+  },
+  "list": {
+    "placeholder": "Co koupit?",
+    "add": "Přidat",
+    "delete": "Smazat",
+    "empty": "Seznam je prázdný.",
+    "remaining": {
+      "one": "Zbývá koupit {count} položku",
+      "few": "Zbývá koupit {count} položky",
+      "other": "Zbývá koupit {count} položek"
+    },
+    "confirmDelete": "Opravdu smazat „{name}“?",
+    "deleted": "Položka „{name}“ byla smazána."
+  },
+  "edit": {
+    "title": "Úprava položky",
+    "name": "Název",
+    "saved": "Uloženo.",
+    "missing": "Položka {id} neexistuje."
+  },
+  "confirm": {
+    "title": "Potvrzení",
+    "yes": "Ano",
+    "no": "Ne"
+  },
+  "common": {
+    "save": "Uložit",
+    "cancel": "Zrušit"
+  },
+  "about": {
+    "title": "O aplikaci",
+    "text": "Ukázka frameworku <strong>PhloxJS</strong>: presentery, routování až do dialogů a překlady."
+  }
+}

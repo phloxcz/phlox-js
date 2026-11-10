@@ -1,0 +1,38 @@
+{
+  "nav": {
+    "list": "List",
+    "about": "About"
+  },
+  "list": {
+    "placeholder": "What to buy?",
+    "add": "Add",
+    "delete": "Delete",
+    "empty": "The list is empty.",
+    "remaining": {
+      "one": "{count} item left to buy",
+      "few": "{count} items left to buy",
+      "other": "{count} items left to buy"
+    },
+    "confirmDelete": "Really delete “{name}”?",
+    "deleted": "Item “{name}” was deleted."
+  },
+  "edit": {
+    "title": "Edit item",
+    "name": "Name",
+    "saved": "Saved.",
+    "missing": "Item {id} does not exist."
+  },
+  "confirm": {
+    "title": "Confirmation",
+    "yes": "Yes",
+    "no": "No"
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel"
+  },
+  "about": {
+    "title": "About",
+    "text": "A demo of the <strong>PhloxJS</strong> framework: presenters, routing down to dialogs and translations."
+  }
+}
