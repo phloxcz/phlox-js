@@ -5,6 +5,7 @@ import { effect, getScope } from '../reactive/reactive';
 import type { Child } from '../ui/dom';
 import type { ElementProps } from '../ui/jsx';
 import { APP } from '../ui/component';
+import { classes, currentTheme } from '../ui/theme';
 import type { Application } from '../application/application';
 import { HiddenField } from './controls';
 import type { FormControl } from './controls';
@@ -45,7 +46,7 @@ export function FormTag(props: { form: Form<any>; children?: Child } & Omit<Elem
 export function Label(props: { control: FormControl<any>; children?: Child }): Child {
   const { control } = props;
   return (
-    <label for={control.htmlId} class={control.isRequired() ? 'required' : null}>
+    <label for={control.htmlId} class={classes(currentTheme().class('label'), control.isRequired() && 'required') || null}>
       {props.children ?? control.label}
     </label>
   );
@@ -62,7 +63,7 @@ export function InputError(props: { control: FormControl<any> }): Child {
   const { control } = props;
   return (
     <If when={() => control.errors().length}>
-      <span class="phlox-form-error" id={`${control.htmlId}-error`}>{() => control.errors()[0]}</span>
+      <span class={currentTheme().class('error')} id={`${control.htmlId}-error`}>{() => control.errors()[0]}</span>
     </If>
   );
 }
@@ -71,7 +72,7 @@ export function InputError(props: { control: FormControl<any> }): Child {
 export function FormErrors(props: { form: Form<any> }): Child {
   return (
     <If when={() => props.form.errors().length}>
-      <ul class="phlox-form-errors" role="alert">
+      <ul class={currentTheme().class('formErrors')} role="alert">
         <For each={props.form.errors}>{error => <li>{error}</li>}</For>
       </ul>
     </If>
@@ -85,18 +86,19 @@ export function FormErrors(props: { form: Form<any> }): Child {
 export function FormView(props: { form: Form<any> } & Omit<ElementProps<HTMLFormElement>, 'children' | 'ref'>): Child {
   const { form, ...attributes } = props;
   const controls = [...form.controls.values()];
+  const theme = currentTheme();
   return (
-    <FormTag form={form} class="phlox-form" {...attributes}>
+    <FormTag form={form} class={theme.class('form') || null} {...attributes}>
       <FormErrors form={form} />
       {controls.filter(control => !(control instanceof HiddenField)).map(control => (
-        <div class="phlox-form-row" id={`${control.htmlId}-pair`}>
+        <div class={theme.class('formRow')} id={`${control.htmlId}-pair`}>
           {control.labelInInput ? null : <Label control={control} />}
           <Input control={control} />
           <InputError control={control} />
         </div>
       ))}
       {controls.filter(control => control instanceof HiddenField).map(control => <Input control={control} />)}
-      <div class="phlox-form-buttons">
+      <div class={theme.class('formButtons')}>
         {[...form.buttons.values()].map(button => <Input control={button} />)}
       </div>
     </FormTag>

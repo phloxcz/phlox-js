@@ -1,0 +1,23 @@
+/**
+ * phlox-js/styles/base.css – layout for every theme. Import it always, with or without Bootstrap.
+ * It has no colors and no fonts, the look comes from the theme (default.css, Bootstrap...).
+ */
+
+/* Native <dialog>: no padding of the browser, a width that fits small screens */
+.phlox-dialog {
+  padding: 0;
+  width: max-content;
+  min-width: min(20rem, calc(100vw - 2rem));
+  max-width: min(40rem, calc(100vw - 2rem));
+  max-height: calc(100vh - 2rem);
+}
+
+/* toggle() hides by the hidden attribute, a display class of a theme (d-flex...) must not win */
+form [hidden] {
+  display: none !important;
+}
+
+/* A dialog without actions() has no footer, whatever the theme */
+.phlox-dialog footer:empty {
+  display: none;
+}

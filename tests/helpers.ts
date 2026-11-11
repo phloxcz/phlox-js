@@ -44,3 +44,11 @@ export async function until(condition: () => boolean, timeout = 2000): Promise<v
     await new Promise(resolve => setTimeout(resolve, 10));
   }
 }
+
+/** history.back() and the navigation it starts. Waits for popstate, which jsdom sends later when it is busy. */
+export async function goBack(): Promise<void> {
+  const popped = new Promise(resolve => window.addEventListener('popstate', resolve, { once: true }));
+  history.back();
+  await popped;
+  await tick();
+}

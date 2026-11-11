@@ -9,7 +9,8 @@ Adresáře `src/` odpovídají jmenným prostorům Nette:
 | Adresář | Obsah | V Nette |
 |---|---|---|
 | `reactive/` | `state`, `computed`, `effect`, `Scope` | |
-| `ui/` | `Component`, `Presenter`, `RouteFrame`, šablony, `<If>`, `<For>`, dialogy | `Nette\Application\UI` |
+| `ui/` | `Component`, `Presenter`, `RouteFrame`, šablony, `<If>`, `<For>`, dialogy, témata | `Nette\Application\UI` |
+| `styles/` | `base.css` (rozložení), `default.css` (výchozí téma) | |
 | `application/` | `Application`, `Router`, flash zprávy | `Nette\Application`, `Nette\Routing` |
 | `di/` | `Container`, Vite plugin pro autowiring | `Nette\DI` |
 | `localization/` | `Translator`, `IntlTranslator` | `Nette\Localization` |
@@ -22,6 +23,16 @@ Adresáře `src/` odpovídají jmenným prostorům Nette:
 - **Flash zprávy:** `flashMessage()` je metoda presenteru jako v Nette, služba, která zprávy drží, patří k aplikaci.
 
 **Importy:** `phlox-js` dává to, co potřebuje každá obrazovka (reaktivita, šablony, komponenty, presentery, aplikace, DI). Volitelné části mají vlastní vstup: `phlox-js/net`, `phlox-js/security`, `phlox-js/forms`, `phlox-js/localization`, `phlox-js/vite` a adaptéry (`phlox-js/adapters/capify`, později `phlox-js/adapters/kendo`).
+
+## Vzhled a témata (rozhodnuto)
+
+Vlastní CSS framework ani pevná vazba na Bootstrap. Postup je stejný jako u `phlox-dropdownlist` a `capify`: malé CSS pro rozložení, výchozí vzhled se systémovými barvami a témata jako mapa tříd.
+
+- **`Theme`** je služba v kontejneru (`src/ui/theme.ts`): místo (`input`, `dialogHeader`...) → třídy. Výchozí téma dává `phlox-*`, `BootstrapTheme` třídy Bootstrapu 5 (rozhodl autor: zatím jen tyto dvě). Tailwind nebo Foundation se přidají jako další mapa, komponenty se nemění. Místa jsou textové klíče, takže vlastní prvky a adaptéry si přidají svá (`dropdownlist.wrapper`).
+- **Téma dostanou vykreslované prvky přes `Scope`** (`THEME`, `currentTheme()`), jako aplikace. Mimo aplikaci platí výchozí.
+- **CSS:** `styles/base.css` (rozložení pro každé téma) a `styles/default.css` (vzhled výchozího tématu). Systémové barvy následují `color-scheme` stránky, takže výchozí téma ztmavne, jen když stránka tmavý režim povolí. Barva chyby proto používá `light-dark()`, ne `prefers-color-scheme`: na světlé stránce v tmavém systému by byla nečitelná.
+- **Bootstrap a nativní `<dialog>`:** třídy `modal-content`, `modal-header`... berou barvy a odsazení z proměnných, které Bootstrap definuje jen na obalu `.modal`. Ten u `<dialog>` být nemůže (dělá vlastní pozicování), a okno pak nemělo pozadí. Téma proto používá utility (`bg-body`, `p-3`, `border-bottom`...), které na ničem nezávisí. Ověřeno snímky z prohlížeče.
+- **Třída předaná do `<Input>`** se přidá k třídě tématu, u tlačítka ji nahradí (jinak by `btn-primary` a `btn-secondary` platily naráz).
 
 ## Adaptéry (rozhodnuto)
 

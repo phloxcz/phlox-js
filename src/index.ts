@@ -11,6 +11,8 @@ export { Component } from './ui/component';
 export { BadRequestError, Presenter, RouteFrame } from './ui/presenter';
 export type { LinkParams, Params, Route } from './ui/presenter';
 export { Dialogs, NativeDialogs } from './ui/dialog';
+export { BootstrapTheme, Theme, classes } from './ui/theme';
+export type { ThemeClasses, ThemeSlot } from './ui/theme';
 
 export { Application, FlashMessages } from './application/application';
 export type { Flash, FlashOptions } from './application/application';

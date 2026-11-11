@@ -347,9 +347,9 @@ describe('rendering', () => {
     expect(element.className).toBe('task');
     expect(element.noValidate).toBe(true);
     expect(label.htmlFor).toBe(input.id);
-    expect(label.className).toBe('required');
+    expect(label.classList.contains('required')).toBe(true);
     expect(label.textContent).toBe('Název:');
-    expect(input.className).toBe('wide');
+    expect([...input.classList]).toEqual(['phlox-input', 'wide']);
     expect(input.placeholder).toBe('např. Nákup');
     expect(input.name).toBe('name');
     expect(input.required).toBe(true);

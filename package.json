@@ -13,6 +13,7 @@
   "devDependencies": {
     "@phloxcz/capify": "^1.2.0",
     "@types/node": "^26.6.6",
+    "bootstrap": "^5.3.8",
     "jsdom": "^29.1.1",
     "typescript": "^7.0.2",
     "vite": "^8.3.6",

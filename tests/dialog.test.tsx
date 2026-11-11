@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import { Component, Presenter, RouteFrame } from '../src/index';
 import type { Route } from '../src/index';
-import { boot, deferred, tick } from './helpers';
+import { boot, deferred, tick, goBack, until } from './helpers';
 
 const windows = () => [...document.querySelectorAll<HTMLElement>('dialog.phlox-dialog')];
 const press = (selector: string) => document.querySelector<HTMLElement>(selector)!.click();
@@ -120,8 +120,8 @@ describe('dialog of a route', () => {
     expect(windows()[0]!.querySelector('h2')!.textContent).toBe('Edit 15');
 
     press('#save');
+    await until(() => location.pathname === '/list');
     await tick();
-    expect(location.pathname).toBe('/list');
     expect(windows()).toHaveLength(0);
     expect(List.results).toEqual(['saved']);
   });
@@ -134,8 +134,8 @@ describe('dialog of a route', () => {
     const entries = history.length;
 
     press('#save');
+    await until(() => location.pathname === '/list');
     await tick();
-    expect(location.pathname).toBe('/list');
     expect(history.length).toBe(entries);
     expect(windows()).toHaveLength(0);
     expect(List.results).toEqual(['saved']);
@@ -145,8 +145,7 @@ describe('dialog of a route', () => {
     List.results = [];
     const { go } = await boot(Root, '/list');
     await go('/list/15');
-    history.back();
-    await tick();
+    await goBack();
     expect(windows()).toHaveLength(0);
     expect(List.results).toEqual([undefined]);
   });
@@ -243,8 +242,8 @@ describe('dialogs opened from dialogs, all with URL', () => {
     await go('/items/5/history');
     await go('/items/5/history/2');
     press('#restore');
+    await until(() => location.pathname === '/items/5/history');
     await tick();
-    expect(location.pathname).toBe('/items/5/history');
     expect(titles()).toEqual(['Item 5', 'History 5']);
     expect(log).toEqual(['change closed true']);
   });
@@ -255,14 +254,11 @@ describe('dialogs opened from dialogs, all with URL', () => {
     await go('/items/5');
     await go('/items/5/history');
     await go('/items/5/history/2');
-    history.back();
-    await tick();
+    await goBack();
     expect(titles()).toEqual(['Item 5', 'History 5']);
-    history.back();
-    await tick();
+    await goBack();
     expect(titles()).toEqual(['Item 5']);
-    history.back();
-    await tick();
+    await goBack();
     expect(titles()).toEqual([]);
     expect(log).toEqual(['change closed undefined', 'history closed undefined', 'item closed undefined']);
   });
@@ -273,8 +269,8 @@ describe('dialogs opened from dialogs, all with URL', () => {
     expect(titles()).toEqual(['Item 5', 'History 5', 'Change 2']);
     const entries = history.length;
     press('#restore');
+    await until(() => location.pathname === '/items/5/history');
     await tick();
-    expect(location.pathname).toBe('/items/5/history');
     expect(titles()).toEqual(['Item 5', 'History 5']);
     expect(history.length).toBe(entries);
   });

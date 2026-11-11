@@ -1,0 +1,143 @@
+/**
+ * phlox-js/styles/default.css – look of the default theme. Not needed with Bootstrap.
+ *
+ * It uses CSS system colors (Canvas, Field, ButtonFace, Highlight, GrayText...), like the other phlox
+ * components. They follow color-scheme of the page: with `:root { color-scheme: light dark; }` the forms and
+ * dialogs turn dark together with the system, without it they stay light. Change the look by the variables.
+ */
+
+:root {
+  --phlox-radius: .25rem;
+  --phlox-error: light-dark(#c62828, #ef9a9a);
+  --phlox-backdrop: rgb(0 0 0 / .4);
+}
+
+/* Forms */
+
+.phlox-form-row {
+  margin-bottom: .75rem;
+}
+
+.phlox-label {
+  display: block;
+  margin-bottom: .25rem;
+}
+
+.phlox-input,
+.phlox-select,
+.phlox-textarea {
+  box-sizing: border-box;
+  font: inherit;
+  padding: .375rem .5rem;
+  border: 1px solid GrayText;
+  border-radius: var(--phlox-radius);
+  background: Field;
+  color: FieldText;
+}
+
+.phlox-textarea {
+  min-height: 5rem;
+}
+
+.phlox-input:focus-visible,
+.phlox-select:focus-visible,
+.phlox-textarea:focus-visible,
+.phlox-button:focus-visible {
+  outline: 2px solid Highlight;
+  outline-offset: 1px;
+}
+
+.phlox-invalid {
+  border-color: var(--phlox-error);
+}
+
+.phlox-form-error {
+  display: block;
+  margin-top: .25rem;
+  color: var(--phlox-error);
+  font-size: .875em;
+}
+
+.phlox-form-errors {
+  margin: 0 0 .75rem;
+  padding: .5rem 1rem;
+  list-style: none;
+  border-left: 3px solid var(--phlox-error);
+  color: var(--phlox-error);
+}
+
+.phlox-checkbox,
+.phlox-choice {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  margin-right: 1rem;
+}
+
+.phlox-form-buttons {
+  display: flex;
+  gap: .5rem;
+}
+
+.phlox-button {
+  font: inherit;
+  padding: .375rem .9rem;
+  border: 1px solid ButtonBorder;
+  border-radius: var(--phlox-radius);
+  background: ButtonFace;
+  color: ButtonText;
+  cursor: pointer;
+}
+
+.phlox-button:disabled {
+  color: GrayText;
+  cursor: default;
+}
+
+/* Dialogs */
+
+.phlox-dialog {
+  border: 1px solid GrayText;
+  border-radius: calc(var(--phlox-radius) * 2);
+  background: Canvas;
+  color: CanvasText;
+}
+
+.phlox-dialog::backdrop {
+  background: var(--phlox-backdrop);
+}
+
+.phlox-dialog-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: .5rem 1rem;
+  border-bottom: 1px solid GrayText;
+}
+
+.phlox-dialog-title {
+  flex: 1;
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.phlox-dialog-close {
+  border: 0;
+  background: none;
+  color: inherit;
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.phlox-dialog-body {
+  padding: 1rem;
+}
+
+.phlox-dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: .5rem;
+  padding: .5rem 1rem;
+  border-top: 1px solid GrayText;
+}

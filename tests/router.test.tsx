@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import { BadRequestError, Presenter, RouteFrame, state } from '../src/index';
 import type { Params, Route } from '../src/index';
-import { boot, deferred, tick, until } from './helpers';
+import { boot, deferred, tick, until, goBack } from './helpers';
 
 const log: string[] = [];
 const take = () => log.splice(0);
@@ -218,8 +218,7 @@ describe('links', () => {
   test('the Back button returns to the previous screen', async () => {
     const { element, go } = await boot(App);
     await go('/users');
-    history.back();
-    await tick();
+    await goBack();
     expect(element.querySelector('h1')!.textContent).toBe('home');
   });
 });

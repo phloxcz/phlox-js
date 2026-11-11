@@ -3,6 +3,7 @@
 import { For } from '../ui/flow';
 import { state } from '../reactive/reactive';
 import type { Child } from '../ui/dom';
+import { classes, currentTheme } from '../ui/theme';
 import { Rules } from './rules';
 import type { Validator } from './rules';
 import type { Form } from './form';
@@ -118,6 +119,20 @@ export abstract class FormControl<T = unknown> {
     };
   }
 
+  /**
+   * Classes of a rendered element: those of the theme slot, the `invalid` class while there is an error,
+   * and the class passed to <Input>. Call it while rendering, the theme is the one of the running application.
+   */
+  protected classFor(attributes: ExtraAttributes, slot: string): () => string {
+    const theme = currentTheme();
+    const own = attributes.class;
+    return () => classes(
+      theme.class(slot),
+      this.hasErrors() && theme.class('invalid'),
+      typeof own === 'function' ? (own as () => string)() : (own as string | undefined),
+    );
+  }
+
   /** After a change: once there is an error or the user has left the field, the rules are checked live. */
   protected changed(): void {
     if (this.touched || this.hasErrors()) this.validate();
@@ -182,13 +197,13 @@ export class TextInput<T = string> extends FormControl<T> {
   }
 
   render(attributes: ExtraAttributes): Child {
-    return <input type={this.htmlType} {...attributes} {...this.attrs()} />;
+    return <input type={this.htmlType} {...attributes} {...this.attrs()} class={this.classFor(attributes, 'input')} />;
   }
 }
 
 export class TextArea extends TextInput<string> {
   override render(attributes: ExtraAttributes): Child {
-    return <textarea {...attributes} {...this.attrs()} />;
+    return <textarea {...attributes} {...this.attrs()} class={this.classFor(attributes, 'textarea')} />;
   }
 }
 
@@ -222,8 +237,8 @@ export class Checkbox extends FormControl<boolean> {
   /** The checkbox inside its label, as in Nette. */
   render(attributes: ExtraAttributes): Child {
     return (
-      <label class="phlox-checkbox">
-        <input type="checkbox" {...attributes} {...this.attrs()} /> {this.label}
+      <label class={currentTheme().class('checkbox')}>
+        <input type="checkbox" {...attributes} {...this.attrs()} class={this.classFor(attributes, 'checkboxInput')} /> {this.label}
       </label>
     );
   }
@@ -276,6 +291,7 @@ export class SelectBox<T = string> extends ChoiceControl<T, T | null> {
       <select
         {...attributes}
         {...this.attrs()}
+        class={this.classFor(attributes, 'select')}
         value={() => {
           const index = this.selected() === null ? -1 : this.indexOf(this.selected() as T);
           return index < 0 ? '' : String(index);
@@ -314,6 +330,7 @@ export class MultiSelectBox<T = string> extends ChoiceControl<T, T[]> {
         multiple
         {...attributes}
         {...this.attrs()}
+        class={this.classFor(attributes, 'select')}
         onChange={event => {
           const chosen = [...event.currentTarget.selectedOptions].map(option => this.items()[Number(option.value)]![0]);
           this.selected.set(chosen);
@@ -347,14 +364,17 @@ export class RadioList<T = string> extends ChoiceControl<T, T | null> {
 
   render(attributes: ExtraAttributes): Child {
     const { id, ...common } = this.attrs();
+    const theme = currentTheme();
+    const inputClass = this.classFor({}, 'choiceInput');
     return (
-      <div class="phlox-radiolist" id={id as string} role="radiogroup" {...attributes}>
+      <div id={id as string} role="radiogroup" {...attributes} class={classes(theme.class('radioList'), attributes.class as string)}>
         <For each={this.items}>
           {([value, label], index) => (
-            <label>
+            <label class={theme.class('choiceItem')}>
               <input
                 type="radio"
                 {...common}
+                class={inputClass}
                 id={() => `${this.htmlId}-${index()}`}
                 checked={() => Object.is(this.selected(), value)}
                 onChange={() => {
@@ -387,14 +407,17 @@ export class CheckboxList<T = string> extends ChoiceControl<T, T[]> {
 
   render(attributes: ExtraAttributes): Child {
     const { id, required: _required, ...common } = this.attrs();
+    const theme = currentTheme();
+    const inputClass = this.classFor({}, 'choiceInput');
     return (
-      <div class="phlox-checkboxlist" id={id as string} {...attributes}>
+      <div id={id as string} {...attributes} class={classes(theme.class('checkboxList'), attributes.class as string)}>
         <For each={this.items}>
           {([value, label], index) => (
-            <label>
+            <label class={theme.class('choiceItem')}>
               <input
                 type="checkbox"
                 {...common}
+                class={inputClass}
                 id={() => `${this.htmlId}-${index()}`}
                 checked={() => this.selected().includes(value)}
                 onChange={event => {
@@ -458,11 +481,13 @@ export class SubmitButton extends FormControl<void> {
     return false;
   }
 
+  /** A class passed to <Input> replaces the one of the theme, e.g. class="btn btn-secondary" for Cancel. */
   render(attributes: ExtraAttributes): Child {
     return (
       <button
         type="submit"
         {...attributes}
+        class={(attributes.class as string | undefined) ?? currentTheme().class('button')}
         id={this.htmlId}
         name={this.name}
         disabled={() => this.disabled() || this.form.submitting()}

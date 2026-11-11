@@ -346,7 +346,7 @@ override routes: Route[] = [
 
 ### Vzhled a výměna okna
 
-Výchozí okno je nativní `<dialog class="phlox-dialog">` s částmi `header`, `.phlox-dialog-body` a `footer`. Framework mu žádný vzhled nedává, styly jsou na aplikaci (viz `index.html` v ukázce).
+Výchozí okno je nativní `<dialog>` s částmi `header`, tělem a `footer`. Třídy mu dává téma (viz Vzhled a témata), u výchozího tématu `phlox-dialog`, `phlox-dialog-header` a další.
 
 Okno dodává služba `Dialogs`. Jinou implementaci, třeba nad Kendo Window, zaregistruješ v kontejneru: `services.add(KendoDialogs)`.
 
@@ -391,6 +391,53 @@ Bez adaptéru drží zprávy výchozí služba v `app.flashes.messages` a layout
 </For>
 ```
 
+## Vzhled a témata
+
+Framework vykresluje formuláře a okna dialogů. Jaké třídy dostanou, určuje téma. CSS framework si nevnucuje.
+
+```ts
+// main.ts: rozložení pro každé téma, k tomu vzhled
+import 'phlox-js/styles/base.css';
+import 'phlox-js/styles/default.css';          // výchozí téma
+```
+
+```ts
+// nebo s Bootstrapem 5
+import 'phlox-js/styles/base.css';
+import 'bootstrap/dist/css/bootstrap.min.css';
+
+services.add(new BootstrapTheme());              // services.ts
+```
+
+- **Výchozí téma** (bez registrace) dává třídy `phlox-*` a `default.css` jim dává vzhled. Používá systémové barvy prohlížeče jako ostatní komponenty phlox. S `:root { color-scheme: light dark; }` na stránce ztmavne se systémem, bez něj zůstane světlé. Barvy a zaoblení jdou změnit proměnnými `--phlox-error`, `--phlox-radius` a `--phlox-backdrop`.
+- **`BootstrapTheme`** dává Bootstrap třídy (`form-control`, `form-select`, `is-invalid`, `invalid-feedback`, `btn btn-primary`...) a o vzhled i tmavý režim se stará Bootstrap. `default.css` se nenačítá.
+- **`base.css`** je jen rozložení (šířka okna dialogu, skrývání přes `toggle()`), potřebuje ho každé téma.
+- **Změna jednotlivých tříd:** `new BootstrapTheme({ formRow: 'row mb-2' })`.
+- **Ukázka** přepne na Bootstrap parametrem `?theme=bootstrap` při načtení stránky.
+
+### Vlastní téma
+
+Téma je mapa „místo → třídy“. Jiný CSS framework (Tailwind, Foundation...) je jen další mapa:
+
+```ts
+class FoundationTheme extends Theme {
+  constructor() {
+    super({ input: '', error: 'form-error is-visible', invalid: 'is-invalid-input', button: 'button' });
+  }
+}
+services.add(new FoundationTheme());
+```
+
+| Místo | Kde |
+|---|---|
+| `form`, `formRow`, `formErrors`, `formButtons` | `<FormView>` |
+| `label`, `input`, `select`, `textarea`, `button` | prvky formuláře |
+| `invalid`, `error` | prvek s chybou, text chyby |
+| `checkbox`, `checkboxInput`, `radioList`, `checkboxList`, `choiceItem`, `choiceInput` | checkboxy a výběry |
+| `dialog`, `dialogContent`, `dialogHeader`, `dialogTitle`, `dialogClose`, `dialogBody`, `dialogFooter` | okno dialogu |
+
+Místo, které téma nemá, dostane prázdnou třídu. Vlastní prvky si mohou zavést svá místa, třeba `dropdownlist.wrapper`, a číst je přes `currentTheme().class('dropdownlist.wrapper')`.
+
 ## Adaptéry: napojení jiných knihoven
 
 Části, které jdou vyměnit, jsou služby v kontejneru. Adaptér je třída, která službu nahradí: zaregistruješ ji v `services.ts` a framework ji použije místo výchozí. Presentery a komponenty se nemění.
@@ -399,6 +446,7 @@ Bez adaptéru drží zprávy výchozí služba v `app.flashes.messages` a layout
 |---|---|---|
 | `FlashMessages` | zprávy pro layout, s časovačem | `CapifyFlashMessages` (`phlox-js/adapters/capify`), jiná knihovna toastů |
 | `Dialogs` | nativní `<dialog>` | okna jiné knihovny, třeba Kendo Window |
+| `Theme` | výchozí třídy `phlox-*` | `BootstrapTheme`, jiný CSS framework |
 | `Translator` | `IntlTranslator` | i18next nebo jiný překladač |
 | `UserStorage` | `sessionStorage` | `localStorage`, cookies |
 | `Authenticator`, `Authorizator` | žádný, chyba při použití | přihlášení a oprávnění aplikace |
@@ -762,7 +810,7 @@ const name = this.form.get('name');
 
 - **Přístupnost:** chybné pole má `aria-invalid` a `aria-describedby` vede na text chyby.
 - **Checkbox** se vykresluje uvnitř svého `<label>`, jako v Nette.
-- **Vzhled je na aplikaci.** Framework dává třídy `phlox-form`, `phlox-form-row`, `phlox-form-error`, `phlox-form-errors` a `phlox-form-buttons`.
+- **Třídy dává téma** (viz Vzhled a témata). Třída předaná do `<Input>` se přidá k třídě tématu, u tlačítka ji nahradí: `<Input control={cancel} class="btn btn-secondary" />`.
 
 ### Vlastní prvek
 

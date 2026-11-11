@@ -5,6 +5,7 @@ import { Container } from '../di/container';
 import type { Class } from '../di/container';
 import { APP, createComponent, renderComponent } from '../ui/component';
 import { Dialogs, NativeDialogs } from '../ui/dialog';
+import { THEME, Theme } from '../ui/theme';
 import type { Presenter } from '../ui/presenter';
 import { Router } from './router';
 import { Authenticator, User, UserStorage, userDefaults } from '../security/user';
@@ -53,6 +54,8 @@ export class Application {
   readonly router: Router;
   readonly flashes: FlashMessages;
   readonly user: User;
+  /** Classes of rendered forms and dialogs, see ui/theme.ts. */
+  readonly theme: Theme;
 
   /** The root presenter while the application is running. */
   presenter: Presenter<any, any> | null = null;
@@ -68,12 +71,14 @@ export class Application {
     container.add(this);
     if (!container.has(Dialogs)) container.add(NativeDialogs);
     if (!container.has(FlashMessages)) container.add(FlashMessages);
+    if (!container.has(Theme)) container.add(new Theme());
     if (!container.has(UserStorage)) container.add(userDefaults.BrowserUserStorage);
     if (!container.has(Authenticator)) container.add(userDefaults.MissingAuthenticator);
     if (!container.has(Authorizator)) container.add(userDefaults.MissingAuthorizator);
     if (!container.has(User)) container.add(User);
     this.flashes = container.get(FlashMessages);
     this.user = container.get(User);
+    this.theme = container.get(Theme);
     this.router = new Router(this);
     container.add(this.router);
   }
@@ -84,6 +89,7 @@ export class Application {
     this.started = { root, element };
     this.scope = new Scope(null);
     this.scope.provide(APP, this);
+    this.scope.provide(THEME, this.theme);
 
     const presenter = this.presenter = createComponent(root, {}, null, this, this.scope);
     await presenter.startup();
