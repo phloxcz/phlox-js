@@ -86,7 +86,9 @@ export class ListPresenter extends Presenter {
                     onChange={event => this.handleToggle(item().id, event.currentTarget.checked)}
                   />
                   <a href={this.link('edit', { id: item().id })}>{() => item().name}</a>
-                  <span class="category">{() => CATEGORIES.find(([id]) => id === item().category)?.[1] ?? ''}</span>
+                  <span class="category">
+                    {() => [CATEGORIES.find(([id]) => id === item().category)?.[1], item().shop].filter(Boolean).join(' · ')}
+                  </span>
                   <button onClick={() => this.handleDelete(item())}>{t('list.delete')}</button>
                 </li>
               )}

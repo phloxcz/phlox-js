@@ -267,6 +267,20 @@ Přebírá se princip z Nette, ne kód z TraceJS: `User`, `Identity`, abstraktn�
 - **Zavírání a kontrola podle `focusout` celého prvku,** ne podle `blur` tlačítka. Jinak by se při otevření seznamu hned ukázala chyba povinného pole.
 - **Výchozí texty anglicky** jako hlášky pravidel, PHP verze má česky.
 
+**ComboBox** (`forms/combobox.tsx`, testy `tests/combobox.test.tsx`) je přepsaný podle `phlox-combobox`: stejné třídy obou témat a stejné chování (hodnota je vybraná položka, `allowCustom` pro napsaný text, Escape vrací předchozí hodnotu).
+
+- **Společná třída `ListControl`** (`forms/listbox.tsx`) pro dropdownlist a combobox: položky, hledání bez diakritiky, vykreslení seznamu, šipky a umístění panelu včetně otočení nahoru. Kód se neopakuje a oprava platí pro oba.
+- **Přesný název se vybere sám,** i v jiné velikosti písmen nebo bez diakritiky. PHP verze napsaný text bez výběru zahodí.
+- **Escape jen v otevřeném seznamu.** V zavřeném poli ho dostane dialog, jinak by šel dialog s comboboxem zavřít jen myší.
+- **Předchozí hodnota pro Escape se pamatuje i na začátku psaní,** ne jen při získání fokusu. Ověření v prohlížeči ukázalo, že po výběru a novém psaní Escape vracel prázdnou hodnotu.
+- **Napsaný text se ustálí ve `validate()`,** takže Enter, který odešle formulář dřív, než pole ztratí fokus, pracuje se správnou hodnotou. Stejný problém řeší PHP verze posluchačem `submit`.
+- **`allowCustom` jen pro textová pole:** typ `addComboBox` ho jinde nedovolí.
+- **Výchozí vzhled v systémových barvách** jako zbytek výchozího tématu. `combobox.css` v PHP knihovně má pevné barvy a vlastní tmavý režim přes `prefers-color-scheme`, který na světlé stránce v tmavém systému nesedí. Třídy jsou stejné, takže by stálo za to sjednotit CSS i v `phlox-combobox`.
+
+**Předvybraná hodnota ze vzdálených dat:** `setValue(value, label)` přijme popisek, když ho data ze serveru mají (bez dotazu navíc, jako PHP verze při vykreslení). Uložená hodnota se v seznamu bez hledaného textu ukáže první, i když ji `search` nevrátil (třeba za limitem 100 záznamů).
+
+**Enter ve formuláři bez tlačítka pro odeslání:** prohlížeč odešle formulář Enterem jen s tlačítkem pro odeslání nebo s jediným textovým polem. Formulář v dialogu má Uložit v patičce, mimo `<form>`, a s druhým polem přestal Enter fungovat (zjištěno v prohlížeči). `FormTag` proto Enter v textovém poli odešle sám, pokud ho nevyužil prvek (výběr v seznamu volá `preventDefault`) a formulář nemá vlastní tlačítko.
+
 **Zatím chybí:** vnořené kontejnery (`addContainer()`) pro DTO s objekty a seznamy, nahrávání souborů a převzetí pravidel z OpenRPC.
 
 ## Síť: RPC (implementováno, čeká na review)

@@ -5,7 +5,12 @@ export interface Item {
   name: string;
   done: boolean;
   category: number | null;
+  /** A shop from SHOPS, or any other typed by the user. */
+  shop: string | null;
 }
+
+/** Suggested shops. A shop can also be typed, see the ComboBox in ItemEdit. */
+export const SHOPS = ['Albert', 'Billa', 'Globus', 'Kaufland', 'Lidl', 'Penny', 'Tesco'];
 
 /** Categories of items. In a real application they would be a table on the server. */
 export const CATEGORIES: [number, string][] = [
@@ -46,12 +51,12 @@ export class ShoppingStore {
   }
 
   async list(): Promise<Item[]> {
-    return this.data.items.map(item => ({ ...item, category: item.category ?? null }));
+    return this.data.items.map(item => ({ ...item, category: item.category ?? null, shop: item.shop ?? null }));
   }
 
   async get(id: number): Promise<Item | null> {
     const item = this.data.items.find(other => other.id === id);
-    return item ? { ...item, category: item.category ?? null } : null;
+    return item ? { ...item, category: item.category ?? null, shop: item.shop ?? null } : null;
   }
 
   async changes(id: number): Promise<Change[]> {
@@ -60,7 +65,7 @@ export class ShoppingStore {
 
   async add(name: string, category: number | null = null): Promise<void> {
     const id = ++this.data.lastId;
-    this.data.items.push({ id, name, done: false, category });
+    this.data.items.push({ id, name, done: false, category, shop: null });
     this.data.changes[id] = [{ at: new Date().toISOString(), from: null, to: name }];
     this.save();
   }

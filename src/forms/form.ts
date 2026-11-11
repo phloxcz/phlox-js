@@ -8,6 +8,8 @@ import {
 import type { Items } from './controls';
 import { DropDownList } from './dropdownlist';
 import type { DropDownListOptions } from './dropdownlist';
+import { ComboBox } from './combobox';
+import type { ComboBoxOptions } from './combobox';
 import { messages, validators } from './rules';
 import type { Validator } from './rules';
 
@@ -133,6 +135,17 @@ export class Form<V extends object = Record<string, any>> {
     name: K, label = '', options: DropDownListOptions<NonNullable<V[K]>> = {},
   ): DropDownList<NonNullable<V[K]>> {
     return this.addControl(name, new DropDownList<NonNullable<V[K]>>(label, options));
+  }
+
+  /**
+   * A text field with suggestions, see ComboBox. The value is a picked item. `allowCustom` lets a typed text
+   * be the value too, so it is allowed only for fields that can hold a text.
+   */
+  addComboBox<K extends keyof V & string>(
+    name: K, label = '',
+    options: ComboBoxOptions<NonNullable<V[K]>> & { allowCustom?: string extends V[K] ? boolean : false } = {},
+  ): ComboBox<NonNullable<V[K]>> {
+    return this.addControl(name, new ComboBox<NonNullable<V[K]>>(label, options));
   }
 
   addHidden(name: KeysFor<V, string>, value = ''): HiddenField {

@@ -270,3 +270,68 @@
   font-weight: 700;
   padding: 0;
 }
+
+/* ComboBox – the classes of phloxcz/forms-combobox, in system colors like the rest of the default theme */
+
+.combobox-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: .375rem 1.75rem .375rem .5rem;
+  font: inherit;
+  color: FieldText;
+  background: Field url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888'/%3E%3C/svg%3E") no-repeat right 10px center / 10px 6px;
+  border: 1px solid GrayText;
+  border-radius: var(--phlox-radius);
+}
+
+.combobox-input:focus-visible {
+  outline: 2px solid Highlight;
+  outline-offset: 1px;
+}
+
+.combobox-input.phlox-invalid {
+  border-color: var(--phlox-error);
+}
+
+.combobox-dropdown {
+  background: Canvas;
+  color: CanvasText;
+  border: 1px solid ButtonBorder;
+  border-radius: var(--phlox-radius);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, .12);
+}
+
+.combobox-dropdown [role="option"][data-value] {
+  display: block;
+  padding: 7px 14px;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.combobox-dropdown [role="option"][data-value]:hover,
+.combobox-dropdown [role="option"].combobox-active {
+  background-color: Highlight;
+  color: HighlightText;
+}
+
+.combobox-dropdown [role="option"].combobox-selected {
+  font-weight: 600;
+}
+
+.combobox-no-results {
+  display: block;
+  padding: 8px 14px;
+  font-size: .875em;
+  font-style: italic;
+  color: GrayText;
+  cursor: default;
+}
+
+.combobox-dropdown mark {
+  background: transparent;
+  color: Highlight;
+  font-weight: 700;
+  padding: 0;
+}

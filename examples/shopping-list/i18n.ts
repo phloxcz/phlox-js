@@ -1,5 +1,5 @@
 import { IntlTranslator } from 'phlox-js/localization';
-import { DropDownList } from 'phlox-js/forms';
+import { ComboBox, DropDownList } from 'phlox-js/forms';
 import cs from './locales/cs.json';
 import en from './locales/en.json';
 
@@ -13,6 +13,7 @@ export const { t, html } = translator;
 export function translateFramework(): void {
   DropDownList.texts.noResults = t('dropdownlist.noResults');
   DropDownList.texts.filterPlaceholder = t('dropdownlist.search');
+  ComboBox.texts.noResults = t('dropdownlist.noResults');
 }
 
 translateFramework();

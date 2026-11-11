@@ -2,12 +2,13 @@ import { BadRequestError, Presenter } from 'phlox-js';
 import type { Route } from 'phlox-js';
 import { Form, FormTag, Input, InputError, Label } from 'phlox-js/forms';
 import { t } from '../i18n';
-import { ShoppingStore } from '../model/ShoppingStore';
+import { SHOPS, ShoppingStore } from '../model/ShoppingStore';
 import { ItemHistory } from './ItemHistory';
 
 interface ItemInput {
   name: string;
   category: number | null;
+  shop: string | null;
 }
 
 /**
@@ -39,6 +40,12 @@ export class ItemEdit extends Presenter<{ id: number }, boolean> {
       label: id => this.store.categoryName(id),
       placeholder: t('list.category'),
     });
+    // Suggested shops, or any other the user types
+    this.form.addComboBox('shop', t('edit.shop'), {
+      items: SHOPS.map(shop => [shop, shop]),
+      allowCustom: true,
+      placeholder: t('edit.shopPlaceholder'),
+    });
     this.form.onSuccess = values => this.handleSave(values);
   }
 
@@ -49,7 +56,7 @@ export class ItemEdit extends Presenter<{ id: number }, boolean> {
   async loadName() {
     const item = await this.store.get(this.props.id);
     if (!item) throw new BadRequestError(404, t('edit.missing', { id: String(this.props.id) }));
-    this.form.setDefaults({ name: item.name, category: item.category });
+    this.form.setDefaults({ name: item.name, category: item.category, shop: item.shop });
   }
 
   override title() {
@@ -69,18 +76,20 @@ export class ItemEdit extends Presenter<{ id: number }, boolean> {
   }
 
   async handleSave(values: ItemInput) {
-    await this.store.update(this.props.id, { name: values.name.trim(), category: values.category });
+    await this.store.update(this.props.id, { name: values.name.trim(), category: values.category, shop: values.shop });
     this.close(true);
   }
 
   render() {
     const name = this.form.get('name');
     const category = this.form.get('category');
+    const shop = this.form.get('shop');
     return (
       <div>
         <FormTag form={this.form}>
           <p><Label control={name} /> <Input control={name} /> <InputError control={name} /></p>
           <p><Label control={category} /> <Input control={category} /></p>
+          <p><Label control={shop} /> <Input control={shop} /></p>
         </FormTag>
         <p><a href={this.link('history')}>{t('edit.history')}</a></p>
       </div>

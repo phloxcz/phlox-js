@@ -314,6 +314,42 @@ describe('submit', () => {
     expect(String(errors[0])).toContain('server down');
   });
 
+  test('Enter sends a form without a submit button, also with several text fields', async () => {
+    const form = new Form<CreateTask>();
+    form.addText('name');
+    form.addText('email');
+    const success = vi.fn();
+    form.onSuccess = success;
+    const root = mount(() => <FormView form={form} />);
+    const [name, email] = root.querySelectorAll('input');
+    const enter = (target: Element, cancelled = false) => {
+      const event = new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true });
+      if (cancelled) event.preventDefault();
+      target.dispatchEvent(event);
+    };
+    enter(email!);
+    await tick();
+    expect(success).toHaveBeenCalledTimes(1);
+    // A control that uses Enter itself prevents it
+    enter(name!, true);
+    await tick();
+    expect(success).toHaveBeenCalledTimes(1);
+  });
+
+  test('with a submit button Enter is left to the browser', async () => {
+    const form = new Form<CreateTask>();
+    form.addText('name');
+    form.addSubmit('save');
+    const success = vi.fn();
+    form.onSuccess = success;
+    const root = mount(() => <FormView form={form} />);
+    const event = new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true });
+    root.querySelector('input')!.dispatchEvent(event);
+    await tick();
+    expect(event.defaultPrevented).toBe(false);
+    expect(success).not.toHaveBeenCalled();
+  });
+
   test('a form can be sent from code, e.g. from a button in the footer of a dialog', async () => {
     const form = new Form<CreateTask>();
     form.addText('name').setRequired();

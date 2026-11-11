@@ -54,3 +54,18 @@ form [hidden] {
   border-color: var(--bs-border-color);
   color: var(--bs-body-color);
 }
+
+/* ComboBox – the same layout as phloxcz/forms-combobox, for every theme */
+
+.combobox-wrapper {
+  position: relative;
+}
+
+.combobox-dropdown,
+[data-combobox-panel] {
+  z-index: 1060;
+  max-height: 260px;
+  overflow-y: auto;
+  padding: 4px 0;
+  list-style: none;
+}

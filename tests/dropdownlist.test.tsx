@@ -289,3 +289,16 @@ describe('DropDownList', () => {
     void city;
   });
 });
+
+describe('DropDownList with a selected value far in remote data', () => {
+  test('the label can be given with the value and the value is first in the list', async () => {
+    const firstTwo = async () => cities.slice(0, 2);
+    const { city, trigger, options } = setup({ search: firstTwo });
+    city.setValue(4, 'Plzeň');
+    expect(trigger.textContent).toBe('Plzeň');
+    trigger.click();
+    await tick();
+    expect(options().map(option => option.textContent)).toEqual(['Plzeň', 'Praha', 'Brno']);
+    expect(options()[0]!.getAttribute('aria-selected')).toBe('true');
+  });
+});

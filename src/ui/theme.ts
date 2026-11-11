@@ -52,6 +52,15 @@ const DEFAULT_CLASSES: Record<ThemeSlot, string> & Record<string, string> = {
   'dropdownlist.itemSelected': 'dropdownlist-selected',
   'dropdownlist.noResults': 'dropdownlist-no-results',
   'dropdownlist.mark': '',
+  // The same classes as phloxcz/forms-combobox
+  'combobox.wrapper': 'combobox-wrapper',
+  'combobox.input': 'combobox-input',
+  'combobox.dropdown': 'combobox-dropdown',
+  'combobox.item': '',
+  'combobox.itemActive': 'combobox-active',
+  'combobox.itemSelected': 'combobox-selected',
+  'combobox.noResults': 'combobox-no-results',
+  'combobox.mark': '',
 };
 
 /** Key under which the application provides its theme to everything it renders. */
@@ -116,6 +125,15 @@ export class BootstrapTheme extends Theme {
       'dropdownlist.itemSelected': 'fw-semibold',
       'dropdownlist.noResults': 'dropdown-item disabled text-muted fst-italic',
       'dropdownlist.mark': 'fw-bold bg-transparent p-0',
+      // The same as THEME_BOOTSTRAP of phloxcz/forms-combobox
+      'combobox.wrapper': 'combobox-wrapper position-relative',
+      'combobox.input': 'form-control',
+      'combobox.dropdown': 'dropdown-menu',
+      'combobox.item': 'dropdown-item',
+      'combobox.itemActive': 'active',
+      'combobox.itemSelected': 'fw-semibold',
+      'combobox.noResults': 'dropdown-item disabled text-muted fst-italic',
+      'combobox.mark': 'fw-bold bg-transparent p-0',
     }, overrides);
   }
 }

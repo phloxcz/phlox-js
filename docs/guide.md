@@ -732,6 +732,7 @@ class TaskCreatePresenter extends Presenter {
 | `addSelect`, `addRadioList` | jedna z hodnot položek nebo `null` |
 | `addMultiSelect`, `addCheckboxList` | pole hodnot položek |
 | `addDropDownList(name, label, options)` | jedna z hodnot položek nebo `null`, výběr s hledáním (viz DropDownList) |
+| `addComboBox(name, label, options)` | jedna z hodnot položek nebo `null`, textové pole s návrhy (viz ComboBox) |
 | `addHidden(name, value)` | text |
 | `addSubmit(name, caption)` | tlačítko, mezi hodnotami není |
 
@@ -772,6 +773,7 @@ form.addText('note')
 - **Během `onSuccess`** jsou tlačítka formuláře zakázaná a `form.submitting()` vrací `true`.
 - **Tlačítko bez kontroly**, třeba Zrušit: `addSubmit('cancel').setValidationScope([])`. Které tlačítko formulář odeslalo, řekne v `onSuccess` metoda `button.isSubmittedBy()`.
 - **Odeslání z kódu:** `await form.submit()`, třeba z tlačítka v patičce dialogu, které leží mimo `<form>`. Vrací, jestli formulář prošel.
+- **Enter v textovém poli** formulář odešle, i když formulář nemá tlačítko pro odeslání a má víc textových polí. Prohlížeč by to sám neudělal.
 
 ### Chyby ze serveru
 
@@ -837,6 +839,31 @@ form.addDropDownList('assignee', 'Řešitel:', {
 - **Texty** jsou anglicky, přelož je jednou při startu: `DropDownList.texts.noResults = t('...')`, `DropDownList.texts.filterPlaceholder`.
 - **Panel se otevře pod tlačítkem, nebo nad ním,** když se dolů celý seznam nevejde a nahoře je víc místa. Když se nevejde nikam, seznam se zkrátí. Je umístěný `fixed`, takže ho dialog ani posuvný kontejner neořízne. Stranu ukazuje atribut `data-placement` (`bottom`, `top`).
 - **Vzhled** dodává téma: místa `dropdownlist.wrapper`, `dropdownlist.trigger`, `dropdownlist.dropdown`, `dropdownlist.item`... CSS je v `base.css` a `default.css`.
+
+### ComboBox
+
+Textové pole s návrhy, převzaté z [phloxcz/forms-combobox](https://github.com/phloxcz/forms-combobox). Na rozdíl od dropdownlistu se píše přímo do pole.
+
+```ts
+form.addComboBox('country', 'Země:', { search: text => this.api.call('country.search', { text }) });
+
+// Napsaný text, který není mezi návrhy, se stane hodnotou
+form.addComboBox('shop', 'Obchod:', { items: shops.map(shop => [shop, shop]), allowCustom: true });
+```
+
+- **Hodnota je vybraná položka.** Dokud uživatel jen píše, hodnota je `null`. Napsaný text, který není položkou, se po opuštění pole zahodí a vrátí se předchozí hodnota. Napsaný přesný název položky (bez ohledu na velikost písmen a diakritiku) se vybere sám.
+- **`allowCustom: true`:** napsaný text se stane hodnotou a `isCustom()` vrací `true`. Kompilátor ho dovolí jen u pole, které může obsahovat text.
+- **Klávesnice:** šipky vybírají, Enter vybere zvýrazněnou položku. Bez zvýraznění Enter odešle formulář jako v každém textovém poli. Escape v otevřeném seznamu vrátí předchozí hodnotu, v zavřeném ho dostane dialog kolem.
+- **`items`, `search`, `label` a `placeholder`** fungují stejně jako u dropdownlistu, stejně se panel otáčí nahoru a hledá bez ohledu na diakritiku.
+- **Texty:** `ComboBox.texts.noResults`. **Vzhled:** místa `combobox.wrapper`, `combobox.input`, `combobox.dropdown`, `combobox.item`...
+
+### Předvybraná hodnota ze vzdálených dat
+
+Když `search` vrací jen prvních pár záznamů (třeba 100) a uložená hodnota mezi nimi není, platí pro dropdownlist i combobox:
+
+- **Popisek se dá předat s hodnotou,** pokud ho data ze serveru už obsahují. Pak není potřeba žádný dotaz: `form.get('assignee').setValue(task.assignee.id, task.assignee.name)`.
+- **Jinak ho zjistí `label`** podle ID, i po `setDefaults({ assignee: 5372 })`.
+- **Po otevření seznamu je uložená hodnota první,** i když mezi prvními záznamy není. Uživatel tak vidí, co je vybrané. Jakmile začne psát, zobrazí se jen to, co hledání vrátí.
 
 ### Vlastní prvek
 

@@ -26,7 +26,9 @@
     "saved": "Saved.",
     "missing": "Item {id} does not exist.",
     "history": "History of the name",
-    "category": "Category"
+    "category": "Category",
+    "shop": "Shop",
+    "shopPlaceholder": "Pick or type"
   },
   "confirm": {
     "title": "Confirmation",
