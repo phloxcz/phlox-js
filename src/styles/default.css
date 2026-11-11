@@ -430,3 +430,63 @@
 .phlox-button-small {
   padding: .125rem .5rem;
 }
+
+/* Upload */
+
+.phlox-upload-dropzone {
+  margin-bottom: .5rem;
+  padding: 1.5rem 1rem;
+  border: 2px dashed GrayText;
+  border-radius: var(--phlox-radius);
+  text-align: center;
+  color: GrayText;
+}
+
+.phlox-upload-dropzone .phlox-button {
+  margin-top: .5rem;
+}
+
+.phlox-upload-dropzone:hover,
+.phlox-upload-dropzone-active {
+  border-color: Highlight;
+  color: CanvasText;
+}
+
+.phlox-upload-dropzone-active {
+  background: color-mix(in srgb, Highlight 10%, transparent);
+}
+
+.phlox-upload-dropzone.phlox-invalid {
+  border-color: var(--phlox-error);
+}
+
+.phlox-upload-table td {
+  padding: .25rem .25rem;
+  border-bottom: 1px solid color-mix(in srgb, GrayText 35%, transparent);
+}
+
+.phlox-upload-row-error {
+  color: var(--phlox-error);
+}
+
+.phlox-upload-size {
+  text-align: right;
+  white-space: nowrap;
+  color: GrayText;
+  font-size: .875em;
+}
+
+.phlox-upload-remove-cell {
+  text-align: right;
+  width: 1%;
+}
+
+.phlox-upload-remove {
+  padding: .25rem;
+  border-radius: 3px;
+}
+
+.phlox-upload-remove:hover {
+  color: var(--phlox-error);
+}
+

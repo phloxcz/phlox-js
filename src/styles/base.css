@@ -211,3 +211,90 @@ form [hidden] {
   flex: 1 1 8rem;
   min-width: 0;
 }
+
+/* Upload: layout of phloxcz/components-upload, the same in every theme */
+.pu-wrapper,
+.pu-wrapper *,
+.pu-wrapper *::before,
+.pu-wrapper *::after {
+  box-sizing: border-box;
+}
+
+.pu-dropzone {
+  position: relative;
+  cursor: pointer;
+  user-select: none;
+  transition: border-color .15s ease, background-color .15s ease, color .15s ease;
+}
+
+.pu-dropzone:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+.pu-dropzone[aria-disabled="true"] {
+  cursor: not-allowed;
+  opacity: .6;
+}
+
+.pu-dropzone-hint {
+  margin: .6rem 0 0;
+}
+
+.pu-dropzone-hint span {
+  font-size: .875em;
+}
+
+.pu-file-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.pu-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+/* Long names end with an ellipsis */
+.pu-cell-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 0;
+  width: 70%;
+}
+
+.pu-thumb {
+  width: 1.75rem;
+  height: 1.75rem;
+  margin-right: .5rem;
+  object-fit: cover;
+  vertical-align: middle;
+  border-radius: 3px;
+}
+
+.pu-row-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: inherit;
+  line-height: 1;
+}
+
+/* Bootstrap has no dashed border utility, phloxcz/components-upload uses one */
+.pu-dropzone.border-dashed {
+  border-style: dashed !important;
+}
+
+/* The invalid state of Bootstrap is meant for inputs, the zone gets only its colour */
+.pu-dropzone.is-invalid {
+  border-color: var(--bs-form-invalid-border-color) !important;
+}
+

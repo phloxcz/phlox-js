@@ -87,6 +87,19 @@ const DEFAULT_CLASSES: Record<ThemeSlot, string> & Record<string, string> = {
   'taginput.optionNew': 'phlox-taginput__option phlox-taginput__option--new',
   'taginput.focused': 'phlox-taginput--focused',
   'taginput.invalid': 'phlox-invalid',
+  // Parts of phloxcz/components-upload; its own classes pu-* are there in every theme
+  'upload.wrapper': '',
+  'upload.dropzone': 'phlox-upload-dropzone',
+  'upload.dropzoneIdle': '',
+  'upload.dropzoneActive': 'phlox-upload-dropzone-active',
+  'upload.button': 'phlox-button',
+  'upload.table': 'phlox-upload-table',
+  'upload.row': '',
+  'upload.rowError': 'phlox-upload-row-error',
+  'upload.cellName': '',
+  'upload.cellSize': 'phlox-upload-size',
+  'upload.cellRemove': 'phlox-upload-remove-cell',
+  'upload.remove': 'phlox-upload-remove',
 };
 
 /** Key under which the application provides its theme to everything it renders. */
@@ -184,6 +197,19 @@ export class BootstrapTheme extends Theme {
       'taginput.optionNew': 'phlox-taginput__option phlox-taginput__option--new dropdown-item text-success',
       'taginput.focused': 'phlox-taginput--focused',
       'taginput.invalid': 'is-invalid',
+      // The Bootstrap theme of phloxcz/components-upload
+      'upload.wrapper': '',
+      'upload.dropzone': 'border border-dashed rounded-3 p-4 p-md-5 text-center mb-3',
+      'upload.dropzoneIdle': 'border-secondary-subtle text-body-secondary',
+      'upload.dropzoneActive': 'border-primary bg-primary-subtle text-primary',
+      'upload.button': 'btn btn-primary mt-2',
+      'upload.table': 'table table-sm align-middle mb-0 mt-2',
+      'upload.row': '',
+      'upload.rowError': 'table-danger',
+      'upload.cellName': 'text-truncate',
+      'upload.cellSize': 'text-end text-nowrap text-body-secondary small',
+      'upload.cellRemove': 'text-end',
+      'upload.remove': 'btn btn-sm btn-link text-danger p-0 lh-1',
     }, overrides);
   }
 }

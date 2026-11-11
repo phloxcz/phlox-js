@@ -55,6 +55,23 @@ function validUrl(value: string): boolean {
   }
 }
 
+/** Files of an upload, one or several. */
+function files(control: FormControl<any>): File[] {
+  const value = control.getValue();
+  return (Array.isArray(value) ? value : [value]).filter((file): file is File => file instanceof File);
+}
+
+/** Image formats of Form.Image, the same as in Nette. */
+export const IMAGE_TYPES = ['image/gif', 'image/png', 'image/jpeg', 'image/webp', 'image/avif'];
+
+/** Whether a MIME type matches one of the patterns, which may end with a wildcard: image/*. */
+const mimeMatches = (type: string, patterns: string[]): boolean =>
+  patterns.some(pattern => (pattern.endsWith('/*') ? type.startsWith(pattern.slice(0, -1)) : type === pattern));
+
+const maxFileSize = (file: File, arg: unknown): boolean => file.size <= Number(resolve(arg));
+const mimeType = (file: File, arg: unknown): boolean => mimeMatches(file.type, list(arg).map(String));
+const image = (file: File): boolean => IMAGE_TYPES.includes(file.type);
+
 /** The validators, also available as Form.Filled, Form.Email and so on. */
 export const validators = {
   Filled: (control => control.isFilled()) as Validator,
@@ -77,7 +94,17 @@ export const validators = {
       && (max === null || max === undefined || compare(control.getValue(), max) <= 0);
   }) as Validator,
   IsIn: ((control, arg) => list(arg).includes(control.getValue())) as Validator,
+  MaxFileSize: ((control, arg) => files(control).every(file => maxFileSize(file, arg))) as Validator,
+  MimeType: ((control, arg) => files(control).every(file => mimeType(file, arg))) as Validator,
+  Image: (control => files(control).every(image)) as Validator,
 };
+
+/** Checks of one file, so an upload can mark which of its files breaks a rule. */
+export const fileChecks = new Map<Validator, (file: File, arg: unknown) => boolean>([
+  [validators.MaxFileSize, maxFileSize],
+  [validators.MimeType, mimeType],
+  [validators.Image, image],
+]);
 
 /** These are checked even when the control is empty. All other rules apply only to a filled control, as in Nette. */
 const CHECKS_EMPTY = new Set<Validator>([validators.Filled, validators.Blank]);
@@ -100,6 +127,9 @@ export const messages = new Map<Validator, string>([
   [validators.Max, 'Please enter a value less than or equal to %d.'],
   [validators.Range, 'Please enter a value between %d and %d.'],
   [validators.IsIn, 'Please submit one of the allowed values.'],
+  [validators.MaxFileSize, 'The size of the uploaded file can be up to %d bytes.'],
+  [validators.MimeType, 'The uploaded file is not in the expected format.'],
+  [validators.Image, 'The uploaded file must be image in format JPEG, GIF, PNG, WebP or AVIF.'],
 ]);
 
 /** %label, %name and %value, then %d and %s in order of the arguments. */
@@ -167,6 +197,14 @@ export class Rules {
 
   isRequired(): boolean {
     return this.items.some(item => 'message' in item && item.validator === validators.Filled);
+  }
+
+  /** Rules that apply now: the own ones and those of conditions that hold. */
+  active(): { validator: Validator; arg: unknown }[] {
+    return this.items.flatMap(item => {
+      if (!('branch' in item)) return [item];
+      return (item.validator(item.control, item.arg) ? item.branch : item.otherwise)?.active() ?? [];
+    });
   }
 
   /** Returns the first error, as Nette stops at the first rule that fails. */

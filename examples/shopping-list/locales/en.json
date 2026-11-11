@@ -94,6 +94,15 @@
       "one": "{count} item was added from {name}.",
       "few": "{count} items were added from {name}.",
       "other": "{count} items were added from {name}."
+    },
+    "photos": "Photos",
+    "notImage": "A photo must be a JPEG, GIF, PNG, WebP or AVIF image.",
+    "tooLarge": "A photo can have at most 5 MB.",
+    "tooMany": "At most %d photos.",
+    "photosSent": {
+      "one": "{count} photo would go to the server in {parts} parts.",
+      "few": "{count} photos would go to the server in {parts} parts.",
+      "other": "{count} photos would go to the server in {parts} parts."
     }
   },
   "multiplier": {
@@ -104,5 +113,13 @@
     "drag": "Drag to change the order, or use the arrow keys",
     "min": "Please add at least %d rows.",
     "max": "Please add no more than %d rows."
+  },
+  "upload": {
+    "dropzone": "Upload area – click or drop files here",
+    "heading": "Drop files here",
+    "or": "or",
+    "browseMultiple": "Choose files",
+    "browseSingle": "Choose a file",
+    "remove": "Remove %s"
   }
 }

@@ -568,6 +568,19 @@ class TasksPresenter extends Presenter {
 - **Session místo tokenu:** `new RpcApi('/rpc', { credentials: 'include' })`, prohlížeč pak posílá cookies i na jiný původ.
 - **Bez typů** jde použít přímo `new RpcClient('/rpc')`, `call()` pak bere libovolnou metodu a vrací `any`.
 
+### Soubory přes RPC
+
+JSON-RPC přenáší jen text. `fileChunks(file, size)` z `phlox-js/net` přečte soubor po částech (výchozí 1 MB) a každou vrátí v base64, takže velký soubor nikdy není v paměti celý:
+
+```ts
+for await (const chunk of fileChunks(file)) {
+  // chunk: { index, total, offset, data }, prázdný soubor má jednu prázdnou část
+  await this.api.call('file.chunk', { uploadId, ...chunk });
+}
+```
+
+Base64 je o třetinu větší než soubor. Na velké soubory je lepší REST API: `fetch(url, { method: 'PUT', body: file })` pošle soubor proudem.
+
 ### Chyby
 
 Každé selhání je `RpcError` s `code`, `message`, `method` a `data`. Nepovedené volání v dávce neovlivní ostatní.
@@ -734,6 +747,8 @@ class TaskCreatePresenter extends Presenter {
 | `addDropDownList(name, label, options)` | jedna z hodnot položek nebo `null`, výběr s hledáním (viz DropDownList) |
 | `addComboBox(name, label, options)` | jedna z hodnot položek nebo `null`, textové pole s návrhy (viz ComboBox) |
 | `addTagInput(name, label, options)` | pole hodnot, štítky (viz TagInput) |
+| `addUpload(name, label)` | `File` nebo `null` (viz Soubory) |
+| `addMultiUpload(name, label)` | `File[]` (viz Soubory) |
 | `addHidden(name, value)` | text |
 | `addSubmit(name, caption)` | tlačítko, mezi hodnotami není |
 | `addContainer(name, label)` | vnořený objekt, viz Kontejnery a řádky |
@@ -761,7 +776,7 @@ form.addText('note')
   .endCondition();
 ```
 
-- **Pravidla:** `Filled` (= `Required`), `Blank`, `Equal`, `NotEqual`, `MinLength`, `MaxLength`, `Length`, `Email`, `URL`, `Pattern`, `Integer`, `Float`, `Min`, `Max`, `Range`, `IsIn`. `Min` a `Max` porovnávají i data: `addRule(Form.Min, 'Termín nesmí být v minulosti.', today)`.
+- **Pravidla:** `Filled` (= `Required`), `Blank`, `Equal`, `NotEqual`, `MinLength`, `MaxLength`, `Length`, `Email`, `URL`, `Pattern`, `Integer`, `Float`, `Min`, `Max`, `Range`, `IsIn`, pro soubory `MaxFileSize`, `MimeType` a `Image`. `Min` a `Max` porovnávají i data: `addRule(Form.Min, 'Termín nesmí být v minulosti.', today)`.
 - **Vlastní pravidlo** je funkce `(control, arg) => boolean`: `addRule(control => control.getValue() !== 'admin', 'Toto jméno je vyhrazené.')`.
 - **Jako v Nette se pravidla kontrolují jen u vyplněného prvku,** kromě `setRequired`. Prázdné nepovinné pole s `Form.Email` je tedy v pořádku.
 - **U prvku se hlásí jen první chyba.**
@@ -883,6 +898,43 @@ form.addTagInput('labels', 'Štítky:', { items: labels.map(label => [label, lab
 - **`allowNew`** kompilátor dovolí jen u seznamu, který může obsahovat text. Výchozí je vypnuté (v PHP zapnuté).
 - **Hodnoty z kódu:** `setValue([1, 2])`, popisky z položek nebo z `label`. Popisky ze serveru jdou předat rovnou: `setValue(ids, names)`.
 - **Texty:** `TagInput.texts.createNew`, `TagInput.texts.remove`. **Vzhled:** místa `taginput.container`, `taginput.tag`, `taginput.tagNew`, `taginput.option`...
+
+### Soubory
+
+Drop zóna s tlačítkem a tabulka vybraných souborů, vzhled převzatý z [phloxcz/components-upload](https://github.com/phloxcz/components-upload). **Nic se nenahrává:** hodnotou jsou objekty `File` a co s nimi, rozhodne `onSuccess`. Jako v Nette, kde `addUpload()` předá `FileUpload` a uložení je na presenteru.
+
+```ts
+// Typ formuláře, ne vygenerované DTO: to typ File nemá
+interface ArticleInput { title: string; cover: File | null; attachments: File[] }
+
+this.form.addUpload('cover', 'Obrázek:')
+  .addRule(Form.Image, 'Jen obrázek.')
+  .addRule(Form.MaxFileSize, 'Nejvýš 5 MB.', 5 * 1024 * 1024);
+this.form.addMultiUpload('attachments', 'Přílohy:')
+  .addRule(Form.MaxLength, 'Nejvýš %d souborů.', 10);
+
+this.form.onSuccess = async values => {
+  const id = await this.api.call('article.create', { input: { title: values.title } });
+  // Přes RPC po částech v base64 (viz Soubory přes RPC)...
+  for (const file of values.attachments) {
+    for await (const chunk of fileChunks(file)) {
+      await this.api.call('article.attachmentChunk', { id, name: file.name, ...chunk });
+    }
+  }
+  // ...nebo proudem do REST API
+  if (values.cover) await fetch(`/api/articles/${id}/cover`, { method: 'PUT', body: values.cover });
+};
+```
+
+- **Hodnota:** `addUpload` dává `File` nebo `null`, `addMultiUpload` `File[]`. Kompilátor dovolí `addUpload` jen na pole typu `File | null` a `addMultiUpload` jen na `File[]`. Formulář s uploadem má proto vlastní typ, ze kterého obsluha sestaví volání API.
+- **Výběr:** klik na zónu nebo tlačítko, Enter nebo mezerník na zóně, klik na popisek, přetažení souborů na zónu. U jednoho souboru nový výběr nahradí starý. U více souborů se přidávají a stejný soubor (název, velikost, datum změny) se nepřidá dvakrát.
+- **Seznam:** název (dlouhý se zkrátí), velikost, u obrázků náhled, křížek pro odebrání.
+- **Pravidla** se kontrolují hned po výběru. `MaxFileSize` (v bajtech), `MimeType` (`'application/pdf'`, `['text/plain', 'image/*']`) a `Image` (JPEG, GIF, PNG, WebP, AVIF jako v Nette) platí pro každý soubor a soubor, který je porušuje, se v seznamu označí. Počet souborů hlídají `MinLength`, `MaxLength` a `Length`, povinnost `setRequired()`.
+- **Atribut `accept`** se doplní z pravidel `MimeType` a `Image`, takže dialog prohlížeče rovnou nabídne jen vhodné soubory. Pravidla platí dál, přetažený soubor `accept` neomezí.
+- **`setValue()`** a `reset()` fungují jako u jiných prvků. Soubory přidá i kód: `control.addFiles(files)`.
+- **Existující soubory** záznamu (už uložené přílohy) upload neukazuje, vykresli je zvlášť.
+- **Texty:** `UploadControl.texts.heading`, `or`, `browseMultiple`, `browseSingle`, `dropzone` (popis zóny pro čtečky), `remove` (`%s` je název souboru). **Vzhled:** místa `upload.dropzone`, `upload.dropzoneIdle`, `upload.dropzoneActive`, `upload.button`, `upload.table`, `upload.row`, `upload.rowError`, `upload.cellName`, `upload.cellSize`, `upload.cellRemove`, `upload.remove`. Třídy `pu-*` z PHP knihovny jsou v každém tématu.
+- **Velikost** pro lidi: `formatFileSize(3_400_000)` vrátí `3.2 MB`.
 
 ### Lokální a vzdálená data
 

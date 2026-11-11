@@ -94,6 +94,15 @@
       "one": "Z receptu {name} přibyla {count} položka.",
       "few": "Z receptu {name} přibyly {count} položky.",
       "other": "Z receptu {name} přibylo {count} položek."
+    },
+    "photos": "Fotky",
+    "notImage": "Fotka musí být obrázek JPEG, GIF, PNG, WebP nebo AVIF.",
+    "tooLarge": "Fotka může mít nejvýš 5 MB.",
+    "tooMany": "Nejvýš %d fotky.",
+    "photosSent": {
+      "one": "{count} fotka by šla na server po {parts} částech.",
+      "few": "{count} fotky by šly na server po {parts} částech.",
+      "other": "{count} fotek by šlo na server po {parts} částech."
     }
   },
   "multiplier": {
@@ -104,5 +113,13 @@
     "drag": "Přetažením změníte pořadí, nebo použijte šipky",
     "min": "Přidejte aspoň %d řádků.",
     "max": "Přidejte nejvýš %d řádků."
+  },
+  "upload": {
+    "dropzone": "Nahrávací oblast – klikněte nebo přetáhněte soubory",
+    "heading": "Přetáhněte soubory sem",
+    "or": "nebo",
+    "browseMultiple": "Vybrat soubory",
+    "browseSingle": "Vybrat soubor",
+    "remove": "Odebrat %s"
   }
 }

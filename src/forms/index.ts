@@ -11,6 +11,7 @@ export { DropDownList } from './dropdownlist';
 export { ComboBox } from './combobox';
 export type { ComboBoxOptions } from './combobox';
 export { TagInput } from './taginput';
+export { UploadControl, formatFileSize } from './upload';
 export type { Tag, TagInputOptions } from './taginput';
 export { ListControl, foldText } from './listbox';
 export type { ListOptions } from './listbox';

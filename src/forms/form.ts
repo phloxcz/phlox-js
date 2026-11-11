@@ -33,6 +33,9 @@ export class Form<V extends object = Record<string, any>> extends Container<V> {
   static Max = validators.Max;
   static Range = validators.Range;
   static IsIn = validators.IsIn;
+  static MaxFileSize = validators.MaxFileSize;
+  static MimeType = validators.MimeType;
+  static Image = validators.Image;
   /** Default messages of the rules, keyed by the validator: Form.messages.set(Form.Filled, 'Vyplňte.'). */
   static messages = messages;
 

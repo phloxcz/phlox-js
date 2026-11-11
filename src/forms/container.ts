@@ -13,6 +13,7 @@ import type { DropDownListOptions } from './dropdownlist';
 import { ComboBox } from './combobox';
 import type { ComboBoxOptions } from './combobox';
 import { TagInput } from './taginput';
+import { UploadControl } from './upload';
 import type { TagInputOptions } from './taginput';
 import { Multiplier } from './multiplier';
 import type { MultiplierOptions } from './multiplier';
@@ -184,6 +185,16 @@ export class Container<V extends object = Record<string, any>> implements Owner 
     options: TagInputOptions<ItemOf<V[K]>> & { allowNew?: string extends ItemOf<V[K]> ? boolean : false } = {},
   ): TagInput<ItemOf<V[K]>> {
     return this.addControl(name, new TagInput<ItemOf<V[K]>>(label, options));
+  }
+
+  /** One file, File or null. Nothing is uploaded: onSuccess gets the File and sends it the way it needs. */
+  addUpload(name: KeysFor<V, File | null>, label = ''): UploadControl<File | null> {
+    return this.addControl(name, new UploadControl<File | null>(label));
+  }
+
+  /** Several files, File[]. The number of them is checked by Form.MinLength and Form.MaxLength, as in Nette. */
+  addMultiUpload(name: KeysFor<V, File[]>, label = ''): UploadControl<File[]> {
+    return this.addControl(name, new UploadControl<File[]>(label, true));
   }
 
   addHidden(name: KeysFor<V, string>, value = ''): HiddenField {

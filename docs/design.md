@@ -313,7 +313,21 @@ Přebírá se princip z Nette, ne kód z TraceJS: `User`, `Identity`, abstraktn�
 - **Rozložení `vertical`, `horizontal` a `grid`** se liší jen tím, jak se porovnají středy: podle `y`, podle `x`, nebo v pořadí čtení (řádek výš, nebo stejný řádek a vlevo). Pohyb položky na rozložení nezávisí. `lockAxis` je pro ty, kdo pohyb mimo osu nechtějí; výchozí je volný pohyb jako v běžných knihovnách typu SortableJS.
 - **Rozvržení polí v řádku je v `base.css`** (flex se zalamováním), ne v tématu. Bootstrap utility `flex-grow-1` bez základní šířky pole skládaly pod sebe.
 
-**Zatím chybí:** nahrávání souborů a převzetí pravidel z OpenRPC.
+### Soubory (implementováno, čeká na review)
+
+`forms/upload.tsx`, `net/files.ts`, testy `tests/upload.test.tsx`.
+
+- **Prvek jen vybírá, nenahrává** (rozhodl autor). Hodnota jsou objekty `File`, přenos řeší `onSuccess`: v CMS po částech v base64 přes RPC, jinde proudem do REST API. Prvek tak nezávisí na serveru, stejně jako `addUpload()` v Nette jen předá `FileUpload`.
+- **Jen nové soubory** (rozhodl autor). Existující přílohy záznamu upload neukazuje, hodnota by jinak byla směs `File` a ID a obsluha by potřebovala i seznam smazaných.
+- **Vzhled převzatý z `phlox-upload`:** drop zóna s ikonou a tlačítkem, tabulka souborů, třídy `pu-*` a Bootstrap mapa tříd. Vynechaný je průběh, stavy a tlačítka Nahrát a Zrušit, protože se tu nic nenahrává. Bootstrap nemá `border-dashed`, který PHP knihovna používá, proto je definovaný v `base.css`.
+- **Zóna je tlačítko pro klávesnici** (`role="button"`, Enter, mezerník), tlačítko uvnitř má `tabindex="-1"`, aby nebyly dvě zastávky na totéž. `id` má skutečný `<input type="file">`, takže `<Label>` otevře dialog. Fokus po chybě dostane zóna.
+- **Pravidla po souborech:** `MaxFileSize`, `MimeType` a `Image` platí pro každý soubor. Kvůli označení chybného souboru v seznamu mají kontrolu jednoho souboru (`fileChecks`) a `Rules.active()` vrací pravidla, která právě platí, i z podmínek. Počet souborů hlídá `MinLength`/`MaxLength` jako v Nette.
+- **`accept` z pravidel** jako v Nette (`MimeType`, `Image`). Je reaktivní, takže sleduje i podmínky.
+- **Kontrola hned po výběru,** ne až po opuštění prvku. Výběr je jedna akce, ne psaní, a uživatel chce hned vědět, že soubor nevyhovuje.
+- **Náhled obrázku přes `URL.createObjectURL`,** adresa se uvolní, když soubor opustí seznam (úklid řádku `<For>`).
+- **`fileChunks` je v `net/`,** ne ve formulářích: dělí jakýkoli `Blob` a s prvkem nesouvisí. Čte po částech přes `slice()`, takže velký soubor není v paměti celý. Převod na base64 jde po 32 KB, `String.fromCharCode()` s celým megabajtem argumentů by přetekl zásobník.
+
+**Zatím chybí:** převzetí pravidel z OpenRPC.
 
 ## Síť: RPC (implementováno, čeká na review)
 

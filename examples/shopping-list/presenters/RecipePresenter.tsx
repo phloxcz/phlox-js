@@ -1,5 +1,6 @@
 import { Presenter, computed } from 'phlox-js';
 import { Form, FormView, Multiplier } from 'phlox-js/forms';
+import { fileChunks } from 'phlox-js/net';
 import { t } from '../i18n';
 import { CATEGORIES, ShoppingStore } from '../model/ShoppingStore';
 
@@ -14,6 +15,7 @@ interface RecipeInput {
   name: string;
   source: { author: string; link: string };
   ingredients: Ingredient[];
+  photos: File[];
 }
 
 const UNITS = ['ks', 'g', 'kg', 'ml', 'l', 'lžíce', 'hrnek'];
@@ -43,6 +45,12 @@ export default class RecipePresenter extends Presenter {
       row.addDropDownList('category', t('edit.category'), { items: CATEGORIES, placeholder: t('list.category') });
     }, { min: 1, max: 20, label: t('recipe.ingredients') });
 
+    // Only chosen here; handleSave decides how they are sent
+    this.form.addMultiUpload('photos', t('recipe.photos'))
+      .addRule(Form.Image, t('recipe.notImage'))
+      .addRule(Form.MaxFileSize, t('recipe.tooLarge'), 5 * 1024 * 1024)
+      .addRule(Form.MaxLength, t('recipe.tooMany'), 3);
+
     this.form.setDefaults({
       name: 'Palačinky',
       ingredients: [
@@ -61,6 +69,10 @@ export default class RecipePresenter extends Presenter {
       await this.store.add(`${ingredient.name.trim()}${amount}`, ingredient.category);
     }
     this.flashMessage(t('recipe.saved', { count: values.ingredients.length, name: values.name }), 'success');
+    // The demo has no server: the photos are only read in parts, as they would go over RPC
+    let parts = 0;
+    for (const photo of values.photos) for await (const _chunk of fileChunks(photo, 256 * 1024)) parts++;
+    if (values.photos.length) this.flashMessage(t('recipe.photosSent', { count: values.photos.length, parts }));
     this.redirect('/');
   }
 
