@@ -475,6 +475,22 @@ services.add(new BootstrapTheme());              // services.ts
 - **Změna jednotlivých tříd:** `new BootstrapTheme({ formRow: 'row mb-2' })`.
 - **Ukázky** mají dole přepínač vzhledu (výchozí, Bootstrap), režimu (podle systému, světlý, tmavý) a animací, který si volbu pamatuje. Kód je v `examples/shared/appearance.tsx` a může posloužit jako vzor pro nastavení v aplikaci. Parametr `?theme=bootstrap` nebo `?theme=default` v URL má přednost.
 
+### Tlačítka
+
+Vlastní tlačítka (v `actions()` dialogu, v seznamu, v layoutu) kresli přes `<Button>`, dostanou třídy tématu:
+
+```tsx
+import { Button } from 'phlox-js';
+
+<Button onClick={() => this.close(false)}>Zrušit</Button>
+<Button primary disabled={() => this.form.submitting()} onClick={() => this.form.submit()}>Uložit</Button>
+<Button danger small onClick={event => this.handleDelete(item(), event.currentTarget)}>Smazat</Button>
+```
+
+- **Varianty:** bez volby vedlejší (Zrušit, Zavřít), `primary` hlavní akce místa, `danger` akce, která něco zničí. `small` je menší.
+- **Je to obyčejný `<button>`:** bere všechny jeho atributy a události, `type` je ve výchozím stavu `button` (ne `submit`). `class` se přidá k třídám tématu.
+- **Místa tématu:** `buttonPrimary`, `buttonSecondary`, `buttonDanger`, `buttonSmall`. V Bootstrapu `btn btn-primary`, `btn btn-outline-secondary`, `btn btn-danger`, `btn-sm`.
+
 ### Animace
 
 Animace frameworku (rozbalování stromu, uhýbání při řazení, otáčení šipek a jiné přechody) mají jeden přepínač:
@@ -509,11 +525,12 @@ services.add(new FoundationTheme());
 |---|---|
 | `form`, `formRow`, `formErrors`, `formButtons` | `<FormView>` |
 | `label`, `input`, `select`, `textarea`, `button` | prvky formuláře |
+| `buttonPrimary`, `buttonSecondary`, `buttonDanger`, `buttonSmall` | `<Button>` |
 | `invalid`, `error` | prvek s chybou, text chyby |
 | `checkbox`, `checkboxInput`, `radioList`, `checkboxList`, `choiceItem`, `choiceInput` | checkboxy a výběry |
 | `dialog`, `dialogContent`, `dialogHeader`, `dialogTitle`, `dialogClose`, `dialogBody`, `dialogFooter` | okno dialogu |
 
-Místo, které téma nemá, dostane prázdnou třídu. Vlastní prvky si mohou zavést svá místa, třeba `dropdownlist.wrapper`, a číst je přes `currentTheme().class('dropdownlist.wrapper')`.
+Místo, které téma nemá, dostane prázdnou třídu. Vlastní prvky si mohou zavést svá místa, třeba `dropdownlist.wrapper`, a číst je přes `currentTheme().class('dropdownlist.wrapper')` (`currentTheme` z `phlox-js`).
 
 ## Adaptéry: napojení jiných knihoven
 

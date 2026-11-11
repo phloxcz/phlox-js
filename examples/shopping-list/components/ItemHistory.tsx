@@ -1,4 +1,4 @@
-import { Else, For, If, Presenter, state } from 'phlox-js';
+import { Button, Else, For, If, Presenter, state } from 'phlox-js';
 import type { Route } from 'phlox-js';
 import { t } from '../i18n';
 import { ShoppingStore } from '../model/ShoppingStore';
@@ -40,7 +40,7 @@ export class ItemHistory extends Presenter<{ id: number }> {
   }
 
   override actions() {
-    return <button type="button" onClick={() => this.close()}>{t('common.close')}</button>;
+    return <Button onClick={() => this.close()}>{t('common.close')}</Button>;
   }
 
   render() {

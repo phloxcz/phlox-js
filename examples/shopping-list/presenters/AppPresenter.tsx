@@ -1,4 +1,4 @@
-import { For, Presenter, RouteFrame } from 'phlox-js';
+import { Button, For, Presenter, RouteFrame } from 'phlox-js';
 import type { Route } from 'phlox-js';
 import { locales, t, translateFramework, translator } from '../i18n';
 import { AppearanceSwitch } from '../../shared/appearance';
@@ -31,9 +31,9 @@ export class AppPresenter extends Presenter {
           <span class="languages">
             <For each={() => Object.keys(locales)}>
               {locale => (
-                <button disabled={locale === translator.locale} onClick={() => this.handleLocale(locale)}>
+                <Button small disabled={locale === translator.locale} onClick={() => this.handleLocale(locale)}>
                   {locale.toUpperCase()}
-                </button>
+                </Button>
               )}
             </For>
           </span>

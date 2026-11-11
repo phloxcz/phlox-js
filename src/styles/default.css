@@ -89,9 +89,31 @@
   cursor: pointer;
 }
 
+.phlox-button-primary {
+  color: HighlightText;
+  background: Highlight;
+  border-color: Highlight;
+}
+
+.phlox-button-danger {
+  color: #fff;
+  background: var(--phlox-error);
+  border-color: var(--phlox-error);
+}
+
 .phlox-button:disabled {
   color: GrayText;
   cursor: default;
+}
+
+.phlox-button-primary:disabled {
+  color: HighlightText;
+  opacity: .5;
+}
+
+.phlox-button-danger:disabled {
+  color: #fff;
+  opacity: .5;
 }
 
 /* Dialogs */
@@ -647,18 +669,6 @@
 }
 
 /* Messages: the look of @phloxcz/capify in the colours of the system */
-
-.phlox-button-primary {
-  color: HighlightText;
-  background: Highlight;
-  border-color: Highlight;
-}
-
-.phlox-button-danger {
-  color: #fff;
-  background: var(--phlox-error);
-  border-color: var(--phlox-error);
-}
 
 .phlox-message-text {
   line-height: 1.5;

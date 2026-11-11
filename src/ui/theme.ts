@@ -10,6 +10,7 @@ import { getScope } from '../reactive/reactive';
 export type ThemeSlot =
   | 'form' | 'formRow' | 'formErrors' | 'formButtons'
   | 'label' | 'input' | 'select' | 'textarea' | 'button' | 'error' | 'invalid'
+  | 'buttonPrimary' | 'buttonSecondary' | 'buttonDanger' | 'buttonSmall'
   | 'checkbox' | 'checkboxInput' | 'radioList' | 'checkboxList' | 'choiceItem' | 'choiceInput'
   | 'dialog' | 'dialogContent' | 'dialogHeader' | 'dialogTitle' | 'dialogClose' | 'dialogBody' | 'dialogFooter'
   | 'group' | 'legend' | 'multiplier' | 'multiplierRow' | 'multiplierHandle' | 'multiplierFields' | 'multiplierField'
@@ -28,6 +29,10 @@ const DEFAULT_CLASSES: Record<ThemeSlot, string> & Record<string, string> = {
   select: 'phlox-select',
   textarea: 'phlox-textarea',
   button: 'phlox-button',
+  buttonPrimary: 'phlox-button phlox-button-primary',
+  buttonSecondary: 'phlox-button',
+  buttonDanger: 'phlox-button phlox-button-danger',
+  buttonSmall: 'phlox-button-small',
   error: 'phlox-form-error',
   invalid: 'phlox-invalid',
   checkbox: 'phlox-checkbox',
@@ -217,6 +222,10 @@ export class BootstrapTheme extends Theme {
       select: 'form-select',
       textarea: 'form-control',
       button: 'btn btn-primary',
+      buttonPrimary: 'btn btn-primary',
+      buttonSecondary: 'btn btn-outline-secondary',
+      buttonDanger: 'btn btn-danger',
+      buttonSmall: 'btn-sm',
       error: 'invalid-feedback d-block',
       invalid: 'is-invalid',
       checkbox: 'form-check',

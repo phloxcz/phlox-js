@@ -1,4 +1,4 @@
-import { BadRequestError, Component, state } from 'phlox-js';
+import { BadRequestError, Button, Component, state } from 'phlox-js';
 import { OrderStore } from '../model/OrderStore';
 import type { Order } from '../model/OrderStore';
 
@@ -23,8 +23,8 @@ export class OrderDetail extends Component<{ id: number }, boolean> {
   override actions() {
     return (
       <>
-        <button type="button" onClick={() => this.close(false)}>Zavřít</button>
-        <button type="button" disabled={() => this.order()?.paid ?? true} onClick={() => void this.handlePaid()}>Označit zaplacenou</button>
+        <Button onClick={() => this.close(false)}>Zavřít</Button>
+        <Button primary disabled={() => this.order()?.paid ?? true} onClick={() => void this.handlePaid()}>Označit zaplacenou</Button>
       </>
     );
   }

@@ -1,4 +1,4 @@
-import { BadRequestError, Component, If } from 'phlox-js';
+import { BadRequestError, Button, Component, If } from 'phlox-js';
 import { t, translator } from '../i18n';
 import { ShoppingStore } from '../model/ShoppingStore';
 import type { Change } from '../model/ShoppingStore';
@@ -24,9 +24,9 @@ export class ChangeDetail extends Component<{ id: number; index: number }, strin
   override actions() {
     return (
       <>
-        <button type="button" onClick={() => this.close()}>{t('common.close')}</button>
+        <Button onClick={() => this.close()}>{t('common.close')}</Button>
         <If when={() => this.change.from !== null}>
-          <button type="button" onClick={() => this.handleRestore()}>{t('change.restore')}</button>
+          <Button primary onClick={() => this.handleRestore()}>{t('change.restore')}</Button>
         </If>
       </>
     );

@@ -1,4 +1,4 @@
-import { Else, For, If, Presenter, computed, state } from 'phlox-js';
+import { Button, Else, For, If, Presenter, computed, state } from 'phlox-js';
 import type { Route } from 'phlox-js';
 import { Form, FormTag, Input, InputError } from 'phlox-js/forms';
 import { t } from '../i18n';
@@ -89,7 +89,7 @@ export class ListPresenter extends Presenter {
                   <span class="category">
                     {() => [CATEGORIES.find(([id]) => id === item().category)?.[1], item().shop, ...item().labels].filter(Boolean).join(' · ')}
                   </span>
-                  <button onClick={event => this.handleDelete(item(), event.currentTarget)}>{t('list.delete')}</button>
+                  <Button danger small onClick={event => this.handleDelete(item(), event.currentTarget)}>{t('list.delete')}</Button>
                 </li>
               )}
             </For>

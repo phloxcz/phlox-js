@@ -1,4 +1,4 @@
-import { BadRequestError, Presenter } from 'phlox-js';
+import { BadRequestError, Button, Presenter } from 'phlox-js';
 import type { Route } from 'phlox-js';
 import { Form, FormTag, Input, InputError, Label } from 'phlox-js/forms';
 import { t } from '../i18n';
@@ -75,10 +75,10 @@ export class ItemEdit extends Presenter<{ id: number }, boolean> {
   override actions() {
     return (
       <>
-        <button type="button" onClick={() => this.close(false)}>{t('common.cancel')}</button>
-        <button type="button" disabled={() => this.form.submitting()} onClick={() => this.form.submit()}>
+        <Button onClick={() => this.close(false)}>{t('common.cancel')}</Button>
+        <Button primary disabled={() => this.form.submitting()} onClick={() => this.form.submit()}>
           {t('common.save')}
-        </button>
+        </Button>
       </>
     );
   }
