@@ -21,3 +21,36 @@ form [hidden] {
 .phlox-dialog footer:empty {
   display: none;
 }
+
+/* DropDownList – the same layout as phloxcz/forms-dropdownlist, for every theme */
+
+.dropdownlist-wrapper {
+  position: relative;
+}
+
+.dropdownlist-dropdown,
+[data-dropdownlist-panel] {
+  z-index: 1060;
+  padding: 0;
+  overflow: visible;
+}
+
+.dropdownlist-list {
+  list-style: none;
+  margin: 0;
+  padding: 4px 0;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+/* Bootstrap's form-select has its own chevron, ours is not needed */
+.dropdownlist-bs-trigger .dropdownlist-trigger-arrow {
+  display: none;
+}
+
+/* Bootstrap in dark mode: our filter row and field are not styled by Bootstrap itself */
+[data-bs-theme="dark"] .dropdownlist-filter-input {
+  background-color: var(--bs-body-bg);
+  border-color: var(--bs-border-color);
+  color: var(--bs-body-color);
+}

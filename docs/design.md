@@ -257,6 +257,16 @@ Přebírá se princip z Nette, ne kód z TraceJS: `User`, `Identity`, abstraktn�
 - **`<form noValidate>`:** pravidla kontroluje formulář sám, bubliny prohlížeče by se s ním tloukly. Atribut `required` u prvků zůstává kvůli čtečkám obrazovky.
 - **Rozšiřitelnost:** vlastní prvek je potomek `FormControl<T>` přidaný přes `addControl()`. Na tom budou stát combobox, dropdownlist a taginput, přepsané podle `phlox-combobox` a dalších (stejné CSS třídy, ovládání a ARIA, data přes funkci místo URL).
 
+**DropDownList** (`forms/dropdownlist.tsx`, testy `tests/dropdownlist.test.tsx`) je přepsaný podle `phlox-dropdownlist`: stejné HTML, třídy obou témat, CSS a ovládání klávesnicí. Rozdíly a důvody:
+
+- **Data:** místo URL dostane `items` nebo funkci `search` (typicky RPC) a pro popisek uložené hodnoty `label`. Server tak nemusí mít signál pro každý výběr.
+- **Navíc `aria-activedescendant`, `aria-controls` a `aria-selected`,** aby čtečka obrazovky hlásila zvýrazněnou položku.
+- **Panel `position: fixed`** podle tlačítka, ne `absolute`: modální `<dialog>` má `overflow: auto` a panel by ořízl. Ověřeno v prohlížeči.
+- **Otočení nahoru** (přání autora): strana se volí podle plné výšky seznamu, ne podle právě zobrazených položek, takže panel při psaní neskáče. Nahoře je panel ukotvený spodním okrajem (`bottom`), aby zůstal u tlačítka, když se seznam zkrátí. Když se nevejde nikam, zkrátí se seznam. Výška musí počítat i s odsazením a okrajem seznamu, jinak panel přesahoval okno o pár pixelů. To ukázalo až měření v prohlížeči.
+- **Hledání v pevných položkách bez ohledu na diakritiku** (`foldText`). Odhalilo to ověření v prohlížeči: „nap“ nenašlo „Nápoje“.
+- **Zavírání a kontrola podle `focusout` celého prvku,** ne podle `blur` tlačítka. Jinak by se při otevření seznamu hned ukázala chyba povinného pole.
+- **Výchozí texty anglicky** jako hlášky pravidel, PHP verze má česky.
+
 **Zatím chybí:** vnořené kontejnery (`addContainer()`) pro DTO s objekty a seznamy, nahrávání souborů a převzetí pravidel z OpenRPC.
 
 ## Síť: RPC (implementováno, čeká na review)

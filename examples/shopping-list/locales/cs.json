@@ -15,7 +15,8 @@
       "other": "Zbývá koupit {count} položek"
     },
     "confirmDelete": "Opravdu smazat „{name}“?",
-    "deleted": "Položka „{name}“ byla smazána."
+    "deleted": "Položka „{name}“ byla smazána.",
+    "category": "Kategorie"
   },
   "edit": {
     "title": "Úprava položky",
@@ -24,7 +25,8 @@
     "tooLong": "Název může mít nejvýš %d znaků.",
     "saved": "Uloženo.",
     "missing": "Položka {id} neexistuje.",
-    "history": "Historie změn názvu"
+    "history": "Historie změn názvu",
+    "category": "Kategorie"
   },
   "confirm": {
     "title": "Potvrzení",
@@ -54,5 +56,9 @@
     "restore": "Vrátit původní název",
     "restored": "Název vrácen na „{name}“.",
     "missing": "Taková změna neexistuje."
+  },
+  "dropdownlist": {
+    "noResults": "Žádné výsledky",
+    "search": "Vyhledat…"
   }
 }

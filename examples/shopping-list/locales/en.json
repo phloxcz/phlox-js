@@ -15,7 +15,8 @@
       "other": "{count} items left to buy"
     },
     "confirmDelete": "Really delete “{name}”?",
-    "deleted": "Item “{name}” was deleted."
+    "deleted": "Item “{name}” was deleted.",
+    "category": "Category"
   },
   "edit": {
     "title": "Edit item",
@@ -24,7 +25,8 @@
     "tooLong": "The name can have at most %d characters.",
     "saved": "Saved.",
     "missing": "Item {id} does not exist.",
-    "history": "History of the name"
+    "history": "History of the name",
+    "category": "Category"
   },
   "confirm": {
     "title": "Confirmation",
@@ -54,5 +56,9 @@
     "restore": "Restore the previous name",
     "restored": "The name was restored to “{name}”.",
     "missing": "No such change."
+  },
+  "dropdownlist": {
+    "noResults": "No results",
+    "search": "Search…"
   }
 }

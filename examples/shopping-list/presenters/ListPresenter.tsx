@@ -3,6 +3,7 @@ import type { Route } from 'phlox-js';
 import { Form, FormTag, Input, InputError } from 'phlox-js/forms';
 import { t } from '../i18n';
 import { ShoppingStore } from '../model/ShoppingStore';
+import { CATEGORIES } from '../model/ShoppingStore';
 import type { Item } from '../model/ShoppingStore';
 import { Confirm } from '../components/Confirm';
 import { ItemEdit } from '../components/ItemEdit';
@@ -10,7 +11,7 @@ import { ItemEdit } from '../components/ItemEdit';
 export class ListPresenter extends Presenter {
   items = state<Item[]>([]);
   remaining = computed(() => this.items().filter(item => !item.done).length);
-  addForm = new Form<{ name: string }>();
+  addForm = new Form<{ name: string; category: number | null }>();
 
   override routes: Route[] = [
     { name: 'default', pattern: '/' },
@@ -30,8 +31,10 @@ export class ListPresenter extends Presenter {
   constructor(private store: ShoppingStore) {
     super();
     this.addForm.addText('name').setRequired(t('list.required'));
+    // Fixed items, filtered in the browser
+    this.addForm.addDropDownList('category', '', { items: CATEGORIES, placeholder: t('list.category') });
     this.addForm.addSubmit('add', t('list.add'));
-    this.addForm.onSuccess = values => this.handleAdd(values.name);
+    this.addForm.onSuccess = values => this.handleAdd(values.name, values.category);
   }
 
   /** In startup and not in an action, the list must be there after a direct link to the dialog as well. */
@@ -43,8 +46,8 @@ export class ListPresenter extends Presenter {
     this.items.set(await this.store.list());
   }
 
-  async handleAdd(name: string) {
-    await this.store.add(name.trim());
+  async handleAdd(name: string, category: number | null) {
+    await this.store.add(name.trim(), category);
     this.addForm.reset();
     await this.reload();
   }
@@ -67,6 +70,7 @@ export class ListPresenter extends Presenter {
       <section>
         <FormTag form={this.addForm} class="add">
           <Input control={this.addForm.get('name')} placeholder={t('list.placeholder')} />
+          <Input control={this.addForm.get('category')} />
           <Input control={this.addForm.getButton('add')} />
         </FormTag>
         <InputError control={this.addForm.get('name')} />
@@ -82,6 +86,7 @@ export class ListPresenter extends Presenter {
                     onChange={event => this.handleToggle(item().id, event.currentTarget.checked)}
                   />
                   <a href={this.link('edit', { id: item().id })}>{() => item().name}</a>
+                  <span class="category">{() => CATEGORIES.find(([id]) => id === item().category)?.[1] ?? ''}</span>
                   <button onClick={() => this.handleDelete(item())}>{t('list.delete')}</button>
                 </li>
               )}

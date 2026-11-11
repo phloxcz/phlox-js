@@ -1,6 +1,6 @@
 import { For, Presenter, RouteFrame } from 'phlox-js';
 import type { Route } from 'phlox-js';
-import { locales, t, translator } from '../i18n';
+import { locales, t, translateFramework, translator } from '../i18n';
 import { ListPresenter } from './ListPresenter';
 
 /** The layout: navigation and the place for the presenter of the current route. Flash messages are shown by capify, see services.ts. */
@@ -14,6 +14,7 @@ export class AppPresenter extends Presenter {
   /** The texts already shown stay in the old language, so the whole tree is built again. */
   handleLocale(locale: string): void {
     translator.setLocale(locale, locales[locale]!);
+    translateFramework();
     document.documentElement.lang = locale;
     void this.app.restart();
   }

@@ -7,6 +7,7 @@ import { ItemHistory } from './ItemHistory';
 
 interface ItemInput {
   name: string;
+  category: number | null;
 }
 
 /**
@@ -32,6 +33,12 @@ export class ItemEdit extends Presenter<{ id: number }, boolean> {
     this.form.addText('name', t('edit.name'))
       .setRequired(t('edit.required'))
       .addRule(Form.MaxLength, t('edit.tooLong'), 40);
+    // Items searched like on a server, the label of the saved value comes from categoryName()
+    this.form.addDropDownList('category', t('edit.category'), {
+      search: query => this.store.searchCategories(query),
+      label: id => this.store.categoryName(id),
+      placeholder: t('list.category'),
+    });
     this.form.onSuccess = values => this.handleSave(values);
   }
 
@@ -42,7 +49,7 @@ export class ItemEdit extends Presenter<{ id: number }, boolean> {
   async loadName() {
     const item = await this.store.get(this.props.id);
     if (!item) throw new BadRequestError(404, t('edit.missing', { id: String(this.props.id) }));
-    this.form.setDefaults({ name: item.name });
+    this.form.setDefaults({ name: item.name, category: item.category });
   }
 
   override title() {
@@ -62,16 +69,18 @@ export class ItemEdit extends Presenter<{ id: number }, boolean> {
   }
 
   async handleSave(values: ItemInput) {
-    await this.store.update(this.props.id, { name: values.name.trim() });
+    await this.store.update(this.props.id, { name: values.name.trim(), category: values.category });
     this.close(true);
   }
 
   render() {
     const name = this.form.get('name');
+    const category = this.form.get('category');
     return (
       <div>
         <FormTag form={this.form}>
-          <Label control={name} /> <Input control={name} /> <InputError control={name} />
+          <p><Label control={name} /> <Input control={name} /> <InputError control={name} /></p>
+          <p><Label control={category} /> <Input control={category} /></p>
         </FormTag>
         <p><a href={this.link('history')}>{t('edit.history')}</a></p>
       </div>

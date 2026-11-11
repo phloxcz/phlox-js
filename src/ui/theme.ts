@@ -16,7 +16,7 @@ export type ThemeSlot =
 export type ThemeClasses = Partial<Record<ThemeSlot, string>> & Record<string, string>;
 
 /** Classes of the default theme. Their look is in styles/default.css and uses only system colors. */
-const DEFAULT_CLASSES: Record<ThemeSlot, string> = {
+const DEFAULT_CLASSES: Record<ThemeSlot, string> & Record<string, string> = {
   form: 'phlox-form',
   formRow: 'phlox-form-row',
   formErrors: 'phlox-form-errors',
@@ -41,6 +41,17 @@ const DEFAULT_CLASSES: Record<ThemeSlot, string> = {
   dialogClose: 'phlox-dialog-close',
   dialogBody: 'phlox-dialog-body',
   dialogFooter: 'phlox-dialog-footer',
+  // The same classes as phloxcz/forms-dropdownlist, so both look the same
+  'dropdownlist.wrapper': 'dropdownlist-wrapper',
+  'dropdownlist.trigger': 'dropdownlist-trigger',
+  'dropdownlist.dropdown': 'dropdownlist-dropdown',
+  'dropdownlist.filterRow': 'dropdownlist-filter',
+  'dropdownlist.filterInput': 'dropdownlist-filter-input',
+  'dropdownlist.item': '',
+  'dropdownlist.itemActive': 'dropdownlist-active',
+  'dropdownlist.itemSelected': 'dropdownlist-selected',
+  'dropdownlist.noResults': 'dropdownlist-no-results',
+  'dropdownlist.mark': '',
 };
 
 /** Key under which the application provides its theme to everything it renders. */
@@ -94,6 +105,17 @@ export class BootstrapTheme extends Theme {
       dialogClose: 'btn-close',
       dialogBody: 'p-3',
       dialogFooter: 'd-flex justify-content-end gap-2 px-3 py-2 border-top',
+      // The same as THEME_BOOTSTRAP of phloxcz/forms-dropdownlist
+      'dropdownlist.wrapper': 'dropdownlist-wrapper position-relative',
+      'dropdownlist.trigger': 'form-select text-start dropdownlist-bs-trigger',
+      'dropdownlist.dropdown': 'dropdown-menu py-0',
+      'dropdownlist.filterRow': 'p-3',
+      'dropdownlist.filterInput': 'form-control form-control-sm',
+      'dropdownlist.item': 'dropdown-item',
+      'dropdownlist.itemActive': 'active',
+      'dropdownlist.itemSelected': 'fw-semibold',
+      'dropdownlist.noResults': 'dropdown-item disabled text-muted fst-italic',
+      'dropdownlist.mark': 'fw-bold bg-transparent p-0',
     }, overrides);
   }
 }

@@ -6,6 +6,8 @@ import {
   Checkbox, CheckboxList, FormControl, HiddenField, MultiSelectBox, RadioList, SelectBox, SubmitButton, TextArea, TextInput,
 } from './controls';
 import type { Items } from './controls';
+import { DropDownList } from './dropdownlist';
+import type { DropDownListOptions } from './dropdownlist';
 import { messages, validators } from './rules';
 import type { Validator } from './rules';
 
@@ -124,6 +126,13 @@ export class Form<V extends object = Record<string, any>> {
 
   addCheckboxList<K extends ListKeys<V>>(name: K, label = '', items: Items<ItemOf<V[K]>> = []): CheckboxList<ItemOf<V[K]>> {
     return this.addControl(name, new CheckboxList<ItemOf<V[K]>>(label, items));
+  }
+
+  /** A select with a search field, see DropDownList. Items are fixed, or come from `search`. */
+  addDropDownList<K extends keyof V & string>(
+    name: K, label = '', options: DropDownListOptions<NonNullable<V[K]>> = {},
+  ): DropDownList<NonNullable<V[K]>> {
+    return this.addControl(name, new DropDownList<NonNullable<V[K]>>(label, options));
   }
 
   addHidden(name: KeysFor<V, string>, value = ''): HiddenField {

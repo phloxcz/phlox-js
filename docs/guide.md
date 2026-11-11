@@ -731,6 +731,7 @@ class TaskCreatePresenter extends Presenter {
 | `addCheckbox(name, caption)` | `true` / `false` |
 | `addSelect`, `addRadioList` | jedna z hodnot položek nebo `null` |
 | `addMultiSelect`, `addCheckboxList` | pole hodnot položek |
+| `addDropDownList(name, label, options)` | jedna z hodnot položek nebo `null`, výběr s hledáním (viz DropDownList) |
 | `addHidden(name, value)` | text |
 | `addSubmit(name, caption)` | tlačítko, mezi hodnotami není |
 
@@ -811,6 +812,31 @@ const name = this.form.get('name');
 - **Přístupnost:** chybné pole má `aria-invalid` a `aria-describedby` vede na text chyby.
 - **Checkbox** se vykresluje uvnitř svého `<label>`, jako v Nette.
 - **Třídy dává téma** (viz Vzhled a témata). Třída předaná do `<Input>` se přidá k třídě tématu, u tlačítka ji nahradí: `<Input control={cancel} class="btn btn-secondary" />`.
+
+### DropDownList
+
+Výběr s vyhledávacím polem, převzatý z [phloxcz/forms-dropdownlist](https://github.com/phloxcz/forms-dropdownlist). Má stejné HTML, třídy a ovládání, takže vypadá stejně jako jeho serverová verze v Nette.
+
+```ts
+// Pevné položky, hledá se v prohlížeči
+form.addDropDownList('category', 'Kategorie:', { items: categories, placeholder: 'Vyberte' });
+
+// Položky ze serveru
+form.addDropDownList('assignee', 'Řešitel:', {
+  search: text => this.api.call('user.search', { text }),   // vrátí [[id, jméno], ...]
+  label: id => this.api.call('user.name', { id }),          // popisek uložené hodnoty
+}).setRequired('Vyberte řešitele.');
+```
+
+- **`items`** jsou pevné položky ve stejném tvaru jako u `addSelect`, filtrují se v prohlížeči.
+- **`search`** se zavolá s `''` při otevření a pak s textem z vyhledávacího pole, 250 ms po posledním stisku. Starší odpověď nikdy nepřepíše novější.
+- **`label`** zjistí popisek hodnoty nastavené z kódu (`setDefaults`), když hodnota není mezi položkami. V Nette ho dodává server při vykreslení.
+- **Hledání nerozlišuje velikost písmen ani diakritiku:** „nap“ najde „Nápoje“ a zvýrazní „Náp“. Pro vlastní hledání na serveru je k dispozici `foldText()`.
+- **Klávesnice:** šipka dolů seznam otevře, šipky vybírají, Enter a Tab potvrdí, Escape zavře jen seznam, ne dialog kolem něj. Klik mimo seznam ho zavře.
+- **Kontrola** proběhne, až fokus opustí celý prvek, ne už při otevření seznamu.
+- **Texty** jsou anglicky, přelož je jednou při startu: `DropDownList.texts.noResults = t('...')`, `DropDownList.texts.filterPlaceholder`.
+- **Panel se otevře pod tlačítkem, nebo nad ním,** když se dolů celý seznam nevejde a nahoře je víc místa. Když se nevejde nikam, seznam se zkrátí. Je umístěný `fixed`, takže ho dialog ani posuvný kontejner neořízne. Stranu ukazuje atribut `data-placement` (`bottom`, `top`).
+- **Vzhled** dodává téma: místa `dropdownlist.wrapper`, `dropdownlist.trigger`, `dropdownlist.dropdown`, `dropdownlist.item`... CSS je v `base.css` a `default.css`.
 
 ### Vlastní prvek
 

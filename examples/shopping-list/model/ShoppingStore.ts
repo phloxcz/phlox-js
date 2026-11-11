@@ -1,8 +1,19 @@
+import { foldText } from 'phlox-js/forms';
+
 export interface Item {
   id: number;
   name: string;
   done: boolean;
+  category: number | null;
 }
+
+/** Categories of items. In a real application they would be a table on the server. */
+export const CATEGORIES: [number, string][] = [
+  [1, 'Pečivo'], [2, 'Mléčné výrobky'], [3, 'Ovoce a zelenina'], [4, 'Maso a uzeniny'],
+  [5, 'Nápoje'], [6, 'Drogerie'], [7, 'Sladkosti'], [8, 'Mražené'],
+];
+
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 /** One change of the name of an item. `from` is null for the name it was created with. */
 export interface Change {
@@ -35,21 +46,21 @@ export class ShoppingStore {
   }
 
   async list(): Promise<Item[]> {
-    return this.data.items.map(item => ({ ...item }));
+    return this.data.items.map(item => ({ ...item, category: item.category ?? null }));
   }
 
   async get(id: number): Promise<Item | null> {
     const item = this.data.items.find(other => other.id === id);
-    return item ? { ...item } : null;
+    return item ? { ...item, category: item.category ?? null } : null;
   }
 
   async changes(id: number): Promise<Change[]> {
     return (this.data.changes[id] ?? []).map(change => ({ ...change }));
   }
 
-  async add(name: string): Promise<void> {
+  async add(name: string, category: number | null = null): Promise<void> {
     const id = ++this.data.lastId;
-    this.data.items.push({ id, name, done: false });
+    this.data.items.push({ id, name, done: false, category });
     this.data.changes[id] = [{ at: new Date().toISOString(), from: null, to: name }];
     this.save();
   }
@@ -63,6 +74,18 @@ export class ShoppingStore {
       return { ...item, ...changes };
     });
     this.save();
+  }
+
+  /** Like a search on the server: it takes a while and returns only what matches. */
+  async searchCategories(query: string): Promise<[number, string][]> {
+    await delay(200);
+    const folded = foldText(query);
+    return CATEGORIES.filter(([, name]) => foldText(name).includes(folded));
+  }
+
+  async categoryName(id: number): Promise<string | null> {
+    await delay(100);
+    return CATEGORIES.find(([key]) => key === id)?.[1] ?? null;
   }
 
   async remove(id: number): Promise<void> {
