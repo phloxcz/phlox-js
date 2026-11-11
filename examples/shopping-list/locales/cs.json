@@ -121,5 +121,16 @@
     "browseMultiple": "Vybrat soubory",
     "browseSingle": "Vybrat soubor",
     "remove": "Odebrat %s"
+  },
+  "appearance": {
+    "theme": "Vzhled",
+    "default": "výchozí",
+    "scheme": "Režim",
+    "system": "podle systému",
+    "light": "světlý",
+    "dark": "tmavý",
+    "motion": "Animace",
+    "on": "zapnuté",
+    "off": "vypnuté"
   }
 }

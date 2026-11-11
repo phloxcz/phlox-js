@@ -1,6 +1,7 @@
 import { For, Presenter, RouteFrame } from 'phlox-js';
 import type { Route } from 'phlox-js';
 import { locales, t, translateFramework, translator } from '../i18n';
+import { AppearanceSwitch } from '../../shared/appearance';
 import { ListPresenter } from './ListPresenter';
 
 /** The layout: navigation and the place for the presenter of the current route. Flash messages are shown by capify, see services.ts. */
@@ -39,6 +40,14 @@ export class AppPresenter extends Presenter {
         </nav>
 
         <RouteFrame />
+
+        <footer>
+          <AppearanceSwitch texts={{
+            theme: t('appearance.theme'), default: t('appearance.default'), bootstrap: 'Bootstrap',
+            scheme: t('appearance.scheme'), system: t('appearance.system'), light: t('appearance.light'), dark: t('appearance.dark'),
+            motion: t('appearance.motion'), on: t('appearance.on'), off: t('appearance.off'),
+          }} />
+        </footer>
       </div>
     );
   }

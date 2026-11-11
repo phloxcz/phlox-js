@@ -121,5 +121,16 @@
     "browseMultiple": "Choose files",
     "browseSingle": "Choose a file",
     "remove": "Remove %s"
+  },
+  "appearance": {
+    "theme": "Theme",
+    "default": "default",
+    "scheme": "Mode",
+    "system": "as the system",
+    "light": "light",
+    "dark": "dark",
+    "motion": "Animations",
+    "on": "on",
+    "off": "off"
   }
 }

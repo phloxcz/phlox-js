@@ -100,6 +100,14 @@ const DEFAULT_CLASSES: Record<ThemeSlot, string> & Record<string, string> = {
   'upload.cellSize': 'phlox-upload-size',
   'upload.cellRemove': 'phlox-upload-remove-cell',
   'upload.remove': 'phlox-upload-remove',
+  // Parts of phloxcz/components-tree; its own classes pt-* are there in every theme
+  'tree.root': '',
+  'tree.row': '',
+  'tree.rowSelected': '',
+  'tree.toggle': '',
+  'tree.label': '',
+  'tree.pick': '',
+  treeselect: 'phlox-treeselect-box',
 };
 
 /** Key under which the application provides its theme to everything it renders. */
@@ -210,6 +218,15 @@ export class BootstrapTheme extends Theme {
       'upload.cellSize': 'text-end text-nowrap text-body-secondary small',
       'upload.cellRemove': 'text-end',
       'upload.remove': 'btn btn-sm btn-link text-danger p-0 lh-1',
+      // The Bootstrap theme of phloxcz/components-tree
+      'tree.root': '',
+      'tree.row': '',
+      'tree.rowSelected': 'active',
+      'tree.toggle': 'btn btn-sm btn-link p-0 border-0 text-reset text-decoration-none',
+      'tree.label': '',
+      // Bootstrap's own look of a checkbox and a radio button, which follows data-bs-theme
+      'tree.pick': 'form-check-input mt-0',
+      treeselect: 'border rounded p-1',
     }, overrides);
   }
 }

@@ -15,6 +15,7 @@ Adresáře `src/` odpovídají jmenným prostorům Nette:
 | `di/` | `Container`, Vite plugin pro autowiring | `Nette\DI` |
 | `localization/` | `Translator`, `IntlTranslator` | `Nette\Localization` |
 | `forms/` | `Form`, prvky, pravidla, vykreslení | `Nette\Forms` |
+| `components/` | samostatné widgety: `Tree`, později grid a kanban | |
 | `adapters/` | napojení cizích knihoven: `adapters/capify` (flash zprávy přes `@phloxcz/capify`), později `adapters/kendo` | |
 | `net/` | RPC klient a generátor typů | |
 | `security/` | `User`, `Identity`, `Permission` | `Nette\Security` |
@@ -22,7 +23,9 @@ Adresáře `src/` odpovídají jmenným prostorům Nette:
 - **Šablony jsou v `ui/`,** ne zvlášť jako obdoba Latte. Jsou s komponentami těsně propojené (rozhodl autor).
 - **Flash zprávy:** `flashMessage()` je metoda presenteru jako v Nette, služba, která zprávy drží, patří k aplikaci.
 
-**Importy:** `phlox-js` dává to, co potřebuje každá obrazovka (reaktivita, šablony, komponenty, presentery, aplikace, DI). Volitelné části mají vlastní vstup: `phlox-js/net`, `phlox-js/security`, `phlox-js/forms`, `phlox-js/localization`, `phlox-js/vite` a adaptéry (`phlox-js/adapters/capify`, později `phlox-js/adapters/kendo`).
+**Importy:** `phlox-js` dává to, co potřebuje každá obrazovka (reaktivita, šablony, komponenty, presentery, aplikace, DI). Volitelné části mají vlastní vstup: `phlox-js/net`, `phlox-js/security`, `phlox-js/forms`, `phlox-js/components`, `phlox-js/localization`, `phlox-js/vite` a adaptéry (`phlox-js/adapters/capify`, později `phlox-js/adapters/kendo`).
+
+**`components/`** (rozhodl autor): velké volitelné widgety jako strom, později grid podle `phlox-grid` a kanban. Název odpovídá PHP knihovnám `phloxcz/components-*`. Do `ui/` nepatří, protože to je jádro, které importuje každá obrazovka, a do `forms/` taky ne, protože to nejsou formulářové prvky. Formulářové prvky postavené na nich (`addTreeSelect`) jsou ve `forms/` a widget si berou z `components/`. Pro projekty s licencí Kendo zůstane `phlox-js/adapters/kendo`.
 
 ## Vzhled a témata (rozhodnuto)
 
@@ -33,6 +36,19 @@ Vlastní CSS framework ani pevná vazba na Bootstrap. Postup je stejný jako u `
 - **CSS:** `styles/base.css` (rozložení pro každé téma) a `styles/default.css` (vzhled výchozího tématu). Systémové barvy následují `color-scheme` stránky, takže výchozí téma ztmavne, jen když stránka tmavý režim povolí. Barva chyby proto používá `light-dark()`, ne `prefers-color-scheme`: na světlé stránce v tmavém systému by byla nečitelná.
 - **Bootstrap a nativní `<dialog>`:** třídy `modal-content`, `modal-header`... berou barvy a odsazení z proměnných, které Bootstrap definuje jen na obalu `.modal`. Ten u `<dialog>` být nemůže (dělá vlastní pozicování), a okno pak nemělo pozadí. Téma proto používá utility (`bg-body`, `p-3`, `border-bottom`...), které na ničem nezávisí. Ověřeno snímky z prohlížeče.
 - **Třída předaná do `<Input>`** se přidá k třídě tématu, u tlačítka ji nahradí (jinak by `btn-primary` a `btn-secondary` platily naráz).
+
+### Animace (implementováno, čeká na review)
+
+`ui/motion.ts`, testy `tests/motion.test.tsx`. Přání autora: jeden třístavový přepínač pro všechny prvky, i budoucí.
+
+- **`setMotion('on' | 'off' | 'system')`, výchozí `'system'`.** Globální stav, ne služba v kontejneru: animace jsou vlastnost stránky pro uživatele, ne jedné aplikace, a CSS stejně potřebuje atribut na `<html>`. Volbu ukládá aplikace, framework nic neukládá.
+- **JS se ptá `allowsMotion()`,** CSS násobí délku proměnnou `--phlox-motion` (1 nebo 0). Jedna konvence pro oba světy: nový prvek ji dodrží a přepínač platí i pro něj bez úprav. `--phlox-motion` počítá `base.css` z atributu `data-phlox-motion` a z media query `prefers-reduced-motion`, takže `'system'` funguje i bez JS.
+- **`'on'` přebije i systém,** jen pro animace frameworku. Bootstrap si omezení pohybu hlídá sám a do jeho přechodů framework nesahá.
+- **Kolečko načítání se točí vždy:** je to ukazatel stavu, ne ozdoba. Proto se nenásobí.
+
+### Tmavý režim s Bootstrapem
+
+Ověření autora ukázalo černá tlačítka rozbalení ve stromu na světlé Bootstrap stránce v tmavém systému. CSS převzaté z `phlox-tree` používá systémovou barvu `Canvas`, která se řídí `color-scheme`, ne `data-bs-theme`. Části v `base.css`, které kreslí pozadí, proto berou `var(--bs-body-bg, Canvas)`: s Bootstrapem jeho barvu, ve výchozím tématu systémovou. Zaškrtávátka výběru ze stromu dostávají v Bootstrapu `form-check-input` (místo tématu `tree.pick`). Stránka má mít `color-scheme` shodné s `data-bs-theme`, ukázky to nastavují v `examples/shared/appearance.tsx`.
 
 ## Adaptéry (rozhodnuto)
 
@@ -327,7 +343,45 @@ Přebírá se princip z Nette, ne kód z TraceJS: `User`, `Identity`, abstraktn�
 - **Náhled obrázku přes `URL.createObjectURL`,** adresa se uvolní, když soubor opustí seznam (úklid řádku `<For>`).
 - **`fileChunks` je v `net/`,** ne ve formulářích: dělí jakýkoli `Blob` a s prvkem nesouvisí. Čte po částech přes `slice()`, takže velký soubor není v paměti celý. Převod na base64 jde po 32 KB, `String.fromCharCode()` s celým megabajtem argumentů by přetekl zásobník.
 
+### Rozbalovací výběr ze stromu (implementováno, čeká na review)
+
+`forms/dropdowntree.tsx`, testy v `tests/tree.test.tsx`. Přání autora: zavřený ukazuje cestu k uzlu, otevřený strom jako dropdownlist.
+
+- **Vzhled a panel dropdownlistu:** stejné třídy tématu a `placePanel` (umístění `fixed`, otočení nahoru). Ve sbaleném stavu vypadá jako ostatní výběry ve formuláři.
+- **Strom v režimu výběru, ne zaškrtávání:** `tree.selected` je hodnota a `onSelect` panel zavře. Klávesnice stromu tak funguje i v panelu bez úprav.
+- **Cesta je `computed` nad stavem stromu,** takže sleduje i `reload()` a přejmenování. Když uzel ve stromu není, prvek si ho najde přes `reveal()` (`path`). Hledání běží v `effect` při vykreslení, ne v `setValue`, aby fungovalo i po `reload()`.
+- **Vymazání křížkem a klávesou Delete** jen u nepovinného prvku. Dropdownlist k tomu má prázdnou položku, strom žádnou „prázdnou“ větev nemá.
+- **Jen jeden uzel.** Více uzlů v rozbalovacím panelu by potřebovalo v tlačítku ukázat několik cest, na to je lepší strom přímo ve formuláři (`addTreeMultiSelect`).
+
+### Výběr ze stromu (implementováno, čeká na review)
+
+`forms/treeselect.tsx`, testy v `tests/tree.test.tsx`. Jako picker `phloxcz/components-tree` (`setSelectable`): strom přímo ve formuláři s přepínači nebo zaškrtávátky, ne rozbalovací seznam.
+
+- **Hodnota je id** (`addTreeSelect`) nebo pole id (`addTreeMultiSelect`), typ podle DTO. Zaškrtnutí jsou nezávislá jako v PHP: rodič neznamená děti.
+- **Prvek drží vlastní `Tree` v režimu `pick`.** Strom tak umí všechno co jinde (líné načítání, `path`, klávesnice) a `checked` stromu je hodnota prvku.
+- **Klik kamkoli na řádek** zaškrtne, jako v PHP. Větší plocha pro klik.
+- **Vybrané uzly hluboko v líném stromu** se ukážou přes `path`, jako `setCheckedNodes` v PHP.
+- **Fokus po chybě** jde na `role="tree"` a ten ho předá vybranému nebo prvnímu uzlu.
+
 **Zatím chybí:** převzetí pravidel z OpenRPC.
+
+## Strom (implementováno, čeká na review)
+
+`components/tree.ts` (model), `components/treeview.tsx` (vykreslení), `ui/drag.ts` (společný základ tažení), testy `tests/tree.test.tsx`, ukázka `examples/tree`. Podle `phloxcz/components-tree`: stejné HTML, třídy `pt-*`, CSS bez pevných barev, Bootstrap mapa a chování (líné načítání, čáry, pamatování rozbalení, přetahování před, za a dovnitř, návrat po chybě, picker).
+
+- **Model a vykreslení zvlášť** jako `Form` a `FormView`. Presenter volá `tree.select(id)` z akce, formulář drží vlastní strom a test pracuje s modelem bez DOM.
+- **Data přes funkce** `load(parent)` a `path(id)`, ne přes URL signálů. Stejně jako `search` u dropdownlistu: strom nezávisí na serveru a volá RPC, REST nebo cokoli.
+- **Výběr podle URL dělá router, ne strom.** PHP verze čte id z URL sama (`setUrlParam`, `setUrlPattern`) a napojuje se na Naja kvůli Zpět a Vpřed. Tady má popisek `href`, akce presenteru volá `tree.select(id)` a o Zpět a Vpřed se postará router. `select()` z kódu nevolá `onSelect`, jinak by výběr z URL znovu navigoval.
+- **Stav je reaktivní** (`expanded`, `children`, `parent` každého uzlu). Přesun je změna dat a šablona se překreslí sama. Návrat po chybě znamená jen vrátit uzel v datech, PHP verze musela obnovit DOM včetně ikon a přechodů mezi listem a větví. Proto je kód asi o polovinu kratší.
+- **Sbalené děti nejsou v DOM** (PHP je skrývá přes `display: none`). Velký rozbalovaný strom tak nedrží tisíce skrytých prvků.
+- **Animace výšky přes `Element.animate`** (přání autora). Při sbalení děti zůstanou v DOM, dokud animace neskončí, a teprve pak zmizí. Přerušená animace se zastaví a nová jede z dosažené výšky: ověření v prohlížeči ukázalo, že jinak běžely dvě najednou. Délka je z `--pt-anim-duration` jako v PHP, `prefers-reduced-motion` ji vypne a první vykreslení se neanimuje (obnovené rozbalení by jinak při načtení stránky „naskakovalo“).
+- **Klávesnice podle WAI-ARIA:** jedna zastávka tabulátoru (roving tabindex), šipky, Home, End, `*` a psaní pro skok na uzel. PHP verze má `tabindex="0"` u každého uzlu, takže se tabulátorem prochází celý strom.
+- **Tažení přes pointer events,** ne HTML5 drag & drop jako v PHP, ze stejných důvodů jako `dragToSort`: jde stylovat a běží i perem. Kopie řádku jede vedle ukazatele, ne přes něj: ověření v prohlížeči ukázalo, že kopie přímo pod ukazatelem zakryje cílový řádek i ukazatel místa. Tažení začne až po posunu o 4 px, aby klik zůstal klikem, a klik po puštění se zahodí, aby nevybral uzel pod ukazatelem.
+- **Prstem po podržení** (přání autora). Strom nemá úchyt a `touch-action: none` na řádcích by zablokovalo posouvání stránky tahem přes strom. Prst proto musí 0,4 s stát (do 8 px), jinak jde o posouvání a tažení nezačne. Po začátku tažení se `touchmove` ruší (`preventDefault`, posluchač s `passive: false`), takže stránka se pod prstem nehne a ukazatel dál posílá `pointermove`. Nabídka prohlížeče po podržení (`contextmenu`) a bublina iOS (`-webkit-touch-callout`) jsou potlačené. Ověřeno skutečnými dotykovými událostmi přes CDP: rychlý tah posouvá, podržení a tah přesune.
+- **Přesun do nenačteného uzlu** ho nejdřív načte, aby se uzel zařadil mezi skutečné děti.
+- **Uložení po přesunu** (`move`) dostane i nového rodiče a pozici, nejen cíl a polohu jako v PHP. Server tak nemusí pozici dopočítávat.
+- **`ui/drag.ts`** je společný základ `dragToSort` a stromu: jeden ukazatel, posluchače na `window`, posouvání u okraje a nově Escape, který tažení zruší a nezavře dialog kolem.
+- **Pamatování rozbalení v `localStorage`** pod klíčem `phlox-tree:<remember>` jako v PHP. Uzly pod sbaleným rodičem si stav nechávají a otevřou se, až se rodič rozbalí.
 
 ## Síť: RPC (implementováno, čeká na review)
 

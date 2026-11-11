@@ -6,10 +6,10 @@
   <link rel="icon" href="data:,">
   <title>Nákupní seznam</title>
   <style>
-    /* The default theme turns dark with the system */
-    :root { color-scheme: light dark; }
+    /* Light or dark is set by the switch at the bottom, see examples/shared/appearance.tsx */
+    .appearance { display: flex; flex-wrap: wrap; gap: .5rem 1rem; margin-top: 2rem; font-size: .875em; }
     body { font: 16px/1.5 system-ui, sans-serif; max-width: 30rem; margin: 2rem auto; padding: 0 1rem; }
-    nav { display: flex; gap: 1rem; align-items: center; border-bottom: 1px solid #ccc; padding-bottom: .5rem; }
+    nav { display: flex; gap: 1rem; align-items: center; border-bottom: 1px solid #8884; padding-bottom: .5rem; }
     nav a.active { font-weight: bold; }
     nav .languages { margin-left: auto; }
     form.add { display: flex; gap: .5rem; }
@@ -22,7 +22,7 @@
     .done a { text-decoration: line-through; opacity: .6; }
     .history { padding-left: 1.5rem; }
     .change { display: grid; grid-template-columns: auto 1fr; gap: .25rem 1rem; margin: 0; }
-    .change dt { color: #666; }
+    .change dt { color: GrayText; }
     .change dd { margin: 0; }
   </style>
 </head>

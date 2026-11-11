@@ -194,7 +194,7 @@
   border-right: 5px solid transparent;
   border-top: 5px solid currentColor;
   opacity: .6;
-  transition: transform .18s ease;
+  transition: transform calc(.18s * var(--phlox-motion)) ease;
 }
 
 .dropdownlist-trigger[aria-expanded="true"] .dropdownlist-trigger-arrow {
@@ -488,5 +488,17 @@
 
 .phlox-upload-remove:hover {
   color: var(--phlox-error);
+}
+
+/* Tree select */
+
+.phlox-treeselect-box {
+  padding: .25rem;
+  border: 1px solid ButtonBorder;
+  border-radius: var(--phlox-radius);
+}
+
+.phlox-treeselect-box.phlox-invalid {
+  border-color: var(--phlox-error);
 }
 

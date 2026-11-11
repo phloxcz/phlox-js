@@ -6,8 +6,7 @@ import { CapifyFlashMessages } from 'phlox-js/adapters/capify';
 import { ShoppingStore } from './model/ShoppingStore';
 import { translator } from './i18n';
 
-/** The demo can show both themes: ?theme=bootstrap when the page is loaded. */
-export const bootstrap = new URLSearchParams(location.search).get('theme') === 'bootstrap';
+import { bootstrap } from '../shared/appearance';
 
 export const services = new Container()
   .add(ShoppingStore, translator)

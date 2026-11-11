@@ -14,6 +14,11 @@ import { ComboBox } from './combobox';
 import type { ComboBoxOptions } from './combobox';
 import { TagInput } from './taginput';
 import { UploadControl } from './upload';
+import { TreeSelect } from './treeselect';
+import type { TreeSelectOptions } from './treeselect';
+import { DropDownTreeSelect } from './dropdowntree';
+import type { DropDownTreeSelectOptions } from './dropdowntree';
+import type { TreeKey } from '../components/tree';
 import type { TagInputOptions } from './taginput';
 import { Multiplier } from './multiplier';
 import type { MultiplierOptions } from './multiplier';
@@ -195,6 +200,30 @@ export class Container<V extends object = Record<string, any>> implements Owner 
   /** Several files, File[]. The number of them is checked by Form.MinLength and Form.MaxLength, as in Nette. */
   addMultiUpload(name: KeysFor<V, File[]>, label = ''): UploadControl<File[]> {
     return this.addControl(name, new UploadControl<File[]>(label, true));
+  }
+
+  /** One node of a tree, its id or null. Nodes come at once (`nodes`) or level by level (`load`). */
+  addTreeSelect<K extends keyof V & string>(
+    name: K, label = '', options: TreeSelectOptions<NonNullable<V[K]> & TreeKey> = {},
+  ): TreeSelect<NonNullable<V[K]> & TreeKey, (NonNullable<V[K]> & TreeKey) | null> {
+    return this.addControl(name, new TreeSelect<NonNullable<V[K]> & TreeKey, (NonNullable<V[K]> & TreeKey) | null>(label, options));
+  }
+
+  /**
+   * One node of a tree in a drop-down: closed it shows the way to the picked node, open the tree.
+   * A lazy tree needs `path`, so the way to a node set from code can be loaded.
+   */
+  addDropDownTreeSelect<K extends keyof V & string>(
+    name: K, label = '', options: DropDownTreeSelectOptions<NonNullable<V[K]> & TreeKey> = {},
+  ): DropDownTreeSelect<NonNullable<V[K]> & TreeKey> {
+    return this.addControl(name, new DropDownTreeSelect<NonNullable<V[K]> & TreeKey>(label, options));
+  }
+
+  /** Several nodes of a tree, a list of ids. */
+  addTreeMultiSelect<K extends ListKeys<V>>(
+    name: K, label = '', options: TreeSelectOptions<ItemOf<V[K]> & TreeKey> = {},
+  ): TreeSelect<ItemOf<V[K]> & TreeKey, (ItemOf<V[K]> & TreeKey)[]> {
+    return this.addControl(name, new TreeSelect<ItemOf<V[K]> & TreeKey, (ItemOf<V[K]> & TreeKey)[]>(label, options, true));
   }
 
   addHidden(name: KeysFor<V, string>, value = ''): HiddenField {

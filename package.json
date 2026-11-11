@@ -8,6 +8,7 @@
     "typecheck": "tsc --noEmit",
     "dev": "vite examples/shopping-list --config vite.config.ts",
     "build:example": "vite build examples/shopping-list --config vite.config.ts",
+    "dev:tree": "vite examples/tree --config vite.config.ts",
     "rpc:types": "node src/net/rpc-types.ts"
   },
   "devDependencies": {

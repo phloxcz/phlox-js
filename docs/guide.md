@@ -12,7 +12,8 @@ Všechno níže je vidět pohromadě v ukázce [examples/shopping-list](../examp
 
 | Příkaz | Co dělá |
 |---|---|
-| `npm run dev` | spustí ukázku |
+| `npm run dev` | spustí ukázku nákupního seznamu |
+| `npm run dev:tree` | spustí ukázku stromu kategorií |
 | `npm test` | spustí testy |
 | `npm run typecheck` | zkontroluje typy |
 
@@ -410,10 +411,27 @@ services.add(new BootstrapTheme());              // services.ts
 ```
 
 - **Výchozí téma** (bez registrace) dává třídy `phlox-*` a `default.css` jim dává vzhled. Používá systémové barvy prohlížeče jako ostatní komponenty phlox. S `:root { color-scheme: light dark; }` na stránce ztmavne se systémem, bez něj zůstane světlé. Barvy a zaoblení jdou změnit proměnnými `--phlox-error`, `--phlox-radius` a `--phlox-backdrop`.
-- **`BootstrapTheme`** dává Bootstrap třídy (`form-control`, `form-select`, `is-invalid`, `invalid-feedback`, `btn btn-primary`...) a o vzhled i tmavý režim se stará Bootstrap. `default.css` se nenačítá.
+- **`BootstrapTheme`** dává Bootstrap třídy (`form-control`, `form-select`, `is-invalid`, `invalid-feedback`, `btn btn-primary`...) a o vzhled i tmavý režim se stará Bootstrap: tmavý je s `data-bs-theme="dark"` na `<html>`. `default.css` se nenačítá. `color-scheme` stránky má s `data-bs-theme` souhlasit, jinak budou systémové prvky (zaškrtávátka, posuvníky) tmavé na světlé stránce.
 - **`base.css`** je jen rozložení (šířka okna dialogu, skrývání přes `toggle()`), potřebuje ho každé téma.
 - **Změna jednotlivých tříd:** `new BootstrapTheme({ formRow: 'row mb-2' })`.
-- **Ukázka** přepne na Bootstrap parametrem `?theme=bootstrap` při načtení stránky.
+- **Ukázky** mají dole přepínač vzhledu (výchozí, Bootstrap), režimu (podle systému, světlý, tmavý) a animací, který si volbu pamatuje. Kód je v `examples/shared/appearance.tsx` a může posloužit jako vzor pro nastavení v aplikaci. Parametr `?theme=bootstrap` nebo `?theme=default` v URL má přednost.
+
+### Animace
+
+Animace frameworku (rozbalování stromu, uhýbání při řazení, otáčení šipek a jiné přechody) mají jeden přepínač:
+
+```ts
+import { setMotion } from 'phlox-js';
+
+setMotion('system');   // výchozí: podle nastavení systému „omezit pohyb“
+setMotion('on');       // vždy, i když systém žádá omezení
+setMotion('off');      // nikdy
+```
+
+- **Platí pro všechny prvky,** i budoucí. Volbu uživatele si aplikace uloží sama (třeba do `localStorage`) a při startu ji nastaví.
+- **`motion()`** vrací aktuální volbu a je reaktivní, hodí se pro přepínač v nastavení. **`allowsMotion()`** řekne, jestli se teď smí animovat.
+- **Vlastní animace** se mohou řídit stejně: v JS se zeptej `allowsMotion()`, v CSS vynásob délku proměnnou `--phlox-motion` (1 nebo 0): `transition: opacity calc(.2s * var(--phlox-motion));`. Proměnnou nastavuje `base.css` podle atributu `data-phlox-motion` na `<html>` a podle nastavení systému.
+- **Ukazatele stavu se točí dál,** třeba kolečko načítání ve stromu. Nejsou ozdoba, říkají, že se něco děje.
 
 ### Vlastní téma
 
@@ -749,6 +767,9 @@ class TaskCreatePresenter extends Presenter {
 | `addTagInput(name, label, options)` | pole hodnot, štítky (viz TagInput) |
 | `addUpload(name, label)` | `File` nebo `null` (viz Soubory) |
 | `addMultiUpload(name, label)` | `File[]` (viz Soubory) |
+| `addTreeSelect(name, label, options)` | id uzlu stromu nebo `null` (viz Výběr ze stromu) |
+| `addTreeMultiSelect(name, label, options)` | pole id uzlů stromu |
+| `addDropDownTreeSelect(name, label, options)` | id uzlu stromu nebo `null`, strom v rozbalovacím panelu |
 | `addHidden(name, value)` | text |
 | `addSubmit(name, caption)` | tlačítko, mezi hodnotami není |
 | `addContainer(name, label)` | vnořený objekt, viz Kontejnery a řádky |
@@ -936,6 +957,50 @@ this.form.onSuccess = async values => {
 - **Texty:** `UploadControl.texts.heading`, `or`, `browseMultiple`, `browseSingle`, `dropzone` (popis zóny pro čtečky), `remove` (`%s` je název souboru). **Vzhled:** místa `upload.dropzone`, `upload.dropzoneIdle`, `upload.dropzoneActive`, `upload.button`, `upload.table`, `upload.row`, `upload.rowError`, `upload.cellName`, `upload.cellSize`, `upload.cellRemove`, `upload.remove`. Třídy `pu-*` z PHP knihovny jsou v každém tématu.
 - **Velikost** pro lidi: `formatFileSize(3_400_000)` vrátí `3.2 MB`.
 
+### Výběr ze stromu
+
+Strom přímo ve formuláři, u každého uzlu přepínač nebo zaškrtávátko, jako picker z [phloxcz/components-tree](https://github.com/phloxcz/components-tree). Uzly se zadávají stejně jako u stromu (viz Strom):
+
+```ts
+// Jeden uzel: id nebo null
+form.addTreeSelect('parentId', 'Nadřazená kategorie:', {
+  load: parent => this.api.call('category.children', { parentId: parent?.id ?? null }),
+  path: id => this.api.call('category.path', { id }),
+  lines: true,
+}).setRequired('Vyberte kategorii.');
+
+// Několik uzlů: pole id
+form.addTreeMultiSelect('pageIds', 'Stránky:', { nodes: pages });
+```
+
+- **Hodnota** je id uzlu (typ podle DTO, třeba `number | null`), u více uzlů pole id. Uzly jsou na sobě nezávislé: zaškrtnutí rodiče neznamená zaškrtnutí dětí.
+- **Vybírá se** klikem kamkoli na řádek, nebo mezerníkem či Enterem na uzlu. Šipky procházejí strom jako u stromu.
+- **Vybraný uzel hluboko v líném stromu** se ukáže, když má strom `path`: po `setDefaults({ parentId: 121 })` se načte a rozbalí cesta k němu.
+- **Kontrola** proběhne po opuštění stromu, po první chybě živě. Fokus po chybě dostane vybraný nebo první uzel.
+- **Strom prvku** je `control.tree`, třeba pro `control.tree.reload()` po změně na serveru.
+- **Vzhled:** obal má třídu `phlox-treeselect` a místo tématu `treeselect`. Delší strom omez výškou: `.phlox-treeselect { max-height: 16rem; overflow: auto; }`.
+
+### Rozbalovací výběr ze stromu
+
+Jeden uzel stromu v rozbalovacím panelu, vypadá a ovládá se jako dropdownlist. Zavřený ukazuje cestu od kořene k vybranému uzlu, otevřený strom:
+
+```ts
+form.addDropDownTreeSelect('parentId', 'Nadřazená kategorie:', {
+  load: parent => this.api.call('category.children', { parentId: parent?.id ?? null }),
+  path: id => this.api.call('category.path', { id }),
+  placeholder: 'Žádná, horní úroveň',
+});
+// zavřený: „Domácnost › Kuchyně › Nože“
+```
+
+- **Hodnota** je id uzlu nebo `null`. Uzly se zadávají stejně jako u stromu (`nodes`, nebo `load` s `path`).
+- **Cesta v tlačítku** se skládá z popisků uzlů. Hodnota nastavená z kódu hluboko v líném stromu si cestu načte přes `path`, mezitím je v tlačítku `…`. Bez `path` umí líný strom ukázat jen načtené uzly, jinak ukáže id. Celá cesta je i v `title`, kdyby se do tlačítka nevešla. Oddělovač mění volba `separator` (výchozí ` › `).
+- **Otevření:** klik, šipka dolů, Enter nebo mezerník. Strom ukáže cestu k vybranému uzlu a dá na něj fokus. Panel se otevře pod tlačítkem, nebo nad ním, když dole není místo.
+- **Výběr:** klik na uzel, nebo Enter či mezerník. Panel se zavře a fokus se vrátí na tlačítko. Escape zavře jen panel, ne dialog kolem.
+- **Vymazání:** u nepovinného prvku křížek v tlačítku, nebo Delete či Backspace na tlačítku.
+- **`lines`** zapne čáry stromu v panelu. **Strom prvku** je `control.tree`, třeba pro `control.tree.reload()`.
+- **Vzhled** je dropdownlistu (místa `dropdownlist.wrapper`, `dropdownlist.trigger`, `dropdownlist.dropdown`), obal má navíc třídu `phlox-dropdowntree` a panel `phlox-dropdowntree-panel`. **Texty:** `DropDownTreeSelect.texts.clear`.
+
 ### Lokální a vzdálená data
 
 Dropdownlist, combobox i taginput berou data dvěma způsoby:
@@ -1085,12 +1150,104 @@ render() {
 - **`lockAxis: true`** nechá položku jezdit jen po ose seznamu, u `'vertical'` jen nahoru a dolů. U mřížky nemá smysl.
 - **Pozice** se volí podle středu tažené položky proti středům ostatních.
 - **Úchyt může být celá položka:** `onPointerdown` dej přímo na ni.
+- **Escape** tažení ukončí. Položka zůstane tam, kam už dojela, protože se v datech přesouvá průběžně.
 - **U okraje se posouvá:** když ukazatel dojede k okraji, posouvá se nejbližší posuvný prvek kolem seznamu (třeba dialog nebo box s `overflow: auto`), jinak stránka. Čím blíž okraji, tím rychleji. Funguje svisle i vodorovně a zastaví se na konci obsahu.
 - **Úchyt potřebuje CSS `touch-action: none`,** jinak prstem posouvá stránku.
 
 ### Vlastní prvek
 
 Prvek je potomek `FormControl<T>` s metodami `getValue()`, `setValue()`, `isFilled()` a `render(attributes)`. Do formuláře se přidá přes `form.addControl('name', new MyControl('Popisek:'))`. Pravidla, `<Label>`, `<Input>`, chyby ze serveru i hodnoty pak fungují jako u vestavěných prvků. Tak vzniknou i combobox, dropdownlist a taginput.
+
+## Strom
+
+Strom jako [phloxcz/components-tree](https://github.com/phloxcz/components-tree), se stejným HTML, třídami a CSS. Importuje se z `phlox-js/components`. Stejně jako u formuláře je zvlášť model (`Tree`) a vykreslení (`<TreeView>`).
+
+```tsx
+import { Tree, TreeView } from 'phlox-js/components';
+
+class CategoriesPresenter extends Presenter {
+  override routes: Route[] = [
+    { name: 'default', pattern: '/' },
+    { name: 'detail', pattern: '/<id \\d+>' },
+  ];
+
+  tree = new Tree<CategoryNode>({
+    load: parent => this.api.call('category.children', { parentId: parent?.id ?? null }),
+    path: id => this.api.call('category.path', { id }),
+    remember: 'categories',
+    draggable: true,
+    move: ({ node, parent, index }) => this.api.call('category.move', { id: node.id, parentId: parent?.id ?? null, index }),
+  });
+
+  constructor(private api: RpcApi) {
+    super();
+  }
+
+  override async startup() {
+    await this.tree.load();
+  }
+
+  async actionDetail({ id }: Params) {
+    await this.tree.select(Number(id));   // označí uzel a rozbalí cestu k němu
+  }
+
+  render() {
+    return <TreeView tree={this.tree} lines href={node => this.link('detail', { id: node.id })} />;
+  }
+}
+```
+
+Celá ukázka je v `examples/tree` (`npm run dev:tree`).
+
+### Uzly
+
+Uzel je objekt s `id`, `label` a volitelně `children`, `hasChildren` a `disabled`. Další pole strom předává dál beze změny, takže typ uzlu může být rozšířený: `interface CategoryNode extends TreeNode<number> { locked?: boolean }`.
+
+- **Najednou:** `new Tree({ nodes })`, děti v `children`. Uzel bez dětí je list.
+- **Po úrovních:** `new Tree({ load })`. `load(null)` vrátí horní úroveň, `load(node)` děti uzlu, až když ho uživatel rozbalí. Uzel, který děti má, potřebuje `hasChildren: true`, jinak se nedá rozbalit. Děti uvedené v `children` se nenačítají.
+- **`path(id)`** vrátí id předků uzlu od kořene. Bez něj umí `select()` a výběr ve formuláři ukázat jen uzel, který už je načtený.
+- **`tree.load()`** načte horní úroveň jednou, `<TreeView>` ho zavolá sám. Když má být strom hotový dřív (třeba pro `select()` v akci), počkej na něj ve `startup()`. **`tree.reload()`** načte strom znovu, třeba po změně na serveru.
+
+### Výběr a URL
+
+- **Klik na uzel nebo Enter** uzel vybere (`tree.selected()`) a zavolá `tree.onSelect(node)`.
+- **S `href`** je popisek odkaz a výběr uzlu na něj přejde. Router tak dostane URL uzlu a akce presenteru zavolá `tree.select(id)`. Výběr tedy vždy odpovídá URL, i po přímém odkazu, obnovení stránky a tlačítkách Zpět a Vpřed.
+- **`tree.select(id)`** z kódu uzel označí a rozbalí cestu k němu. `onSelect` nevolá, aby výběr z URL znovu nenavigoval. `tree.select(null)` výběr zruší.
+- **Zakázaný uzel** (`disabled`) nejde vybrat, zaškrtnout ani přetáhnout.
+
+### Rozbalování a vzhled
+
+- **Šipka u uzlu** ho rozbalí nebo sbalí, během načítání se ukáže kolečko a uzel má `aria-busy`. Když načtení selže, uzel zůstane sbalený a chyba jde do `app.onError`.
+- **Rozbalení a sbalení se animuje,** délku dává CSS proměnná `--pt-anim-duration` (výchozí 180 ms, `0ms` animaci vypne). Zapnutí a vypnutí řídí `setMotion()` (viz Animace), ve výchozím stavu podle nastavení systému. Při prvním vykreslení se neanimuje.
+- **`remember: 'klíč'`** si rozbalené uzly pamatuje v prohlížeči (`localStorage`). Po načtení se znovu rozbalí, u líného stromu i s načtením dětí.
+- **Z kódu:** `tree.expand(item)`, `tree.collapse(item)`, `tree.toggle(item)`, `tree.reveal(id)` (rozbalí cestu bez výběru). `tree.find(id)` vrátí načtený uzel jako `TreeItem` se stavem: `expanded()`, `children()`, `loading()`, `parent()`, `hasChildren()`.
+- **`<TreeView>`:** `lines` (spojovací čáry), `href`, `icon={(node, item) => ...}`, `label={node => ...}`, `aria-label`, `class`.
+- **Vzhled** dodává téma: místa `tree.root`, `tree.row`, `tree.rowSelected`, `tree.toggle`, `tree.label`, `tree.pick` (zaškrtávátko nebo přepínač výběru, v Bootstrapu `form-check-input`). Rozměry jdou změnit proměnnými jako v PHP knihovně: `--pt-row-height`, `--pt-indent-width`, `--pt-font-size`… CSS je v `base.css` a nemá pevné barvy.
+- **Texty:** `Tree.texts.expand`, `collapse`, `loading`.
+
+### Klávesnice
+
+Podle vzoru stromu z WAI-ARIA. Tabulátorem jde jen na jeden uzel (vybraný, jinak první), dál se pokračuje šipkami.
+
+| Klávesa | Co udělá |
+|---|---|
+| ↓ ↑ | další a předchozí viditelný uzel |
+| → | rozbalí uzel, na rozbaleném přejde na první dítě |
+| ← | sbalí uzel, na sbaleném přejde na rodiče |
+| Home, End | první a poslední viditelný uzel |
+| Enter, mezerník | vybere uzel (s `href` na něj přejde), ve výběru ve formuláři ho zaškrtne |
+| `*` | rozbalí všechny sourozence |
+| písmena | přejde na uzel, který jimi začíná, bez ohledu na diakritiku |
+
+### Přetahování
+
+- **`draggable: true`**, nebo funkce, která řekne, které uzly jde přetáhnout: `draggable: node => !node.locked`.
+- **Kam uzel půjde,** určuje poloha nad řádkem: horní čtvrtina znamená před uzel, dolní za něj, prostředek dovnitř jako poslední dítě. Místo ukazuje atribut `data-drop-pos` (`before`, `after`, `child`) a čára nebo rámeček. Kopie řádku jede vedle ukazatele, uzel zůstává na místě zesvětlený.
+- **Sbalený uzel se rozbalí,** když nad jeho prostředkem tažený uzel chvíli zůstane. U okraje se seznam nebo stránka posouvá.
+- **Nejde** pustit uzel na sebe, do svého podstromu ani znovu do svého rodiče. Escape tažení zruší.
+- **`move({ node, target, position, parent, index })`** se zavolá po přesunu: `parent` je nový rodič (`null` pro horní úroveň) a `index` pozice mezi jeho dětmi. Když `move` skončí chybou (server přesun odmítl), uzel se vrátí na původní místo a chyba jde do `app.onError`.
+- **Z kódu:** `await tree.move(item, target, 'child')`.
+- **Prstem** se uzel přetahuje po podržení: prst musí chvíli (0,4 s) stát na místě, pak se objeví kopie řádku a telefon krátce zavibruje. Rychlý tah prstem dál posouvá stránku. Během tažení se stránka pod prstem neposouvá (kromě posouvání u okraje) a neotevře se nabídka prohlížeče.
 
 ## Reaktivní hodnoty
 
