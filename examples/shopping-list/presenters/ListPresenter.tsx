@@ -1,5 +1,6 @@
 import { Else, For, If, Presenter, computed, state } from 'phlox-js';
 import type { Route } from 'phlox-js';
+import { Form, FormTag, Input, InputError } from 'phlox-js/forms';
 import { t } from '../i18n';
 import { ShoppingStore } from '../model/ShoppingStore';
 import type { Item } from '../model/ShoppingStore';
@@ -8,19 +9,19 @@ import { ItemEdit } from '../components/ItemEdit';
 
 export class ListPresenter extends Presenter {
   items = state<Item[]>([]);
-  draft = state('');
   remaining = computed(() => this.items().filter(item => !item.done).length);
+  addForm = new Form<{ name: string }>();
 
   override routes: Route[] = [
     { name: 'default', pattern: '/' },
     {
-      // /5 opens the editing dialog over the list
+      // /5 opens the editing dialog over the list, /5/history and /5/history/1 the next ones over it
       name: 'edit',
       pattern: '/<id \\d+>',
       dialog: ({ id }) => [ItemEdit, { id: Number(id) }],
       closed: saved => {
-        if (!saved) return;
-        this.flashMessage(t('edit.saved'), 'success');
+        if (saved) this.flashMessage(t('edit.saved'), 'success');
+        // Also without saving, a name could have been restored in the history
         void this.reload();
       },
     },
@@ -28,6 +29,9 @@ export class ListPresenter extends Presenter {
 
   constructor(private store: ShoppingStore) {
     super();
+    this.addForm.addText('name').setRequired(t('list.required'));
+    this.addForm.addSubmit('add', t('list.add'));
+    this.addForm.onSuccess = values => this.handleAdd(values.name);
   }
 
   /** In startup and not in an action, the list must be there after a direct link to the dialog as well. */
@@ -39,12 +43,9 @@ export class ListPresenter extends Presenter {
     this.items.set(await this.store.list());
   }
 
-  async handleAdd(event: Event) {
-    event.preventDefault();
-    const name = this.draft().trim();
-    if (!name) return;
-    await this.store.add(name);
-    this.draft.set('');
+  async handleAdd(name: string) {
+    await this.store.add(name.trim());
+    this.addForm.reset();
     await this.reload();
   }
 
@@ -64,15 +65,11 @@ export class ListPresenter extends Presenter {
   render() {
     return (
       <section>
-        <form onSubmit={event => this.handleAdd(event)}>
-          <input
-            type="text"
-            placeholder={t('list.placeholder')}
-            value={this.draft}
-            onInput={event => this.draft.set(event.currentTarget.value)}
-          />
-          <button disabled={() => !this.draft().trim()}>{t('list.add')}</button>
-        </form>
+        <FormTag form={this.addForm} class="add">
+          <Input control={this.addForm.get('name')} placeholder={t('list.placeholder')} />
+          <Input control={this.addForm.getButton('add')} />
+        </FormTag>
+        <InputError control={this.addForm.get('name')} />
 
         <If when={() => this.items().length}>
           <ul>

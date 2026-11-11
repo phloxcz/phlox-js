@@ -4,7 +4,7 @@ Jak se s frameworkem pracuje. Popisuje jen to, co je už napsané a otestované.
 
 **Co zatím chybí:** persistentní parametry a adaptér pro Kendo.
 
-**Kde co je:** jádro (reaktivita, šablony, komponenty, presentery, aplikace, DI) se importuje z `phlox-js`. Volitelné části mají vlastní vstup: síť (RPC) `phlox-js/net`, přihlášení a oprávnění `phlox-js/security`, překlady `phlox-js/localization` a Vite plugin `phlox-js/vite`.
+**Kde co je:** jádro (reaktivita, šablony, komponenty, presentery, aplikace, DI) se importuje z `phlox-js`. Volitelné části mají vlastní vstup: síť (RPC) `phlox-js/net`, přihlášení a oprávnění `phlox-js/security`, formuláře `phlox-js/forms`, překlady `phlox-js/localization` a Vite plugin `phlox-js/vite`.
 
 Všechno níže je vidět pohromadě v ukázce [examples/shopping-list](../examples/shopping-list/main.ts).
 
@@ -33,6 +33,8 @@ Všechno níže je vidět pohromadě v ukázce [examples/shopping-list](../examp
 | `$this->user`, `User`, `SimpleIdentity` | `this.user`, `User`, `Identity` |
 | `Authenticator`, `Authorizator`, `Permission` | stejně |
 | volání API kontroleru z `phlox-rpc-api` | `await this.api.call('user.read', { id })` |
+| `Nette\Forms\Form`, `addText()`, `addRule()`, `onSuccess` | stejně, `new Form<Dto>()` |
+| `{form}`, `{label}`, `{input}`, `{inputError}`, `{control form}` | `<FormTag>`, `<Label>`, `<Input>`, `<InputError>`, `<FormView>` |
 
 **Hlavní rozdíl:** v Nette žije presenter jeden požadavek. Tady žije, dokud je na obrazovce, a obrazovku tvoří strom presenterů, mezi které se dělí URL.
 
@@ -308,7 +310,39 @@ override routes: Route[] = [
 - **Zavření vrátí URL zpět:** uvnitř aplikace krokem zpět v historii, po příchodu přímým odkazem nahrazením URL.
 - **Seznam pod dialogem načítej ve `startup()`.** Po přímém odkazu na dialog se `actionDefault()` nespustí.
 - **Když `startup()` dialogu selže,** selže celá navigace. Odkaz na smazaný záznam proto ošetři v akci presenteru (`actionEdit`) nebo v dialogu.
-- **Dialog může být i `Presenter`** s vlastními routami, pak zpracuje zbytek URL.
+- **`closed` se zavolá vždy,** i když dialog zmizí proto, že se zavřel dialog pod ním nebo se odešlo z presenteru.
+
+### Dialog z dialogu
+
+Dialog, který je `Presenter`, má vlastní routy, a ty mohou otevřít další dialog. Každá úroveň přidá kus URL. V ukázce je to úprava položky (`/5`) → historie změn (`/5/history`) → detail změny (`/5/history/1`):
+
+```ts
+// Seznam: /5 otevře úpravu
+{ name: 'edit', pattern: '/<id \\d+>', dialog: ({ id }) => [ItemEdit, { id: Number(id) }] }
+
+// ItemEdit extends Presenter<{ id: number }, boolean>: /5/history otevře historii nad ní
+override routes: Route[] = [
+  { name: 'default', pattern: '/' },
+  { name: 'history', pattern: '/history', dialog: () => [ItemHistory, { id: this.props.id }], closed: () => void this.loadName() },
+];
+
+// ItemHistory extends Presenter<{ id: number }>: /5/history/1 otevře detail změny
+override routes: Route[] = [
+  { name: 'default', pattern: '/' },
+  { name: 'change', pattern: '/<index \\d+>', dialog: ({ index }) => [ChangeDetail, { id: this.props.id, index: Number(index) }] },
+];
+```
+
+```tsx
+<a href={this.link('history')}>Historie</a>        // uvnitř ItemEdit vede na /5/history
+```
+
+- **Odkazy uvnitř dialogu** míří na routy jeho presenteru, `this.link('history')` tedy doplní `/history` za `/5`.
+- **Zavření nejvyššího dialogu** vrátí URL o úroveň níž a jeho výsledek dostane `closed` routy o úroveň níž. Tlačítko Zpět zavírá dialogy jeden po druhém.
+- **Přímý odkaz** `/5/history/1` otevře všechny tři naráz. Zavírání pak nahrazuje URL úroveň po úrovni.
+- **Přechod na nižší úroveň** zavře dialogy nad ní. Odchod jinam zavře všechny, každý `closed` dostane `undefined`.
+- **Data pod dialogem znovu načti v `closed`,** i bez výsledku. Uživatel mohl změnu udělat ve vyšším dialogu a pak se vrátit tlačítkem Zpět.
+- **Nativní `<dialog>` je modální,** ovládat jde jen ten nahoře. Dialogy pod ním jsou neaktivní, dokud se horní nezavře.
 
 ### Vzhled a výměna okna
 
@@ -547,6 +581,139 @@ class AdminPresenter extends Presenter {
 Přesměrování ze `startup()` nebo akce zastaví celou navigaci, takže chráněná obrazovka se neobjeví ani na okamžik. V `startup()` použij absolutní cestu: presenter v tu chvíli ještě neví, na jaké části URL sedí.
 
 Po přihlášení nebo odhlášení přesměruj (`this.redirect(...)`) nebo zavolej `this.app.restart()`, aby se obrazovky postavily znovu pro nového uživatele.
+
+## Formuláře
+
+Jako `Nette\Forms`. Importuje se z `phlox-js/forms`.
+
+```tsx
+// CreateTask je DTO vygenerované z PHP (npm run rpc:types)
+class TaskCreatePresenter extends Presenter {
+  form = new Form<CreateTask>();
+
+  constructor(private api: RpcApi) {
+    super();
+    this.form.addText('name', 'Název:')
+      .setRequired('Vyplňte název.')
+      .addRule(Form.MaxLength, 'Nejvýš %d znaků.', 100);
+    this.form.addSelect('priority', 'Priorita:', { 1: 'Nízká', 2: 'Střední', 3: 'Vysoká' })
+      .setPrompt('Vyberte');
+    this.form.addDate('dueDate', 'Termín:');
+    this.form.addSubmit('save', 'Uložit');
+    this.form.onSuccess = values => this.handleSave(values);
+  }
+
+  async handleSave(values: CreateTask) {
+    await this.api.call('task.create', { input: values });
+    this.flashMessage('Uloženo.');
+    this.redirect('default');
+  }
+
+  render() {
+    return <FormView form={this.form} />;
+  }
+}
+```
+
+- **Typ hodnot je DTO.** Kompilátor hlídá názvy prvků i jejich druh: `addText('nmae')` je chyba, stejně jako `addText('priority')`, když je priorita číslo. `onSuccess` dostane hodnoty typu `CreateTask`.
+- **Formulář se tvoří v konstruktoru** nebo jako pole třídy, obdoba `createComponentXxx()`.
+- **Data ze serveru** se do prvků dostanou přes `form.setDefaults({ name: task.name })`, typicky ve `startup()`.
+
+### Prvky
+
+| Metoda | Hodnota |
+|---|---|
+| `addText(name, label, maxLength?)` | text, `''` když je prázdný. S `setNullable()` je prázdný `null` |
+| `addPassword`, `addEmail`, `addTextArea` | text. `addEmail` rovnou kontroluje formát |
+| `addInteger`, `addFloat` | číslo nebo `null`. `addFloat` bere i desetinnou čárku |
+| `addDate` | text `RRRR-MM-DD` nebo `null`, tak jak datum čeká DTO |
+| `addCheckbox(name, caption)` | `true` / `false` |
+| `addSelect`, `addRadioList` | jedna z hodnot položek nebo `null` |
+| `addMultiSelect`, `addCheckboxList` | pole hodnot položek |
+| `addHidden(name, value)` | text |
+| `addSubmit(name, caption)` | tlačítko, mezi hodnotami není |
+
+**Položky** výběrů se zadávají jako dvojice `[[1, 'Nízká'], [2, 'Vysoká']]`, nebo jako objekt `{ 1: 'Nízká' }`, ve kterém se celočíselné klíče převedou na čísla jako v PHP. Přijít mohou i později, třeba ze serveru: `control.setItems(...)`.
+
+Další metody prvku: `setDisabled()` (nekontroluje se a chybí v hodnotách), `setOmitted()`, `getValue()`, `setValue()`, `errors()`, `addError()`.
+
+### Pravidla a podmínky
+
+```ts
+form.addText('name').setRequired('Vyplňte jméno.');
+form.addText('zip').addRule(Form.Pattern, 'PSČ má pět číslic.', '\\d{5}');
+form.addInteger('age').addRule(Form.Range, 'Věk mezi %d a %d.', [18, 120]);
+
+const password = form.addPassword('password').addRule(Form.MinLength, 'Aspoň %d znaků.', 8);
+form.addPassword('again').addRule(Form.Equal, 'Hesla se neshodují.', password);
+
+form.addText('note')
+  .addConditionOn(form.get('done'), Form.Filled)
+    .setRequired('U hotového úkolu vyplňte poznámku.')
+  .elseCondition()
+    .addRule(Form.MaxLength, 'Nejvýš %d znaků.', 50)
+  .endCondition();
+```
+
+- **Pravidla:** `Filled` (= `Required`), `Blank`, `Equal`, `NotEqual`, `MinLength`, `MaxLength`, `Length`, `Email`, `URL`, `Pattern`, `Integer`, `Float`, `Min`, `Max`, `Range`, `IsIn`. `Min` a `Max` porovnávají i data: `addRule(Form.Min, 'Termín nesmí být v minulosti.', today)`.
+- **Vlastní pravidlo** je funkce `(control, arg) => boolean`: `addRule(control => control.getValue() !== 'admin', 'Toto jméno je vyhrazené.')`.
+- **Jako v Nette se pravidla kontrolují jen u vyplněného prvku,** kromě `setRequired`. Prázdné nepovinné pole s `Form.Email` je tedy v pořádku.
+- **U prvku se hlásí jen první chyba.**
+- **Zástupné hodnoty v hláškách:** `%d` a `%s` podle argumentů, `%label`, `%name`, `%value`.
+- **Výchozí hlášky** jsou anglicky. Pro jazyk aplikace je přepiš jednou při startu: `Form.messages.set(Form.Filled, 'Vyplňte %label.')`.
+- **`toggle(id)`** v podmínce zobrazí prvek s tím id, jen když podmínka platí: `form.get('done').addCondition(Form.Filled).toggle('note-pair')`.
+
+### Kdy se kontroluje
+
+- **Při odeslání** se zkontroluje celý formulář. Když neprojde, zavolá se `onError`, u polí se objeví chyby a kurzor skočí na první chybné pole. Při úspěchu se zavolá `onSuccess`.
+- **Během psaní:** po opuštění pole se kontroluje živě. Chyba zmizí, jakmile ji uživatel opraví.
+- **Během `onSuccess`** jsou tlačítka formuláře zakázaná a `form.submitting()` vrací `true`.
+- **Tlačítko bez kontroly**, třeba Zrušit: `addSubmit('cancel').setValidationScope([])`. Které tlačítko formulář odeslalo, řekne v `onSuccess` metoda `button.isSubmittedBy()`.
+- **Odeslání z kódu:** `await form.submit()`, třeba z tlačítka v patičce dialogu, které leží mimo `<form>`. Vrací, jestli formulář prošel.
+
+### Chyby ze serveru
+
+Kontrola v prohlížeči slouží uživateli, bezpečnost zajišťuje server. Když `onSuccess` skončí chybou neplatných parametrů z `phlox-rpc-api` (`-32602`), formulář ji nevyhodí, ale ukáže u polí. `input.name` patří k prvku `name`. Cesta, ke které prvek není (třeba `input.addresses.1.city`), se ukáže jako chyba celého formuláře v `<FormErrors>`.
+
+Ručně: `form.addServerErrors(error)` a vlastní předpona cesty `form.addServerErrors(error, 'data')`. Jiné chyby z `onSuccess` dostane `app.onError`.
+
+**Žádné pravidlo nesmí platit jen v prohlížeči.** Co prohlížeč pustí a server odmítne, se uživateli ukáže u pole. Rozdílná pravidla jsou pak jen nepohodlí, ne díra.
+
+### Vykreslení
+
+**Automaticky** jako `{control form}`: `<FormView form={this.form} />`. Každý prvek dostane řádek s id `<id prvku>-pair` (pro `toggle()`) a nahoře jsou chyby formuláře.
+
+**Ručně** jako `{form}…{/form}` v Latte:
+
+```tsx
+const name = this.form.get('name');
+
+<FormTag form={this.form}>
+  <div class="field">
+    <Label control={name} />
+    <Input control={name} class="wide" placeholder="např. Nákup" />
+    <InputError control={name} />
+  </div>
+  <Input control={this.form.getButton('save')} class="btn btn-primary" />
+</FormTag>
+```
+
+| Latte | PhloxJS |
+|---|---|
+| `{form}…{/form}` | `<FormTag form={…}>` |
+| `{label name /}` | `<Label control={…} />`, povinný prvek má třídu `required` |
+| `{input name}` | `<Input control={…} />`, další atributy dostane prvek |
+| `{inputError name}` | `<InputError control={…} />` |
+| `n:name="name"` | `<input class="x" {...control.attrs()} />` |
+| chyby formuláře | `<FormErrors form={…} />` |
+
+- **Přístupnost:** chybné pole má `aria-invalid` a `aria-describedby` vede na text chyby.
+- **Checkbox** se vykresluje uvnitř svého `<label>`, jako v Nette.
+- **Vzhled je na aplikaci.** Framework dává třídy `phlox-form`, `phlox-form-row`, `phlox-form-error`, `phlox-form-errors` a `phlox-form-buttons`.
+
+### Vlastní prvek
+
+Prvek je potomek `FormControl<T>` s metodami `getValue()`, `setValue()`, `isFilled()` a `render(attributes)`. Do formuláře se přidá přes `form.addControl('name', new MyControl('Popisek:'))`. Pravidla, `<Label>`, `<Input>`, chyby ze serveru i hodnoty pak fungují jako u vestavěných prvků. Tak vzniknou i combobox, dropdownlist a taginput.
 
 ## Reaktivní hodnoty
 

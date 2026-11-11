@@ -1,45 +1,80 @@
-import { BadRequestError, Component, state } from 'phlox-js';
+import { BadRequestError, Presenter } from 'phlox-js';
+import type { Route } from 'phlox-js';
+import { Form, FormTag, Input, InputError, Label } from 'phlox-js/forms';
 import { t } from '../i18n';
 import { ShoppingStore } from '../model/ShoppingStore';
+import { ItemHistory } from './ItemHistory';
 
-/** Edits one item. It returns true when the item was saved. */
-export class ItemEdit extends Component<{ id: number }, boolean> {
-  name = state('');
+interface ItemInput {
+  name: string;
+}
+
+/**
+ * Edits one item, at /5. It returns true when the item was saved.
+ * It is a presenter, so it has routes of its own: /5/history opens the next dialog over it.
+ */
+export class ItemEdit extends Presenter<{ id: number }, boolean> {
+  form = new Form<ItemInput>();
+
+  override routes: Route[] = [
+    { name: 'default', pattern: '/' },
+    {
+      name: 'history',
+      pattern: '/history',
+      dialog: () => [ItemHistory, { id: this.props.id }],
+      // A name could have been restored in the history, also when it was closed by the Back button
+      closed: () => void this.loadName(),
+    },
+  ];
 
   constructor(private store: ShoppingStore) {
     super();
+    this.form.addText('name', t('edit.name'))
+      .setRequired(t('edit.required'))
+      .addRule(Form.MaxLength, t('edit.tooLong'), 40);
+    this.form.onSuccess = values => this.handleSave(values);
   }
 
   override async startup() {
+    await this.loadName();
+  }
+
+  async loadName() {
     const item = await this.store.get(this.props.id);
     if (!item) throw new BadRequestError(404, t('edit.missing', { id: String(this.props.id) }));
-    this.name.set(item.name);
+    this.form.setDefaults({ name: item.name });
   }
 
   override title() {
     return t('edit.title');
   }
 
+  /** The buttons are in the footer of the dialog, outside the <form>, so Save sends the form from code. */
   override actions() {
     return (
       <>
-        <button onClick={() => this.close(false)}>{t('common.cancel')}</button>
-        <button disabled={() => !this.name().trim()} onClick={() => this.handleSave()}>{t('common.save')}</button>
+        <button type="button" onClick={() => this.close(false)}>{t('common.cancel')}</button>
+        <button type="button" disabled={() => this.form.submitting()} onClick={() => this.form.submit()}>
+          {t('common.save')}
+        </button>
       </>
     );
   }
 
-  async handleSave() {
-    await this.store.update(this.props.id, { name: this.name().trim() });
+  async handleSave(values: ItemInput) {
+    await this.store.update(this.props.id, { name: values.name.trim() });
     this.close(true);
   }
 
   render() {
+    const name = this.form.get('name');
     return (
-      <label>
-        {t('edit.name')}{' '}
-        <input type="text" value={this.name} onInput={event => this.name.set(event.currentTarget.value)} />
-      </label>
+      <div>
+        <FormTag form={this.form}>
+          <Label control={name} /> <Input control={name} /> <InputError control={name} />
+        </FormTag>
+        <p><a href={this.link('history')}>{t('edit.history')}</a></p>
+      </div>
     );
   }
 }

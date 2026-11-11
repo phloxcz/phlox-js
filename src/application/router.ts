@@ -316,9 +316,21 @@ export class Router {
   }
 
   private closeDialog(presenter: AnyPresenter, dialog: RoutedDialog): void {
+    // A dialog that is a presenter may have its own dialogs open above it
+    if (dialog.component instanceof Presenter) this.closeDialogsOf(dialog.component);
     if (presenter.routing.dialog === dialog) presenter.routing.dialog = null;
     dialog.component.scope.dispose();
     dialog.route.closed?.call(presenter, dialog.result);
+  }
+
+  /**
+   * Closes the routed dialogs of a presenter that is leaving, and of the presenters below it,
+   * the topmost first, so that every `closed` learns about it.
+   */
+  private closeDialogsOf(presenter: AnyPresenter): void {
+    const child = untrack(presenter.child);
+    if (child) this.closeDialogsOf(child);
+    if (presenter.routing.dialog) this.closeDialog(presenter, presenter.routing.dialog);
   }
 
   /**
@@ -334,6 +346,7 @@ export class Router {
   private replaceChild(presenter: AnyPresenter, child: AnyPresenter | null): void {
     const old = untrack(presenter.child);
     if (old === child) return;
+    if (old) this.closeDialogsOf(old);
     old?.scope.dispose();
     presenter.child.set(child);
   }

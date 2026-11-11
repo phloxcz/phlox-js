@@ -10,8 +10,10 @@
     nav { display: flex; gap: 1rem; align-items: center; border-bottom: 1px solid #ccc; padding-bottom: .5rem; }
     nav a.active { font-weight: bold; }
     nav .languages { margin-left: auto; }
-    form { display: flex; gap: .5rem; }
+    form.add { display: flex; gap: .5rem; }
     input[type=text] { flex: 1; padding: .4rem; }
+    input[aria-invalid=true] { outline: 2px solid #d33; }
+    .phlox-form-error { display: block; color: #b00; font-size: .9rem; margin-top: .25rem; }
     ul { list-style: none; padding: 0; }
     li { display: flex; align-items: center; gap: .5rem; padding: .25rem 0; }
     li a { flex: 1; }
@@ -26,6 +28,10 @@
     .phlox-dialog-body { padding: 1rem; }
     .phlox-dialog footer { display: flex; justify-content: flex-end; gap: .5rem; padding: .5rem 1rem; border-top: 1px solid #ddd; }
     .phlox-dialog footer:empty { display: none; }
+    .history { padding-left: 1.5rem; }
+    .change { display: grid; grid-template-columns: auto 1fr; gap: .25rem 1rem; margin: 0; }
+    .change dt { color: #666; }
+    .change dd { margin: 0; }
   </style>
 </head>
 <body>

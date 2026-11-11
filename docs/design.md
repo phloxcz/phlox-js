@@ -13,13 +13,14 @@ Adresáře `src/` odpovídají jmenným prostorům Nette:
 | `application/` | `Application`, `Router`, flash zprávy | `Nette\Application`, `Nette\Routing` |
 | `di/` | `Container`, Vite plugin pro autowiring | `Nette\DI` |
 | `localization/` | `Translator`, `IntlTranslator` | `Nette\Localization` |
+| `forms/` | `Form`, prvky, pravidla, vykreslení | `Nette\Forms` |
 | `net/` | RPC klient a generátor typů | |
 | `security/` | `User`, `Identity`, `Permission` | `Nette\Security` |
 
 - **Šablony jsou v `ui/`,** ne zvlášť jako obdoba Latte. Jsou s komponentami těsně propojené (rozhodl autor).
 - **Flash zprávy:** `flashMessage()` je metoda presenteru jako v Nette, služba, která zprávy drží, patří k aplikaci.
 
-**Importy:** `phlox-js` dává to, co potřebuje každá obrazovka (reaktivita, šablony, komponenty, presentery, aplikace, DI). Volitelné části mají vlastní vstup: `phlox-js/net`, `phlox-js/security`, `phlox-js/localization` a `phlox-js/vite`. Každý vstup je jeden soubor (`src/index.ts`, `src/net/index.ts`...), ostatní soubory jsou vnitřní. Na kořeni `src/` zůstávají jen vstupy: `index.ts`, `vite.ts` a `jsx-runtime.ts`, který si podle názvu hledá kompilátor.
+**Importy:** `phlox-js` dává to, co potřebuje každá obrazovka (reaktivita, šablony, komponenty, presentery, aplikace, DI). Volitelné části mají vlastní vstup: `phlox-js/net`, `phlox-js/security`, `phlox-js/forms`, `phlox-js/localization` a `phlox-js/vite`. Každý vstup je jeden soubor (`src/index.ts`, `src/net/index.ts`...), ostatní soubory jsou vnitřní. Na kořeni `src/` zůstávají jen vstupy: `index.ts`, `vite.ts` a `jsx-runtime.ts`, který si podle názvu hledá kompilátor.
 
 ## Presenter a Component (rozhodnuto)
 
@@ -220,6 +221,22 @@ Přebírá se princip z Nette, ne kód z TraceJS: `User`, `Identity`, abstraktn�
 - **Ochrana presenterů je ve `startup()`,** žádný zvláštní mechanismus. Funguje, protože navigace se při `redirect()` vzdá dřív, než změní obrazovku.
 - **Po přihlášení a odhlášení** se obrazovky nepřestaví samy. Šablony reagují (metody `User` čtou `state`), ale data načtená ve `startup()` by zůstala. Aplikace přesměruje nebo zavolá `app.restart()`.
 
+## Formuláře (implementováno, čeká na review)
+
+`src/forms/` (import `phlox-js/forms`), testy `tests/forms.test.tsx`. API podle `Nette\Forms`: `addText()`, `setRequired()`, `addRule()`, `addCondition()`, `addConditionOn()`, `elseCondition()`, `endCondition()`, `toggle()`, `onSuccess`, `onError`, `setValidationScope()`, `isSubmittedBy()`.
+
+- **Typ hodnot je typový parametr:** `new Form<CreateTask>()` s DTO vygenerovaným z PHP (rozhodl autor). Názvy prvků i jejich druh hlídá kompilátor, `onSuccess` dostane DTO. Že formulář má prvek pro každé povinné pole DTO, kompilátor nezkontroluje.
+- **Validace v prohlížeči je pro uživatele, rozhoduje server.** Chyby `-32602` z `phlox-rpc-api` (`fields`: cesta → zpráva) se ukážou u prvků, první část cesty (název parametru, třeba `input`) se odřízne. Pravidla se tedy píšou dvakrát, ale rozejití je jen nepohodlí. Převzít pravidla z OpenRPC (`required`, `minimum`, `enum`) je možné později.
+- **Hodnoty mají tvar, jaký čeká DTO:** číslo nebo `null` u čísel, datum jako text `RRRR-MM-DD`, položky výběru s celočíselnými klíči jako čísla (jako pole v PHP).
+- **Pravidla jen u vyplněného prvku, první chyba prvku, zakázaný prvek se nekontroluje** – stejně jako v Nette.
+- **Výchozí hlášky jsou anglicky** jako v Nette a jdou přepsat přes `Form.messages`. `Translator` se do formuláře nepředává: s typovanými klíči si aplikace hlášky přeloží sama přes `t()`.
+- **Kontrola během psaní** začne po opuštění pole nebo po první chybě. Dřív by uživatele rušila už u prvního písmene.
+- **`toggle()`** přepíná atribut `hidden` u prvku s daným id, nejdřív ho hledá uvnitř formuláře.
+- **`<form noValidate>`:** pravidla kontroluje formulář sám, bubliny prohlížeče by se s ním tloukly. Atribut `required` u prvků zůstává kvůli čtečkám obrazovky.
+- **Rozšiřitelnost:** vlastní prvek je potomek `FormControl<T>` přidaný přes `addControl()`. Na tom budou stát combobox, dropdownlist a taginput, přepsané podle `phlox-combobox` a dalších (stejné CSS třídy, ovládání a ARIA, data přes funkci místo URL).
+
+**Zatím chybí:** vnořené kontejnery (`addContainer()`) pro DTO s objekty a seznamy, nahrávání souborů a převzetí pravidel z OpenRPC.
+
 ## Síť: RPC (implementováno, čeká na review)
 
 `src/net/` (import `phlox-js/net`): klient `RpcClient` pro `phlox-rpc-api` a generátor typů z OpenRPC.
@@ -398,6 +415,8 @@ Kód: `ui/component.ts`, `ui/presenter.ts`, `ui/dialog.ts`, `application/router.
 
 - **Okno dodává služba `Dialogs`,** výchozí `NativeDialogs` používá `<dialog>`. Kendo adaptér ji v kontejneru nahradí.
 - **Routovaný dialog** se zavírá přes `history.back()`, pokud je v historii předchozí záznam aplikace (pozná se podle čítače v `history.state`). Jinak se URL nahradí cestou presenteru.
+- **Dialog z dialogu:** routovaný dialog, který je `Presenter`, zpracuje zbytek URL svými routami, takže jeho routa může otevřít další dialog. Router pro to nemá zvláštní větev. Ověřeno testy (tři úrovně, Zpět, přímý odkaz, přechod mezi úrovněmi) a v ukázce v prohlížeči. Autor to potřebuje pro CMS.
+- **`closed` dostane každý zavřený dialog,** i když zmizí s dialogem pod sebou nebo s presenterem, ze kterého se odchází. Zavírá se od nejvyššího dolů. Dřív se to dělo jen u dialogu, jehož vlastní routa se změnila, a vnořené dialogy o svém zavření nevěděly.
 - **Dialog, jehož `startup()` selže,** zruší celou navigaci (viz nedělitelnost). Odkaz na smazaný záznam má ošetřit akce presenteru nebo dialog sám.
 
 ### Co zatím chybí

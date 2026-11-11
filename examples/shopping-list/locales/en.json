@@ -6,6 +6,7 @@
   "list": {
     "placeholder": "What to buy?",
     "add": "Add",
+    "required": "Write what to buy.",
     "delete": "Delete",
     "empty": "The list is empty.",
     "remaining": {
@@ -19,8 +20,11 @@
   "edit": {
     "title": "Edit item",
     "name": "Name",
+    "required": "Fill in the name.",
+    "tooLong": "The name can have at most %d characters.",
     "saved": "Saved.",
-    "missing": "Item {id} does not exist."
+    "missing": "Item {id} does not exist.",
+    "history": "History of the name"
   },
   "confirm": {
     "title": "Confirmation",
@@ -29,10 +33,26 @@
   },
   "common": {
     "save": "Save",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "close": "Close"
   },
   "about": {
     "title": "About",
     "text": "A demo of the <strong>PhloxJS</strong> framework: presenters, routing down to dialogs and translations."
+  },
+  "history": {
+    "title": "History of changes",
+    "empty": "No changes.",
+    "created": "Created as “{name}”",
+    "renamed": "“{from}” → “{to}”"
+  },
+  "change": {
+    "title": "Change of the name",
+    "when": "When",
+    "from": "Previous name",
+    "to": "New name",
+    "restore": "Restore the previous name",
+    "restored": "The name was restored to “{name}”.",
+    "missing": "No such change."
   }
 }

@@ -6,6 +6,7 @@
   "list": {
     "placeholder": "Co koupit?",
     "add": "Přidat",
+    "required": "Napište, co koupit.",
     "delete": "Smazat",
     "empty": "Seznam je prázdný.",
     "remaining": {
@@ -19,8 +20,11 @@
   "edit": {
     "title": "Úprava položky",
     "name": "Název",
+    "required": "Vyplňte název.",
+    "tooLong": "Název může mít nejvýš %d znaků.",
     "saved": "Uloženo.",
-    "missing": "Položka {id} neexistuje."
+    "missing": "Položka {id} neexistuje.",
+    "history": "Historie změn názvu"
   },
   "confirm": {
     "title": "Potvrzení",
@@ -29,10 +33,26 @@
   },
   "common": {
     "save": "Uložit",
-    "cancel": "Zrušit"
+    "cancel": "Zrušit",
+    "close": "Zavřít"
   },
   "about": {
     "title": "O aplikaci",
     "text": "Ukázka frameworku <strong>PhloxJS</strong>: presentery, routování až do dialogů a překlady."
+  },
+  "history": {
+    "title": "Historie změn",
+    "empty": "Bez změn.",
+    "created": "Vytvořeno jako „{name}“",
+    "renamed": "„{from}“ → „{to}“"
+  },
+  "change": {
+    "title": "Změna názvu",
+    "when": "Kdy",
+    "from": "Původní název",
+    "to": "Nový název",
+    "restore": "Vrátit původní název",
+    "restored": "Název vrácen na „{name}“.",
+    "missing": "Taková změna neexistuje."
   }
 }

@@ -165,3 +165,138 @@ describe('dialog of a route', () => {
     expect(windows()).toHaveLength(0);
   });
 });
+
+describe('dialogs opened from dialogs, all with URL', () => {
+  const log: string[] = [];
+
+  class Change extends Component<{ id: number; index: number }, boolean> {
+    override title() { return `Change ${this.props.index}`; }
+    render() { return <button id="restore" onClick={() => this.close(true)}>restore</button>; }
+  }
+
+  class History extends Presenter<{ id: number }, boolean> {
+    override routes: Route[] = [
+      { name: 'default', pattern: '/' },
+      {
+        name: 'change',
+        pattern: '/<index \\d+>',
+        dialog: ({ index }) => [Change, { id: this.props.id, index: Number(index) }],
+        closed: restored => { log.push(`change closed ${restored}`); },
+      },
+    ];
+    override title() { return `History ${this.props.id}`; }
+    render() { return <a id="change-link" href={this.link('change', { index: 2 })}>change 2</a>; }
+  }
+
+  class Item extends Presenter<{ id: number }, boolean> {
+    override routes: Route[] = [
+      { name: 'default', pattern: '/' },
+      {
+        name: 'history',
+        pattern: '/history',
+        dialog: () => [History, { id: this.props.id }],
+        closed: changed => { log.push(`history closed ${changed}`); },
+      },
+    ];
+    override title() { return `Item ${this.props.id}`; }
+    render() { return <a id="history-link" href={this.link('history')}>history</a>; }
+  }
+
+  class Items extends Presenter {
+    override routes: Route[] = [
+      { name: 'default', pattern: '/' },
+      {
+        name: 'item',
+        pattern: '/<id \\d+>',
+        dialog: ({ id }) => [Item, { id: Number(id) }],
+        closed: saved => { log.push(`item closed ${saved}`); },
+      },
+    ];
+    render() { return <h1>items</h1>; }
+  }
+
+  class App extends Presenter {
+    override routes: Route[] = [{ name: 'items', pattern: '/items', presenter: Items }];
+    render() { return <RouteFrame />; }
+  }
+
+  const titles = () => windows().map(dialog => dialog.querySelector('h2')!.textContent);
+
+  test('links inside dialogs open the next one, each level adds a part of the URL', async () => {
+    log.length = 0;
+    const { element, go } = await boot(App, '/items');
+    await go('/items/5');
+    press('#history-link');
+    await tick();
+    expect(location.pathname).toBe('/items/5/history');
+    press('#change-link');
+    await tick();
+    expect(location.pathname).toBe('/items/5/history/2');
+    expect(titles()).toEqual(['Item 5', 'History 5', 'Change 2']);
+    expect(element.querySelector('h1')!.textContent).toBe('items');
+  });
+
+  test('closing the top one goes one level back and hands its result to the level below', async () => {
+    log.length = 0;
+    const { go } = await boot(App, '/items');
+    await go('/items/5');
+    await go('/items/5/history');
+    await go('/items/5/history/2');
+    press('#restore');
+    await tick();
+    expect(location.pathname).toBe('/items/5/history');
+    expect(titles()).toEqual(['Item 5', 'History 5']);
+    expect(log).toEqual(['change closed true']);
+  });
+
+  test('the Back button closes them one by one', async () => {
+    log.length = 0;
+    const { go } = await boot(App, '/items');
+    await go('/items/5');
+    await go('/items/5/history');
+    await go('/items/5/history/2');
+    history.back();
+    await tick();
+    expect(titles()).toEqual(['Item 5', 'History 5']);
+    history.back();
+    await tick();
+    expect(titles()).toEqual(['Item 5']);
+    history.back();
+    await tick();
+    expect(titles()).toEqual([]);
+    expect(log).toEqual(['change closed undefined', 'history closed undefined', 'item closed undefined']);
+  });
+
+  test('a direct link opens all three, closing then replaces the URL level by level', async () => {
+    log.length = 0;
+    await boot(App, '/items/5/history/2');
+    expect(titles()).toEqual(['Item 5', 'History 5', 'Change 2']);
+    const entries = history.length;
+    press('#restore');
+    await tick();
+    expect(location.pathname).toBe('/items/5/history');
+    expect(titles()).toEqual(['Item 5', 'History 5']);
+    expect(history.length).toBe(entries);
+  });
+
+  test('going to a lower level closes the dialogs above it, leaving closes all', async () => {
+    log.length = 0;
+    const { go } = await boot(App, '/items/5/history/2');
+    await go('/items/5');
+    expect(titles()).toEqual(['Item 5']);
+    expect(log).toEqual(['change closed undefined', 'history closed undefined']);
+    await go('/items/5/history/3');
+    expect(titles()).toEqual(['Item 5', 'History 5', 'Change 3']);
+    await go('/items');
+    expect(titles()).toEqual([]);
+  });
+});
+
+describe('leaving a presenter with an open routed dialog', () => {
+  test('the closed handler of the dialog still learns about it', async () => {
+    List.results = [];
+    const { go } = await boot(Root, '/list/15');
+    await go('/');
+    expect(List.results).toEqual([undefined]);
+  });
+});
