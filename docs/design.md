@@ -365,6 +365,28 @@ Přebírá se princip z Nette, ne kód z TraceJS: `User`, `Identity`, abstraktn�
 
 **Zatím chybí:** převzetí pravidel z OpenRPC.
 
+## Grid (implementováno, čeká na review)
+
+`components/grid.ts` (model), `components/gridview.tsx` (vykreslení), testy `tests/grid.test.tsx`, ukázka `examples/grid`. Podle `phloxcz/components-grid` (`phlox-grid`): stejné třídy `phx-grid-*`, Bootstrap mapa, CSS bez pevných barev a funkce (řazení ve třech stavech, hledání, filtry text, výběr, vícenásobný výběr, rozsah, ano a ne, výběr ze serveru, stránky s volbou počtu, akce na řádku a v menu, hromadné akce, součty, šířka, pořadí a viditelnost sloupců).
+
+- **Dotaz ve formátu phloxcz/api-query** (rozhodl autor), tedy Kendo UI: grid jde napojit rovnou na API bez převodu. Data v prohlížeči zpracuje `applyQuery()` stejnými pravidly, takže lokální grid a serverový se chovají stejně a ukázka v ní má „server“.
+- **Součty ve formátu Kendo** (`aggregate` v dotazu, `aggregates` v odpovědi). phlox-api-query je zatím neumí; formát Kendo je pro jejich doplnění na serveru nejpřirozenější. PHP grid je počítá nad celým vyfiltrovaným výběrem, ne nad stránkou, a stejně tak tady.
+- **Sloupce řetězením metod** jako v PHP a ve formulářích, názvy hlídá kompilátor podle typu řádku. Obsah buňky je šablona, ne HTML text jako v PHP.
+- **Filtr v URL jako text** (`f.price=100..300`, `f.category=Knihy,Sport`): čitelný odkaz. Na typ ho převede sloupec (číslo, ano a ne, hodnota položky).
+- **Změny jdou přes URL,** když je grid svázaný (`bind`): kliknutí naviguje, router změní parametry a grid podle nich načte. Jeden směr toku dat, Zpět a Vpřed tak fungují bez další logiky.
+- **Šířky:** první změna změří všechny sloupce naráz a přepne tabulku na `table-layout: fixed` s šířkou rovnou součtu. Ověření v prohlížeči ukázalo dvě chyby: s šířkou 100 % se volné místo rozdělilo mezi sloupce a sloupec rostl méně, než se táhlo; a měření po jednom přepnulo rozložení dřív, než se změřily ostatní sloupce. Buňky mají `box-sizing: border-box`, jinak výchozí téma (bez globálního `border-box` jako Bootstrap) přičetlo k šířce odsazení.
+- **Tažení sloupců a změna šířky** stojí na `ui/drag.ts` jako řazení a strom: posun u okraje, Escape zruší. Tažení začne po 5 px, kratší pohyb je klik a řadí. Pro klávesnici jsou v menu Sloupce tlačítka ← →.
+- **Panely (filtry, menu, sloupce) `fixed`** a zarovnané do okna: v `table-responsive` s `overflow-x` by je `absolute` ořízlo.
+- **Potvrzení přes `Grid.confirm`,** ve výchozím stavu `window.confirm`, aby šel napojit dialog aplikace nebo capify bez závislosti gridu na nich.
+- **Ikony jsou malé SVG** v kódu, PHP verze čeká Bootstrap Icons, které framework nemá.
+- **Předvolby (uložené stavy) z PHP verze nejsou:** stav je v URL, takže předvolbou je záložka nebo odkaz. Když budou potřeba pojmenované, dají se doplnit nad URL a `localStorage`.
+
+**Kde je stav (rozhodl autor):**
+
+- **V URL:** stránka, řazení, hledání a filtry, tedy „na co se dívám“. Odkaz jde poslat a ukáže totéž, Zpět a Vpřed vracejí předchozí stav, obnovení stránky ho drží.
+- **V `localStorage`:** šířka a pořadí sloupců, tedy „jak to mám rád“. Je to osobní nastavení, do odkazu nepatří a platí napříč záložkami.
+- **Žádné záložní obnovení ze `sessionStorage`:** seznam otevřený odkazem bez parametrů (z menu) začíná čistý. Úložiště by se s URL přetahovalo: Zpět by vrátilo jinou URL, ale stejný uložený stav.
+
 ## Strom (implementováno, čeká na review)
 
 `components/tree.ts` (model), `components/treeview.tsx` (vykreslení), `ui/drag.ts` (společný základ tažení), testy `tests/tree.test.tsx`, ukázka `examples/tree`. Podle `phloxcz/components-tree`: stejné HTML, třídy `pt-*`, CSS bez pevných barev, Bootstrap mapa a chování (líné načítání, čáry, pamatování rozbalení, přetahování před, za a dovnitř, návrat po chybě, picker).
@@ -504,20 +526,15 @@ class UsersPresenter extends Presenter {
 
 Místo tvarů se dvojtečkou z `routeTo` jsou tři jednoduché: `link('detail', { id })` na routu presenteru, `link('this', { page: 2 })` na aktuální stránku a `link('/settings/users')` absolutně. Výsledkem je skutečná URL v `<a href>`, kliknutí zachytí router. Funguje tak otevření v novém panelu, což `href="#"` z Tracedu neumí. Podoba parametrů přes více úrovní se upřesní při implementaci.
 
-### Persistentní parametry (zatím není implementováno)
+### Persistentní parametry (implementováno, čeká na review)
 
-Dnes dostane query parametry akce koncového presenteru a mění se přes `link('this', { page: 2 })`. Návrh:
+`persistent: string[]` na presenteru, čte je `Router.link()`. Testy v `tests/router.test.tsx`. Vznikly pro grid (rozhodl autor: obecně pro presentery, ne jen pro grid).
 
-`page = persistent('page', 1)` je `state` svázaný s query parametrem URL.
-
-- **Typ** se odvodí z výchozí hodnoty, nesmyslná hodnota z URL se změní na výchozí.
-- **Výchozí hodnota** se do URL nepíše, jako v Nette.
-- **`0` a prázdný text** jsou platné hodnoty (regresní test na chybu z TraceJS).
-- **Změna** je navigace jako v Nette: zapíše se do historie a znovu spustí aktuální akci. Pro psaní do filtru je volba bez zápisu do historie.
-- **Platnost:** parametr žije, dokud je jeho vlastník ve stromu.
-- **Stejný název** u dvou živých vlastníků je ve vývoji chyba.
-
-**Neověřeno praxí:** aplikace v Tracedu persistentní parametry nepoužívá (v `client/src` není `configurePersistentParameters`) a autor je v JS nejspíš nepoužil. Návrh vychází z Nette. První ověření přinese kanban a podle něj se upraví nebo odloží.
+- **Jen seznam názvů, ne typovaný `state` na parametr,** jak navrhoval původní text tady. Stav a jeho převod z textu má ten, kdo parametry používá (grid, akce presenteru), framework jen zařídí, aby je odkazy nesly. Je to menší a nemíchá dvě místa, kde by žil tentýž stav.
+- **Platí pro odkazy presenteru a presenterů pod ním** na jejich routy, jako v Nette pro odkazy na stejný presenter. `link('this')` nesl celé query už předtím, absolutní cesta neopouští aktuální presenter jen náhodou, a proto nenese nic.
+- **Název s `*`** (`'f.*'`) kvůli filtrům gridu, jejichž názvy závisejí na sloupcích.
+- **Zavření routovaného dialogu po přímém odkazu** vede na URL presenteru s jeho persistentními parametry. Jinak by se grid pod dialogem vrátil na první stránku bez filtrů.
+- **Výchozí hodnoty do URL nepíše ten, kdo parametr nastavuje** (grid vynechá `page=1`), framework hodnoty nezná.
 
 ### `<view-frame>` (rozhodnuto)
 

@@ -647,3 +647,362 @@ a.pt-label {
   padding-right: 1.5rem;
 }
 
+/* Grid: the layout of phloxcz/components-grid, the same in every theme */
+.phx-grid-wrapper {
+  position: relative;
+}
+
+.phx-grid-header {
+  margin-bottom: .5rem;
+}
+
+.phx-grid-toolbar-gap {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .5rem;
+}
+
+.phx-grid-search-group {
+  flex: 1 1 12rem;
+  width: auto;
+}
+
+.phx-grid-search-input {
+  width: 100%;
+}
+
+.phx-grid-table-wrapper {
+  overflow-x: auto;
+}
+
+.phx-grid-table {
+  width: 100%;
+  transition: opacity calc(.15s * var(--phlox-motion)) ease;
+}
+
+.phx-grid-table.phx-grid-loading {
+  opacity: .45;
+}
+
+.phx-grid-table-fixed {
+  table-layout: fixed;
+  max-width: none;
+}
+
+/* A width is the whole cell with its padding, as measured, in every theme (Bootstrap sets it for all) */
+.phx-grid-table th,
+.phx-grid-table td {
+  box-sizing: border-box;
+}
+
+.phx-grid-table-fixed td,
+.phx-grid-table-fixed th {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.phx-grid-table-fixed .phx-grid-filter-th {
+  overflow: visible;
+}
+
+/* Checkboxes and buttons are not text, they get no ellipsis */
+.phx-grid-table-fixed .phx-grid-th-check,
+.phx-grid-table-fixed .phx-grid-td-check,
+.phx-grid-table-fixed .phx-grid-td-actions {
+  text-overflow: clip;
+  padding-inline: .25rem;
+}
+
+.phx-grid-th {
+  position: relative;
+  vertical-align: middle;
+}
+
+.phx-grid-th.phx-grid-sortable {
+  white-space: nowrap;
+}
+
+.phx-grid-sort-link {
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+  max-width: 100%;
+  font: inherit;
+  font-weight: 600;
+  color: inherit;
+  text-align: start;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+.phx-grid-sort-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+.phx-grid-filter-cell-wrap {
+  display: flex;
+  align-items: center;
+  gap: .15rem;
+}
+
+.phx-grid-filter-cell-wrap > :first-child {
+  flex: 1;
+  min-width: 0;
+}
+
+.phx-grid-filter-input,
+.phx-grid-ms-trigger {
+  width: 100%;
+  min-width: 0;
+}
+
+.phx-grid-filter-clear,
+.phx-grid-filter-clear-btn {
+  display: inline-flex;
+  flex-shrink: 0;
+  line-height: 1;
+  color: inherit;
+  opacity: .5;
+}
+
+.phx-grid-filter-clear-btn {
+  padding: .25rem;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.phx-grid-filter-clear:hover:not(:disabled),
+.phx-grid-filter-clear-btn:hover:not(:disabled) {
+  opacity: 1;
+}
+
+.phx-grid-filter-clear:disabled,
+.phx-grid-filter-clear-btn:disabled {
+  opacity: .2;
+  cursor: default;
+}
+
+.phx-grid-ms-trigger {
+  display: flex;
+  align-items: center;
+  text-align: start;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.phx-grid-ms-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.phx-grid-ms-more {
+  font-size: .75em;
+  opacity: .7;
+}
+
+.phx-grid-popup,
+.phx-grid-ms-dropdown,
+.phx-grid-action-menu,
+.phx-grid-coltoggle-menu {
+  min-width: 10rem;
+  width: max-content;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.phx-grid-ms-item,
+.phx-grid-coltoggle-label {
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.phx-grid-coltoggle-item {
+  display: flex;
+  align-items: center;
+  gap: .25rem;
+}
+
+.phx-grid-coltoggle-label {
+  flex: 1;
+}
+
+.phx-grid-coltoggle-move {
+  padding: 0 .35rem;
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.phx-grid-coltoggle-move:hover {
+  border-color: currentColor;
+}
+
+.phx-grid-ms-footer {
+  padding: .35rem .5rem;
+}
+
+.phx-grid-range-wrap {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: .25rem .4rem;
+  padding: .4rem .5rem;
+}
+
+.phx-grid-range-label {
+  font-size: .75rem;
+  opacity: .7;
+  white-space: nowrap;
+}
+
+.phx-grid-range-input {
+  min-width: 0;
+  width: 100%;
+}
+
+.phx-grid-actions {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: .2rem;
+}
+
+.phx-grid-action-menu a,
+.phx-grid-action-menu button {
+  display: block;
+  width: 100%;
+  text-align: start;
+}
+
+.phx-grid-th-check,
+.phx-grid-td-check {
+  width: 2.25rem;
+  text-align: center;
+}
+
+.phx-grid-th-actions {
+  width: 1%;
+}
+
+.phx-grid-td-actions {
+  white-space: nowrap;
+}
+
+/* More specific than the cells of a theme, which align to the start */
+th.phx-grid-align-end,
+td.phx-grid-align-end {
+  text-align: end;
+}
+
+th.phx-grid-align-center,
+td.phx-grid-align-center {
+  text-align: center;
+}
+
+th.phx-grid-align-end .phx-grid-sort-link {
+  flex-direction: row-reverse;
+}
+
+.phx-grid-bulk-bar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.phx-grid-footer-label {
+  display: block;
+  font-size: .7em;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  opacity: .7;
+}
+
+.phx-grid-pagination-right,
+.phx-grid-per-page {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .5rem;
+}
+
+.phx-grid-per-page {
+  flex-wrap: nowrap;
+}
+
+.phx-grid-per-page-label {
+  opacity: .7;
+  white-space: nowrap;
+}
+
+.phx-grid-per-page-select {
+  width: auto;
+}
+
+/* A DropDownList in the filter row is as small as the other filters */
+.phx-grid-filter-th .dropdownlist-trigger {
+  padding: 2px 8px;
+}
+
+.phx-grid-filter-th .dropdownlist-bs-trigger {
+  padding: .25rem 2.25rem .25rem .5rem;
+  font-size: .875rem;
+  border-radius: var(--bs-border-radius-sm);
+}
+
+.phx-grid-resize-handle {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 6px;
+  cursor: col-resize;
+  touch-action: none;
+  z-index: 5;
+}
+
+.phx-grid-resize-handle:hover,
+.phx-grid-resize-handle.phx-grid-resizing {
+  background: color-mix(in srgb, currentColor 20%, transparent);
+}
+
+.phx-grid-wrapper.phx-grid-col-resizing,
+.phx-grid-wrapper.phx-grid-col-resizing * {
+  cursor: col-resize !important;
+  user-select: none;
+}
+
+th.phx-grid-drag-source {
+  opacity: .4;
+}
+
+th.phx-grid-drag-over-left {
+  box-shadow: inset 3px 0 0 0 var(--phx-grid-drag-color, var(--bs-primary, Highlight));
+}
+
+th.phx-grid-drag-over-right {
+  box-shadow: inset -3px 0 0 0 var(--phx-grid-drag-color, var(--bs-primary, Highlight));
+}
+
+.phx-grid-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

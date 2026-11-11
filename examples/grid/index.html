@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="data:,">
+  <title>Objednávky</title>
+  <style>
+    body { font: 15px/1.5 system-ui, sans-serif; max-width: 72rem; margin: 2rem auto; padding: 0 1rem; }
+    h1 { font-size: 1.5rem; }
+    .hint { color: GrayText; font-size: .875em; margin-top: 1rem; }
+    .detail { display: grid; grid-template-columns: auto 1fr; gap: .25rem 1rem; margin: 0; }
+    .detail dt { color: GrayText; }
+    .detail dd { margin: 0; }
+    /* Light or dark is set by the switch at the bottom, see examples/shared/appearance.tsx */
+    .appearance { display: flex; flex-wrap: wrap; gap: .5rem 1rem; margin-top: 2rem; font-size: .875em; }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+  <script type="module" src="./main.ts"></script>
+</body>
+</html>

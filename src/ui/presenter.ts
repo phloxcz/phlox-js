@@ -44,6 +44,13 @@ export abstract class Presenter<P extends object = {}, R = void> extends Compone
   /** Routes of the presenter, tried in this order. */
   routes: Route[] = [];
 
+  /**
+   * Query parameters the links of this presenter and of those below it keep, like #[Persistent] in Nette:
+   * with ['page'], link('detail', { id: 5 }) on ?page=2 leads to /5?page=2. A name ending with * stands
+   * for all that start with it, e.g. 'filter.*'. A parameter given to link() wins, null leaves it out.
+   */
+  persistent: string[] = [];
+
   /** Name of the current route, null when no route matches. */
   readonly route = state<string | null>(null);
 

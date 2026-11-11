@@ -502,3 +502,146 @@
   border-color: var(--phlox-error);
 }
 
+/* Grid */
+
+.phx-grid-table {
+  border-collapse: collapse;
+}
+
+.phx-grid-th,
+.phx-grid-td {
+  padding: .4rem .6rem;
+  border-bottom: 1px solid color-mix(in srgb, GrayText 40%, transparent);
+  text-align: start;
+}
+
+.phx-grid-th {
+  background: color-mix(in srgb, CanvasText 5%, Canvas);
+}
+
+.phx-grid-filter-th {
+  padding: .3rem .4rem;
+  background: color-mix(in srgb, CanvasText 3%, Canvas);
+  border-bottom: 1px solid color-mix(in srgb, GrayText 40%, transparent);
+}
+
+.phx-grid-th.phx-grid-sorted {
+  background: color-mix(in srgb, Highlight 12%, Canvas);
+}
+
+.phx-grid-table tbody tr:hover {
+  background: color-mix(in srgb, CanvasText 4%, transparent);
+}
+
+.phx-grid-row-selected,
+.phx-grid-table tbody tr.phx-grid-row-selected:hover {
+  background: color-mix(in srgb, Highlight 14%, transparent);
+}
+
+.phx-grid-td-footer {
+  border-top: 2px solid color-mix(in srgb, GrayText 50%, transparent);
+  border-bottom: 0;
+}
+
+.phx-grid-no-data {
+  padding: 2rem;
+  text-align: center;
+  color: GrayText;
+}
+
+.phx-grid-bool-no {
+  color: GrayText;
+}
+
+.phx-grid-danger {
+  color: var(--phlox-error);
+}
+
+.phx-grid-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: .5rem;
+  margin-top: .5rem;
+}
+
+.phx-grid-pagination-info {
+  color: GrayText;
+}
+
+.phx-grid-page-list {
+  display: flex;
+  gap: .2rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.phx-grid-page-link {
+  min-width: 2rem;
+  padding: .2rem .5rem;
+  font: inherit;
+  color: ButtonText;
+  background: ButtonFace;
+  border: 1px solid ButtonBorder;
+  border-radius: var(--phlox-radius);
+  cursor: pointer;
+}
+
+.phx-grid-page-active .phx-grid-page-link {
+  color: HighlightText;
+  background: Highlight;
+  border-color: Highlight;
+}
+
+.phx-grid-page-disabled .phx-grid-page-link {
+  opacity: .45;
+  cursor: default;
+}
+
+.phx-grid-popup {
+  padding: .25rem 0;
+  color: CanvasText;
+  background: Canvas;
+  border: 1px solid ButtonBorder;
+  border-radius: var(--phlox-radius);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, .15);
+}
+
+.phx-grid-ms-item,
+.phx-grid-coltoggle-item {
+  padding: .2rem .6rem;
+}
+
+.phx-grid-menu-item {
+  padding: .3rem .8rem;
+  font: inherit;
+  color: inherit;
+  text-decoration: none;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.phx-grid-menu-item:hover,
+.phx-grid-menu-item:focus-visible,
+.phx-grid-ms-item:hover {
+  background: color-mix(in srgb, Highlight 15%, transparent);
+}
+
+.phx-grid-ms-apply {
+  width: 100%;
+}
+
+.phx-grid-bulk {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .5rem;
+  padding: .4rem .6rem;
+  background: color-mix(in srgb, Highlight 10%, Canvas);
+  border: 1px solid color-mix(in srgb, Highlight 30%, transparent);
+  border-radius: var(--phlox-radius);
+  margin-bottom: .5rem;
+}

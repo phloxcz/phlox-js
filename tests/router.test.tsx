@@ -191,6 +191,25 @@ describe('links', () => {
     expect(detail.params().number).toBe('A/7');
   });
 
+  test('persistent parameters stay in links of the presenter and of those below it', async () => {
+    const { app, go } = await boot(App, '/users/15/orders?page=2&sort=name&filter.state=open&tab=x');
+    const users = app.presenter!.child() as Users;
+    const detail = users.child() as UserDetail;
+    users.persistent = ['page', 'filter.*'];
+    detail.persistent = ['sort'];
+
+    expect(users.link('detail', { id: 7 })).toBe('/users/7?page=2&filter.state=open');
+    expect(users.link('detail', { id: 7, page: 1 })).toBe('/users/7?page=1&filter.state=open');
+    expect(users.link('detail', { id: 7, page: null })).toBe('/users/7?filter.state=open');
+    // The presenter below keeps its own and those of the presenters above
+    expect(detail.link('orders')).toBe('/users/15/orders?page=2&sort=name&filter.state=open');
+    // Not to an absolute path, which leaves the presenter
+    expect(users.link('/about')).toBe('/about');
+
+    await go('/users/15');
+    expect(users.link('detail', { id: 7 })).toBe('/users/7');
+  });
+
   test('a click on a link navigates without a reload, other clicks are left to the browser', async () => {
     const { element } = await boot(App);
     const link = element.querySelector('#users')!;

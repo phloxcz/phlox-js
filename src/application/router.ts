@@ -138,7 +138,7 @@ export class Router {
 
     const route = presenter.routes.find(candidate => candidate.name === destination);
     if (!route) throw new Error(`${presenter.constructor.name} has no route '${destination}'.`);
-    const query = { ...params };
+    const query = { ...this.persistentOf(presenter), ...params };
     const path = route.pattern.replace(/<(\w+)[^>]*>/g, (_text, name: string) => {
       const value = params[name];
       // 0 and false are valid values
@@ -149,6 +149,18 @@ export class Router {
       return encodeURIComponent(String(value));
     });
     return joinUrl(presenter.basePath() + path, query);
+  }
+
+  /** Current values of the persistent parameters of the presenter and of the presenters above it. */
+  private persistentOf(presenter: AnyPresenter): LinkParams {
+    const names: string[] = [];
+    for (let owner: Component<any, any> | null = presenter; owner; owner = owner.parent) {
+      if (owner instanceof Presenter) names.push(...owner.persistent);
+    }
+    if (!names.length) return {};
+    const kept = (name: string) => names.some(pattern => (pattern.endsWith('*') ? name.startsWith(pattern.slice(0, -1)) : name === pattern));
+    const { query } = splitUrl(this.running ? this.running.url : this.url());
+    return Object.fromEntries(Object.entries(query).filter(([name]) => kept(name)));
   }
 
   private onPopState = (): void => {
@@ -339,7 +351,7 @@ export class Router {
    */
   private leaveDialog(presenter: AnyPresenter): void {
     if ((history.state?.phlox ?? 0) > 0) history.back();
-    else void this.navigate(untrack(presenter.basePath) || '/', { replace: true });
+    else void this.navigate(joinUrl(untrack(presenter.basePath) || '/', this.persistentOf(presenter)), { replace: true });
   }
 
   /** The old presenter is shut down while its view is still in the page. */
