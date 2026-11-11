@@ -28,7 +28,9 @@
     "history": "Historie změn názvu",
     "category": "Kategorie",
     "shop": "Obchod",
-    "shopPlaceholder": "Vyberte nebo napište"
+    "shopPlaceholder": "Vyberte nebo napište",
+    "labels": "Štítky",
+    "labelsPlaceholder": "Přidat štítek…"
   },
   "confirm": {
     "title": "Potvrzení",
@@ -62,5 +64,9 @@
   "dropdownlist": {
     "noResults": "Žádné výsledky",
     "search": "Vyhledat…"
+  },
+  "taginput": {
+    "createNew": "Vytvořit: ",
+    "remove": "Odebrat"
   }
 }

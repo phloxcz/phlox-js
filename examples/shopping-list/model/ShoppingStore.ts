@@ -7,9 +7,13 @@ export interface Item {
   category: number | null;
   /** A shop from SHOPS, or any other typed by the user. */
   shop: string | null;
+  labels: string[];
 }
 
 /** Suggested shops. A shop can also be typed, see the ComboBox in ItemEdit. */
+/** Suggested labels, the user can make new ones, see the TagInput in ItemEdit. */
+export const LABELS = ['bio', 'akce', 'sleva', 'na víkend', 'pro děti', 'bez lepku'];
+
 export const SHOPS = ['Albert', 'Billa', 'Globus', 'Kaufland', 'Lidl', 'Penny', 'Tesco'];
 
 /** Categories of items. In a real application they would be a table on the server. */
@@ -51,12 +55,12 @@ export class ShoppingStore {
   }
 
   async list(): Promise<Item[]> {
-    return this.data.items.map(item => ({ ...item, category: item.category ?? null, shop: item.shop ?? null }));
+    return this.data.items.map(item => ({ ...item, category: item.category ?? null, shop: item.shop ?? null, labels: item.labels ?? [] }));
   }
 
   async get(id: number): Promise<Item | null> {
     const item = this.data.items.find(other => other.id === id);
-    return item ? { ...item, category: item.category ?? null, shop: item.shop ?? null } : null;
+    return item ? { ...item, category: item.category ?? null, shop: item.shop ?? null, labels: item.labels ?? [] } : null;
   }
 
   async changes(id: number): Promise<Change[]> {
@@ -65,7 +69,7 @@ export class ShoppingStore {
 
   async add(name: string, category: number | null = null): Promise<void> {
     const id = ++this.data.lastId;
-    this.data.items.push({ id, name, done: false, category, shop: null });
+    this.data.items.push({ id, name, done: false, category, shop: null, labels: [] });
     this.data.changes[id] = [{ at: new Date().toISOString(), from: null, to: name }];
     this.save();
   }

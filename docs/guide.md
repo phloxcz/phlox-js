@@ -733,6 +733,7 @@ class TaskCreatePresenter extends Presenter {
 | `addMultiSelect`, `addCheckboxList` | pole hodnot položek |
 | `addDropDownList(name, label, options)` | jedna z hodnot položek nebo `null`, výběr s hledáním (viz DropDownList) |
 | `addComboBox(name, label, options)` | jedna z hodnot položek nebo `null`, textové pole s návrhy (viz ComboBox) |
+| `addTagInput(name, label, options)` | pole hodnot, štítky (viz TagInput) |
 | `addHidden(name, value)` | text |
 | `addSubmit(name, caption)` | tlačítko, mezi hodnotami není |
 
@@ -856,6 +857,58 @@ form.addComboBox('shop', 'Obchod:', { items: shops.map(shop => [shop, shop]), al
 - **Klávesnice:** šipky vybírají, Enter vybere zvýrazněnou položku. Bez zvýraznění Enter odešle formulář jako v každém textovém poli. Escape v otevřeném seznamu vrátí předchozí hodnotu, v zavřeném ho dostane dialog kolem.
 - **`items`, `search`, `label` a `placeholder`** fungují stejně jako u dropdownlistu, stejně se panel otáčí nahoru a hledá bez ohledu na diakritiku.
 - **Texty:** `ComboBox.texts.noResults`. **Vzhled:** místa `combobox.wrapper`, `combobox.input`, `combobox.dropdown`, `combobox.item`...
+
+### TagInput
+
+Více hodnot jako štítky, převzaté z [phloxcz/forms-taginput](https://github.com/phloxcz/forms-taginput). Pole v DTO musí být seznam.
+
+```ts
+// Kategorie podle ID, jen z návrhů
+form.addTagInput('categories', 'Kategorie:', { search: text => this.api.call('category.search', { text }) });
+
+// Textové štítky, nové vznikají z napsaného textu
+form.addTagInput('labels', 'Štítky:', { items: labels.map(label => [label, label]), allowNew: true, maxTags: 5 });
+```
+
+- **Návrhy se ukážou při psaní,** bez štítků, které už jsou přidané. S `allowNew` je posledním návrhem „Vytvořit: "text"“.
+- **Přidání štítku:** Enter nebo čárka vezme zvýrazněný nebo první návrh. Když se návrhy neukazují, vezme napsaný text: přesný název položky, nebo s `allowNew` nový štítek. Enter v tomto poli nikdy neodešle formulář, jako v PHP verzi.
+- **Odebrání:** křížek u štítku, nebo Backspace v prázdném poli odebere poslední.
+- **Duplicity** se nepřidají, u textu bez ohledu na velikost písmen a diakritiku.
+- **`maxTags`** omezí počet štítků. Pro chybovou hlášku použij pravidla `Form.MinLength` a `Form.MaxLength`, které u seznamu počítají štítky.
+- **Napsaný text, který nebyl potvrzený,** se na štítek převede až při odeslání formuláře, ne při opuštění pole.
+- **`getSplitValue()`** vrátí `{ picked, created }`: hodnoty vybrané z návrhů a texty nových štítků zvlášť, jako `getSplitValue()` v PHP.
+- **`allowNew`** kompilátor dovolí jen u seznamu, který může obsahovat text. Výchozí je vypnuté (v PHP zapnuté).
+- **Hodnoty z kódu:** `setValue([1, 2])`, popisky z položek nebo z `label`. Popisky ze serveru jdou předat rovnou: `setValue(ids, names)`.
+- **Texty:** `TagInput.texts.createNew`, `TagInput.texts.remove`. **Vzhled:** místa `taginput.container`, `taginput.tag`, `taginput.tagNew`, `taginput.option`...
+
+### Lokální a vzdálená data
+
+Dropdownlist, combobox i taginput berou data dvěma způsoby:
+
+| | `items` | `search` |
+|---|---|---|
+| **K čemu** | pevný seznam, filtruje se v prohlížeči | data ze serveru, filtruje server |
+| **Dropdownlist, combobox: otevření bez psaní** | ukáže celý seznam | zavolá `search('')`, server vrátí první záznamy (třeba 100) |
+| **Dropdownlist, combobox: při psaní** | filtruje hned | `search(text)` 250 ms po posledním stisku, starší odpověď se zahodí |
+| **Taginput** | návrhy až při psaní | `search(text)` až při psaní, s prázdným textem se nevolá |
+
+Volání s prázdným textem je záměrné, odpovídá `fetchData('')` v PHP knihovnách. Taginput ani v PHP nic nenabízí, dokud uživatel nepíše.
+
+**`search` vrací stejný tvar jako `items`:** dvojice `[hodnota, popisek]`, nebo objekt `{ id: popisek }`. Když API vrací objekty, převedou se v té funkci. Třeba s metodou `stats.tasks` z `phlox-api-sample`:
+
+```ts
+form.addDropDownList('taskId', 'Úkol:', {
+  search: async text => {
+    const page = await this.api.call('stats.tasks', { query: { search: text, pageSize: 100 } });
+    return page.data.map(task => [task.id!, task.name ?? ''] as const);
+  },
+  label: async id => (await this.api.call('task.read', { id })).name,   // pro uloženou hodnotu
+});
+```
+
+- **Hledání bez ohledu na diakritiku** platí jen pro `items`. U `search` záleží na serveru. Pro vlastní filtrování v JS je `foldText()` z `phlox-js/forms`.
+- **`label` je potřeba jen u `search`,** pro hodnotu nastavenou z kódu, která mezi načtenými záznamy není. U `items` se popisek najde v seznamu.
+- **Obojí najednou:** seznam bere `search`, `items` slouží jen k hledání popisků.
 
 ### Předvybraná hodnota ze vzdálených dat
 

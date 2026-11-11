@@ -335,3 +335,61 @@
   font-weight: 700;
   padding: 0;
 }
+
+/* TagInput – the classes of phloxcz/forms-taginput. Tag colors follow color-scheme of the page */
+
+.phlox-taginput--theme-default .phlox-taginput__container {
+  border: 1px solid GrayText;
+  border-radius: var(--phlox-radius);
+  background: Field;
+  color: FieldText;
+}
+
+.phlox-taginput--theme-default .phlox-taginput__container.phlox-taginput--focused {
+  outline: 2px solid Highlight;
+  outline-offset: 1px;
+}
+
+.phlox-taginput--theme-default .phlox-taginput__container.phlox-invalid {
+  border-color: var(--phlox-error);
+}
+
+.phlox-taginput--theme-default .phlox-tag-existing {
+  background-color: light-dark(#dbeafe, #1e3a5f);
+  color: light-dark(#1e40af, #bfdbfe);
+}
+
+.phlox-taginput--theme-default .phlox-tag-new {
+  background-color: light-dark(#dcfce7, #14532d);
+  color: light-dark(#166534, #bbf7d0);
+}
+
+.phlox-taginput--theme-default .phlox-taginput__dropdown {
+  padding: 4px 0;
+  background: Canvas;
+  color: CanvasText;
+  border: 1px solid ButtonBorder;
+  border-radius: var(--phlox-radius);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, .12);
+}
+
+.phlox-taginput--theme-default .phlox-taginput__option {
+  padding: 7px 14px;
+}
+
+.phlox-taginput--theme-default .phlox-taginput__option:hover,
+.phlox-taginput--theme-default .phlox-taginput__option--active {
+  background-color: Highlight;
+  color: HighlightText;
+}
+
+.phlox-taginput--theme-default .phlox-taginput__option--new:not(.phlox-taginput__option--active) {
+  color: light-dark(#166534, #86efac);
+}
+
+.phlox-taginput--theme-default .phlox-taginput__option mark {
+  background: transparent;
+  color: inherit;
+  font-weight: 700;
+  padding: 0;
+}

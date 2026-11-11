@@ -6,6 +6,8 @@ export type { ExtraAttributes, Items } from './controls';
 export { DropDownList } from './dropdownlist';
 export { ComboBox } from './combobox';
 export type { ComboBoxOptions } from './combobox';
+export { TagInput } from './taginput';
+export type { Tag, TagInputOptions } from './taginput';
 export { ListControl, foldText } from './listbox';
 export type { ListOptions } from './listbox';
 export type { DropDownListOptions } from './dropdownlist';

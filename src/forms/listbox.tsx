@@ -216,61 +216,66 @@ export abstract class ListControl<T> extends FormControl<T | null> {
     });
   }
 
-  /**
-   * Places the panel `fixed` next to the control. Unlike `absolute` in the PHP versions,
-   * a dialog or another scrolling container around it does not cut it off.
-   *
-   * It opens below. When the whole list would not fit there and there is more room above,
-   * it opens above. When it fits on neither side, the list gets shorter. The side is chosen by the
-   * full height of the list, not by the items shown now, so it does not jump while the user types.
-   * `list` is the scrolling part of the panel, or the panel itself.
-   */
+  /** Places the panel next to the control, see placePanel(). */
   protected place(panel: HTMLElement, list: HTMLElement): void {
-    const GAP = 2;
-    const update = () => {
-      const anchor = this.element?.getBoundingClientRect();
-      if (!anchor) return;
-
-      list.style.maxHeight = '';
-      const style = getComputedStyle(list);
-      // max-height limits the content of the list, its padding and border come on top of it
-      const listChrome = ['paddingTop', 'paddingBottom', 'borderTopWidth', 'borderBottomWidth']
-        .reduce((sum, name) => sum + (Number.parseFloat(style[name as 'paddingTop']) || 0), 0);
-      const rest = panel.offsetHeight - list.offsetHeight + listChrome;
-      const needed = rest + (Number.parseFloat(style.maxHeight) || 200);
-      const below = window.innerHeight - anchor.bottom - GAP * 2;
-      const above = anchor.top - GAP * 2;
-      const up = below < needed && above > below;
-      const room = up ? above : below;
-      if (room < needed) list.style.maxHeight = `${Math.max(room - rest, 60)}px`;
-
-      panel.dataset.placement = up ? 'top' : 'bottom';
-      Object.assign(panel.style, {
-        display: 'block',
-        position: 'fixed',
-        // Above, the panel is held by its bottom edge, so it stays at the control when the list gets shorter
-        top: up ? 'auto' : `${anchor.bottom + GAP}px`,
-        bottom: up ? `${window.innerHeight - anchor.top + GAP}px` : 'auto',
-        left: `${anchor.left}px`,
-        width: `${anchor.width}px`,
-        margin: '0',
-      });
-    };
-    update();
-    // The height of the panel is known once it is in the page (jsdom has no requestAnimationFrame)
-    if (typeof requestAnimationFrame === 'function') requestAnimationFrame(update);
-    else setTimeout(update);
-    window.addEventListener('scroll', update, true);
-    window.addEventListener('resize', update);
-    onCleanup(() => {
-      window.removeEventListener('scroll', update, true);
-      window.removeEventListener('resize', update);
-    });
+    placePanel(() => this.element, panel, list);
   }
 }
 
+/**
+ * Places the panel `fixed` next to the control. Unlike `absolute` in the PHP versions,
+ * a dialog or another scrolling container around it does not cut it off.
+ *
+ * It opens below. When the whole list would not fit there and there is more room above,
+ * it opens above. When it fits on neither side, the list gets shorter. The side is chosen by the
+ * full height of the list, not by the items shown now, so it does not jump while the user types.
+ * `list` is the scrolling part of the panel, or the panel itself.
+ */
+export function placePanel(anchorOf: () => Element | null, panel: HTMLElement, list: HTMLElement): void {
+  const GAP = 2;
+  const update = () => {
+    const anchor = anchorOf()?.getBoundingClientRect();
+    if (!anchor) return;
+
+    list.style.maxHeight = '';
+    const style = getComputedStyle(list);
+    // max-height limits the content of the list, its padding and border come on top of it
+    const listChrome = ['paddingTop', 'paddingBottom', 'borderTopWidth', 'borderBottomWidth']
+      .reduce((sum, name) => sum + (Number.parseFloat(style[name as 'paddingTop']) || 0), 0);
+    const rest = panel.offsetHeight - list.offsetHeight + listChrome;
+    const needed = rest + (Number.parseFloat(style.maxHeight) || 200);
+    const below = window.innerHeight - anchor.bottom - GAP * 2;
+    const above = anchor.top - GAP * 2;
+    const up = below < needed && above > below;
+    const room = up ? above : below;
+    if (room < needed) list.style.maxHeight = `${Math.max(room - rest, 60)}px`;
+
+    panel.dataset.placement = up ? 'top' : 'bottom';
+    Object.assign(panel.style, {
+      display: 'block',
+      position: 'fixed',
+      // Above, the panel is held by its bottom edge, so it stays at the control when the list gets shorter
+      top: up ? 'auto' : `${anchor.bottom + GAP}px`,
+      bottom: up ? `${window.innerHeight - anchor.top + GAP}px` : 'auto',
+      left: `${anchor.left}px`,
+      width: `${anchor.width}px`,
+      margin: '0',
+    });
+  };
+  update();
+  // The height of the panel is known once it is in the page (jsdom has no requestAnimationFrame)
+  if (typeof requestAnimationFrame === 'function') requestAnimationFrame(update);
+  else setTimeout(update);
+  window.addEventListener('scroll', update, true);
+  window.addEventListener('resize', update);
+  onCleanup(() => {
+    window.removeEventListener('scroll', update, true);
+    window.removeEventListener('resize', update);
+  });
+}
+
 /** The label with the searched text in <mark>, as text, never as HTML. Diacritics do not matter. */
-function highlight(label: string, query: string, markClass: string): Child {
+export function highlight(label: string, query: string, markClass: string): Child {
   const at = query ? foldText(label).indexOf(foldText(query)) : -1;
   if (at < 0) return label;
   return [

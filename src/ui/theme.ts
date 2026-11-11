@@ -61,6 +61,20 @@ const DEFAULT_CLASSES: Record<ThemeSlot, string> & Record<string, string> = {
   'combobox.itemSelected': 'combobox-selected',
   'combobox.noResults': 'combobox-no-results',
   'combobox.mark': '',
+  // The same classes as phloxcz/forms-taginput
+  'taginput.wrapper': 'phlox-taginput phlox-taginput--theme-default',
+  'taginput.container': 'phlox-taginput__container',
+  'taginput.input': 'phlox-taginput__input',
+  'taginput.tag': 'phlox-taginput__tag',
+  'taginput.tagExisting': 'phlox-tag-existing',
+  'taginput.tagNew': 'phlox-tag-new',
+  'taginput.tagRemove': 'phlox-taginput__tag-remove',
+  'taginput.dropdown': 'phlox-taginput__dropdown',
+  'taginput.option': 'phlox-taginput__option',
+  'taginput.optionActive': 'phlox-taginput__option--active',
+  'taginput.optionNew': 'phlox-taginput__option phlox-taginput__option--new',
+  'taginput.focused': 'phlox-taginput--focused',
+  'taginput.invalid': 'phlox-invalid',
 };
 
 /** Key under which the application provides its theme to everything it renders. */
@@ -134,6 +148,20 @@ export class BootstrapTheme extends Theme {
       'combobox.itemSelected': 'fw-semibold',
       'combobox.noResults': 'dropdown-item disabled text-muted fst-italic',
       'combobox.mark': 'fw-bold bg-transparent p-0',
+      // The same as THEME_BOOTSTRAP of phloxcz/forms-taginput
+      'taginput.wrapper': 'phlox-taginput phlox-taginput--theme-bootstrap',
+      'taginput.container': 'phlox-taginput__container form-control d-flex flex-wrap gap-1 align-items-center',
+      'taginput.input': 'phlox-taginput__input border-0 flex-grow-1 bg-transparent p-0',
+      'taginput.tag': 'phlox-taginput__tag d-inline-flex align-items-center gap-1 rounded-pill',
+      'taginput.tagExisting': 'badge text-bg-primary phlox-tag-existing',
+      'taginput.tagNew': 'badge text-bg-success phlox-tag-new',
+      'taginput.tagRemove': 'phlox-taginput__tag-remove btn-close btn-close-white',
+      'taginput.dropdown': 'phlox-taginput__dropdown dropdown-menu show',
+      'taginput.option': 'phlox-taginput__option dropdown-item',
+      'taginput.optionActive': 'active',
+      'taginput.optionNew': 'phlox-taginput__option phlox-taginput__option--new dropdown-item text-success',
+      'taginput.focused': 'phlox-taginput--focused',
+      'taginput.invalid': 'is-invalid',
     }, overrides);
   }
 }

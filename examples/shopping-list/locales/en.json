@@ -28,7 +28,9 @@
     "history": "History of the name",
     "category": "Category",
     "shop": "Shop",
-    "shopPlaceholder": "Pick or type"
+    "shopPlaceholder": "Pick or type",
+    "labels": "Labels",
+    "labelsPlaceholder": "Add a label…"
   },
   "confirm": {
     "title": "Confirmation",
@@ -62,5 +64,9 @@
   "dropdownlist": {
     "noResults": "No results",
     "search": "Search…"
+  },
+  "taginput": {
+    "createNew": "Create: ",
+    "remove": "Remove"
   }
 }

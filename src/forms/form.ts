@@ -10,6 +10,8 @@ import { DropDownList } from './dropdownlist';
 import type { DropDownListOptions } from './dropdownlist';
 import { ComboBox } from './combobox';
 import type { ComboBoxOptions } from './combobox';
+import { TagInput } from './taginput';
+import type { TagInputOptions } from './taginput';
 import { messages, validators } from './rules';
 import type { Validator } from './rules';
 
@@ -146,6 +148,17 @@ export class Form<V extends object = Record<string, any>> {
     options: ComboBoxOptions<NonNullable<V[K]>> & { allowCustom?: string extends V[K] ? boolean : false } = {},
   ): ComboBox<NonNullable<V[K]>> {
     return this.addControl(name, new ComboBox<NonNullable<V[K]>>(label, options));
+  }
+
+  /**
+   * Several values as tags, see TagInput. The field must be a list. `allowNew` makes tags of typed text,
+   * so it is allowed only for lists that can hold texts.
+   */
+  addTagInput<K extends ListKeys<V>>(
+    name: K, label = '',
+    options: TagInputOptions<ItemOf<V[K]>> & { allowNew?: string extends ItemOf<V[K]> ? boolean : false } = {},
+  ): TagInput<ItemOf<V[K]>> {
+    return this.addControl(name, new TagInput<ItemOf<V[K]>>(label, options));
   }
 
   addHidden(name: KeysFor<V, string>, value = ''): HiddenField {

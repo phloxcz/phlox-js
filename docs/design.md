@@ -277,6 +277,15 @@ Přebírá se princip z Nette, ne kód z TraceJS: `User`, `Identity`, abstraktn�
 - **`allowCustom` jen pro textová pole:** typ `addComboBox` ho jinde nedovolí.
 - **Výchozí vzhled v systémových barvách** jako zbytek výchozího tématu. `combobox.css` v PHP knihovně má pevné barvy a vlastní tmavý režim přes `prefers-color-scheme`, který na světlé stránce v tmavém systému nesedí. Třídy jsou stejné, takže by stálo za to sjednotit CSS i v `phlox-combobox`.
 
+**TagInput** (`forms/taginput.tsx`, testy `tests/taginput.test.tsx`) je přepsaný podle `phlox-taginput`: stejné třídy obou témat, CSS a ovládání (Enter, čárka, Backspace, šipky dokola, „Vytvořit:“). Rozdíly:
+
+- **Hodnota je `T[]`,** nové štítky jsou texty. `getSplitValue()` je dělí jako PHP. Příznak „nový“ PHP posílá serveru zvlášť (`{v, n}`), v SPA ho má prvek u sebe.
+- **`allowNew` je ve výchozím stavu vypnuté** (v PHP zapnuté), protože ho typ `addTagInput` dovolí jen u seznamu textů. Seznam ID by jinak výchozím nastavením přestal sedět na typ.
+- **Duplicity bez ohledu na diakritiku** (`foldText`), PHP porovnává jen velikost písmen.
+- **Nedopsaný text se převede na štítek při odeslání formuláře, ne při opuštění pole.** Ověření v prohlížeči ukázalo, že převod při opuštění pole o řádek zvětší formulář, tlačítko Uložit pod myší poskočí a klik skončí jinde.
+- **Panel se umisťuje stejně jako u dropdownlistu** (`placePanel` z `listbox.tsx`), podle obalu se štítky.
+- **Výchozí barvy štítků** přes `light-dark()` podle `color-scheme` stránky, PHP má `prefers-color-scheme`. Pro Bootstrap je navíc zvýraznění fokusu na obalu, protože fokus je v poli uvnitř `form-control`.
+
 **Předvybraná hodnota ze vzdálených dat:** `setValue(value, label)` přijme popisek, když ho data ze serveru mají (bez dotazu navíc, jako PHP verze při vykreslení). Uložená hodnota se v seznamu bez hledaného textu ukáže první, i když ji `search` nevrátil (třeba za limitem 100 záznamů).
 
 **Enter ve formuláři bez tlačítka pro odeslání:** prohlížeč odešle formulář Enterem jen s tlačítkem pro odeslání nebo s jediným textovým polem. Formulář v dialogu má Uložit v patičce, mimo `<form>`, a s druhým polem přestal Enter fungovat (zjištěno v prohlížeči). `FormTag` proto Enter v textovém poli odešle sám, pokud ho nevyužil prvek (výběr v seznamu volá `preventDefault`) a formulář nemá vlastní tlačítko.

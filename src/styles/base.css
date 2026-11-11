@@ -69,3 +69,98 @@ form [hidden] {
   padding: 4px 0;
   list-style: none;
 }
+
+/* TagInput – the same structure as phloxcz/forms-taginput, for every theme */
+
+.phlox-taginput {
+  position: relative;
+  display: block;
+}
+
+.phlox-taginput__container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .25rem;
+  align-items: center;
+  cursor: text;
+  min-height: 2.5rem;
+  padding: .375rem .5rem;
+  box-sizing: border-box;
+}
+
+.phlox-taginput__tag {
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.phlox-tag-existing,
+.phlox-tag-new {
+  border-radius: 999px;
+  padding: 2px 10px;
+  font-size: .8125rem;
+  line-height: 1.5;
+  font-weight: 500;
+  user-select: none;
+  border: none;
+}
+
+.phlox-taginput__tag-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: transparent;
+  border: none;
+  padding: 0;
+  line-height: 1;
+  color: inherit;
+  cursor: pointer;
+  flex-shrink: 0;
+  opacity: .6;
+}
+
+.phlox-taginput__tag-remove:hover {
+  opacity: 1;
+}
+
+.phlox-taginput__input {
+  border: none;
+  outline: none;
+  background: transparent;
+  flex: 1 1 120px;
+  min-width: 120px;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+}
+
+.phlox-taginput__dropdown,
+[data-phlox-taginput-dropdown] {
+  z-index: 1060;
+  max-height: 240px;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+.phlox-taginput__option {
+  cursor: pointer;
+  user-select: none;
+}
+
+.phlox-taginput__option--new::before {
+  content: '+ ';
+  font-weight: bold;
+}
+
+.phlox-taginput__container:has(.phlox-taginput__input:disabled) {
+  opacity: .65;
+  pointer-events: none;
+}
+
+/* Bootstrap: the container is a form-control, but the focus is in the field inside it */
+.phlox-taginput--theme-bootstrap .phlox-taginput__container.phlox-taginput--focused {
+  border-color: var(--bs-focus-ring-color, #86b7fe);
+  box-shadow: 0 0 0 .25rem rgba(var(--bs-primary-rgb, 13, 110, 253), .25);
+}
