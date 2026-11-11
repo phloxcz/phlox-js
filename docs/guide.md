@@ -4,7 +4,7 @@ Jak se s frameworkem pracuje. Popisuje jen to, co je už napsané a otestované.
 
 **Co zatím chybí:** persistentní parametry a adaptér pro Kendo.
 
-**Kde co je:** jádro (reaktivita, šablony, komponenty, presentery, aplikace, DI) se importuje z `phlox-js`. Volitelné části mají vlastní vstup: síť (RPC) `phlox-js/net`, přihlášení a oprávnění `phlox-js/security`, formuláře `phlox-js/forms`, překlady `phlox-js/localization` a Vite plugin `phlox-js/vite`.
+**Kde co je:** jádro (reaktivita, šablony, komponenty, presentery, aplikace, DI) se importuje z `phlox-js`. Volitelné části mají vlastní vstup: síť (RPC) `phlox-js/net`, přihlášení a oprávnění `phlox-js/security`, formuláře `phlox-js/forms`, překlady `phlox-js/localization` a Vite plugin `phlox-js/vite`. Napojení cizích knihoven (adaptéry) jsou pod `phlox-js/adapters/…`.
 
 Všechno níže je vidět pohromadě v ukázce [examples/shopping-list](../examples/shopping-list/main.ts).
 
@@ -353,18 +353,71 @@ Okno dodává služba `Dialogs`. Jinou implementaci, třeba nad Kendo Window, za
 ## Flash zprávy
 
 ```ts
-this.flashMessage('Uloženo.', 'success');   // v presenteru
+this.flashMessage('Uloženo.', 'success');                     // v presenteru
+this.flashMessage('Hotovo.', 'info', { duration: 2000 });     // vlastní doba
 ```
 
-Zprávy drží `app.flashes`. Kde a jak se zobrazí, určuje layout:
+- **Typy:** `info`, `success`, `warning`, `error`.
+- **Zprávy samy mizí** po 5 sekundách. Chyby zůstávají, dokud je uživatel nezavře, aby je nepřehlédl. Pro celou aplikaci se to nastaví na službě: `app.flashes.duration = 3000`, `app.flashes.errorDuration = 10000` (0 = nezmizí sama).
+- **Rozdíl proti Nette:** tam zpráva přežije přesměrování a ukáže se na další stránce. V SPA se stránka nepřenačítá, takže zprávy fungují jako toasty.
+
+### Zobrazení přes capify
+
+Doporučené: zprávy jako toasty knihovny [capify](https://github.com/phloxcz/capify), které se skládají na sebe, mají odpočet, pauzu při najetí myší a křížek.
+
+```ts
+// services.ts
+import * as Capify from '@phloxcz/capify';
+import '@phloxcz/capify/capify.css';
+import { CapifyFlashMessages } from 'phlox-js/adapters/capify';
+
+services.add(new CapifyFlashMessages(Capify, { position: 'top-right', theme: 'bootstrap' }));
+```
+
+Druhý parametr jsou volby `Capify.notify()` pro všechny zprávy. `phlox-js` sám capify nevyžaduje, instaluje ho aplikace (`npm i @phloxcz/capify`).
+
+### Zobrazení v layoutu
+
+Bez adaptéru drží zprávy výchozí služba v `app.flashes.messages` a layout si je vykreslí sám:
 
 ```tsx
 <For each={this.app.flashes.messages}>
-  {flash => <p class={`flash ${flash.type}`} onClick={() => this.app.flashes.remove(flash)}>{flash.text}</p>}
+  {flash => (
+    <p class={`flash ${flash.type}`} role="status">
+      {flash.text}
+      <button type="button" aria-label="Zavřít" onClick={() => this.app.flashes.remove(flash)}>×</button>
+    </p>
+  )}
 </For>
 ```
 
-Samy nemizí. Odebírá je `remove()`.
+## Adaptéry: napojení jiných knihoven
+
+Části, které jdou vyměnit, jsou služby v kontejneru. Adaptér je třída, která službu nahradí: zaregistruješ ji v `services.ts` a framework ji použije místo výchozí. Presentery a komponenty se nemění.
+
+| Služba | Výchozí | K čemu adaptér |
+|---|---|---|
+| `FlashMessages` | zprávy pro layout, s časovačem | `CapifyFlashMessages` (`phlox-js/adapters/capify`), jiná knihovna toastů |
+| `Dialogs` | nativní `<dialog>` | okna jiné knihovny, třeba Kendo Window |
+| `Translator` | `IntlTranslator` | i18next nebo jiný překladač |
+| `UserStorage` | `sessionStorage` | `localStorage`, cookies |
+| `Authenticator`, `Authorizator` | žádný, chyba při použití | přihlášení a oprávnění aplikace |
+| `FormControl` | prvky formulářů | widgety jiné knihovny jako prvky formuláře |
+
+Vlastní adaptér pro jinou knihovnu toastů:
+
+```ts
+class ToastifyFlashMessages extends FlashMessages {
+  override add(text: string, type = 'info', options: FlashOptions = {}): Flash {
+    Toastify({ text, className: type, duration: options.duration ?? this.duration }).showToast();
+    return { text, type };
+  }
+}
+
+services.add(ToastifyFlashMessages);
+```
+
+Adaptér, který knihovnu dostane v konstruktoru (jako `CapifyFlashMessages`), nemá na knihovnu závislost a dá se otestovat s falešnou náhradou.
 
 ## Překlady
 

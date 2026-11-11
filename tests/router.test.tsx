@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import { BadRequestError, Presenter, RouteFrame, state } from '../src/index';
 import type { Params, Route } from '../src/index';
-import { boot, deferred, tick } from './helpers';
+import { boot, deferred, tick, until } from './helpers';
 
 const log: string[] = [];
 const take = () => log.splice(0);
@@ -237,14 +237,12 @@ describe('redirect, errors and the old screen', () => {
     }
     const { element, go } = await boot(Root);
     await go('/old');
-    await tick();
-    expect(location.pathname).toBe('/users');
+    await until(() => location.pathname === '/users');
     expect(element.querySelector('h1')!.textContent).toBe('users');
 
     // /old never got into history, so one step back is the page before it
     history.back();
-    await tick();
-    expect(location.pathname).toBe('/');
+    await until(() => location.pathname === '/');
   });
 
   test("redirect('this') runs the action again", async () => {

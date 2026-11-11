@@ -12,21 +12,40 @@ import { Authorizator } from '../security/permission';
 
 export interface Flash {
   text: string;
+  /** `info`, `success`, `warning` or `error`. */
   type: string;
 }
 
-/** Flash messages. Show them in the layout: `<For each={this.app.flashes.messages}>`. */
+export interface FlashOptions {
+  /** After how many ms the message disappears, 0 = it stays until removed. */
+  duration?: number;
+}
+
+/**
+ * Flash messages. Show them in the layout: `<For each={this.app.flashes.messages}>`,
+ * or replace the service by an adapter that shows them by a library, e.g. CapifyFlashMessages.
+ */
 export class FlashMessages {
   readonly messages = state<Flash[]>([]);
+  /** How long a message stays, in ms. 0 = until removed. */
+  duration = 5000;
+  /** Errors stay until the user closes them, the user should not miss them. */
+  errorDuration = 0;
 
-  add(text: string, type = 'info'): Flash {
+  add(text: string, type = 'info', options: FlashOptions = {}): Flash {
     const flash = { text, type };
     this.messages.update(list => [...list, flash]);
+    const duration = options.duration ?? (type === 'error' ? this.errorDuration : this.duration);
+    if (duration > 0) setTimeout(() => this.remove(flash), duration);
     return flash;
   }
 
   remove(flash: Flash): void {
     this.messages.update(list => list.filter(other => other !== flash));
+  }
+
+  clear(): void {
+    this.messages.set([]);
   }
 }
 

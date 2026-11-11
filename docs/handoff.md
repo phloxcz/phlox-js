@@ -109,7 +109,7 @@ Knihovny leží vedle tohoto repa v `d:\Projekty\phlox\` a jsou na GitHubu pod `
 Pro SPA se používá Kendo UI a použije se minimálně i v CMS (rozhodnutí autora). Grid ani další složité widgety se tedy v první fázi nepíšou vlastní.
 
 Z toho plyne:
-- **Oddělený adaptér:** napojení na Kendo patří do samostatného balíčku, ne do jádra. Kendo je komerční a stojí na jQuery, zatímco jádro má zůstat bez obou závislostí.
+- **Oddělený adaptér:** napojení na Kendo patří do samostatného balíčku, ne do jádra. Kendo je komerční a stojí na jQuery, zatímco jádro má zůstat bez obou závislostí. Bude to vstup `phlox-js/adapters/kendo` (rozhodnuto 11. 11. 2026), postavený stejně jako `phlox-js/adapters/capify`: služby a prvky, které nahradí výchozí (`Dialogs` → Kendo Window, prvky formulářů → Kendo widgety, grid jako komponenta). Viz Adaptéry v [design.md](design.md).
 - **jQuery zůstává v aplikaci:** kvůli Kendo ho aplikace načítá, jádro ho ale nepoužívá.
 - **Životní cyklus widgetu:** adaptér musí svázat `state` s hodnotami widgetu v obou směrech a při úklidu widget sám zničit.
 - **Typy a prvky bez závislosti na adaptéru:** běžné view musí jít psát i bez Kendo.

@@ -14,13 +14,24 @@ Adresáře `src/` odpovídají jmenným prostorům Nette:
 | `di/` | `Container`, Vite plugin pro autowiring | `Nette\DI` |
 | `localization/` | `Translator`, `IntlTranslator` | `Nette\Localization` |
 | `forms/` | `Form`, prvky, pravidla, vykreslení | `Nette\Forms` |
+| `adapters/` | napojení cizích knihoven: `adapters/capify` (flash zprávy přes `@phloxcz/capify`), později `adapters/kendo` | |
 | `net/` | RPC klient a generátor typů | |
 | `security/` | `User`, `Identity`, `Permission` | `Nette\Security` |
 
 - **Šablony jsou v `ui/`,** ne zvlášť jako obdoba Latte. Jsou s komponentami těsně propojené (rozhodl autor).
 - **Flash zprávy:** `flashMessage()` je metoda presenteru jako v Nette, služba, která zprávy drží, patří k aplikaci.
 
-**Importy:** `phlox-js` dává to, co potřebuje každá obrazovka (reaktivita, šablony, komponenty, presentery, aplikace, DI). Volitelné části mají vlastní vstup: `phlox-js/net`, `phlox-js/security`, `phlox-js/forms`, `phlox-js/localization` a `phlox-js/vite`. Každý vstup je jeden soubor (`src/index.ts`, `src/net/index.ts`...), ostatní soubory jsou vnitřní. Na kořeni `src/` zůstávají jen vstupy: `index.ts`, `vite.ts` a `jsx-runtime.ts`, který si podle názvu hledá kompilátor.
+**Importy:** `phlox-js` dává to, co potřebuje každá obrazovka (reaktivita, šablony, komponenty, presentery, aplikace, DI). Volitelné části mají vlastní vstup: `phlox-js/net`, `phlox-js/security`, `phlox-js/forms`, `phlox-js/localization`, `phlox-js/vite` a adaptéry (`phlox-js/adapters/capify`, později `phlox-js/adapters/kendo`).
+
+## Adaptéry (rozhodnuto)
+
+Napojení cizích knihoven nejde do jádra, ale do adaptérů. Adaptér nahradí službu frameworku v kontejneru (`FlashMessages`, `Dialogs`, `Translator`, `UserStorage`...) nebo přidá prvek formuláře (`FormControl`). Presentery a komponenty o knihovně nevědí.
+
+- **Adaptéry jsou v `src/adapters/`, každý s vlastním vstupem** (`phlox-js/adapters/capify`, `phlox-js/adapters/kendo`). Kořen `src/` kopíruje jmenné prostory Nette a napojení cizí knihovny mezi ně nepatří (rozhodl autor). Vlastní vstup je proto, aby aplikace bez té knihovny nic navíc nepotřebovala.
+- **Knihovna se adaptéru předá, adaptér ji neimportuje,** pokud to jde: `new CapifyFlashMessages(Capify, options)`. Adaptér pak nemá závislost, potřebuje jen malé rozhraní (`CapifyNotify`) a testuje se s falešnou náhradou. U Kenda to kvůli jQuery a pluginům nejspíš nepůjde, tam bude Kendo volitelná závislost (`peerDependencies`).
+- **Vlastní adaptér pro jinou knihovnu** si aplikace napíše stejně, seznam služeb je v příručce.
+
+**Flash zprávy:** výchozí `FlashMessages` drží zprávy pro layout a sama je po 5 s maže. Chyby zůstávají (`errorDuration = 0`), aby je uživatel nepřehlédl. `CapifyFlashMessages` je ukazuje jako toasty capify a časovač nechává na capify (stejné volby `duration`). Ukázka používá capify. Každý vstup je jeden soubor (`src/index.ts`, `src/net/index.ts`...), ostatní soubory jsou vnitřní. Na kořeni `src/` zůstávají jen vstupy: `index.ts`, `vite.ts` a `jsx-runtime.ts`, který si podle názvu hledá kompilátor.
 
 ## Presenter a Component (rozhodnuto)
 

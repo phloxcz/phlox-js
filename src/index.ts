@@ -13,7 +13,7 @@ export type { LinkParams, Params, Route } from './ui/presenter';
 export { Dialogs, NativeDialogs } from './ui/dialog';
 
 export { Application, FlashMessages } from './application/application';
-export type { Flash } from './application/application';
+export type { Flash, FlashOptions } from './application/application';
 export { Router } from './application/router';
 
 export { Container } from './di/container';

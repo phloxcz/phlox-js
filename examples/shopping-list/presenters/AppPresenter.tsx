@@ -3,7 +3,7 @@ import type { Route } from 'phlox-js';
 import { locales, t, translator } from '../i18n';
 import { ListPresenter } from './ListPresenter';
 
-/** The layout: navigation, flash messages and the place for the presenter of the current route. */
+/** The layout: navigation and the place for the presenter of the current route. Flash messages are shown by capify, see services.ts. */
 export class AppPresenter extends Presenter {
   override routes: Route[] = [
     { name: 'about', pattern: '/about', presenter: () => import('./AboutPresenter') },
@@ -19,7 +19,6 @@ export class AppPresenter extends Presenter {
   }
 
   render() {
-    const flashes = this.app.flashes;
     return (
       <div>
         <nav>
@@ -35,10 +34,6 @@ export class AppPresenter extends Presenter {
             </For>
           </span>
         </nav>
-
-        <For each={flashes.messages}>
-          {flash => <p class={`flash ${flash.type}`} onClick={() => flashes.remove(flash)}>{flash.text}</p>}
-        </For>
 
         <RouteFrame />
       </div>

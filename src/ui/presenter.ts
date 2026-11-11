@@ -4,6 +4,7 @@ import { getScope, state } from '../reactive/reactive';
 import type { Child } from './dom';
 import { COMPONENT, Component, renderComponent } from './component';
 import type { Class } from '../di/container';
+import type { FlashOptions } from '../application/application';
 
 export type Params = Record<string, string>;
 export type LinkParams = Record<string, string | number | boolean | null | undefined>;
@@ -82,8 +83,9 @@ export abstract class Presenter<P extends object = {}, R = void> extends Compone
     throw new BadRequestError(code, message);
   }
 
-  flashMessage(text: string, type = 'info'): void {
-    this.app.flashes.add(text, type);
+  /** Like flashMessage() in Nette. The message disappears by itself, see FlashMessages.duration. */
+  flashMessage(text: string, type = 'info', options: FlashOptions = {}): void {
+    this.app.flashes.add(text, type, options);
   }
 
   /** Called when the rest of the URL matches no route of this presenter. Override it to show something else. */

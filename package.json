@@ -11,6 +11,7 @@
     "rpc:types": "node src/net/rpc-types.ts"
   },
   "devDependencies": {
+    "@phloxcz/capify": "^1.2.0",
     "@types/node": "^26.6.6",
     "jsdom": "^29.1.1",
     "typescript": "^7.0.2",

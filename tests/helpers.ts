@@ -35,3 +35,12 @@ export function deferred<T = void>() {
   });
   return { promise, resolve };
 }
+
+/** Waits until the condition holds, for things that take a browser event or two, e.g. history.back(). */
+export async function until(condition: () => boolean, timeout = 2000): Promise<void> {
+  const end = Date.now() + timeout;
+  while (!condition()) {
+    if (Date.now() > end) throw new Error('The condition did not hold in time.');
+    await new Promise(resolve => setTimeout(resolve, 10));
+  }
+}
