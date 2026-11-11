@@ -12,6 +12,8 @@ export { BadRequestError, Presenter, RouteFrame } from './ui/presenter';
 export type { LinkParams, Params, Route } from './ui/presenter';
 export { Dialogs, NativeDialogs } from './ui/dialog';
 export { BootstrapTheme, Theme, classes } from './ui/theme';
+export { DRAGGING, dragToSort } from './ui/sortable';
+export type { SortOptions } from './ui/sortable';
 export type { ThemeClasses, ThemeSlot } from './ui/theme';
 
 export { Application, FlashMessages } from './application/application';

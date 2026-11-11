@@ -393,3 +393,40 @@
   font-weight: 700;
   padding: 0;
 }
+
+/* Groups (containers) and multiplier rows */
+
+.phlox-group,
+.phlox-multiplier {
+  margin: 0 0 .75rem;
+  padding: .5rem .75rem .75rem;
+  border: 1px solid GrayText;
+  border-radius: var(--phlox-radius);
+}
+
+.phlox-legend {
+  padding: 0 .25rem;
+  font-weight: 600;
+}
+
+.phlox-multiplier-row {
+  margin-bottom: .5rem;
+  padding: .5rem;
+  border: 1px solid ButtonBorder;
+  border-radius: var(--phlox-radius);
+  background: Canvas;
+}
+
+.phlox-multiplier-field .phlox-input,
+.phlox-multiplier-field .phlox-select {
+  width: 100%;
+}
+
+.phlox-multiplier-buttons {
+  display: flex;
+  gap: .25rem;
+}
+
+.phlox-button-small {
+  padding: .125rem .5rem;
+}

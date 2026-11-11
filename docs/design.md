@@ -290,7 +290,30 @@ Přebírá se princip z Nette, ne kód z TraceJS: `User`, `Identity`, abstraktn�
 
 **Enter ve formuláři bez tlačítka pro odeslání:** prohlížeč odešle formulář Enterem jen s tlačítkem pro odeslání nebo s jediným textovým polem. Formulář v dialogu má Uložit v patičce, mimo `<form>`, a s druhým polem přestal Enter fungovat (zjištěno v prohlížeči). `FormTag` proto Enter v textovém poli odešle sám, pokud ho nevyužil prvek (výběr v seznamu volá `preventDefault`) a formulář nemá vlastní tlačítko.
 
-**Zatím chybí:** vnořené kontejnery (`addContainer()`) pro DTO s objekty a seznamy, nahrávání souborů a převzetí pravidel z OpenRPC.
+**Přechod z pole na tlačítko nekontroluje.** Ověření v prohlížeči ukázalo, že chyba objevená při `blur` posune tlačítko Uložit a klik se ztratí (`mousedown` na tlačítku, `mouseup` vedle). Uživatel musel klikat dvakrát. Když fokus přechází na tlačítko (`relatedTarget`), kontrola se vynechá. Odeslání zkontroluje vše a jiná tlačítka (posun řádku) nechají kontrolu na příští opuštění pole.
+
+### Kontejnery a řádky (implementováno, čeká na review)
+
+`forms/container.ts`, `forms/multiplier.ts`, `ui/sortable.ts`, testy `tests/multiplier.test.tsx` a `tests/sortable.test.tsx`. Podle `Nette\Forms\Container` a `contributte/forms-multiplier`.
+
+- **`Form extends Container`** jako v Nette. Všechny metody `add*()` jsou v `Container`, `Form` přidává jen odeslání, tlačítka, chyby formuláře a chyby ze serveru. Dosavadní API formuláře se nezměnilo.
+- **Vlastník (`Owner`)** dává členům tři věci: formulář, začátek id (`frm1-lines-3-quantity`) a `name` (`lines[3][quantity]`). Kontejner, multiplikátor i formulář jsou vlastníci, takže vnoření je libovolně hluboké bez zvláštních případů.
+- **Řádek je `Container`,** multiplikátor drží pole řádků ve `state`. Hodnoty, kontrola, `setValues`, `reset`, hledání podle cesty ze serveru a fokus první chyby jsou rekurzivní metody se stejným názvem na kontejneru i multiplikátoru.
+- **Klíč řádku v id a `name` je pořadové číslo vzniku, ne index.** Při přesunu se nemění, takže `<For>` bez `key` přesune celý prvek i s rozepsaným textem a fokusem a id zůstanou jedinečná. Pořadí v hodnotách dává pole řádků. Cesta ze serveru (`lines.2.quantity`) naopak index je, protože server vidí pole.
+- **`setValues` řádky znovu použije,** jen přidá nebo ubere chybějící. Prvky se nevykreslují znovu, když se data načtou podruhé.
+- **`min` a `max` hlídají tlačítka i kontrola.** Chyba počtu patří multiplikátoru, ne formuláři, aby se ukázala u řádků (a aby na ni šla poslat chyba ze serveru `input.lines`).
+- **Typy:** `addContainer` přijme jen název objektu, `addMultiplier` jen název seznamu objektů. `setDefaults` bere `DeepPartial` DTO, protože výchozí hodnoty bývají neúplné.
+- **Tažení přes pointer events, ne HTML5 drag & drop.** HTML5 DnD nefunguje na dotykových zařízeních, tažený obrázek nejde stylovat a událostí je hodně. Pointer events pokryjí myš, pero i prst stejným kódem a celé řazení je asi 50 řádků.
+- **Položka se přesouvá v datech už během tažení,** šablona přesune prvek. Nic se nekreslí dvakrát a puštění nic nepřepočítává. Pozice se volí podle středu tažené položky proti středům ostatních, takže položky různé výšky fungují.
+- **Tažená položka jede volně za ukazatelem** (přání autora, i vodorovně): `transform: translate` je rozdíl mezi místem pod ukazatelem a místem v rozvržení. Po každém přesunu v datech se dopočítá znovu, takže položka neposkočí. Ostatní uhýbají animací FLIP (`Element.animate`, 150 ms) a puštěná položka dosedne stejnou animací. Bez klonu prvku: tažený je skutečný řádek, takže si drží rozepsaný text i fokus. Tažená položka je neprůhledná, průhledná nechávala prosvítat text pod sebou.
+- **Posluchače jsou na `window`, ne `setPointerCapture()` na úchytu.** Ověření v prohlížeči ukázalo, že přesun prvku v DOM capture uvolní a zbytek tažení se ztratí (řádek se posunul jen o jedno místo a zůstal ve stavu tažení).
+- **Klávesnice:** šipky na úchytu a tlačítka ↑ ↓. Fokus zůstává na úchytu, takže jde řádek posunout o víc míst za sebou. Tlačítka pro posun mají i uživatelé bez myši a čteček, kterým tažení nic neřekne.
+- **`dragToSort` je samostatná funkce v `ui/`,** ne součást formulářů. Použije ji i kanban.
+- **Posouvání u okraje** (přání autora): posouvá se nejbližší předek s `overflow: auto/scroll`, který má co posouvat, jinak stránka. Formulář v dialogu tak posouvá dialog, ne stránku pod ním. Smyčka běží přes `requestAnimationFrame` po celou dobu tažení, protože ukazatel u okraje stojí a `pointermove` nechodí. Po posunu se položka znovu umístí a zařadí. Meze posunu se berou před tažením: posunutá položka obsah zvětšuje a ověření v prohlížeči ukázalo, že by se jinak posouvalo donekonečna.
+- **Rozložení `vertical`, `horizontal` a `grid`** se liší jen tím, jak se porovnají středy: podle `y`, podle `x`, nebo v pořadí čtení (řádek výš, nebo stejný řádek a vlevo). Pohyb položky na rozložení nezávisí. `lockAxis` je pro ty, kdo pohyb mimo osu nechtějí; výchozí je volný pohyb jako v běžných knihovnách typu SortableJS.
+- **Rozvržení polí v řádku je v `base.css`** (flex se zalamováním), ne v tématu. Bootstrap utility `flex-grow-1` bez základní šířky pole skládaly pod sebe.
+
+**Zatím chybí:** nahrávání souborů a převzetí pravidel z OpenRPC.
 
 ## Síť: RPC (implementováno, čeká na review)
 

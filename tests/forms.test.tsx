@@ -417,6 +417,23 @@ describe('rendering', () => {
     expect(name.errors()).toEqual([]);
   });
 
+  test('leaving a field for a button does not show the error, the click must not miss the moved button', async () => {
+    const form = new Form<CreateTask>();
+    const name = form.addText('name').setRequired('Vyplňte.');
+    form.addSubmit('save', 'Uložit');
+    const sent = vi.fn();
+    form.onSuccess = sent;
+    const root = mount(() => <FormView form={form} />);
+    const input = root.querySelector('input')!;
+    const button = root.querySelector('button')!;
+
+    input.dispatchEvent(new FocusEvent('blur', { relatedTarget: button }));
+    expect(name.errors()).toEqual([]);
+    expect(await form.submit()).toBe(false);
+    expect(name.errors()).toEqual(['Vyplňte.']);
+    expect(sent).not.toHaveBeenCalled();
+  });
+
   test('every kind of control renders and writes its value', () => {
     const form = new Form<CreateTask>();
     form.addTextArea('note');

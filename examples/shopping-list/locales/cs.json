@@ -1,7 +1,8 @@
 {
   "nav": {
     "list": "Seznam",
-    "about": "O aplikaci"
+    "about": "O aplikaci",
+    "recipe": "Recept"
   },
   "list": {
     "placeholder": "Co koupit?",
@@ -68,5 +69,40 @@
   "taginput": {
     "createNew": "Vytvořit: ",
     "remove": "Odebrat"
+  },
+  "recipe": {
+    "title": "Recept do nákupu",
+    "name": "Název",
+    "nameRequired": "Vyplňte název receptu.",
+    "source": "Zdroj",
+    "author": "Autor",
+    "link": "Odkaz",
+    "badLink": "Odkaz musí být adresa URL.",
+    "ingredients": "Ingredience",
+    "ingredient": "Ingredience",
+    "ingredientRequired": "Vyplňte ingredienci.",
+    "amount": "Množství",
+    "positive": "Množství musí být kladné.",
+    "unit": "Jednotka",
+    "save": "Přidat do seznamu",
+    "filled": {
+      "one": "Vyplněná {count} ingredience",
+      "few": "Vyplněné {count} ingredience",
+      "other": "Vyplněno {count} ingrediencí"
+    },
+    "saved": {
+      "one": "Z receptu {name} přibyla {count} položka.",
+      "few": "Z receptu {name} přibyly {count} položky.",
+      "other": "Z receptu {name} přibylo {count} položek."
+    }
+  },
+  "multiplier": {
+    "add": "Přidat řádek",
+    "remove": "Odebrat řádek",
+    "moveUp": "Posunout nahoru",
+    "moveDown": "Posunout dolů",
+    "drag": "Přetažením změníte pořadí, nebo použijte šipky",
+    "min": "Přidejte aspoň %d řádků.",
+    "max": "Přidejte nejvýš %d řádků."
   }
 }

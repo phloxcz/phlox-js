@@ -1,28 +1,20 @@
-/** Form, like Nette\Forms\Form. V is the type of its values, usually a DTO generated from PHP. */
+/**
+ * Form, like Nette\Forms\Form. V is the type of its values, usually a DTO generated from PHP.
+ * The controls are added by methods of Container, which a form is, as in Nette.
+ */
 
 import { batch, computed, state, untrack } from '../reactive/reactive';
 import type { Accessor } from '../reactive/reactive';
-import {
-  Checkbox, CheckboxList, FormControl, HiddenField, MultiSelectBox, RadioList, SelectBox, SubmitButton, TextArea, TextInput,
-} from './controls';
-import type { Items } from './controls';
-import { DropDownList } from './dropdownlist';
-import type { DropDownListOptions } from './dropdownlist';
-import { ComboBox } from './combobox';
-import type { ComboBoxOptions } from './combobox';
-import { TagInput } from './taginput';
-import type { TagInputOptions } from './taginput';
+import { FormControl, SubmitButton } from './controls';
+import { Container } from './container';
+import { Multiplier } from './multiplier';
 import { messages, validators } from './rules';
 import type { Validator } from './rules';
-
-/** Names of the values of V that can hold a T: addText() needs a text field of the DTO, addInteger() a number. */
-type KeysFor<V, T> = { [K in keyof V]-?: T extends V[K] ? K : never }[keyof V] & string;
-type ListKeys<V> = { [K in keyof V]-?: NonNullable<V[K]> extends readonly unknown[] ? K : never }[keyof V] & string;
-type ItemOf<L> = NonNullable<L> extends readonly (infer E)[] ? E : never;
+import type { DeepPartial } from './container';
 
 let lastId = 0;
 
-export class Form<V extends object = Record<string, any>> {
+export class Form<V extends object = Record<string, any>> extends Container<V> {
   static Filled = validators.Filled;
   static Required = validators.Filled;
   static Blank = validators.Blank;
@@ -45,7 +37,7 @@ export class Form<V extends object = Record<string, any>> {
   static messages = messages;
 
   readonly id = `frm${++lastId}`;
-  readonly controls = new Map<string, FormControl<any>>();
+  /** Submit buttons of the whole form, also those added to containers. */
   readonly buttons = new Map<string, SubmitButton>();
   /** Errors of the whole form, not of one control. */
   readonly errors = state<string[]>([]);
@@ -65,117 +57,20 @@ export class Form<V extends object = Record<string, any>> {
   /** Elements switched by toggle() in rules: id → visible. */
   readonly toggles: Accessor<Map<string, boolean>> = computed(() => {
     const result = new Map<string, boolean>();
-    for (const control of this.controls.values()) control.rules.collectToggles(result);
+    this.collectToggles(result);
     return result;
   });
 
-  /** Adds an own control, the way the add*() methods do. */
-  addControl<C extends FormControl<any>>(name: string, control: C): C {
-    if (this.controls.has(name) || this.buttons.has(name)) throw new Error(`The form already has a control '${name}'.`);
-    control.form = this;
-    control.name = name;
-    if (control instanceof SubmitButton) this.buttons.set(name, control);
-    else this.controls.set(name, control);
-    return control;
+  override get form(): Form<any> {
+    return this;
   }
 
-  addText(name: KeysFor<V, string>, label = '', maxLength?: number): TextInput<string> {
-    const control = this.addControl(name, new TextInput<string>(label));
-    if (maxLength !== undefined) control.addRule(Form.MaxLength, null, maxLength);
-    return control;
+  override get idPrefix(): string {
+    return this.id;
   }
 
-  addPassword(name: KeysFor<V, string>, label = ''): TextInput<string> {
-    return this.addControl(name, new TextInput<string>(label)).setHtmlType('password');
-  }
-
-  addEmail(name: KeysFor<V, string>, label = ''): TextInput<string> {
-    return this.addControl(name, new TextInput<string>(label)).setHtmlType('email').addRule(Form.Email);
-  }
-
-  addTextArea(name: KeysFor<V, string>, label = ''): TextArea {
-    return this.addControl(name, new TextArea(label));
-  }
-
-  /** A whole number, null when empty. */
-  addInteger(name: KeysFor<V, number | null>, label = ''): TextInput<number | null> {
-    return this.addControl(name, new TextInput<number | null>(label, 'integer')).addRule(Form.Integer);
-  }
-
-  /** A number, also with a decimal comma, null when empty. */
-  addFloat(name: KeysFor<V, number | null>, label = ''): TextInput<number | null> {
-    return this.addControl(name, new TextInput<number | null>(label, 'float')).addRule(Form.Float);
-  }
-
-  /** A date as text YYYY-MM-DD, the way a DTO receives it, null when empty. */
-  addDate(name: KeysFor<V, string | null>, label = ''): TextInput<string | null> {
-    return this.addControl(name, new TextInput<string | null>(label, 'date'));
-  }
-
-  addCheckbox(name: KeysFor<V, boolean>, caption = ''): Checkbox {
-    return this.addControl(name, new Checkbox(caption));
-  }
-
-  addSelect<K extends keyof V & string>(name: K, label = '', items: Items<NonNullable<V[K]>> = []): SelectBox<NonNullable<V[K]>> {
-    return this.addControl(name, new SelectBox<NonNullable<V[K]>>(label, items));
-  }
-
-  addMultiSelect<K extends ListKeys<V>>(name: K, label = '', items: Items<ItemOf<V[K]>> = []): MultiSelectBox<ItemOf<V[K]>> {
-    return this.addControl(name, new MultiSelectBox<ItemOf<V[K]>>(label, items));
-  }
-
-  addRadioList<K extends keyof V & string>(name: K, label = '', items: Items<NonNullable<V[K]>> = []): RadioList<NonNullable<V[K]>> {
-    return this.addControl(name, new RadioList<NonNullable<V[K]>>(label, items));
-  }
-
-  addCheckboxList<K extends ListKeys<V>>(name: K, label = '', items: Items<ItemOf<V[K]>> = []): CheckboxList<ItemOf<V[K]>> {
-    return this.addControl(name, new CheckboxList<ItemOf<V[K]>>(label, items));
-  }
-
-  /** A select with a search field, see DropDownList. Items are fixed, or come from `search`. */
-  addDropDownList<K extends keyof V & string>(
-    name: K, label = '', options: DropDownListOptions<NonNullable<V[K]>> = {},
-  ): DropDownList<NonNullable<V[K]>> {
-    return this.addControl(name, new DropDownList<NonNullable<V[K]>>(label, options));
-  }
-
-  /**
-   * A text field with suggestions, see ComboBox. The value is a picked item. `allowCustom` lets a typed text
-   * be the value too, so it is allowed only for fields that can hold a text.
-   */
-  addComboBox<K extends keyof V & string>(
-    name: K, label = '',
-    options: ComboBoxOptions<NonNullable<V[K]>> & { allowCustom?: string extends V[K] ? boolean : false } = {},
-  ): ComboBox<NonNullable<V[K]>> {
-    return this.addControl(name, new ComboBox<NonNullable<V[K]>>(label, options));
-  }
-
-  /**
-   * Several values as tags, see TagInput. The field must be a list. `allowNew` makes tags of typed text,
-   * so it is allowed only for lists that can hold texts.
-   */
-  addTagInput<K extends ListKeys<V>>(
-    name: K, label = '',
-    options: TagInputOptions<ItemOf<V[K]>> & { allowNew?: string extends ItemOf<V[K]> ? boolean : false } = {},
-  ): TagInput<ItemOf<V[K]>> {
-    return this.addControl(name, new TagInput<ItemOf<V[K]>>(label, options));
-  }
-
-  addHidden(name: KeysFor<V, string>, value = ''): HiddenField {
-    const control = this.addControl(name, new HiddenField());
-    control.setValue(value);
-    return control;
-  }
-
-  /** A button is not among the values. Several buttons can be told apart by isSubmittedBy(). */
-  addSubmit(name: string, caption = ''): SubmitButton {
-    return this.addControl(name, new SubmitButton(caption));
-  }
-
-  get<K extends keyof V & string>(name: K): FormControl<V[K]> {
-    const control = this.controls.get(name);
-    if (!control) throw new Error(`The form has no control '${name}'.`);
-    return control;
+  override htmlName(name: string): string {
+    return name;
   }
 
   getButton(name: string): SubmitButton {
@@ -184,28 +79,15 @@ export class Form<V extends object = Record<string, any>> {
     return button;
   }
 
-  /** Values of the controls, without disabled and omitted ones. Reads state, so a template follows it. */
-  getValues(): V {
-    const values: Record<string, unknown> = {};
-    for (const [name, control] of this.controls) {
-      if (!control.omitted && !control.disabled()) values[name] = control.getValue();
-    }
-    return values as V;
+  /** Fills the controls, typically with data loaded from the server. The same as setValues(). */
+  setDefaults(values: DeepPartial<V>): this {
+    return this.setValues(values);
   }
 
-  /** Fills the controls, typically with data loaded from the server. */
-  setDefaults(values: Partial<V>): this {
-    batch(() => {
-      for (const [name, value] of Object.entries(values)) {
-        if (value !== undefined) this.controls.get(name)?.setValue(value);
-      }
-    });
-    return this;
-  }
-
-  /** Checks the given controls, or all of them. Returns whether they are valid. */
-  validate(controls: Iterable<FormControl<any>> = this.controls.values()): boolean {
+  /** Checks the given controls, or the whole form. Returns whether they are valid. */
+  validate(controls?: Iterable<FormControl<any>>): boolean {
     this.errors.set([]);
+    if (!controls) return this.validateAll();
     let valid = true;
     batch(() => {
       for (const control of controls) valid = control.validate() && valid;
@@ -213,8 +95,8 @@ export class Form<V extends object = Record<string, any>> {
     return valid;
   }
 
-  hasErrors(): boolean {
-    return this.errors().length > 0 || [...this.controls.values()].some(control => control.hasErrors());
+  override hasErrors(): boolean {
+    return this.errors().length > 0 || super.hasErrors();
   }
 
   addError(message: string): void {
@@ -223,8 +105,8 @@ export class Form<V extends object = Record<string, any>> {
 
   /**
    * Shows errors of invalid parameters from the server at the controls. Paths such as `input.name`
-   * lead to the control `name`. A path with no control becomes an error of the form.
-   * Returns whether the error had such fields.
+   * lead to the control `name`, `input.lines.2.quantity` to the quantity in the third row.
+   * A path with no control becomes an error of the form. Returns whether the error had such fields.
    */
   addServerErrors(error: unknown, prefix?: string): boolean {
     const source = error as { data?: { fields?: unknown }; fields?: unknown } | null;
@@ -233,11 +115,12 @@ export class Form<V extends object = Record<string, any>> {
 
     batch(() => {
       for (const [path, message] of Object.entries(fields as Record<string, unknown>)) {
-        let name = prefix && path.startsWith(`${prefix}.`) ? path.slice(prefix.length + 1) : path;
-        if (!this.controls.has(name) && !prefix && name.includes('.')) name = name.slice(name.indexOf('.') + 1);
-        const control = this.controls.get(name);
+        const relative = prefix && path.startsWith(`${prefix}.`) ? path.slice(prefix.length + 1) : path;
+        const segments = relative.split('.');
+        // The first part is usually the name of the parameter, e.g. input
+        const target = this.resolve(segments) ?? (prefix ? null : this.resolve(segments.slice(1)));
         for (const text of Array.isArray(message) ? message : [message]) {
-          if (control) control.addError(String(text));
+          if (target instanceof FormControl || target instanceof Multiplier) target.addError(String(text));
           else this.addError(`${path}: ${String(text)}`);
         }
       }
@@ -254,8 +137,7 @@ export class Form<V extends object = Record<string, any>> {
   async submit(button: SubmitButton | null = null): Promise<boolean> {
     if (untrack(this.submitting)) return false;
     this.submittedBy = button;
-    const scope = button?.validationScope ?? this.controls.values();
-    if (!this.validate(scope)) {
+    if (!this.validate(button?.validationScope ?? undefined)) {
       this.focusFirstError();
       this.onError?.(this);
       return false;
@@ -274,23 +156,11 @@ export class Form<V extends object = Record<string, any>> {
   }
 
   /** Empties all controls and errors. */
-  reset(): void {
+  override reset(): void {
     batch(() => {
-      for (const control of this.controls.values()) {
-        control.setValue((Array.isArray(control.getValue()) ? [] : control instanceof Checkbox ? false : null) as never);
-        control.cleanErrors();
-      }
+      super.reset();
       this.errors.set([]);
     });
-  }
-
-  private focusFirstError(): void {
-    for (const control of this.controls.values()) {
-      if (control.hasErrors()) {
-        control.element?.focus();
-        return;
-      }
-    }
   }
 }
 

@@ -265,7 +265,7 @@ export class TagInput<T = string> extends FormControl<T[]> {
           this.focused.set(false);
           this.suggestions.set([]);
           this.leaving = true;
-          (onBlur as () => void)();
+          (onBlur as (event: FocusEvent) => void)(event);
           this.leaving = false;
         }}
       >

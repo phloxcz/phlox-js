@@ -151,7 +151,7 @@ export class ComboBox<T = string> extends ListControl<T> {
           if (wrapper.contains(event.relatedTarget as Node | null)) return;
           this.commit();
           this.close();
-          (onBlur as () => void)();
+          (onBlur as (event: FocusEvent) => void)(event);
         }}
       >
         <input

@@ -7,6 +7,7 @@ import { classes, currentTheme } from '../ui/theme';
 import { Rules } from './rules';
 import type { Validator } from './rules';
 import type { Form } from './form';
+import type { Container } from './container';
 
 /** Attributes passed on by <Input control={...} class="wide" />. */
 export type ExtraAttributes = Record<string, unknown>;
@@ -22,6 +23,8 @@ function normalize<T>(items: Items<T>): [T, string][] {
 export abstract class FormControl<T = unknown> {
   /** Set by the form when the control is added. */
   form!: Form<any>;
+  /** The form or a nested container the control is in. */
+  container!: Container<any>;
   name = '';
   readonly errors = state<string[]>([]);
   readonly disabled = state(false);
@@ -39,7 +42,12 @@ export abstract class FormControl<T = unknown> {
   }
 
   get htmlId(): string {
-    return `${this.form.id}-${this.name}`;
+    return `${this.container.idPrefix}-${this.name}`;
+  }
+
+  /** The name attribute, like customer[city] in Nette for a control in a container. */
+  get htmlName(): string {
+    return this.container.htmlName(this.name);
   }
 
   abstract getValue(): T;
@@ -104,7 +112,7 @@ export abstract class FormControl<T = unknown> {
   attrs(): Record<string, unknown> {
     return {
       id: this.htmlId,
-      name: this.name,
+      name: this.htmlName,
       required: this.isRequired(),
       disabled: this.disabled,
       'aria-invalid': () => (this.hasErrors() ? 'true' : null),
@@ -112,8 +120,11 @@ export abstract class FormControl<T = unknown> {
       ref: (element: HTMLElement) => {
         this.element = element;
       },
-      onBlur: () => {
+      onBlur: (event?: FocusEvent) => {
         this.touched = true;
+        // Not when the focus goes to a button: the error would move it away under the mouse and the click
+        // would be lost. Sending validates anyway, other buttons let the field be checked on the next blur.
+        if (event?.relatedTarget instanceof HTMLButtonElement) return;
         this.validate();
       },
     };
@@ -452,7 +463,7 @@ export class HiddenField extends FormControl<string> {
   }
 
   render(attributes: ExtraAttributes): Child {
-    return <input type="hidden" {...attributes} id={this.htmlId} name={this.name} value={this.raw} />;
+    return <input type="hidden" {...attributes} id={this.htmlId} name={this.htmlName} value={this.raw} />;
   }
 }
 
@@ -489,7 +500,7 @@ export class SubmitButton extends FormControl<void> {
         {...attributes}
         class={(attributes.class as string | undefined) ?? currentTheme().class('button')}
         id={this.htmlId}
-        name={this.name}
+        name={this.htmlName}
         disabled={() => this.disabled() || this.form.submitting()}
         onClick={() => {
           this.form.clickedButton = this;

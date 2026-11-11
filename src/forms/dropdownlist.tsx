@@ -77,7 +77,7 @@ export class DropDownList<T = string> extends ListControl<T> {
         onFocusout={event => {
           if (wrapper.contains(event.relatedTarget as Node | null)) return;
           this.close();
-          (onBlur as () => void)();
+          (onBlur as (event: FocusEvent) => void)(event);
         }}
       >
         <button

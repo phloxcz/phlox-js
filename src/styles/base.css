@@ -48,6 +48,14 @@ form [hidden] {
   display: none;
 }
 
+/* A long label in a narrow field ends with an ellipsis, it does not make the button taller */
+.dropdownlist-bs-trigger .dropdownlist-trigger-text {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* Bootstrap in dark mode: our filter row and field are not styled by Bootstrap itself */
 [data-bs-theme="dark"] .dropdownlist-filter-input {
   background-color: var(--bs-body-bg);
@@ -163,4 +171,43 @@ form [hidden] {
 .phlox-taginput--theme-bootstrap .phlox-taginput__container.phlox-taginput--focused {
   border-color: var(--bs-focus-ring-color, #86b7fe);
   box-shadow: 0 0 0 .25rem rgba(var(--bs-primary-rgb, 13, 110, 253), .25);
+}
+
+/* Multiplier rows and dragging, for every theme */
+
+.phlox-multiplier-row {
+  display: flex;
+  gap: .5rem;
+  align-items: flex-start;
+}
+
+.phlox-multiplier-handle {
+  cursor: grab;
+  /* The finger drags the row, it does not scroll the page */
+  touch-action: none;
+  user-select: none;
+}
+
+.phlox-dragging {
+  position: relative;
+  z-index: 1;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, .18);
+}
+
+.phlox-dragging .phlox-multiplier-handle {
+  cursor: grabbing;
+}
+
+/* Fields of a row side by side, as many as fit, in every theme */
+.phlox-multiplier-fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.phlox-multiplier-field {
+  flex: 1 1 8rem;
+  min-width: 0;
 }

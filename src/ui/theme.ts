@@ -11,7 +11,9 @@ export type ThemeSlot =
   | 'form' | 'formRow' | 'formErrors' | 'formButtons'
   | 'label' | 'input' | 'select' | 'textarea' | 'button' | 'error' | 'invalid'
   | 'checkbox' | 'checkboxInput' | 'radioList' | 'checkboxList' | 'choiceItem' | 'choiceInput'
-  | 'dialog' | 'dialogContent' | 'dialogHeader' | 'dialogTitle' | 'dialogClose' | 'dialogBody' | 'dialogFooter';
+  | 'dialog' | 'dialogContent' | 'dialogHeader' | 'dialogTitle' | 'dialogClose' | 'dialogBody' | 'dialogFooter'
+  | 'group' | 'legend' | 'multiplier' | 'multiplierRow' | 'multiplierHandle' | 'multiplierFields' | 'multiplierField'
+  | 'multiplierButtons' | 'multiplierButton' | 'multiplierAdd';
 
 export type ThemeClasses = Partial<Record<ThemeSlot, string>> & Record<string, string>;
 
@@ -41,6 +43,16 @@ const DEFAULT_CLASSES: Record<ThemeSlot, string> & Record<string, string> = {
   dialogClose: 'phlox-dialog-close',
   dialogBody: 'phlox-dialog-body',
   dialogFooter: 'phlox-dialog-footer',
+  group: 'phlox-group',
+  legend: 'phlox-legend',
+  multiplier: 'phlox-multiplier',
+  multiplierRow: 'phlox-multiplier-row',
+  multiplierHandle: 'phlox-multiplier-handle',
+  multiplierFields: 'phlox-multiplier-fields',
+  multiplierField: 'phlox-multiplier-field',
+  multiplierButtons: 'phlox-multiplier-buttons',
+  multiplierButton: 'phlox-button phlox-button-small',
+  multiplierAdd: 'phlox-button',
   // The same classes as phloxcz/forms-dropdownlist, so both look the same
   'dropdownlist.wrapper': 'dropdownlist-wrapper',
   'dropdownlist.trigger': 'dropdownlist-trigger',
@@ -128,6 +140,16 @@ export class BootstrapTheme extends Theme {
       dialogClose: 'btn-close',
       dialogBody: 'p-3',
       dialogFooter: 'd-flex justify-content-end gap-2 px-3 py-2 border-top',
+      group: 'border rounded p-3 mb-3',
+      legend: 'float-none w-auto px-2 mb-0 fs-6 fw-semibold',
+      multiplier: 'border rounded p-3 mb-3',
+      multiplierRow: 'phlox-multiplier-row d-flex gap-2 align-items-start p-2 mb-2 border rounded bg-body',
+      multiplierHandle: 'phlox-multiplier-handle btn btn-sm btn-outline-secondary',
+      multiplierFields: 'phlox-multiplier-fields',
+      multiplierField: 'phlox-multiplier-field',
+      multiplierButtons: 'd-flex gap-1',
+      multiplierButton: 'btn btn-sm btn-outline-secondary',
+      multiplierAdd: 'btn btn-sm btn-outline-primary',
       // The same as THEME_BOOTSTRAP of phloxcz/forms-dropdownlist
       'dropdownlist.wrapper': 'dropdownlist-wrapper position-relative',
       'dropdownlist.trigger': 'form-select text-start dropdownlist-bs-trigger',

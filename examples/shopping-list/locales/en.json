@@ -1,7 +1,8 @@
 {
   "nav": {
     "list": "List",
-    "about": "About"
+    "about": "About",
+    "recipe": "Recipe"
   },
   "list": {
     "placeholder": "What to buy?",
@@ -68,5 +69,40 @@
   "taginput": {
     "createNew": "Create: ",
     "remove": "Remove"
+  },
+  "recipe": {
+    "title": "Recipe to shopping",
+    "name": "Name",
+    "nameRequired": "Please fill in the name of the recipe.",
+    "source": "Source",
+    "author": "Author",
+    "link": "Link",
+    "badLink": "The link must be a URL.",
+    "ingredients": "Ingredients",
+    "ingredient": "Ingredient",
+    "ingredientRequired": "Please fill in the ingredient.",
+    "amount": "Amount",
+    "positive": "The amount must be positive.",
+    "unit": "Unit",
+    "save": "Add to the list",
+    "filled": {
+      "one": "{count} ingredient filled in",
+      "few": "{count} ingredients filled in",
+      "other": "{count} ingredients filled in"
+    },
+    "saved": {
+      "one": "{count} item was added from {name}.",
+      "few": "{count} items were added from {name}.",
+      "other": "{count} items were added from {name}."
+    }
+  },
+  "multiplier": {
+    "add": "Add a row",
+    "remove": "Remove the row",
+    "moveUp": "Move up",
+    "moveDown": "Move down",
+    "drag": "Drag to change the order, or use the arrow keys",
+    "min": "Please add at least %d rows.",
+    "max": "Please add no more than %d rows."
   }
 }
