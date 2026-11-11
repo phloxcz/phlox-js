@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, test, vi } from 'vitest';
 import { Presenter, render } from '../src/index';
 import type { Child } from '../src/index';
-import { Form, FormTag, FormView, Input, InputError, Label } from '../src/forms/index';
+import { Form, FormTag, FormView, Input, InputError, Label, toPairs } from '../src/forms/index';
 import { RpcError } from '../src/net/index';
 import { boot, tick } from './helpers';
 
@@ -403,6 +403,32 @@ describe('rendering', () => {
     expect(root.querySelector('input')!.value).toBe('from code');
   });
 
+  test('a value read in a template follows typing, like a binding in MVVM', () => {
+    const form = new Form<CreateTask>();
+    const name = form.addText('name');
+    const root = mount(() => (
+      <div>
+        <h2>{name.value}</h2>
+        <h3>{() => name.value() || 'Nový úkol'}</h3>
+        <p>{() => `${name.value().length} znaků`}</p>
+        <FormView form={form} />
+      </div>
+    ));
+    expect(root.querySelector('h2')!.textContent).toBe('');
+    expect(root.querySelector('h3')!.textContent).toBe('Nový úkol');
+    type(root.querySelector('input')!, 'Hrnce');
+    expect(root.querySelector('h2')!.textContent).toBe('Hrnce');
+    expect(root.querySelector('h3')!.textContent).toBe('Hrnce');
+    expect(root.querySelector('p')!.textContent).toBe('5 znaků');
+    // Writing goes the other way: into the field
+    name.value.set('Pánve');
+    expect(root.querySelector('h2')!.textContent).toBe('Pánve');
+    expect(root.querySelector<HTMLInputElement>('input')!.value).toBe('Pánve');
+    name.value.update(text => `${text} a hrnce`);
+    expect(root.querySelector<HTMLInputElement>('input')!.value).toBe('Pánve a hrnce');
+    expect(name.value()).toBe(name.getValue());
+  });
+
   test('live validation: after leaving the field, and while fixing an error', () => {
     const form = new Form<CreateTask>();
     const name = form.addText('name').setRequired('Vyplňte.').addRule(Form.MinLength, 'Aspoň %d.', 3);
@@ -432,6 +458,18 @@ describe('rendering', () => {
     expect(await form.submit()).toBe(false);
     expect(name.errors()).toEqual(['Vyplňte.']);
     expect(sent).not.toHaveBeenCalled();
+  });
+
+  test('items as pairs, as an object, or as values that are their own labels', () => {
+    const shops = ['Albert', 'Billa'];
+    expect(toPairs(shops)).toEqual([['Albert', 'Albert'], ['Billa', 'Billa']]);
+    expect(toPairs<number>([[1, 'Nízká'], [2, 'Vysoká']])).toEqual([[1, 'Nízká'], [2, 'Vysoká']]);
+    expect(toPairs<number>({ 1: 'Nízká', 2: 'Vysoká' })).toEqual([[1, 'Nízká'], [2, 'Vysoká']]);
+    const form = new Form<{ shop: string | null }>();
+    // A list of texts goes straight in, without .map(shop => [shop, shop])
+    form.addSelect('shop', 'Obchod:', shops).setPrompt('Vyberte');
+    const root = mount(() => <FormView form={form} />);
+    expect([...root.querySelectorAll('option')].map(option => option.textContent)).toEqual(['Vyberte', 'Albert', 'Billa']);
   });
 
   test('every kind of control renders and writes its value', () => {

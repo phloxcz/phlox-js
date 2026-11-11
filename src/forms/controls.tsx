@@ -1,7 +1,8 @@
 /** Form controls, like Nette\Forms\Controls. Each holds its value in state, so templates follow it. */
 
 import { For } from '../ui/flow';
-import { state } from '../reactive/reactive';
+import { state, untrack } from '../reactive/reactive';
+import type { State } from '../reactive/reactive';
 import type { Child } from '../ui/dom';
 import { classes, currentTheme } from '../ui/theme';
 import { Rules } from './rules';
@@ -12,11 +13,17 @@ import type { Container } from './container';
 /** Attributes passed on by <Input control={...} class="wide" />. */
 export type ExtraAttributes = Record<string, unknown>;
 
-/** Choices of a select or a list: pairs of value and label, or an object whose integer-like keys become numbers. */
-export type Items<T> = readonly (readonly [T, string])[] | Record<string, string>;
+/**
+ * Choices of a select or a list: pairs of value and label, values that are their own labels,
+ * or an object whose integer-like keys become numbers.
+ */
+export type Items<T> = readonly (readonly [T, string])[] | readonly T[] | Record<string, string>;
 
-function normalize<T>(items: Items<T>): [T, string][] {
-  if (Array.isArray(items)) return items.map(([value, label]) => [value, label]);
+/** Items as pairs of value and label. */
+export function toPairs<T>(items: Items<T>): [T, string][] {
+  if (Array.isArray(items)) {
+    return items.map(item => (Array.isArray(item) ? [item[0] as T, String(item[1])] : [item as T, String(item)]));
+  }
   return Object.entries(items).map(([key, label]) => [(/^-?\d+$/.test(key) ? Number(key) : key) as T, label]);
 }
 
@@ -36,6 +43,16 @@ export abstract class FormControl<T = unknown> {
   /** The label is part of the input itself, e.g. a checkbox. */
   readonly labelInInput: boolean = false;
   private touched = false;
+
+  /**
+   * The value as a state, like a binding in MVVM. Given to a template without calling it, the text follows
+   * typing: <h2>{control.value}</h2>. control.value() reads it, control.value.set(x) writes it to the field,
+   * the same as getValue() and setValue().
+   */
+  readonly value: State<T> = Object.assign(() => this.getValue(), {
+    set: (value: T) => this.setValue(value),
+    update: (change: (value: T) => T) => this.setValue(change(untrack(() => this.getValue()))),
+  });
 
   constructor(public label = '') {
     this.rules = new Rules(this);
@@ -266,7 +283,7 @@ abstract class ChoiceControl<T, V> extends FormControl<V> {
 
   /** Choices can be set later, e.g. when they come from the server. */
   setItems(items: Items<T>): this {
-    this.items.set(normalize(items));
+    this.items.set(toPairs(items));
     return this;
   }
 

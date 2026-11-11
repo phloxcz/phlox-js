@@ -28,7 +28,8 @@ export class DropDownTreeSelect<K extends TreeKey> extends FormControl<K | null>
   static texts = { clear: 'Clear' };
 
   readonly tree: Tree<TreeNode<K>>;
-  readonly value = state<K | null>(null);
+  /** The picked id, the value of the control. */
+  private readonly picked = state<K | null>(null);
   readonly opened = state(false);
   /** True while the way to a node set from code is being loaded. */
   readonly loading = state(false);
@@ -36,7 +37,7 @@ export class DropDownTreeSelect<K extends TreeKey> extends FormControl<K | null>
 
   /** Nodes from the top down to the picked one, as far as they are loaded. Follows the tree, also a reload. */
   readonly path = computed((): TreeItem<TreeNode<K>>[] => {
-    const id = this.value();
+    const id = this.picked();
     if (id === null) return [];
     const search = (items: TreeItem<TreeNode<K>>[]): TreeItem<TreeNode<K>>[] | null => {
       for (const item of items) {
@@ -54,7 +55,7 @@ export class DropDownTreeSelect<K extends TreeKey> extends FormControl<K | null>
     this.tree = new Tree<TreeNode<K>>({ ...options });
     // Picking a node closes the panel and returns to the button
     this.tree.onSelect = node => {
-      this.value.set(node.id);
+      this.picked.set(node.id);
       this.close();
       this.element?.focus();
       this.changed();
@@ -62,16 +63,16 @@ export class DropDownTreeSelect<K extends TreeKey> extends FormControl<K | null>
   }
 
   getValue(): K | null {
-    return this.value();
+    return this.picked();
   }
 
   setValue(value: K | null): void {
-    this.value.set(value ?? null);
+    this.picked.set(value ?? null);
     this.tree.selected.set(value ?? null);
   }
 
   isFilled(): boolean {
-    return this.value() !== null;
+    return this.picked() !== null;
   }
 
   open(): void {
@@ -87,7 +88,7 @@ export class DropDownTreeSelect<K extends TreeKey> extends FormControl<K | null>
   private text(): string {
     const path = this.path();
     if (path.length) return path.map(item => item.node.label).join(this.options.separator ?? ' › ');
-    const id = this.value();
+    const id = this.picked();
     return id === null ? '' : this.loading() ? '…' : String(id);
   }
 
@@ -99,7 +100,7 @@ export class DropDownTreeSelect<K extends TreeKey> extends FormControl<K | null>
 
     // A node set from code is found in the tree: its way is loaded with the `path` option
     effect(() => {
-      const value = this.value();
+      const value = this.picked();
       if (value === null || this.path().length) return;
       untrack(() => {
         this.loading.set(true);
@@ -151,7 +152,7 @@ export class DropDownTreeSelect<K extends TreeKey> extends FormControl<K | null>
           </span>
           <span class="dropdownlist-trigger-arrow" aria-hidden="true" />
         </button>
-        <If when={() => !this.isRequired() && this.value() !== null && !this.disabled()}>
+        <If when={() => !this.isRequired() && this.picked() !== null && !this.disabled()}>
           <button
             type="button"
             class="phlox-dropdowntree-clear"
@@ -175,7 +176,7 @@ export class DropDownTreeSelect<K extends TreeKey> extends FormControl<K | null>
             ref={panel => {
               placePanel(() => this.element, panel, panel.querySelector<HTMLElement>('.phlox-tree')!);
               // The picked node is shown and gets the focus, the arrows go on from it
-              const value = untrack(this.value);
+              const value = untrack(this.picked);
               void (value === null ? this.tree.load() : this.tree.reveal(value)).catch(() => null).then(() => {
                 if (untrack(this.opened)) panel.querySelector<HTMLElement>('[role=tree]')?.focus();
               });

@@ -43,13 +43,13 @@ export class ItemEdit extends Presenter<{ id: number }, boolean> {
     });
     // Suggested shops, or any other the user types
     this.form.addComboBox('shop', t('edit.shop'), {
-      items: SHOPS.map(shop => [shop, shop]),
+      items: SHOPS,
       allowCustom: true,
       placeholder: t('edit.shopPlaceholder'),
     });
     // Several labels: suggested ones, or new ones typed by the user
     this.form.addTagInput('labels', t('edit.labels'), {
-      items: LABELS.map(label => [label, label]),
+      items: LABELS,
       allowNew: true,
       maxTags: 5,
       placeholder: t('edit.labelsPlaceholder'),

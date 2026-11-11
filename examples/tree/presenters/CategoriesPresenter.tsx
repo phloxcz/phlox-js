@@ -120,7 +120,8 @@ export class CategoriesPresenter extends Presenter {
             )}
           </For>
           <If when={this.category}>
-            <h2>{() => this.category()?.name}</h2>
+            {/* The value of a control is reactive: the heading follows typing, before anything is saved */}
+            <h2>{this.form.get('name').value}</h2>
             <p>{() => `Produktů: ${this.category()?.products ?? 0}`}</p>
             <FormView form={this.form} />
             <Else />

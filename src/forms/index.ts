@@ -17,7 +17,7 @@ export type { TreeSelectOptions } from './treeselect';
 export { DropDownTreeSelect } from './dropdowntree';
 export type { DropDownTreeSelectOptions } from './dropdowntree';
 export type { Tag, TagInputOptions } from './taginput';
-export { ListControl, foldText } from './listbox';
+export { ListControl, foldText, toPairs } from './listbox';
 export type { ListOptions } from './listbox';
 export type { DropDownListOptions } from './dropdownlist';
 export { Rules } from './rules';

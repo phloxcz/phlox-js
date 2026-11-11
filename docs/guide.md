@@ -775,7 +775,7 @@ class TaskCreatePresenter extends Presenter {
 | `addContainer(name, label)` | vnořený objekt, viz Kontejnery a řádky |
 | `addMultiplier(name, factory, options)` | seznam objektů, řádky, které uživatel přidává a řadí |
 
-**Položky** výběrů se zadávají jako dvojice `[[1, 'Nízká'], [2, 'Vysoká']]`, nebo jako objekt `{ 1: 'Nízká' }`, ve kterém se celočíselné klíče převedou na čísla jako v PHP. Přijít mohou i později, třeba ze serveru: `control.setItems(...)`.
+**Položky** výběrů se zadávají jako dvojice `[[1, 'Nízká'], [2, 'Vysoká']]`, jako objekt `{ 1: 'Nízká' }`, ve kterém se celočíselné klíče převedou na čísla jako v PHP, nebo jako seznam hodnot, které jsou zároveň popisky: `['Albert', 'Billa']`. Přijít mohou i později, třeba ze serveru: `control.setItems(...)`.
 
 Další metody prvku: `setDisabled()` (nekontroluje se a chybí v hodnotách), `setOmitted()`, `getValue()`, `setValue()`, `errors()`, `addError()`.
 
@@ -855,6 +855,25 @@ const name = this.form.get('name');
 - **Checkbox** se vykresluje uvnitř svého `<label>`, jako v Nette.
 - **Třídy dává téma** (viz Vzhled a témata). Třída předaná do `<Input>` se přidá k třídě tématu, u tlačítka ji nahradí: `<Input control={cancel} class="btn btn-secondary" />`.
 
+### Hodnota prvku jinde na stránce
+
+`control.value` je hodnota prvku jako stav (`state`). Dej ji do šablony bez volání a text sleduje psaní, jako binding v MVVM (v Knockoutu `text: name`). Nic se nepropojuje ručně:
+
+```tsx
+const name = this.form.get('name');
+
+<h2>{name.value}</h2>                                 // mění se při psaní
+<h2>{() => name.value() || 'Nová kategorie'}</h2>    // s úpravou: funkce, ve které se hodnota přečte
+<p>{() => `${name.value().length} / 40 znaků`}</p>
+```
+
+- **Bez závorek, nebo ve funkci:** `{name.value}` předá šabloně funkci a ta ji sleduje. `{name.value()}` se závorkami přečte hodnotu jen jednou při vykreslení (viz Co je reaktivní). `name.value()` je totéž co `name.getValue()`.
+- **Proč ne `{this.form.get('name')}`:** prvek v šabloně by mohl znamenat pole i hodnotu. Pole vykresluje `<Input control={…} />`, hodnotu `.value`.
+- **Proč ne `this.form['name']` jako v Nette:** třída v TypeScriptu neumí přístup přes hranaté závorky typovaný podle DTO, aniž by se názvy polí tloukly s metodami formuláře (`reset`, `errors`…). `get('name')` kompilátor hlídá.
+- **Zápis:** `name.value.set('Pánve')` nebo `name.value.update(text => text.trim())` zapíše hodnotu do pole, stejně jako `name.setValue()`.
+- **Celý formulář:** `computed(() => this.form.getValues())` sleduje všechny prvky, i v kontejnerech a řádcích. Tak vzniká třeba živý součet faktury (viz Kontejnery a řádky).
+- **Hodnota se mění při psaní,** ne až po uložení. Uložený stav (třeba název v jiném seznamu) se změní, až ho aplikace po uložení načte znovu.
+
 ### DropDownList
 
 Výběr s vyhledávacím polem, převzatý z [phloxcz/forms-dropdownlist](https://github.com/phloxcz/forms-dropdownlist). Má stejné HTML, třídy a ovládání, takže vypadá stejně jako jeho serverová verze v Nette.
@@ -888,7 +907,7 @@ Textové pole s návrhy, převzaté z [phloxcz/forms-combobox](https://github.co
 form.addComboBox('country', 'Země:', { search: text => this.api.call('country.search', { text }) });
 
 // Napsaný text, který není mezi návrhy, se stane hodnotou
-form.addComboBox('shop', 'Obchod:', { items: shops.map(shop => [shop, shop]), allowCustom: true });
+form.addComboBox('shop', 'Obchod:', { items: shops, allowCustom: true });
 ```
 
 - **Hodnota je vybraná položka.** Dokud uživatel jen píše, hodnota je `null`. Napsaný text, který není položkou, se po opuštění pole zahodí a vrátí se předchozí hodnota. Napsaný přesný název položky (bez ohledu na velikost písmen a diakritiku) se vybere sám.
@@ -906,7 +925,7 @@ Více hodnot jako štítky, převzaté z [phloxcz/forms-taginput](https://github
 form.addTagInput('categories', 'Kategorie:', { search: text => this.api.call('category.search', { text }) });
 
 // Textové štítky, nové vznikají z napsaného textu
-form.addTagInput('labels', 'Štítky:', { items: labels.map(label => [label, label]), allowNew: true, maxTags: 5 });
+form.addTagInput('labels', 'Štítky:', { items: labels, allowNew: true, maxTags: 5 });
 ```
 
 - **Návrhy se ukážou při psaní,** bez štítků, které už jsou přidané. S `allowNew` je posledním návrhem „Vytvořit: "text"“.

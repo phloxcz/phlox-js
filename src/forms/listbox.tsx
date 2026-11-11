@@ -7,7 +7,7 @@ import { Else, For, If } from '../ui/flow';
 import { effect, onCleanup, state, untrack } from '../reactive/reactive';
 import type { Child } from '../ui/dom';
 import { classes } from '../ui/theme';
-import { FormControl } from './controls';
+import { FormControl, toPairs } from './controls';
 import type { Items } from './controls';
 
 export interface ListOptions<T> {
@@ -34,10 +34,7 @@ export function foldText(text: string): string {
   return text.split('').map(char => char.normalize('NFD')[0]!.toLowerCase()).join('');
 }
 
-export function toPairs<T>(items: Items<T>): [T, string][] {
-  if (Array.isArray(items)) return items.map(([value, label]) => [value, label]);
-  return Object.entries(items).map(([key, label]) => [(/^-?\d+$/.test(key) ? Number(key) : key) as T, label]);
-}
+export { toPairs };
 
 export abstract class ListControl<T> extends FormControl<T | null> {
   readonly selected = state<T | null>(null);

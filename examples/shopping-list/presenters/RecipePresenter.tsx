@@ -41,7 +41,7 @@ export default class RecipePresenter extends Presenter {
     this.ingredients = this.form.addMultiplier('ingredients', row => {
       row.addText('name', t('recipe.ingredient')).setRequired(t('recipe.ingredientRequired'));
       row.addFloat('amount', t('recipe.amount')).addCondition(Form.Filled).addRule(Form.Min, t('recipe.positive'), 0.001);
-      row.addSelect('unit', t('recipe.unit'), UNITS.map(unit => [unit, unit]));
+      row.addSelect('unit', t('recipe.unit'), UNITS);
       row.addDropDownList('category', t('edit.category'), { items: CATEGORIES, placeholder: t('list.category') });
     }, { min: 1, max: 20, label: t('recipe.ingredients') });
 
