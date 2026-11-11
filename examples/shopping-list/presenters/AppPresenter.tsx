@@ -4,7 +4,7 @@ import { locales, t, translateFramework, translator } from '../i18n';
 import { AppearanceSwitch } from '../../shared/appearance';
 import { ListPresenter } from './ListPresenter';
 
-/** The layout: navigation and the place for the presenter of the current route. Flash messages are shown by capify, see services.ts. */
+/** The layout: navigation and the place for the presenter of the current route. Flash messages are toasts of the framework. */
 export class AppPresenter extends Presenter {
   override routes: Route[] = [
     { name: 'recipe', pattern: '/recipe', presenter: () => import('./RecipePresenter') },

@@ -1,9 +1,10 @@
 // The grid example: orders with sorting, search, filters, pages, actions and totals; the state is in the URL.
 import 'phlox-js/styles/base.css';
-import { Application } from 'phlox-js';
+import { Application, messageTexts } from 'phlox-js';
 import { Grid } from 'phlox-js/components';
 import { DropDownList } from 'phlox-js/forms';
 import { bootstrap, startAppearance } from '../shared/appearance';
+import { showExampleMenu } from '../shared/menu';
 import { services } from './services';
 import { OrdersPresenter } from './presenters/OrdersPresenter';
 
@@ -23,10 +24,13 @@ Grid.texts = {
   sum: 'Celkem', avg: 'Průměr', count: 'Počet', min: 'Nejméně', max: 'Nejvíc',
 };
 
+Object.assign(messageTexts, { ok: 'OK', cancel: 'Zrušit', close: 'Zavřít', loading: 'Načítám…' });
 DropDownList.texts.filterPlaceholder = 'Hledat…';
 DropDownList.texts.noResults = 'Nic nenalezeno';
 
 const app = new Application(services);
+// All examples run as one site, this one under its own path, see examples/shared/menu.ts
+app.basePath = showExampleMenu();
 
 app.onError = error => {
   console.error(error);

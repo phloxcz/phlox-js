@@ -33,11 +33,6 @@
     "labels": "Labels",
     "labelsPlaceholder": "Add a label…"
   },
-  "confirm": {
-    "title": "Confirmation",
-    "yes": "Yes",
-    "no": "No"
-  },
   "common": {
     "save": "Save",
     "cancel": "Cancel",
@@ -132,5 +127,11 @@
     "motion": "Animations",
     "on": "on",
     "off": "off"
+  },
+  "messages": {
+    "ok": "OK",
+    "cancel": "Cancel",
+    "close": "Close",
+    "loading": "Loading…"
   }
 }

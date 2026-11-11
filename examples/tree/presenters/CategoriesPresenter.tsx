@@ -1,4 +1,4 @@
-import { For, If, Else, Presenter, state } from 'phlox-js';
+import { If, Else, Presenter, state } from 'phlox-js';
 import type { Params, Route } from 'phlox-js';
 import { Tree, TreeView } from 'phlox-js/components';
 import { Form, FormView } from 'phlox-js/forms';
@@ -111,14 +111,6 @@ export class CategoriesPresenter extends Presenter {
         </aside>
 
         <main>
-          <For each={this.app.flashes.messages}>
-            {flash => (
-              <p class={`flash ${flash.type}`} role="status">
-                {flash.text}
-                <button type="button" aria-label="Zavřít" onClick={() => this.app.flashes.remove(flash)}>×</button>
-              </p>
-            )}
-          </For>
           <If when={this.category}>
             {/* The value of a control is reactive: the heading follows typing, before anything is saved */}
             <h2>{this.form.get('name').value}</h2>

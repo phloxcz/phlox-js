@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="data:,">
+  <title>Ukázky PhloxJS</title>
+  <style>
+    :root { color-scheme: light dark; }
+    body { font: 16px/1.5 system-ui, sans-serif; max-width: 40rem; margin: 2rem auto; padding: 0 1rem; }
+    h1 { font-size: 1.5rem; }
+    ul { list-style: none; padding: 0; }
+    li { margin-bottom: 1rem; }
+    li a { font-weight: 600; font-size: 1.125rem; }
+    li p { margin: .125rem 0 0; color: GrayText; }
+  </style>
+</head>
+<body>
+  <h1>Ukázky PhloxJS</h1>
+  <ul id="examples"></ul>
+  <script type="module">
+    import { showExampleList } from '/shared/menu.ts';
+    showExampleList(document.getElementById('examples'));
+  </script>
+</body>
+</html>

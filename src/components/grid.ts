@@ -289,8 +289,14 @@ export class Grid<R extends object> {
     sum: 'Total', avg: 'Average', count: 'Count', min: 'Minimum', max: 'Maximum',
   };
 
-  /** Asks before an action with `confirm`. Replace it with an own dialog: Grid.confirm = question => ... */
-  static confirm: (question: string) => boolean | Promise<boolean> = question => window.confirm(question);
+  /**
+   * Asks before an action with `confirm`. Null asks by the application: a popover at the button of the action
+   * (see Application.confirm), or window.confirm() outside an application. An own question: Grid.confirm = (question, anchor) => ...
+   */
+  static confirm: ((question: string, anchor?: HTMLElement, danger?: boolean) => boolean | Promise<boolean>) | null = null;
+
+  /** How <GridView> asks when Grid.confirm is null; set by the view to the confirm() of the application. */
+  ask: (question: string, anchor?: HTMLElement, danger?: boolean) => boolean | Promise<boolean> = question => window.confirm(question);
 
   readonly columns: GridColumn<R>[] = [];
   readonly actions: GridAction<R>[] = [];
@@ -553,9 +559,9 @@ export class Grid<R extends object> {
   }
 
   /** Runs an action on the selected rows, after a confirmation, then clears the selection and loads again. */
-  async runBulk(action: BulkAction<R>): Promise<void> {
+  async runBulk(action: BulkAction<R>, anchor?: HTMLElement): Promise<void> {
     const keys = untrack(this.selected);
-    if (!keys.length || (action.confirm && !(await Grid.confirm(action.confirm)))) return;
+    if (!keys.length || (action.confirm && !(await this.question(action.confirm, anchor, action.danger)))) return;
     const rows = untrack(this.rows).filter(row => keys.includes(this.keyOf(row)));
     await action.run(keys, rows);
     this.selected.set([]);
@@ -563,11 +569,15 @@ export class Grid<R extends object> {
   }
 
   /** Runs an action on a row, after a confirmation. */
-  async runAction(action: GridAction<R>, row: R): Promise<boolean> {
+  async runAction(action: GridAction<R>, row: R, anchor?: HTMLElement): Promise<boolean> {
     const question = typeof action.confirm === 'function' ? action.confirm(row) : action.confirm;
-    if (question && !(await Grid.confirm(question))) return false;
+    if (question && !(await this.question(question, anchor, action.danger))) return false;
     await action.onClick?.(row);
     return true;
+  }
+
+  private question(text: string, anchor?: HTMLElement, danger?: boolean): boolean | Promise<boolean> {
+    return (Grid.confirm ?? this.ask)(text, anchor, danger);
   }
 
   // Columns

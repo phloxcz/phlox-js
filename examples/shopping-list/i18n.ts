@@ -1,3 +1,4 @@
+import { messageTexts } from 'phlox-js';
 import { IntlTranslator } from 'phlox-js/localization';
 import { ComboBox, DropDownList, Multiplier, TagInput, UploadControl } from 'phlox-js/forms';
 import cs from './locales/cs.json';
@@ -18,6 +19,7 @@ export function translateFramework(): void {
   TagInput.texts.remove = t('taginput.remove');
   for (const key of Object.keys(Multiplier.texts) as (keyof typeof Multiplier.texts)[]) Multiplier.texts[key] = t(`multiplier.${key}`);
   for (const key of Object.keys(UploadControl.texts) as (keyof typeof UploadControl.texts)[]) UploadControl.texts[key] = t(`upload.${key}`);
+  for (const key of Object.keys(messageTexts) as (keyof typeof messageTexts)[]) messageTexts[key] = t(`messages.${key}`);
 }
 
 translateFramework();

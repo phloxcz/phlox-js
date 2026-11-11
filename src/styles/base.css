@@ -1006,3 +1006,126 @@ th.phx-grid-drag-over-right {
   clip-path: inset(50%);
   white-space: nowrap;
 }
+
+/* Messages after @phloxcz/capify: toasts, the popover, the dialog while something loads; the same in every theme */
+.cap-notify-container {
+  position: fixed;
+  z-index: 1080;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: calc(100vh - 32px);
+  padding: 4px;
+  pointer-events: none;
+}
+
+.cap-notify-container[data-pos="top-left"] { top: 16px; left: 16px; align-items: flex-start; }
+.cap-notify-container[data-pos="top-center"] { top: 16px; left: 50%; transform: translateX(-50%); align-items: center; }
+.cap-notify-container[data-pos="top-right"] { top: 16px; right: 16px; align-items: flex-end; }
+.cap-notify-container[data-pos="bottom-left"] { bottom: 16px; left: 16px; align-items: flex-start; flex-direction: column-reverse; }
+.cap-notify-container[data-pos="bottom-center"] { bottom: 16px; left: 50%; transform: translateX(-50%); align-items: center; flex-direction: column-reverse; }
+.cap-notify-container[data-pos="bottom-right"] { bottom: 16px; right: 16px; align-items: flex-end; flex-direction: column-reverse; }
+
+.cap-notify {
+  position: relative;
+  min-width: 260px;
+  max-width: 380px;
+  overflow: hidden;
+  pointer-events: auto;
+  animation: cap-notify-in calc(.2s * var(--phlox-motion)) ease both;
+  transition: opacity calc(.2s * var(--phlox-motion)) ease, transform calc(.2s * var(--phlox-motion)) ease;
+}
+
+.cap-notify.cap-notify-exit {
+  opacity: 0;
+  transform: translateX(30px) scale(.95);
+}
+
+@keyframes cap-notify-in {
+  from { opacity: 0; transform: translateY(8px) scale(.97); }
+}
+
+/* The time left; it is a state, not a decoration, so it runs also without animations */
+.cap-notify-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  width: 100%;
+  background: var(--phlox-toast-accent, currentColor);
+  opacity: .6;
+  animation: cap-notify-time linear forwards;
+}
+
+.cap-notify:hover .cap-notify-progress,
+.cap-notify:focus-within .cap-notify-progress {
+  animation-play-state: paused;
+}
+
+@keyframes cap-notify-time {
+  to { width: 0; }
+}
+
+.cap-popover,
+.cap-popover-bs {
+  z-index: 1080;
+  min-width: 220px;
+  max-width: 320px;
+  animation: cap-popover-in calc(.15s * var(--phlox-motion)) ease both;
+}
+
+@keyframes cap-popover-in {
+  from { opacity: 0; transform: scale(.95); }
+}
+
+/* Bootstrap draws the arrow itself, the framework only says where */
+.cap-popover-bs .popover-arrow {
+  left: calc(var(--phlox-arrow) - var(--bs-popover-arrow-width) / 2);
+}
+
+@media (max-width: 480px) {
+  .cap-notify-container {
+    left: 8px !important;
+    right: 8px !important;
+    transform: none !important;
+  }
+
+  .cap-notify {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  /* On a small screen the popover is in the middle */
+  .cap-popover,
+  .cap-popover-bs {
+    top: 50% !important;
+    left: 50% !important;
+    translate: -50% -50%;
+    max-width: 90vw;
+  }
+
+  .cap-popover-arrow,
+  .cap-popover-bs .popover-arrow {
+    display: none;
+  }
+}
+
+.phlox-loading .phlox-dialog-body,
+.phlox-loading [role="status"] {
+  min-width: 14rem;
+}
+
+.phlox-spinner {
+  display: inline-block;
+  flex: none;
+  width: 20px;
+  height: 20px;
+  border: 2px solid color-mix(in srgb, currentColor 25%, transparent);
+  border-top-color: currentColor;
+  border-radius: 50%;
+  animation: phlox-spin .7s linear infinite;
+}
+
+@keyframes phlox-spin {
+  to { transform: rotate(360deg); }
+}

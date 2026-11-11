@@ -24,15 +24,19 @@ export class CapifyFlashMessages extends FlashMessages {
 
   constructor(private capify: CapifyNotify, private options: CapifyNotifyOptions = {}) {
     super();
+    // Capify shows the messages, not the toasts of the framework
+    this.toasts = false;
   }
 
   /** Shows the message as a toast. It is not kept in `messages`, capify takes care of it and of its timer. */
   override add(text: string, type = 'info', options: FlashOptions = {}): Flash {
-    const flash = { text, type };
+    const duration = options.duration ?? (type === 'error' ? this.errorDuration : this.duration);
+    const flash: Flash = { text, type, duration, ...(options.title ? { title: options.title } : {}) };
     const handle = this.capify.notify(text, {
       ...this.options,
       type: TYPES.has(type) ? type : 'info',
-      duration: options.duration ?? (type === 'error' ? this.errorDuration : this.duration),
+      duration,
+      ...(options.title ? { title: options.title } : {}),
     });
     this.handles.set(flash, handle);
     return flash;

@@ -134,7 +134,7 @@ export class Router {
       const current = splitUrl(this.running ? this.running.url : this.url());
       return joinUrl(current.path, { ...current.query, ...params });
     }
-    if (destination.startsWith('/')) return joinUrl(destination, params);
+    if (destination.startsWith('/')) return joinUrl(this.base + destination, params);
 
     const route = presenter.routes.find(candidate => candidate.name === destination);
     if (!route) throw new Error(`${presenter.constructor.name} has no route '${destination}'.`);
@@ -161,6 +161,16 @@ export class Router {
     const kept = (name: string) => names.some(pattern => (pattern.endsWith('*') ? name.startsWith(pattern.slice(0, -1)) : name === pattern));
     const { query } = splitUrl(this.running ? this.running.url : this.url());
     return Object.fromEntries(Object.entries(query).filter(([name]) => kept(name)));
+  }
+
+  /** The base path of the application without the slash at the end, see Application.basePath. */
+  get base(): string {
+    return this.app.basePath.replace(/\/+$/, '');
+  }
+
+  /** Whether the path belongs to the application, that is it lies under its base path. */
+  owns(path: string): boolean {
+    return !this.base || path === this.base || path.startsWith(`${this.base}/`);
   }
 
   private onPopState = (): void => {
@@ -197,6 +207,8 @@ export class Router {
    */
   private async run(navigation: Navigation): Promise<void> {
     const { path, query, full } = splitUrl(navigation.url);
+    // Another page of the site, outside the base path, is loaded by the browser
+    if (!this.owns(path)) return location.assign(full);
     const commits: (() => void)[] = [];
     const created: Component<any, any>[] = [];
     const changed: { presenter: AnyPresenter; matchKey: string }[] = [];
@@ -206,8 +218,8 @@ export class Router {
 
     try {
       let presenter = this.root;
-      let rest = path;
-      let base = '';
+      let base = this.base;
+      let rest = path.slice(base.length) || '/';
       let refresh = false;
 
       while (presenter) {

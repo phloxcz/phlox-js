@@ -245,7 +245,7 @@ describe('the view', () => {
       expect(cells(root, 'id')).toEqual(['3', '5']);
       expect(root.querySelector('.phx-grid-bulk-bar')).toBeNull();
     } finally {
-      Grid.confirm = question => window.confirm(question);
+      Grid.confirm = null;
     }
   });
 

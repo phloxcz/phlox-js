@@ -33,11 +33,6 @@
     "labels": "Štítky",
     "labelsPlaceholder": "Přidat štítek…"
   },
-  "confirm": {
-    "title": "Potvrzení",
-    "yes": "Ano",
-    "no": "Ne"
-  },
   "common": {
     "save": "Uložit",
     "cancel": "Zrušit",
@@ -132,5 +127,11 @@
     "motion": "Animace",
     "on": "zapnuté",
     "off": "vypnuté"
+  },
+  "messages": {
+    "ok": "OK",
+    "cancel": "Zrušit",
+    "close": "Zavřít",
+    "loading": "Načítám…"
   }
 }

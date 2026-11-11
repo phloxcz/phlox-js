@@ -139,6 +139,8 @@ export function GridView<R extends object>(props: GridViewProps<R>): Child {
   const filterForm = new Form();
 
   grid.follow();
+  // Questions before actions: a popover at the button, in the look of the theme
+  if (app) grid.ask = (question, anchor, danger) => app.confirm(question, { ...(anchor ? { anchor, placement: 'bottom-right' as const } : {}), danger: Boolean(danger) });
   if (!untrack(() => grid.loading())) run(grid.loadOnce());
 
   const hasFilters = () => grid.visibleColumns().some(column => column.filterKind);
@@ -241,7 +243,7 @@ export function GridView<R extends object>(props: GridViewProps<R>): Child {
       <div class={classes('phx-grid-bulk-bar', slot('bulkBar'))} role="region" aria-label={texts.actions}>
         <span class={classes(slot('bulkCount'), 'phx-grid-bulk-bar-count')}>{() => format(texts.selected, grid.selected().length)}</span>
         {grid.bulkActions.map(action => (
-          <button type="button" class={classes(slot('bulkBtn'), action.danger && slot('danger'))} onClick={() => run(grid.runBulk(action))}>
+          <button type="button" class={classes(slot('bulkBtn'), action.danger && slot('danger'))} onClick={event => run(grid.runBulk(action, event.currentTarget))}>
             {action.label}
           </button>
         ))}
@@ -518,10 +520,13 @@ export function GridView<R extends object>(props: GridViewProps<R>): Child {
     const visible = () => grid.actions.filter(action => !action.visible || action.visible(row()));
     const primary = () => visible().filter(action => action.primary);
     const other = () => visible().filter(action => !action.primary);
-    const activate = (action: GridAction<R>, event: Event): void => {
+    const activate = (action: GridAction<R>, event: Event, anchor?: HTMLElement): void => {
       if (!action.confirm && !action.onClick) return;
       event.preventDefault();
-      run(grid.runAction(action, row()).then(async done => {
+      // An item of the menu disappears with the menu, the question is at its button
+      const button = event.currentTarget as HTMLElement;
+      const at = anchor ?? (button.closest('[role=menu]') ? button.closest('.phx-grid-actions')?.querySelector<HTMLElement>('.phx-grid-action-toggle') : null) ?? button;
+      run(grid.runAction(action, row(), at).then(async done => {
         if (!done) return;
         if (action.href) await app?.router.navigate(action.href(row()));
         else await grid.load();

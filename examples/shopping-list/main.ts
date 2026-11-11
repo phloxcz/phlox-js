@@ -2,6 +2,7 @@
 import 'phlox-js/styles/base.css';
 import { Application } from 'phlox-js';
 import { bootstrap, startAppearance } from '../shared/appearance';
+import { showExampleMenu } from '../shared/menu';
 import { services } from './services';
 import { AppPresenter } from './presenters/AppPresenter';
 
@@ -11,6 +12,8 @@ if (bootstrap) await import('bootstrap/dist/css/bootstrap.min.css');
 else await import('phlox-js/styles/default.css');
 
 const app = new Application(services);
+// All examples run as one site, this one under its own path, see examples/shared/menu.ts
+app.basePath = showExampleMenu();
 
 app.onError = error => {
   console.error(error);

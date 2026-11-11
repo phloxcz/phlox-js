@@ -1,8 +1,9 @@
 // The tree example: a shop's categories, loaded level by level, selected by the URL, moved by dragging.
 import 'phlox-js/styles/base.css';
-import { Application } from 'phlox-js';
+import { Application, messageTexts } from 'phlox-js';
 import { Tree } from 'phlox-js/components';
 import { bootstrap, startAppearance } from '../shared/appearance';
+import { showExampleMenu } from '../shared/menu';
 import { services } from './services';
 import { CategoriesPresenter } from './presenters/CategoriesPresenter';
 
@@ -12,8 +13,11 @@ if (bootstrap) await import('bootstrap/dist/css/bootstrap.min.css');
 else await import('phlox-js/styles/default.css');
 
 Tree.texts = { expand: 'Rozbalit', collapse: 'Sbalit', loading: 'Načítám…' };
+Object.assign(messageTexts, { ok: 'OK', cancel: 'Zrušit', close: 'Zavřít', loading: 'Načítám…' });
 
 const app = new Application(services);
+// All examples run as one site, this one under its own path, see examples/shared/menu.ts
+app.basePath = showExampleMenu();
 
 app.onError = error => {
   console.error(error);

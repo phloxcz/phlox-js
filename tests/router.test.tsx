@@ -1,5 +1,5 @@
-import { describe, expect, test } from 'vitest';
-import { BadRequestError, Presenter, RouteFrame, state } from '../src/index';
+import { describe, expect, test, vi } from 'vitest';
+import { Application, BadRequestError, Container, Presenter, RouteFrame, state } from '../src/index';
 import type { Params, Route } from '../src/index';
 import { boot, deferred, tick, until, goBack } from './helpers';
 
@@ -322,8 +322,49 @@ describe('redirect, errors and the old screen', () => {
   test('flashMessage adds a message to the application', async () => {
     const { app } = await boot(App);
     app.presenter!.flashMessage('Saved', 'success');
-    expect(app.flashes.messages()).toEqual([{ text: 'Saved', type: 'success' }]);
+    expect(app.flashes.messages()).toEqual([{ text: 'Saved', type: 'success', duration: 5000 }]);
     app.flashes.remove(app.flashes.messages()[0]!);
     expect(app.flashes.messages()).toEqual([]);
+  });
+});
+
+describe('base path', () => {
+  test('the application under /admin: routes, links, clicks and pages outside it', async () => {
+    history.replaceState(null, '', '/admin/users/15');
+    const element = document.createElement('main');
+    document.body.append(element);
+    const app = new Application(new Container());
+    app.basePath = '/admin/';
+    app.onError = error => { throw error; };
+    await app.run(App, element);
+    try {
+      expect(element.querySelector('h2')!.textContent).toBe('detail of 15 default');
+      expect(app.presenter!.link('users')).toBe('/admin/users');
+      expect(app.presenter!.link('/about')).toBe('/admin/about');
+      expect(element.querySelector<HTMLAnchorElement>('#users')!.getAttribute('href')).toBe('/admin/users');
+
+      await app.router.navigate('/admin');
+      expect(element.querySelector('h1')!.textContent).toBe('home');
+      expect(location.pathname).toBe('/admin');
+
+      // A link inside the base path is a navigation, a link outside it is left to the browser
+      const navigate = vi.spyOn(app.router, 'navigate');
+      const click = (href: string) => {
+        const link = Object.assign(document.createElement('a'), { href });
+        document.body.append(link);
+        link.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+      };
+      // jsdom cannot load another page
+      const stay = (event: Event) => event.preventDefault();
+      document.addEventListener('click', stay);
+      click('/admin/users');
+      click('/shop');
+      document.removeEventListener('click', stay);
+      expect(navigate.mock.calls.map(call => call[0])).toEqual(['/admin/users']);
+      await tick();
+      expect(location.pathname).toBe('/admin/users');
+    } finally {
+      app.stop();
+    }
   });
 });

@@ -76,6 +76,26 @@ export abstract class Component<P extends object = {}, R = void> {
     return null;
   }
 
+  /** A message with OK, see Application.alert(). With `anchor` a popover at an element. */
+  alert(message: Child, options: Parameters<Application['alert']>[1] = {}): Promise<void> {
+    return this.app.alert(message, options, this);
+  }
+
+  /** A question with OK and Cancel, true for OK. With `anchor` a popover at an element. */
+  confirm(message: Child, options: Parameters<Application['confirm']>[1] = {}): Promise<boolean> {
+    return this.app.confirm(message, options, this);
+  }
+
+  /** A question for a text, null for Cancel. With `anchor` a popover at an element. */
+  prompt(message: Child, options: Parameters<Application['prompt']>[1] = {}): Promise<string | null> {
+    return this.app.prompt(message, options, this);
+  }
+
+  /** A dialog while something runs: const loading = this.loading('Saving…'); … loading.close(). */
+  loading(message?: Child): ReturnType<Application['loading']> {
+    return this.app.loading(message, this);
+  }
+
   /** Closes the dialog the component is shown in and hands the result to whoever opened it. */
   close(result?: R): void {
     this.onClose?.(result);

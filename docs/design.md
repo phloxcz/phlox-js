@@ -37,6 +37,21 @@ Vlastní CSS framework ani pevná vazba na Bootstrap. Postup je stejný jako u `
 - **Bootstrap a nativní `<dialog>`:** třídy `modal-content`, `modal-header`... berou barvy a odsazení z proměnných, které Bootstrap definuje jen na obalu `.modal`. Ten u `<dialog>` být nemůže (dělá vlastní pozicování), a okno pak nemělo pozadí. Téma proto používá utility (`bg-body`, `p-3`, `border-bottom`...), které na ničem nezávisí. Ověřeno snímky z prohlížeče.
 - **Třída předaná do `<Input>`** se přidá k třídě tématu, u tlačítka ji nahradí (jinak by `btn-primary` a `btn-secondary` platily naráz).
 
+### Zprávy: toasty, alert, confirm, prompt, popover (implementováno, čeká na review)
+
+`ui/messages.tsx`, testy `tests/messages.test.tsx`. Převzaté z `@phloxcz/capify` do frameworku, ne jako závislost (rozhodl autor, stejně jako dropdownlist, strom nebo grid).
+
+- **Proč ne závislost:** pravidlo „jádro bez závislostí“, ale hlavně jednotnost. Capify má vlastní témata, tmavý režim podle systému (ne podle stránky a `data-bs-theme`) a vlastní animace. Ve frameworku jdou třídy přes `Theme`, barvy přes systémové barvy nebo Bootstrap a animace přes `setMotion()`, takže zprávy vypadají a chovají se jako zbytek.
+- **Vzhled capify zůstal:** třídy `cap-notify-*` a `cap-pop-*`, rozložení a chování (štos v rohu, proužek času, pauza při najetí, popover s šipkou a otočením). Bootstrap dostává svoje `alert` a `popover`.
+- **`alert`, `confirm`, `prompt` jsou okno frameworku,** ne vlastní overlay capify. Vypadají jako ostatní dialogy aplikace, Escape, fokus a dialog nad dialogem už okno umí. Proto je kódu výrazně méně než v capify.
+- **Metody na `Component` a `Application`,** ne volné funkce: dialog potřebuje otevírající komponentu (vnoření, úklid při jejím zániku) a téma z jejího scope. `Component.confirm()` volá `app.confirm()` s komponentou, aby `ui/component.ts` nemusel importovat dialogy (kruhový import).
+- **Zpráva je šablona, ne HTML:** capify má volbu `html` (s varováním před XSS). Šablona frameworku dá formátování bez rizika.
+- **Popover se měří až s `position: fixed`.** Ověření v prohlížeči ukázalo, že jako obyčejný blok má při měření maximální šířku, zúží se až potom a uteče od tlačítka.
+- **Proužek času u toastu běží i bez animací:** je to ukazatel stavu, ne ozdoba, jako kolečko načítání. Čas se počítá ve službě (`pause`, `resume`), CSS animace proužku se pozastaví stejně.
+- **Grid se ptá popoverem u tlačítka akce.** U akce z menu je kotvou tlačítko menu, protože položka menu po kliknutí zmizí.
+- **`loading` je vlastní `<dialog>`, ne okno komponenty:** okno má zavírací křížek a Escape, které by tu nesměly fungovat.
+- **Capify adaptér zůstává** pro aplikace, které chtějí přímo knihovnu (stránky společné s Nette). Balíček capify už není ani vývojová závislost, ukázky používají zprávy frameworku.
+
 ### Animace (implementováno, čeká na review)
 
 `ui/motion.ts`, testy `tests/motion.test.tsx`. Přání autora: jeden třístavový přepínač pro všechny prvky, i budoucí.
@@ -58,7 +73,7 @@ Napojení cizích knihoven nejde do jádra, ale do adaptérů. Adaptér nahradí
 - **Knihovna se adaptéru předá, adaptér ji neimportuje,** pokud to jde: `new CapifyFlashMessages(Capify, options)`. Adaptér pak nemá závislost, potřebuje jen malé rozhraní (`CapifyNotify`) a testuje se s falešnou náhradou. U Kenda to kvůli jQuery a pluginům nejspíš nepůjde, tam bude Kendo volitelná závislost (`peerDependencies`).
 - **Vlastní adaptér pro jinou knihovnu** si aplikace napíše stejně, seznam služeb je v příručce.
 
-**Flash zprávy:** výchozí `FlashMessages` drží zprávy pro layout a sama je po 5 s maže. Chyby zůstávají (`errorDuration = 0`), aby je uživatel nepřehlédl. `CapifyFlashMessages` je ukazuje jako toasty capify a časovač nechává na capify (stejné volby `duration`). Ukázka používá capify. Každý vstup je jeden soubor (`src/index.ts`, `src/net/index.ts`...), ostatní soubory jsou vnitřní. Na kořeni `src/` zůstávají jen vstupy: `index.ts`, `vite.ts` a `jsx-runtime.ts`, který si podle názvu hledá kompilátor.
+**Flash zprávy:** výchozí `FlashMessages` drží zprávy a aplikace je ukazuje jako toasty (převzaté z capify, viz Zprávy). Po 5 s je sama maže, chyby zůstávají (`errorDuration = 0`), aby je uživatel nepřehlédl. Layout, který zprávy kreslí sám, nastaví `toasts = false`. `CapifyFlashMessages` je ukazuje jako toasty knihovny capify a časovač nechává na ní. Každý vstup je jeden soubor (`src/index.ts`, `src/net/index.ts`...), ostatní soubory jsou vnitřní. Na kořeni `src/` zůstávají jen vstupy: `index.ts`, `vite.ts` a `jsx-runtime.ts`, který si podle názvu hledá kompilátor.
 
 ## Presenter a Component (rozhodnuto)
 
@@ -159,7 +174,7 @@ Routovaný dialog je obyčejný potomek ve stromu, jen se místo do `<RouteFrame
 - **Zavření routovaného dialogu:** když se na něj přišlo uvnitř aplikace, volá se `history.back()`. Jinak by Zpět dialog znovu otevřelo. Po přímém odkazu se volá `replaceState` na výchozí routu presenteru, aby Zpět neopustilo aplikaci.
 - **Výsledek routovaného dialogu:** promise by po obnovení stránky neměla kdo čekat, proto `closed` u routy. Zavře-li dialog navigace, přijde `undefined`.
 - **Nečekat na dialog v `actionXxx`:** navigace běží po jedné, takže čekání na uživatele by blokovalo všechny další.
-- **Okno je výměnné:** jádro používá nativní `<dialog>` bez závislostí, Kendo adaptér ho může nahradit `kendoWindow`. `alert`, `confirm` a `prompt` řeší `capify`.
+- **Okno je výměnné:** jádro používá nativní `<dialog>` bez závislostí, Kendo adaptér ho může nahradit `kendoWindow`. `alert`, `confirm` a `prompt` jsou převzaté z capify (viz Zprávy) a ukazují se v tomto okně.
 
 ### Odloženo
 
@@ -574,6 +589,23 @@ Kód: `ui/component.ts`, `ui/presenter.ts`, `ui/dialog.ts`, `application/router.
 - **`redirect()` znovu spustí akci** volajícího presenteru a presenterů pod ním, i když se URL nezměnila. Proto funguje `redirect('this')` po smazání.
 - **Odkazy přes více úrovní:** `link('název')` umí routy vlastního presenteru. Hlouběji vede absolutní cesta nebo `link()` cílového presenteru.
 
+### Základní cesta (implementováno, čeká na review)
+
+`Application.basePath`, test v `tests/router.test.tsx`. Vznikla kvůli ukázkám jako jednomu webu, ale stejně ji potřebuje aplikace nasazená v podadresáři.
+
+- **Na aplikaci, ne na kořenovém presenteru:** je to vlastnost nasazení, ne struktury aplikace. Router ji vezme jako `basePath` kořenového presenteru, takže odkazy a zavírání dialogů ji obsahují bez další práce.
+- **Odkaz mimo ni je jiná stránka:** aplikace ho nezachytí a navigace na adresu mimo ni načte stránku v prohlížeči. Na jednom webu tak vedle sebe žije víc aplikací.
+- **Nastavuje se ručně, ne z `<base href>`:** jeden řádek v `main.ts` je vidět, `<base>` by navíc měnil relativní adresy obrázků a skriptů.
+
+### Ukázky jako jeden web (implementováno, čeká na review)
+
+`npm run dev` servíruje celé `examples/` (konfigurace `examples/vite.config.ts`). Na `/` je rozcestník, každá ukázka běží pod svou cestou a lišta nahoře (`examples/shared/menu.ts`) mezi nimi přepíná.
+
+- **Každá ukázka zůstává samostatnou aplikací** se svými službami, texty a styly. Přepnutí načte stránku znovu. Jedna aplikace se všemi ukázkami jako moduly by míchala jejich služby a globální texty (`messageTexts`, `Grid.texts`) a nákupní seznam přepíná jazyk restartem aplikace.
+- **Přímý odkaz dovnitř ukázky** (`/grid/1001`) dostane stránku ukázky díky malému middlewaru ve Vite; vestavěný záložní režim Vite by vrátil rozcestník. Skripty mají v HTML absolutní cestu, aby fungovaly i z hlubší adresy.
+- **Lišta je obyčejné DOM mimo aplikaci,** takže ji žádný presenter nemusí vykreslovat.
+- **Jeden původ místo tří portů:** volba vzhledu v `localStorage` platí pro všechny ukázky najednou.
+
 ### Dialogy
 
 - **Okno dodává služba `Dialogs`,** výchozí `NativeDialogs` používá `<dialog>`. Kendo adaptér ji v kontejneru nahradí.
@@ -586,7 +618,7 @@ Kód: `ui/component.ts`, `ui/presenter.ts`, `ui/dialog.ts`, `application/router.
 
 - Persistentní parametry.
 - Zadržení odchodu s neuloženými změnami.
-- Aplikace v podadresáři (base path) a práce s `#hash`.
+- Práce s `#hash`.
 
 ## Reaktivní jádro a renderer (implementováno, čeká na review)
 

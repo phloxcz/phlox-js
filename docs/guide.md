@@ -12,9 +12,8 @@ Všechno níže je vidět pohromadě v ukázce [examples/shopping-list](../examp
 
 | Příkaz | Co dělá |
 |---|---|
-| `npm run dev` | spustí ukázku nákupního seznamu |
-| `npm run dev:tree` | spustí ukázku stromu kategorií |
-| `npm run dev:grid` | spustí ukázku gridu objednávek |
+| `npm run dev` | spustí ukázky: rozcestník na `/`, každá ukázka pod svou cestou (`/shopping-list`, `/tree`, `/grid`), přepíná se lištou nahoře |
+| `npm run build:examples` | sestaví ukázky do `examples/dist` |
 | `npm test` | spustí testy |
 | `npm run typecheck` | zkontroluje typy |
 
@@ -56,6 +55,7 @@ void app.run(AppPresenter, document.getElementById('app')!);
 
 - **`app.onError`** dostane chyby z navigace a z metod životního cyklu. Výchozí je `console.error`, typicky je chceš i ukázat: `app.onError = error => app.flashes.add(String(error), 'error')`.
 - **`app.restart()`** postaví celý strom presenterů znovu na stejné URL. Hodí se po změně jazyka.
+- **`app.basePath`** je cesta, pod kterou aplikace na webu běží, když není v kořeni: `app.basePath = '/admin'` před `run()`. Routy se počítají od ní, odkazy ji obsahují (`link('/about')` dá `/admin/about`) a odkaz mimo ni načte prohlížeč jako jinou stránku. Server musí na každou adresu pod ní vrátit stránku aplikace.
 - **`app.presenter`** je kořenový presenter, **`app.router`** router, **`app.flashes`** flash zprávy, **`app.user`** přihlášený uživatel.
 
 Projekt potřebuje ve `vite.config.ts` plugin kvůli autowiringu a v `tsconfig.json` nastavení TSX (viz Šablony):
@@ -209,7 +209,7 @@ this.link('/about')                       // absolutní cesta
 <a href={this.link('detail', { id: user.id })}>{user.name}</a>
 ```
 
-Odkaz je obyčejné `<a href>`. Kliknutí zachytí aplikace a přejde bez načtení stránky, otevření v novém panelu funguje normálně. Odkaz s `target` nebo `download` a odkaz na jiný web nechá prohlížeči.
+Odkaz je obyčejné `<a href>`. Kliknutí zachytí aplikace a přejde bez načtení stránky, otevření v novém panelu funguje normálně. Odkaz s `target` nebo `download`, odkaz na jiný web a odkaz mimo `app.basePath` nechá prohlížeči.
 
 `link('název')` zná jen routy vlastního presenteru. Do hlubší úrovně vede absolutní cesta, nebo `link()` zavolaný na cílovém presenteru.
 
@@ -375,32 +375,28 @@ Okno dodává služba `Dialogs`. Jinou implementaci, třeba nad Kendo Window, za
 ## Flash zprávy
 
 ```ts
-this.flashMessage('Uloženo.', 'success');                     // v presenteru
-this.flashMessage('Hotovo.', 'info', { duration: 2000 });     // vlastní doba
+this.flashMessage('Uloženo.', 'success');                           // v presenteru
+this.flashMessage('Hotovo.', 'info', { duration: 2000 });           // vlastní doba
+this.flashMessage('Objednávka odeslána.', 'success', { title: 'Hotovo' });
 ```
 
-- **Typy:** `info`, `success`, `warning`, `error`.
+Aplikace zprávy ukazuje jako toasty převzaté z [capify](https://github.com/phloxcz/capify): skládají se v rohu, mají proužek se zbývajícím časem, při najetí myší nebo fokusu čekají a mají křížek. Vzhled dává téma (výchozí, Bootstrap jako `alert`), takže sleduje tmavý režim i přepínač animací.
+
+- **Typy:** `info`, `success`, `warning`, `error`. Chyba se čtečkám ohlásí hned (`role="alert"`), ostatní zdvořile (`role="status"`).
 - **Zprávy samy mizí** po 5 sekundách. Chyby zůstávají, dokud je uživatel nezavře, aby je nepřehlédl. Pro celou aplikaci se to nastaví na službě: `app.flashes.duration = 3000`, `app.flashes.errorDuration = 10000` (0 = nezmizí sama).
+- **Roh** se nastaví před startem aplikace: `top-right` (výchozí), `top-left`, `top-center`, `bottom-left`, `bottom-center`, `bottom-right`. Třeba vlastní službou: `const flashes = new FlashMessages(); flashes.position = 'bottom-right'; services.add(flashes);`.
 - **Rozdíl proti Nette:** tam zpráva přežije přesměrování a ukáže se na další stránce. V SPA se stránka nepřenačítá, takže zprávy fungují jako toasty.
-
-### Zobrazení přes capify
-
-Doporučené: zprávy jako toasty knihovny [capify](https://github.com/phloxcz/capify), které se skládají na sebe, mají odpočet, pauzu při najetí myší a křížek.
-
-```ts
-// services.ts
-import * as Capify from '@phloxcz/capify';
-import '@phloxcz/capify/capify.css';
-import { CapifyFlashMessages } from 'phlox-js/adapters/capify';
-
-services.add(new CapifyFlashMessages(Capify, { position: 'top-right', theme: 'bootstrap' }));
-```
-
-Druhý parametr jsou volby `Capify.notify()` pro všechny zprávy. `phlox-js` sám capify nevyžaduje, instaluje ho aplikace (`npm i @phloxcz/capify`).
+- **Vzhled:** místa `toast.card`, `toast.info`, `toast.success`, `toast.warning`, `toast.error`, `toast.title`, `toast.message`, `toast.close`. **Text** křížku pro čtečky: `messageTexts.close`.
 
 ### Zobrazení v layoutu
 
-Bez adaptéru drží zprávy výchozí služba v `app.flashes.messages` a layout si je vykreslí sám:
+Kdo chce zprávy vykreslit sám, vypne toasty (`toasts = false`) a zprávy najde v `app.flashes.messages`:
+
+```ts
+const flashes = new FlashMessages();
+flashes.toasts = false;
+services.add(flashes);
+```
 
 ```tsx
 <For each={this.app.flashes.messages}>
@@ -412,6 +408,48 @@ Bez adaptéru drží zprávy výchozí služba v `app.flashes.messages` a layout
   )}
 </For>
 ```
+
+### Zobrazení přes capify
+
+Adaptér pro aplikace, které chtějí přímo knihovnu capify, třeba kvůli stránkám společným s Nette:
+
+```ts
+import * as Capify from '@phloxcz/capify';
+import '@phloxcz/capify/capify.css';
+import { CapifyFlashMessages } from 'phlox-js/adapters/capify';
+
+services.add(new CapifyFlashMessages(Capify, { position: 'top-right', theme: 'bootstrap' }));
+```
+
+Druhý parametr jsou volby `Capify.notify()` pro všechny zprávy. Toasty frameworku se pak neukazují. `phlox-js` capify nevyžaduje, instaluje ho aplikace.
+
+## Zprávy a otázky: alert, confirm, prompt
+
+Náhrada `window.alert()`, `confirm()` a `prompt()` převzatá z capify. V komponentě a presenteru jako metody, jinde přes `app`:
+
+```ts
+await this.alert('Uloženo.');
+if (await this.confirm('Smazat položku?', { danger: true, okText: 'Smazat' })) { … }
+const name = await this.prompt('Nový název:', { value: item.name });   // text, nebo null
+
+// Malý popover u tlačítka místo dialogu
+<button onClick={async event => {
+  if (await this.confirm('Smazat?', { anchor: event.currentTarget, danger: true })) await this.handleDelete();
+}}>Smazat</button>
+
+// Dialog bez tlačítek, než něco doběhne
+const loading = this.loading('Ukládám…');
+loading.update('Ukládám 2 z 5…');
+loading.close();
+```
+
+- **Dialog** je okno frameworku (nativní `<dialog>`), vypadá jako ostatní dialogy aplikace. `confirm` vrátí `true` pro OK, `false` pro Zrušit, Escape i křížek. `prompt` vrátí text, nebo `null`. Enter v poli potvrdí.
+- **Popover** (`anchor: prvek`) se ukáže u prvku, pod ním vlevo, nebo podle `placement` (`bottom-left`, `bottom-right`, `top-left`, `top-right`). Když se nevejde, otočí se. Fokus dostane OK nebo pole, Escape a klik mimo ho zruší, potom se fokus vrátí na prvek. Escape nezavře dialog pod ním.
+- **Volby:** `title`, `okText`, `cancelText`, `danger` (OK varuje, třeba u mazání), u `prompt` `value` a `placeholder`.
+- **`loading`** uživatel nezavře, ani Escapem; zavře ho `close()`. Zpráva může být šablona, ne jen text.
+- **Zpráva** je text nebo šablona, nikdy HTML v textu, takže nehrozí vložení cizího kódu.
+- **Texty tlačítek:** `messageTexts.ok`, `cancel`, `close`, `loading` z `phlox-js`. **Vzhled:** místa `message.*` (dialog) a `popover.*` (popover; v Bootstrapu jeho `popover` se šipkou).
+- **Grid** se před akcí s `confirm` ptá popoverem u tlačítka akce.
 
 ## Vzhled a témata
 
@@ -1237,7 +1275,7 @@ class CategoriesPresenter extends Presenter {
 }
 ```
 
-Celá ukázka je v `examples/tree` (`npm run dev:tree`).
+Celá ukázka je v `examples/tree` (`npm run dev`, stránka `/tree`).
 
 ### Uzly
 
@@ -1332,7 +1370,7 @@ class OrdersPresenter extends Presenter {
 }
 ```
 
-Celá ukázka je v `examples/grid` (`npm run dev:grid`).
+Celá ukázka je v `examples/grid` (`npm run dev`, stránka `/grid`).
 
 ### Data
 
@@ -1391,7 +1429,7 @@ S `remember: 'klíč'` si je grid pamatuje v prohlížeči (`localStorage`), pat
 
 - **`addAction(label, { href | onClick, primary, danger, confirm, visible })`:** `primary` je tlačítko v řádku, ostatní jsou v menu ⋮. `href` dělá odkaz, `onClick` funkci, po které se grid načte znovu. `visible: row => …` ukáže akci jen u některých řádků.
 - **`addBulkAction(label, (keys, rows) => …, { confirm, danger })`:** řádky dostanou zaškrtávátka, nad tabulkou se objeví lišta s počtem vybraných. Výběr platí napříč stránkami (podle klíčů), po akci se smaže a grid se načte znovu.
-- **`confirm`** se ptá přes `Grid.confirm(question)`, ve výchozím stavu `window.confirm`. Vlastní dialog: `Grid.confirm = question => this.openDialog(Confirm, { question }).then(Boolean)`.
+- **`confirm`** se ptá popoverem u tlačítka akce (`app.confirm` s `anchor`), u akce s `danger` s varovným OK. Jinou otázku nastaví `Grid.confirm = (question, anchor, danger) => …`, mimo běžící aplikaci se grid ptá přes `window.confirm`.
 
 ### Ostatní
 

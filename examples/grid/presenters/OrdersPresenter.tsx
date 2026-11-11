@@ -3,7 +3,6 @@ import type { Route } from 'phlox-js';
 import { Grid, GridView } from 'phlox-js/components';
 import { CATEGORIES, OrderStore } from '../model/OrderStore';
 import type { Order } from '../model/OrderStore';
-import { Confirm } from '../components/Confirm';
 import { OrderDetail } from '../components/OrderDetail';
 import { AppearanceSwitch } from '../../shared/appearance';
 
@@ -52,10 +51,9 @@ export class OrdersPresenter extends Presenter {
     grid.addBulkAction('Označit zaplacené', keys => this.store.setPaid(keys as number[], true));
     grid.addBulkAction('Smazat', keys => this.store.remove(keys as number[]), { danger: true, confirm: 'Smazat vybrané objednávky?' });
 
-    // The state goes to the URL, and links of this presenter (the detail) keep it
+    // The state goes to the URL, and links of this presenter (the detail) keep it.
+    // The grid asks before deleting by a popover at the button that asked.
     grid.bind(this);
-    // Questions of the grid in a dialog of the application instead of window.confirm()
-    Grid.confirm = question => this.openDialog(Confirm, { question }).then(Boolean);
   }
 
   render() {

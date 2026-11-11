@@ -1,0 +1,16 @@
+/* The menu of examples, see menu.ts. Classes win over the `nav` rules of the examples. */
+.examples-menu {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: .25rem 1rem;
+  margin: 0 0 1.5rem;
+  padding: .5rem 0;
+  border: 0;
+  border-bottom: 1px solid #8884;
+  font-size: .875rem;
+}
+.examples-menu a { color: inherit; opacity: .75; text-decoration: none; }
+.examples-menu a:hover { opacity: 1; text-decoration: underline; }
+.examples-menu a[aria-current=page] { opacity: 1; font-weight: 600; }
+.examples-menu .examples-home { opacity: 1; font-weight: 700; margin-right: .5rem; }

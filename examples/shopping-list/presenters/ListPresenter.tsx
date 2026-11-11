@@ -5,7 +5,6 @@ import { t } from '../i18n';
 import { ShoppingStore } from '../model/ShoppingStore';
 import { CATEGORIES } from '../model/ShoppingStore';
 import type { Item } from '../model/ShoppingStore';
-import { Confirm } from '../components/Confirm';
 import { ItemEdit } from '../components/ItemEdit';
 
 export class ListPresenter extends Presenter {
@@ -57,8 +56,9 @@ export class ListPresenter extends Presenter {
     await this.reload();
   }
 
-  async handleDelete(item: Item) {
-    const confirmed = await this.openDialog(Confirm, { question: t('list.confirmDelete', { name: item.name }) });
+  /** Asks by a popover at the button; without `anchor` it would be a dialog. */
+  async handleDelete(item: Item, button: HTMLElement) {
+    const confirmed = await this.confirm(t('list.confirmDelete', { name: item.name }), { anchor: button, danger: true, okText: t('list.delete') });
     if (!confirmed) return;
     await this.store.remove(item.id);
     this.flashMessage(t('list.deleted', { name: item.name }));
@@ -89,7 +89,7 @@ export class ListPresenter extends Presenter {
                   <span class="category">
                     {() => [CATEGORIES.find(([id]) => id === item().category)?.[1], item().shop, ...item().labels].filter(Boolean).join(' · ')}
                   </span>
-                  <button onClick={() => this.handleDelete(item())}>{t('list.delete')}</button>
+                  <button onClick={event => this.handleDelete(item(), event.currentTarget)}>{t('list.delete')}</button>
                 </li>
               )}
             </For>

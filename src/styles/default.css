@@ -645,3 +645,167 @@
   border-radius: var(--phlox-radius);
   margin-bottom: .5rem;
 }
+
+/* Messages: the look of @phloxcz/capify in the colours of the system */
+
+.phlox-button-primary {
+  color: HighlightText;
+  background: Highlight;
+  border-color: Highlight;
+}
+
+.phlox-button-danger {
+  color: #fff;
+  background: var(--phlox-error);
+  border-color: var(--phlox-error);
+}
+
+.phlox-message-text {
+  line-height: 1.5;
+}
+
+.phlox-message-input {
+  display: block;
+  width: 100%;
+  margin-top: .75rem;
+  box-sizing: border-box;
+}
+
+.phlox-message-loading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cap-notify {
+  --phlox-toast-accent: light-dark(#2563eb, #60a5fa);
+  padding: 12px 36px 12px 14px;
+  font-size: .875rem;
+  line-height: 1.45;
+  color: CanvasText;
+  background: Canvas;
+  border: 1px solid color-mix(in srgb, GrayText 40%, transparent);
+  border-left: 3px solid var(--phlox-toast-accent);
+  border-radius: 10px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, .15);
+}
+
+.cap-notify[data-type="success"] { --phlox-toast-accent: light-dark(#16a34a, #4ade80); }
+.cap-notify[data-type="warning"] { --phlox-toast-accent: light-dark(#d97706, #fbbf24); }
+.cap-notify[data-type="error"] { --phlox-toast-accent: var(--phlox-error); }
+
+.cap-notify-title {
+  margin: 0 0 2px;
+  font-weight: 600;
+}
+
+.cap-notify-msg {
+  opacity: .85;
+}
+
+.cap-notify-card .cap-notify-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  font-size: 16px;
+  line-height: 1;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  border-radius: 4px;
+  opacity: .5;
+  cursor: pointer;
+}
+
+.cap-notify-card .cap-notify-close:hover {
+  opacity: .9;
+  background: color-mix(in srgb, CanvasText 10%, transparent);
+}
+
+.cap-popover {
+  padding: 14px 16px;
+  color: CanvasText;
+  background: Canvas;
+  border: 1px solid ButtonBorder;
+  border-radius: 10px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, .2);
+}
+
+.cap-popover-arrow {
+  position: absolute;
+  left: calc(var(--phlox-arrow) - 6px);
+  width: 10px;
+  height: 10px;
+  background: Canvas;
+  border: 1px solid ButtonBorder;
+  transform: rotate(45deg);
+}
+
+.cap-popover[data-placement="bottom"] .cap-popover-arrow {
+  top: -6px;
+  border-right: 0;
+  border-bottom: 0;
+}
+
+.cap-popover[data-placement="top"] .cap-popover-arrow {
+  bottom: -6px;
+  border-left: 0;
+  border-top: 0;
+}
+
+.cap-pop-label {
+  margin: 0 0 8px;
+  font-size: .875rem;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.cap-pop-input {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0 0 10px;
+  padding: 6px 9px;
+  font: inherit;
+  font-size: .875rem;
+  color: inherit;
+  background: Field;
+  border: 1px solid ButtonBorder;
+  border-radius: 6px;
+}
+
+.cap-pop-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.cap-pop-btn {
+  padding: 4px 12px;
+  font: inherit;
+  font-size: .8125rem;
+  font-weight: 500;
+  border: 1px solid ButtonBorder;
+  border-radius: 6px;
+  cursor: pointer;
+  color: ButtonText;
+  background: ButtonFace;
+}
+
+.cap-pop-btn-ok {
+  color: HighlightText;
+  background: Highlight;
+  border-color: Highlight;
+}
+
+.cap-pop-btn-danger {
+  color: #fff;
+  background: var(--phlox-error);
+  border-color: var(--phlox-error);
+}

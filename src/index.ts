@@ -14,12 +14,14 @@ export { Dialogs, NativeDialogs } from './ui/dialog';
 export { BootstrapTheme, Theme, classes } from './ui/theme';
 export { DRAGGING, dragToSort } from './ui/sortable';
 export { allowsMotion, motion, setMotion } from './ui/motion';
+export { MessageBox, messageTexts } from './ui/messages';
+export type { LoadingHandle, MessageKind, MessageOptions, Placement, PromptOptions } from './ui/messages';
 export type { Motion } from './ui/motion';
 export type { SortOptions } from './ui/sortable';
 export type { ThemeClasses, ThemeSlot } from './ui/theme';
 
 export { Application, FlashMessages } from './application/application';
-export type { Flash, FlashOptions } from './application/application';
+export type { Flash, FlashOptions, ToastPosition } from './application/application';
 export { Router } from './application/router';
 
 export { Container } from './di/container';
