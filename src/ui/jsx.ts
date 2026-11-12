@@ -36,4 +36,28 @@ export type ElementProps<E> =
     children?: Child;
   };
 
-export type ElementMap = { [K in keyof HTMLElementTagNameMap]: ElementProps<HTMLElementTagNameMap[K]> };
+/**
+ * SVG elements have their attributes only as read-only objects (SVGAnimatedLength), so the common
+ * attributes are listed here. Names with a hyphen (`stroke-width`, `aria-hidden`) are not checked by TypeScript.
+ */
+type SvgAttribute =
+  | 'viewBox' | 'xmlns' | 'fill' | 'stroke' | 'opacity' | 'transform' | 'd' | 'points' | 'pathLength'
+  | 'x' | 'y' | 'x1' | 'y1' | 'x2' | 'y2' | 'cx' | 'cy' | 'r' | 'rx' | 'ry' | 'width' | 'height'
+  | 'preserveAspectRatio' | 'href' | 'id' | 'role' | 'tabIndex' | 'focusable' | 'offset';
+
+export type SvgProps<E> =
+  & { [K in SvgAttribute]?: Reactive<string | number | null | undefined> }
+  & EventProps<E>
+  & {
+    class?: Reactive<string | null | undefined>;
+    style?: Reactive<string | Partial<CSSStyleDeclaration> | null | undefined>;
+    ref?: (element: E) => void;
+    children?: Child;
+  };
+
+/** Tags with the same name in HTML and SVG (a, title, style, script) are typed as HTML. */
+type SvgOnly = Exclude<keyof SVGElementTagNameMap, keyof HTMLElementTagNameMap>;
+
+export type ElementMap =
+  & { [K in keyof HTMLElementTagNameMap]: ElementProps<HTMLElementTagNameMap[K]> }
+  & { [K in SvgOnly]: SvgProps<SVGElementTagNameMap[K]> };

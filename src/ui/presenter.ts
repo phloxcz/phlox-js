@@ -2,9 +2,10 @@
 
 import { getScope, state } from '../reactive/reactive';
 import type { Child } from './dom';
-import { COMPONENT, Component, renderComponent } from './component';
+import { COMPONENT, Component, IS_PRESENTER, renderComponent } from './component';
 import type { Class } from '../di/container';
 import type { FlashOptions } from '../application/application';
+import type { DialogOptions } from './dialog';
 
 export type Params = Record<string, string>;
 export type LinkParams = Record<string, string | number | boolean | null | undefined>;
@@ -19,8 +20,16 @@ export interface Route {
   pattern: string;
   /** Presenter shown in <RouteFrame />, it handles the rest of the URL. A function loads it lazily: `() => import('./X')`. */
   presenter?: PresenterClass | (() => Promise<PresenterClass | { default: PresenterClass }>);
-  /** Component shown in a dialog while the route is active: returns its class and props. */
-  dialog?: (params: Params) => [Class<Component<any, any>>, object];
+  /**
+   * Props of the presenter of the route, made from the parameters: `({ id }) => ({ projectId: Number(id) })`.
+   * The presenter is created again when the parameters change, so its props never change.
+   */
+  props?: (params: Params) => object;
+  /**
+   * Component shown in a dialog while the route is active: returns its class, props and how it is shown,
+   * e.g. `[ItemEdit, { id }, { placement: 'end' }]` for a panel sliding in from the right.
+   */
+  dialog?: (params: Params) => [Class<Component<any, any>>, object] | [Class<Component<any, any>>, object, DialogOptions];
   /** Called when the dialog of the route is closed. The result is undefined when navigation closed it. */
   closed?: (result: any) => void;
 }
@@ -41,6 +50,8 @@ export class BadRequestError extends Error {
 }
 
 export abstract class Presenter<P extends object = {}, R = void> extends Component<P, R> {
+  readonly [IS_PRESENTER] = true;
+
   /** Routes of the presenter, tried in this order. */
   routes: Route[] = [];
 
@@ -65,16 +76,6 @@ export abstract class Presenter<P extends object = {}, R = void> extends Compone
 
   /** Used by the router to tell what has changed since the last navigation. */
   readonly routing = { matchKey: '', actionKey: '', dialog: null as RoutedDialog | null };
-
-  /**
-   * Creates a URL:
-   * - `link('detail', { id: 5 })` leads to a route of this presenter, extra parameters go to the query,
-   * - `link('this', { page: 2 })` is the current URL with changed query parameters, null removes one,
-   * - `link('/users')` is an absolute path.
-   */
-  link(destination: string, params?: LinkParams): string {
-    return this.app.router.link(this, destination, params);
-  }
 
   /**
    * Goes to another URL, the arguments are the same as in link(). It replaces the current history entry

@@ -26,7 +26,7 @@ const type = (input: HTMLInputElement, text: string) => {
 };
 const leave = (element: Element) => element.dispatchEvent(new FocusEvent('focusout', { bubbles: true, relatedTarget: null }));
 
-function setup(options: Omit<ComboBoxOptions<number>, 'allowCustom'> = { items: countries, placeholder: 'Země' }) {
+function setup(options: ComboBoxOptions<number> & { allowCustom?: false } = { items: countries, placeholder: 'Země' }) {
   const form = new Form<Order>();
   const country = form.addComboBox('country', 'Země:', options);
   form.addSubmit('save', 'Uložit');

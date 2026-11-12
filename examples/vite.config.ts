@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vite';
 import type { Plugin } from 'vite';
 import { phlox } from '../src/vite.ts';
+import { helpdeskServer } from './helpdesk/server/plugin.ts';
 
 const root = fileURLToPath(new URL('.', import.meta.url));
 const examples = readdirSync(root).filter(name => name !== 'dist' && existsSync(`${root}/${name}/index.html`));
@@ -26,7 +27,8 @@ function examplePages(): Plugin {
 
 export default defineConfig({
   root,
-  plugins: [phlox({ exclude: /\/phlox-js\/src\// }), examplePages()],
+  // The mock backend of the helpdesk goes first, its URLs must not become pages
+  plugins: [phlox({ exclude: /\/phlox-js\/src\// }), helpdeskServer(), examplePages()],
   // `phlox-js` and the JSX runtime resolve to src/ through `paths` in tsconfig.json
   resolve: { tsconfigPaths: true },
   build: {

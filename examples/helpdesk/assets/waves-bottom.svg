@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 300" preserveAspectRatio="none">
+  <!-- High at the left, falling away to the right, so the page under the card shows them as in the design -->
+  <defs>
+    <linearGradient id="deep" x1="0" x2="1" y1="1" y2="0">
+      <stop offset="0" stop-color="#0d9488"/>
+      <stop offset=".5" stop-color="#2dd4bf" stop-opacity=".75"/>
+      <stop offset="1" stop-color="#99f6e4" stop-opacity=".2"/>
+    </linearGradient>
+  </defs>
+  <path d="M0 60 C 200 30, 420 120, 760 190 C 1050 250, 1350 250, 1600 230 L1600 300 L0 300 Z" fill="#a7f3d0" opacity=".28"/>
+  <path d="M0 120 C 180 90, 400 160, 700 220 C 980 272, 1300 278, 1600 268 L1600 300 L0 300 Z" fill="#5eead4" opacity=".35"/>
+  <path d="M0 185 C 150 165, 360 215, 640 258 C 900 294, 1250 298, 1600 296 L1600 300 L0 300 Z" fill="url(#deep)" opacity=".85"/>
+  <path d="M0 98 C 220 70, 440 170, 800 232 C 1100 280, 1380 282, 1600 270" fill="none" stroke="#fff" stroke-opacity=".7" stroke-width="1.2" vector-effect="non-scaling-stroke"/>
+  <path d="M0 160 C 200 136, 420 210, 760 262 C 1050 296, 1350 296, 1600 290" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1" vector-effect="non-scaling-stroke"/>
+</svg>

@@ -89,7 +89,7 @@ describe('themes', () => {
     const dialog = document.querySelector('dialog')!;
     expect(dialog.className).toBe('phlox-dialog border-0 p-0 bg-transparent');
     const content = dialog.firstElementChild!;
-    expect(content.className).toBe('bg-body text-body border rounded-3 shadow');
+    expect(content.className).toBe('bg-body text-body border rounded-3 shadow-lg');
     expect(content.querySelector('header.border-bottom > h2.h5')!.textContent).toBe('Hello');
     expect(content.querySelector('header .btn-close')!.textContent).toBe('');
     expect(content.querySelector('.p-3')!.textContent).toBe('body');

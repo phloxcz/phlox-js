@@ -296,3 +296,74 @@ describe('leaving a presenter with an open routed dialog', () => {
     expect(List.results).toEqual([undefined]);
   });
 });
+
+describe('the window of a dialog', () => {
+  class Panel extends Component<{}, string> {
+    override title() { return 'Úprava'; }
+    render() { return <p class="inside">obsah</p>; }
+  }
+
+  test('a panel at the side by openDialog() or by the route, own classes of the window', async () => {
+    class Page extends Presenter {
+      override routes: Route[] = [
+        { name: 'default', pattern: '/' },
+        { name: 'edit', pattern: '/edit', dialog: () => [Panel, {}, { placement: 'end', class: 'wide' }] },
+      ];
+      render() { return <main><RouteFrame /></main>; }
+    }
+    const { app, go } = await boot(Page);
+    void app.presenter!.openDialog(Panel, {}, { placement: 'start' });
+    await tick();
+    expect(windows()[0]!.dataset.placement).toBe('start');
+    windows()[0]!.dispatchEvent(new Event('cancel', { cancelable: true }));
+    await tick();
+    expect(windows()).toHaveLength(0);
+
+    await go('/edit');
+    expect(windows()[0]!.dataset.placement).toBe('end');
+    expect(windows()[0]!.classList.contains('wide')).toBe(true);
+  });
+
+  test('a click on the backdrop closes it like Escape, a click or a selection inside does not', async () => {
+    class Page extends Presenter {
+      render() { return <main />; }
+    }
+    const { app } = await boot(Page);
+    const result = app.presenter!.openDialog(Panel, {});
+    await tick();
+    const window = windows()[0]!;
+    const click = (down: Element, up: Element) => {
+      down.dispatchEvent(new MouseEvent('pointerdown', { bubbles: true }));
+      up.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    };
+    click(window.querySelector('.inside')!, window.querySelector('.inside')!);
+    // Pressed inside, released on the backdrop: selecting text, not closing
+    click(window.querySelector('.inside')!, window);
+    await tick();
+    expect(windows()).toHaveLength(1);
+    click(window, window);
+    expect(await result).toBeUndefined();
+    expect(windows()).toHaveLength(0);
+  });
+});
+
+test('the focus goes to the first field of a dialog, or to the window, not to ×', async () => {
+  class Form1 extends Component {
+    override title() { return 'S polem'; }
+    render() { return <p><input id="first" /></p>; }
+  }
+  class Plain extends Component {
+    override title() { return 'Bez pole'; }
+    render() { return <p>text</p>; }
+  }
+  class Page extends Presenter {
+    render() { return <main />; }
+  }
+  const { app } = await boot(Page);
+  void app.presenter!.openDialog(Form1, {});
+  await tick();
+  expect(document.activeElement?.id).toBe('first');
+  void app.presenter!.openDialog(Plain, {});
+  await tick();
+  expect(document.activeElement).toBe(windows().at(-1));
+});

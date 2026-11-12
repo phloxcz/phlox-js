@@ -2,6 +2,7 @@
 
 import { If, For } from '../ui/flow';
 import { effect, getScope, untrack } from '../reactive/reactive';
+import { insert } from '../ui/dom';
 import type { Child } from '../ui/dom';
 import type { ElementProps } from '../ui/jsx';
 import { APP } from '../ui/component';
@@ -66,10 +67,17 @@ export function Label(props: { control: FormControl<any>; children?: Child }): C
   );
 }
 
-/** Like {input name} in Latte. Other attributes go to the element: <Input control={...} class="wide" />. */
+/**
+ * Like {input name} in Latte. Other attributes go to the element: <Input control={...} class="wide" />.
+ * `ref` gets the element the user works with (control.element), the control keeps its own reference too.
+ */
 export function Input(props: { control: FormControl<any> } & Record<string, unknown>): Child {
-  const { control, ...attributes } = props;
-  return control.render(attributes);
+  const { control, ref, ...attributes } = props;
+  if (typeof ref !== 'function') return control.render(attributes);
+  const fragment = document.createDocumentFragment();
+  insert(fragment, control.render(attributes), null);
+  ref(control.element);
+  return fragment;
 }
 
 /** Like {inputError name} in Latte: the error of the control, shown only while there is one. */

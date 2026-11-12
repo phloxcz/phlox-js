@@ -119,10 +119,20 @@
 /* Dialogs */
 
 .phlox-dialog {
-  border: 1px solid GrayText;
-  border-radius: calc(var(--phlox-radius) * 2);
+  border: 1px solid color-mix(in srgb, CanvasText 12%, transparent);
+  border-radius: calc(var(--phlox-radius) * 3);
   background: Canvas;
   color: CanvasText;
+  box-shadow: 0 1.5rem 4rem rgb(0 0 0 / .25), 0 .25rem 1rem rgb(0 0 0 / .1);
+}
+
+.phlox-dialog[data-placement] {
+  border-radius: 0;
+  border-width: 0 0 0 1px;
+}
+
+.phlox-dialog[data-placement="start"] {
+  border-width: 0 1px 0 0;
 }
 
 .phlox-dialog::backdrop {
@@ -133,8 +143,8 @@
   display: flex;
   align-items: center;
   gap: 1rem;
-  padding: .5rem 1rem;
-  border-bottom: 1px solid GrayText;
+  padding: .75rem 1rem;
+  border-bottom: 1px solid color-mix(in srgb, CanvasText 12%, transparent);
 }
 
 .phlox-dialog-title {
@@ -160,8 +170,8 @@
   display: flex;
   justify-content: flex-end;
   gap: .5rem;
-  padding: .5rem 1rem;
-  border-top: 1px solid GrayText;
+  padding: .75rem 1rem;
+  border-top: 1px solid color-mix(in srgb, CanvasText 12%, transparent);
 }
 
 /* DropDownList – the same look as the default theme of phloxcz/forms-dropdownlist */
@@ -736,6 +746,21 @@
 .cap-notify-card .cap-notify-close:hover {
   opacity: .9;
   background: color-mix(in srgb, CanvasText 10%, transparent);
+}
+
+.phlox-dropdown-button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.phlox-dropdown {
+  padding: .25rem;
+  color: CanvasText;
+  background: Canvas;
+  border: 1px solid ButtonBorder;
+  border-radius: 10px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, .2);
 }
 
 .cap-popover {

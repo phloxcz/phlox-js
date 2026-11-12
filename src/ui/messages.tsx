@@ -121,7 +121,7 @@ export async function showMessage(opener: Component<any, any>, kind: MessageKind
 const GAP = 8;
 
 /** Where a popover goes: under or above the element, aligned to its left or right, turned over when it does not fit. */
-function placePopover(anchor: HTMLElement, popover: HTMLElement, placement: Placement) {
+export function placePopover(anchor: HTMLElement, popover: HTMLElement, placement: Placement) {
   const box = anchor.getBoundingClientRect();
   const width = popover.offsetWidth;
   const height = popover.offsetHeight;
@@ -222,7 +222,8 @@ function showPopover(owner: Scope, kind: MessageKind, message: Child, options: P
       ), null);
     });
 
-    document.body.append(host);
+    // In a modal dialog the popover must be inside it, the rest of the page is under its backdrop
+    (anchor.closest('dialog') ?? document.body).append(host);
     place();
     window.addEventListener('scroll', place, true);
     window.addEventListener('resize', place);

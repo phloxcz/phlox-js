@@ -73,6 +73,7 @@ export class UploadControl<T extends File | null | File[]> extends FormControl<T
     } else {
       this.files.set([added[0]!]);
     }
+    this.edited = true;
     this.validate();
   }
 

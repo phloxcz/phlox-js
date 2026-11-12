@@ -10,16 +10,46 @@ import { classes } from '../ui/theme';
 import { FormControl, toPairs } from './controls';
 import type { Items } from './controls';
 
-export interface ListOptions<T> {
+/** Items as values, or as pairs [value, label], or as an object { value: label }. */
+export interface PlainItems<T> {
   /** Fixed items, filtered in the browser. */
   items?: Items<T>;
   /** Items for the typed text, e.g. from the server. Called with '' when the list opens. */
   search?: (query: string) => Promise<Items<T>> | Items<T>;
   /** Label of a value set from code, when it is not among the items, e.g. after setDefaults(). */
   label?: (value: T) => Promise<string | null> | string | null;
+  itemValue?: never;
+  itemLabel?: never;
+  template?: never;
+}
+
+/**
+ * Items as objects, e.g. users from the server: `itemValue` says what of an item is the value,
+ * `itemLabel` its text (searching, screen readers, the field of a combobox) and `template` how it looks.
+ */
+export interface ObjectItems<T, O> {
+  items?: readonly O[];
+  search?: (query: string) => Promise<readonly O[]> | readonly O[];
+  /** Label or the whole item of a value set from code, when it is not among the items. */
+  label?: (value: T) => Promise<string | O | null> | string | O | null;
+  /** The value of an item. */
+  itemValue: (item: O) => T;
+  /** The text of an item. Without it the value as a text. */
+  itemLabel?: (item: O) => string;
+  /** How an item looks in the list (and as the chosen value or a tag), instead of its text. */
+  template?: (item: O) => Child;
+}
+
+/** Items as plain values, or as objects with `itemValue`. */
+export type ItemOptions<T, O = never> = PlainItems<T> | ObjectItems<T, O>;
+
+export type ListOptions<T, O = never> = ItemOptions<T, O> & {
   /** Text shown while nothing is selected. */
   placeholder?: string;
-}
+};
+
+/** What the controls keep of the options, the type of item objects is known only where they are given. */
+type Known<T> = { itemValue?: (item: any) => T; itemLabel?: (item: any) => string; template?: (item: any) => Child };
 
 /** How long typing has to pause before `search` is called. */
 const DEBOUNCE_MS = 250;
@@ -36,6 +66,29 @@ export function foldText(text: string): string {
 
 export { toPairs };
 
+/** Items as pairs of value and label. Objects (with `itemValue`) are remembered by their values for the template. */
+export function itemPairs<T>(items: Items<T> | readonly unknown[], options: Known<T>, objects: Map<T, unknown>): [T, string][] {
+  const { itemValue, itemLabel } = options;
+  if (!itemValue) return toPairs(items as Items<T>);
+  return (items as readonly unknown[]).map(item => {
+    const value = itemValue(item);
+    objects.set(value, item);
+    return [value, itemLabel?.(item) ?? String(value)];
+  });
+}
+
+/** The label of a value given by a text or by an item object, which is remembered for the template. */
+export function labelOf<T>(value: T, given: unknown, options: Known<T>, objects: Map<T, unknown>): string {
+  if (typeof given === 'string' || !options.itemValue) return String(given);
+  objects.set(value, given);
+  return options.itemLabel?.(given) ?? String(value);
+}
+
+/** The template of a known item object, otherwise the text. */
+export function itemContent<T>(value: T, text: Child, options: Known<T>, objects: Map<T, unknown>): Child {
+  return options.template && objects.has(value) ? options.template(objects.get(value)!) : text;
+}
+
 export abstract class ListControl<T> extends FormControl<T | null> {
   readonly selected = state<T | null>(null);
   /** Label of the selected value. */
@@ -48,19 +101,21 @@ export abstract class ListControl<T> extends FormControl<T | null> {
   readonly query = state('');
   placeholder: string;
   protected readonly listId: string;
+  /** Item objects by their values, see ItemOptions. */
+  protected readonly objects = new Map<T, unknown>();
   private all: [T, string][] = [];
   private request = 0;
   private timer: ReturnType<typeof setTimeout> | undefined;
 
-  constructor(label: string, protected options: ListOptions<T>, idPrefix: string) {
+  constructor(label: string, protected options: ListOptions<T, any>, idPrefix: string) {
     super(label);
     this.listId = `${idPrefix}${++lastList}`;
     this.placeholder = options.placeholder ?? '';
     if (options.items) this.setItems(options.items);
   }
 
-  setItems(items: Items<T>): this {
-    this.all = toPairs(items);
+  setItems(items: Items<T> | readonly unknown[]): this {
+    this.all = itemPairs(items, this.options, this.objects);
     return this;
   }
 
@@ -74,17 +129,17 @@ export abstract class ListControl<T> extends FormControl<T | null> {
   }
 
   /**
-   * Sets the value. The label can be given, e.g. when the data from the server have it already,
-   * otherwise it comes from the items, or from the `label` option.
+   * Sets the value. The label (or the item object) can be given, e.g. when the data from the server have it
+   * already, otherwise it comes from the items, or from the `label` option.
    */
-  setValue(value: T | null, label?: string): void {
+  setValue(value: T | null, label?: unknown): void {
     this.selected.set(value ?? null);
     if (value === null || value === undefined) {
       this.selectedLabel.set('');
       return;
     }
     if (label !== undefined) {
-      this.selectedLabel.set(label);
+      this.selectedLabel.set(labelOf(value, label, this.options, this.objects));
       return;
     }
     const known = this.findItem(value);
@@ -94,7 +149,7 @@ export abstract class ListControl<T> extends FormControl<T | null> {
     }
     this.selectedLabel.set(String(value));
     void Promise.resolve(this.options.label?.(value) ?? null).then(label => {
-      if (label !== null && Object.is(untrack(this.selected), value)) this.selectedLabel.set(label);
+      if (label !== null && Object.is(untrack(this.selected), value)) this.selectedLabel.set(labelOf(value, label, this.options, this.objects));
     });
   }
 
@@ -135,7 +190,7 @@ export abstract class ListControl<T> extends FormControl<T | null> {
     const request = ++this.request;
     let items: [T, string][];
     if (this.options.search) {
-      items = toPairs(await this.options.search(query));
+      items = itemPairs(await this.options.search(query), this.options, this.objects);
     } else {
       const folded = foldText(query);
       items = this.all.filter(([, label]) => foldText(label).includes(folded));
@@ -190,7 +245,7 @@ export abstract class ListControl<T> extends FormControl<T | null> {
                 this.pick(value, label);
               }}
             >
-              {() => highlight(label, this.query().trim(), slot('mark'))}
+              {itemContent(value, () => highlight(label, this.query().trim(), slot('mark')), this.options, this.objects)}
             </li>
           )}
         </For>

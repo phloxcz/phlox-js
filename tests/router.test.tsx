@@ -368,3 +368,42 @@ describe('base path', () => {
     }
   });
 });
+
+describe('presenters in the middle of the chain', () => {
+  test('props from the parameters of the route, persistent parameters in params', async () => {
+    const seen: string[] = [];
+    class Task extends Presenter<{ taskId: number }> {
+      override startup() { seen.push(`task ${this.props.taskId} at ${this.basePath()}`); }
+      render() { return <b>{this.props.taskId}</b>; }
+    }
+    class Tasks extends Presenter<{ projectId: number }> {
+      override persistent = ['status'];
+      override routes: Route[] = [
+        { name: 'default', pattern: '/' },
+        { name: 'detail', pattern: '/<task \\d+>', presenter: Task, props: ({ task }) => ({ taskId: Number(task) }) },
+      ];
+      override startup() { seen.push(`project ${this.props.projectId} ${this.params().status}`); }
+      actionDetail(params: Params) { seen.push(`status ${params.status ?? '-'}`); }
+      render() { return <div><RouteFrame /></div>; }
+    }
+    class Root extends Presenter {
+      override routes: Route[] = [
+        { name: 'project', pattern: '/<project \\d+>', presenter: Tasks, props: ({ project }) => ({ projectId: Number(project) }) },
+      ];
+      render() { return <main><RouteFrame /></main>; }
+    }
+    const { app, element, go, errors } = await boot(Root, '/3/7?status=open&other=1');
+    expect(errors).toEqual([]);
+    // startup() knows the parameters and the part of the URL, like in Nette
+    expect(seen.splice(0)).toEqual(['project 3 open', 'status open', 'task 7 at /3/7']);
+    const tasks = app.presenter!.child()! as Tasks;
+    expect(tasks.params()).toEqual({ status: 'open', task: '7' });
+    expect(element.querySelector('b')!.textContent).toBe('7');
+
+    // A change of the persistent parameter runs the action, the child stays
+    await go('/3/7?status=closed');
+    expect(seen.splice(0)).toEqual(['status closed']);
+    await go('/3/8?status=closed');
+    expect(seen.splice(0)).toEqual(['status closed', 'task 8 at /3/8']);
+  });
+});

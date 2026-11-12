@@ -9,10 +9,10 @@ import { untrack } from '../reactive/reactive';
 import type { Child } from '../ui/dom';
 import { classes, currentTheme } from '../ui/theme';
 import type { ExtraAttributes } from './controls';
-import { ListControl } from './listbox';
+import { ListControl, itemContent } from './listbox';
 import type { ListOptions } from './listbox';
 
-export type DropDownListOptions<T> = ListOptions<T>;
+export type DropDownListOptions<T, O = never> = ListOptions<T, O>;
 
 export class DropDownList<T = string> extends ListControl<T> {
   /** Texts of the list. Replace them for the language of the application: DropDownList.texts.noResults = '...'. */
@@ -21,7 +21,7 @@ export class DropDownList<T = string> extends ListControl<T> {
     filterPlaceholder: 'Search…',
   };
 
-  constructor(label = '', options: DropDownListOptions<T> = {}) {
+  constructor(label = '', options: DropDownListOptions<T, any> = {}) {
     super(label, options, 'dropdownlist');
   }
 
@@ -29,6 +29,8 @@ export class DropDownList<T = string> extends ListControl<T> {
     if (untrack(this.opened) || untrack(this.disabled)) return;
     this.query.set('');
     this.active.set(-1);
+    // Closing the list without a choice shows an error, the user has worked with the control
+    this.edited = true;
     this.opened.set(true);
     void this.load('');
   }
@@ -106,7 +108,10 @@ export class DropDownList<T = string> extends ListControl<T> {
           }}
         >
           <span class={() => classes('dropdownlist-trigger-text', !this.selectedLabel() && 'dropdownlist-trigger-placeholder')}>
-            {() => this.selectedLabel() || this.placeholder}
+            {() => {
+              const value = this.selected();
+              return value === null ? this.placeholder : itemContent(value, this.selectedLabel(), this.options, this.objects);
+            }}
           </span>
           <span class="dropdownlist-trigger-arrow" aria-hidden="true" />
         </button>

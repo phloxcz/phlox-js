@@ -25,7 +25,7 @@ const type = (input: HTMLInputElement, text: string) => {
   input.dispatchEvent(new Event('input', { bubbles: true }));
 };
 
-function setup(options: Omit<TagInputOptions<number>, 'allowNew'> = { items: categories, placeholder: 'Přidat štítek…' }) {
+function setup(options: TagInputOptions<number> & { allowNew?: false } = { items: categories, placeholder: 'Přidat štítek…' }) {
   const form = new Form<Article>();
   const control = form.addTagInput('categories', 'Kategorie:', options);
   const root = mount(() => <FormView form={form} />);

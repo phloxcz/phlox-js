@@ -4,7 +4,7 @@
  */
 
 import { batch, state, untrack } from '../reactive/reactive';
-import { createComponent, showDialog } from '../ui/component';
+import { createComponent, showDialog, startComponent } from '../ui/component';
 import type { Component } from '../ui/component';
 import { Presenter } from '../ui/presenter';
 import type { LinkParams, Params, Route, RoutedDialog } from '../ui/presenter';
@@ -114,6 +114,8 @@ export class Router {
   private index = 0;
   private returning = false;
   private running: Navigation | null = null;
+  /** Presenters created but not started: startup() runs once the router knows their route and parameters. */
+  private pending = new WeakSet<AnyPresenter>();
   private queued: { navigation: Navigation; done: () => void } | null = null;
 
   constructor(private app: Application) {}
@@ -121,6 +123,7 @@ export class Router {
   /** Starts routing from the current URL of the browser. */
   start(root: AnyPresenter): Promise<void> {
     this.root = root;
+    this.pending.add(root);
     this.index = history.state?.phlox ?? 0;
     window.addEventListener('popstate', this.onPopState);
     return this.enqueue({ url: location.href, history: 'none', refresh: null });
@@ -161,13 +164,17 @@ export class Router {
 
   /** Current values of the persistent parameters of the presenter and of the presenters above it. */
   private persistentOf(presenter: AnyPresenter): LinkParams {
+    return this.persistentQuery(presenter, splitUrl(this.running ? this.running.url : this.url()).query);
+  }
+
+  /** The parameters of the query that are persistent for the presenter or for a presenter above it. */
+  private persistentQuery(presenter: AnyPresenter, query: Params): Params {
     const names: string[] = [];
     for (let owner: Component<any, any> | null = presenter; owner; owner = owner.parent) {
       if (owner instanceof Presenter) names.push(...owner.persistent);
     }
     if (!names.length) return {};
     const kept = (name: string) => names.some(pattern => (pattern.endsWith('*') ? name.startsWith(pattern.slice(0, -1)) : name === pattern));
-    const { query } = splitUrl(this.running ? this.running.url : this.url());
     return Object.fromEntries(Object.entries(query).filter(([name]) => kept(name)));
   }
 
@@ -241,6 +248,11 @@ export class Router {
     const check = (): void => {
       if (this.queued) throw SUPERSEDED;
     };
+    const start = async (presenter: AnyPresenter): Promise<void> => {
+      if (!this.pending.delete(presenter)) return;
+      await startComponent(presenter);
+      check();
+    };
 
     try {
       let presenter = this.root;
@@ -255,6 +267,14 @@ export class Router {
         const found = match(current.routes.length > 0 ? current.routes : DEFAULT_ROUTES, rest);
 
         if (!found) {
+          if (this.pending.has(current)) {
+            batch(() => {
+              current.basePath.set(base);
+              current.route.set(null);
+              current.params.set({});
+            });
+            await start(current);
+          }
           // Throws unless the presenter handles an unknown URL itself, then nothing changes
           current.notFound(rest);
           changed.push({ presenter: current, matchKey: routing.matchKey });
@@ -276,7 +296,8 @@ export class Router {
         }
 
         const { route, params, matched, remaining, exact } = found;
-        const all = route.presenter ? params : { ...query, ...params };
+        // Query parameters go to the end of the chain; a presenter above it gets its persistent ones
+        const all = route.presenter ? { ...this.persistentQuery(current, query), ...params } : { ...query, ...params };
         const matchKey = JSON.stringify([route.name, params]);
         const actionKey = JSON.stringify([route.name, all]);
         const routeChanged = matchKey !== routing.matchKey;
@@ -290,6 +311,8 @@ export class Router {
           current.route.set(route.name);
           if (actionChanged) current.params.set(all);
         });
+        // Like in Nette, startup() of a new presenter already knows its parameters
+        await start(current);
 
         if (actionChanged || refresh) {
           const action = `action${route.name.charAt(0).toUpperCase()}${route.name.slice(1)}`;
@@ -310,10 +333,9 @@ export class Router {
             next = old;
           } else {
             if (old) leaving.push(old);
-            const child = createComponent(cls, {}, current, this.app, current.scope);
+            const child = createComponent(cls, route.props?.(params) ?? {}, current, this.app, current.scope);
             created.push(child);
-            await child.startup();
-            check();
+            this.pending.add(child);
             commits.push(() => this.replaceChild(current, child));
             next = child;
           }
@@ -378,10 +400,12 @@ export class Router {
     }
     if (!route.dialog) return null;
 
-    const [cls, props] = route.dialog(params);
+    const [cls, props, options] = route.dialog(params);
     const component = createComponent(cls, props, presenter, this.app, presenter.scope);
     created.push(component);
-    await component.startup();
+    // A presenter in a dialog is started when the router comes to it, as any other presenter
+    if (component instanceof Presenter && !route.presenter) this.pending.add(component);
+    else await startComponent(component);
     const dialog: RoutedDialog = { route, key: key!, component, result: undefined };
     component.onClose = result => {
       dialog.result = result;
@@ -389,7 +413,7 @@ export class Router {
     };
     commits.push(() => {
       presenter.routing.dialog = dialog;
-      showDialog(component);
+      showDialog(component, options);
     });
     return component;
   }

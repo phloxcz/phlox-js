@@ -257,3 +257,32 @@ describe('events and cleanup', () => {
     expect(other).not.toHaveBeenCalled();
   });
 });
+
+describe('SVG', () => {
+  test('<svg> and everything inside it are SVG elements, also rows of <For> added later', async () => {
+    const { For } = await import('../src/ui/flow');
+    const points = state([1]);
+    const { root } = mount(() => (
+      <p>
+        <svg viewBox="0 0 24 24" class="icon" aria-hidden="true">
+          <path d="M1 1h22" stroke-width="2" />
+          {() => <circle cx="12" cy="12" r={points().length} />}
+          <For each={points}>{point => <rect x={point} y="0" width="1" height="1" />}</For>
+          <foreignObject><span>text</span></foreignObject>
+        </svg>
+      </p>
+    ));
+    points.set([1, 2]);
+    const svg = root.querySelector('svg')!;
+    const SVG = 'http://www.w3.org/2000/svg';
+    expect(svg.namespaceURI).toBe(SVG);
+    expect(svg.getAttribute('viewBox')).toBe('0 0 24 24');
+    expect(svg.getAttribute('class')).toBe('icon');
+    expect(svg.querySelector('path')!.namespaceURI).toBe(SVG);
+    expect(svg.querySelector('circle')!.namespaceURI).toBe(SVG);
+    expect(svg.querySelector('circle')!.getAttribute('r')).toBe('2');
+    expect([...svg.querySelectorAll('rect')].map(rect => rect.namespaceURI)).toEqual([SVG, SVG]);
+    expect(svg.querySelector('span')!.namespaceURI).toBe('http://www.w3.org/1999/xhtml');
+    expect(root.querySelector('p')!.namespaceURI).toBe('http://www.w3.org/1999/xhtml');
+  });
+});

@@ -1,0 +1,1626 @@
+/*
+ * The look of the helpdesk after the design "Moderní helpdesk pro řízení projektů". Light only, like the design.
+ * Built on Bootstrap 5 (BootstrapTheme in services.ts): its variables get the colours of the design,
+ * the classes below are the layout and what Bootstrap does not have.
+ */
+
+:root {
+  color-scheme: light;
+  --hd-teal: #0f766e;
+  --hd-teal-bright: #14b8a6;
+  --hd-teal-soft: #e3f4f2;
+  --hd-teal-line: #9fd8d2;
+  --hd-text: #0f172a;
+  --hd-muted: #64748b;
+  --hd-line: #e6edf0;
+  --hd-panel: #fff;
+  --hd-red: #dc2626;
+  --hd-red-soft: #fde8e8;
+  --hd-orange: #d97706;
+  --hd-orange-soft: #fdf0dc;
+  --hd-blue: #2563eb;
+  --hd-blue-soft: #e5eefe;
+  --hd-radius: 12px;
+  /* Bootstrap in the colours of the design */
+  --bs-body-font-family: Inter, "Segoe UI", system-ui, sans-serif;
+  --bs-body-font-size: 14px;
+  --bs-body-color: #0f172a;
+  --bs-primary: #0f766e;
+  --bs-primary-rgb: 15, 118, 110;
+  --bs-link-color: #0f766e;
+  --bs-link-color-rgb: 15, 118, 110;
+  --bs-link-hover-color: #0b5a54;
+  --bs-link-hover-color-rgb: 11, 90, 84;
+  --bs-border-color: #e6edf0;
+  --bs-border-radius: 10px;
+  --bs-border-radius-lg: 16px;
+  --bs-focus-ring-color: rgb(20 184 166 / .25);
+  --bs-box-shadow-lg: 0 1.5rem 4rem rgb(15 23 42 / .18);
+}
+
+.btn-primary {
+  --bs-btn-bg: #0f766e;
+  --bs-btn-border-color: #0f766e;
+  --bs-btn-hover-bg: #0d665f;
+  --bs-btn-hover-border-color: #0d665f;
+  --bs-btn-active-bg: #0b5a54;
+  --bs-btn-active-border-color: #0b5a54;
+  --bs-btn-disabled-bg: #0f766e;
+  --bs-btn-disabled-border-color: #0f766e;
+  --bs-btn-focus-shadow-rgb: 20, 184, 166;
+  box-shadow: 0 6px 16px rgb(15 118 110 / .25);
+}
+
+.btn-outline-secondary {
+  --bs-btn-color: #0f172a;
+  --bs-btn-border-color: #e6edf0;
+  --bs-btn-hover-color: #0f172a;
+  --bs-btn-hover-bg: #f1f5f9;
+  --bs-btn-hover-border-color: #dbe4e8;
+  --bs-btn-active-color: #0f172a;
+  --bs-btn-active-bg: #e8eef2;
+  --bs-btn-active-border-color: #dbe4e8;
+}
+
+.form-control:focus,
+.form-select:focus,
+.dropdownlist-bs-trigger:focus,
+.dropdownlist-bs-trigger[aria-expanded="true"] {
+  border-color: #9fd8d2;
+  box-shadow: 0 0 0 .2rem rgb(20 184 166 / .18);
+}
+
+.form-check-input:checked {
+  background-color: #14b8a6;
+  border-color: #14b8a6;
+}
+
+/* Bootstrap sizes controls by rem (16px), the design is denser and takes the size of the page */
+.form-control,
+.form-select,
+.form-label,
+.btn,
+.dropdown-item {
+  font-size: inherit;
+}
+
+.dropdown-item.active,
+.dropdown-item:active {
+  color: #0f172a;
+  background-color: #e3f4f2;
+}
+
+.hd-page-body {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  margin: 0;
+  color: var(--hd-text);
+  line-height: 1.45;
+  /* The waves of the design: at the bottom left under the menu, the header has its own */
+  background:
+    url("./assets/waves-bottom.svg") no-repeat left bottom / 100% 300px,
+    linear-gradient(180deg, #eef8f8, #f6fafb);
+}
+
+.hd-page-body .examples-menu {
+  margin: 0;
+  padding: .4rem 1.25rem;
+}
+
+#app {
+  flex: 1;
+  min-height: 0;
+}
+
+a {
+  color: inherit;
+}
+
+h1, h2 {
+  margin: 0;
+}
+
+.hd-icon {
+  flex: none;
+}
+
+.hd-muted {
+  color: var(--hd-muted);
+}
+
+.hd-pad {
+  padding: 0 1.25rem;
+}
+
+.hd-urgent {
+  color: var(--hd-red) !important;
+}
+
+.hd-link {
+  display: inline-flex;
+  align-items: center;
+  gap: .25rem;
+  padding: 0;
+  border: 0;
+  font: inherit;
+  font-size: .8rem;
+  font-weight: 600;
+  color: var(--hd-teal);
+  background: none;
+  cursor: pointer;
+}
+
+.hd-link:disabled {
+  color: var(--hd-muted);
+  cursor: default;
+}
+
+/* Buttons: <Button> gives Bootstrap classes, these add the look of the design */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+  font-weight: 600;
+}
+
+.hd-button-block {
+  white-space: nowrap;
+  width: 100%;
+  min-height: 46px;
+}
+
+.hd-button-soft {
+  --bs-btn-bg: #eef3f6;
+  --bs-btn-border-color: #e3eaee;
+  --bs-btn-hover-bg: #e5edf1;
+}
+
+.hd-button-outline {
+  --bs-btn-color: var(--hd-teal);
+  --bs-btn-border-color: var(--hd-teal);
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: var(--hd-teal);
+  --bs-btn-hover-border-color: var(--hd-teal);
+  --bs-btn-border-width: 1.5px;
+}
+
+.hd-button-outline:disabled {
+  color: var(--hd-muted);
+  border-color: var(--hd-line);
+  cursor: default;
+}
+
+.hd-icon-button,
+.hd-round-button {
+  display: inline-grid;
+  place-items: center;
+  position: relative;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  color: var(--hd-muted);
+  background: none;
+  border: 0;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.hd-icon-button:hover {
+  color: var(--hd-text);
+  background: #eef3f6;
+}
+
+.hd-round-button {
+  color: var(--hd-text);
+  background: #fff;
+  border: 1px solid var(--hd-line);
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgb(15 23 42 / .06);
+}
+
+.hd-filter-button.hd-active {
+  color: var(--hd-teal);
+  background: var(--hd-teal-soft);
+}
+
+/* The shell: header, menu on the left, the white workspace */
+
+.hd-shell {
+  display: grid;
+  grid-template: 76px minmax(0, 1fr) / 178px minmax(0, 1fr);
+  height: 100%;
+  transition: grid-template-columns calc(.2s * var(--phlox-motion));
+}
+
+/* The menu collapsed to icons, by the button under it */
+.hd-shell.hd-nav-collapsed {
+  grid-template-columns: 68px minmax(0, 1fr);
+}
+
+.hd-nav-collapsed .hd-nav-item {
+  justify-content: center;
+  padding: .65rem;
+}
+
+.hd-nav-collapsed .hd-nav-item > span,
+.hd-nav-collapsed .hd-help {
+  display: none;
+}
+
+.hd-nav-toggle {
+  position: absolute;
+  top: 50%;
+  right: -14px;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  color: var(--hd-muted);
+  background: #fff;
+  border: 1px solid var(--hd-line);
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgb(15 23 42 / .1);
+  cursor: pointer;
+  transform: translateY(-50%);
+}
+
+.hd-nav-toggle:hover {
+  color: var(--hd-teal);
+  border-color: var(--hd-teal-line);
+}
+
+/* The hamburger only on a phone, see the media queries */
+.hd-hamburger {
+  display: none;
+}
+
+/* The menu in the panel of the hamburger */
+.hd-menu-dialog {
+  --phlox-panel-width: min(18rem, 85vw);
+}
+
+.hd-nav-panel {
+  padding: .5rem 0;
+}
+
+.hd-header {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 0 1.75rem 0 1.75rem;
+  background: url("./assets/waves-top.svg") no-repeat center top / 100% 100%;
+}
+
+.hd-brand {
+  display: flex;
+  align-items: center;
+  gap: .55rem;
+  min-width: 150px;
+  font-size: 1.15rem;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+/* Search fields are one form-control of Bootstrap, the icon lies over it at the left */
+.hd-search,
+.hd-filter {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.hd-search > .hd-icon,
+.hd-filter > .hd-icon {
+  position: absolute;
+  left: .9rem;
+  color: var(--hd-muted);
+  pointer-events: none;
+}
+
+.hd-search {
+  width: min(575px, 100%);
+  margin: 0 auto;
+}
+
+.hd-search .form-control {
+  height: 42px;
+  padding-left: 2.6rem;
+  background: rgb(255 255 255 / .92);
+  border-color: #e3ecee;
+  border-radius: 999px;
+  box-shadow: 0 4px 18px rgb(15 23 42 / .06);
+}
+
+.hd-filter {
+  margin: 0 1rem .75rem;
+}
+
+.hd-filter .form-control {
+  height: 38px;
+  padding-left: 2.3rem;
+  background: rgb(255 255 255 / .85);
+}
+
+.hd-search-results {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 50;
+  padding: .35rem;
+  background: #fff;
+  border: 1px solid var(--hd-line);
+  border-radius: var(--hd-radius);
+  box-shadow: 0 16px 40px rgb(15 23 42 / .14);
+}
+
+.hd-search-hit {
+  display: flex;
+  align-items: center;
+  gap: .65rem;
+  padding: .5rem .65rem;
+  color: var(--hd-text);
+  text-decoration: none;
+  border-radius: 8px;
+}
+
+.hd-search-hit[aria-current],
+.hd-search-hit:hover {
+  background: var(--hd-teal-soft);
+}
+
+.hd-search-hit span {
+  display: flex;
+  flex-direction: column;
+}
+
+.hd-search-hit small,
+.hd-search-empty {
+  color: var(--hd-muted);
+}
+
+.hd-search-empty {
+  margin: .5rem .65rem;
+}
+
+.hd-header-tools {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.hd-bell {
+  color: var(--hd-text);
+}
+
+.hd-bell-count {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  box-sizing: border-box;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 16px;
+  color: #fff;
+  background: #ef4444;
+  border: 2px solid #fff;
+  border-radius: 999px;
+}
+
+.hd-user-button {
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+  padding: 0;
+  color: var(--hd-text);
+  background: none;
+  border: 0;
+}
+
+/* Menu on the left */
+
+.hd-nav {
+  position: relative;
+  /* Above the workspace, so the toggle on the edge is not covered by it */
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: .35rem;
+  padding: .75rem .65rem 1rem .65rem;
+  min-height: 0;
+}
+
+.hd-nav-item {
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: .7rem;
+  padding: .65rem .8rem;
+  font-weight: 500;
+  color: #334155;
+  text-decoration: none;
+  border-radius: 10px;
+}
+
+.hd-nav-item:hover {
+  background: rgb(255 255 255 / .7);
+}
+
+.hd-nav-item[aria-current] {
+  font-weight: 600;
+  color: var(--hd-teal);
+  background: #d9f1ee;
+  box-shadow: inset 3px 0 0 var(--hd-teal-bright);
+}
+
+.hd-nav-badge {
+  margin-left: auto;
+  padding: 0 .45rem;
+  font-size: .75rem;
+  font-weight: 600;
+  color: var(--hd-teal);
+  background: var(--hd-teal-soft);
+  border-radius: 999px;
+}
+
+.hd-help .hd-link {
+  white-space: nowrap;
+}
+
+.hd-help {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .35rem;
+  margin-top: auto;
+  padding: 1rem .5rem;
+  text-align: center;
+  background: rgb(255 255 255 / .75);
+  border: 1px solid #e3ecee;
+  border-radius: 14px;
+}
+
+.hd-help-icon {
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  color: var(--hd-teal);
+  background: var(--hd-teal-soft);
+  border-radius: 50%;
+}
+
+/* The white workspace: columns side by side, each scrolls by itself */
+
+/*
+ * The workspace is a card with a rounded corner set into the page. It has no background of its own:
+ * the column of projects is translucent, so the waves of the page show through, the others are white.
+ */
+.hd-workspace {
+  display: flex;
+  min-height: 0;
+  overflow-x: auto;
+  border-top-left-radius: 22px;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / .7), 0 10px 40px rgb(15 23 42 / .06);
+}
+
+.hd-workspace > .hd-column {
+  background: var(--hd-panel);
+}
+
+.hd-workspace > .hd-projects {
+  /* The blur makes its own layer; above the tasks, so that its ResizeHandle is not covered by them */
+  z-index: 1;
+  background: rgb(255 255 255 / .62);
+  backdrop-filter: blur(6px);
+  border-right-color: rgb(255 255 255 / .8);
+}
+
+.hd-column {
+  box-sizing: border-box;
+  min-height: 0;
+  overflow-y: auto;
+  border-right: 1px solid var(--hd-line);
+}
+
+.hd-column-head {
+  display: flex;
+  align-items: center;
+  gap: .25rem;
+  padding: 1.25rem 1.25rem .75rem;
+}
+
+.hd-column-head h2 {
+  flex: 1;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+/* Projects */
+
+/* The width is set by the user (ResizeHandle), the list scrolls inside, so the handle stays at the edge */
+.hd-workspace > .hd-projects {
+  display: flex;
+  flex: 0 1 var(--hd-projects-width, 236px);
+  min-width: 180px;
+  flex-direction: column;
+  overflow: visible;
+}
+
+.hd-projects > .hd-project-list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.hd-projects h2 {
+  font-size: 1.35rem;
+}
+
+.hd-project-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.hd-project {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  padding: .75rem 1rem .75rem 1.1rem;
+  text-decoration: none;
+  border-left: 3px solid transparent;
+}
+
+.hd-project:hover {
+  background: #f6fafb;
+}
+
+.hd-project[aria-current] {
+  background: #eaf7f5;
+  border-left-color: var(--hd-teal-bright);
+}
+
+.hd-project-dot {
+  display: inline-block;
+  flex: none;
+  width: 12px;
+  height: 12px;
+  background: currentColor;
+  border-radius: 4px;
+  box-shadow: 0 0 0 5px color-mix(in srgb, currentColor 20%, transparent);
+  margin: 0 .3rem 0 .3rem;
+}
+
+.hd-project-text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.hd-project-text strong,
+.hd-project-text small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hd-project-text strong {
+  font-size: .84rem;
+  font-weight: 600;
+}
+
+.hd-project-text small {
+  color: var(--hd-muted);
+  font-size: .78rem;
+}
+
+.hd-count {
+  min-width: 22px;
+  padding: 0 .35rem;
+  font-size: .72rem;
+  line-height: 20px;
+  text-align: center;
+  color: var(--hd-muted);
+  background: #f1f5f9;
+  border-radius: 999px;
+}
+
+/* Tasks */
+
+/* The width is set by the user (ResizeHandle), the list scrolls inside, so the handle stays at the edge */
+.hd-workspace > .hd-tasks {
+  display: flex;
+  /* It may get narrower than set when the window has no room, but not below 280px */
+  flex: 0 1 var(--hd-tasks-width, 416px);
+  min-width: 280px;
+  flex-direction: column;
+  overflow: visible;
+}
+
+.hd-tasks > .hd-task-list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.hd-tabs {
+  display: flex;
+  flex: none;
+  gap: 1rem;
+  white-space: nowrap;
+  /* In a narrow column the tabs scroll by themselves, without a scrollbar */
+  overflow-x: auto;
+}
+
+.hd-shell .hd-tabs {
+  scrollbar-width: none;
+  padding: 0 1.25rem;
+  border-bottom: 1px solid var(--hd-line);
+}
+
+.hd-tabs a,
+.hd-detail-tabs button {
+  padding: .55rem .15rem;
+  margin-bottom: -1px;
+  font: inherit;
+  font-weight: 500;
+  color: #475569;
+  text-decoration: none;
+  background: none;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+}
+
+.hd-tabs a[aria-current],
+.hd-detail-tabs button[aria-selected="true"] {
+  font-weight: 600;
+  color: var(--hd-teal);
+  border-bottom-color: var(--hd-teal-bright);
+}
+
+.hd-task-list {
+  margin: 0;
+  padding: .6rem .75rem;
+  list-style: none;
+  transition: opacity calc(.2s * var(--phlox-motion));
+}
+
+.hd-task-list.hd-loading {
+  opacity: .6;
+}
+
+.hd-task {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: .75rem;
+  min-height: 56px;
+  padding: .45rem .75rem;
+  border: 1.5px solid transparent;
+  border-bottom-color: var(--hd-line);
+  border-radius: 10px;
+}
+
+.hd-task:hover {
+  background: #f8fbfb;
+}
+
+.hd-task.hd-selected {
+  background: #f3fbfa;
+  border-color: var(--hd-teal-bright);
+  box-shadow: 0 4px 14px rgb(20 184 166 / .12);
+}
+
+.hd-task input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--hd-teal-bright);
+}
+
+.hd-task-title {
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.hd-task-title::after {
+  /* The whole row is the link */
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+.hd-task {
+  position: relative;
+}
+
+.hd-task input,
+.hd-task-meta {
+  position: relative;
+  z-index: 1;
+}
+
+.hd-task.hd-done .hd-task-title {
+  color: var(--hd-muted);
+  text-decoration: line-through;
+}
+
+.hd-task-meta {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  pointer-events: none;
+}
+
+.hd-due {
+  min-width: 42px;
+  font-size: .82rem;
+  text-align: right;
+  color: var(--hd-muted);
+}
+
+.hd-due.hd-urgent {
+  font-weight: 600;
+}
+
+/* Badges, avatars */
+
+.hd-priority {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  padding: .1rem .5rem;
+  font-size: .72rem;
+  font-weight: 600;
+  border-radius: 6px;
+}
+
+.hd-priority-high { color: var(--hd-red); background: var(--hd-red-soft); }
+.hd-priority-medium { color: var(--hd-orange); background: var(--hd-orange-soft); }
+.hd-priority-low { color: var(--hd-blue); background: var(--hd-blue-soft); }
+
+.hd-priority-large {
+  padding: .35rem .75rem;
+  font-size: .9rem;
+  border-radius: 8px;
+}
+
+.hd-avatar {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 30px;
+  height: 30px;
+  font-size: .72rem;
+  font-weight: 700;
+  color: #fff;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px #fff;
+}
+
+.hd-avatar-small {
+  width: 26px;
+  height: 26px;
+  font-size: .62rem;
+}
+
+.hd-avatar-large {
+  width: 40px;
+  height: 40px;
+  font-size: .85rem;
+}
+
+.hd-status-dot {
+  display: inline-block;
+  flex: none;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.hd-status-label {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+}
+
+.hd-status-open { color: var(--hd-teal-bright); }
+.hd-status-progress { color: #f59e0b; }
+.hd-status-closed { color: #94a3b8; }
+
+/* Detail */
+
+.hd-detail {
+  flex: 1 1 0;
+  /* The detail follows its own width, the user can make it narrow by widening the list */
+  container-type: inline-size;
+  min-width: 420px;
+  padding: 1.25rem 1.75rem 0;
+}
+
+.hd-detail.hd-empty {
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  color: var(--hd-muted);
+}
+
+.hd-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+  font-size: .9rem;
+  color: var(--hd-muted);
+}
+
+.hd-breadcrumb a {
+  color: var(--hd-teal);
+  text-decoration: none;
+}
+
+.hd-breadcrumb span {
+  color: var(--hd-text);
+}
+
+.hd-badges {
+  display: flex;
+  gap: .6rem;
+  margin: 1.1rem 0 .7rem;
+}
+
+.hd-status-pill.btn {
+  gap: .35rem;
+  padding: .35rem .6rem;
+  color: var(--hd-text);
+  border: 0;
+  border-radius: 8px;
+  background: color-mix(in srgb, currentColor 12%, #fff);
+}
+
+.hd-status-pill .hd-status-label {
+  color: var(--hd-text);
+}
+
+.hd-detail h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.hd-description {
+  max-width: 40rem;
+  margin: .75rem 0 1.25rem;
+  font-size: 1rem;
+  line-height: 1.55;
+}
+
+.hd-meta {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  gap: .55rem 1.5rem;
+  margin: 0 0 1.25rem;
+  padding-bottom: 1.25rem;
+}
+
+.hd-meta-row {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  align-items: center;
+}
+
+.hd-meta dt {
+  font-weight: 400;
+  color: var(--hd-muted);
+}
+
+.hd-meta dd {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  margin: 0;
+  font-size: .86rem;
+  white-space: nowrap;
+}
+
+.hd-meta dd > .hd-icon {
+  color: var(--hd-muted);
+}
+
+.hd-meta dd a {
+  text-decoration: none;
+}
+
+.hd-due-note {
+  display: inline-flex;
+  align-items: center;
+  gap: .2rem;
+  font-size: .8rem;
+}
+
+.hd-detail-tabs {
+  display: flex;
+  gap: 1.75rem;
+  border-bottom: 1px solid var(--hd-line);
+}
+
+.hd-tab-panel {
+  padding: 1rem 0;
+}
+
+.hd-comments,
+.hd-attachments,
+.hd-history {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.hd-comment {
+  display: flex;
+  gap: .9rem;
+  padding: .55rem 0;
+}
+
+.hd-comment p {
+  margin: 0;
+}
+
+.hd-comment-head {
+  display: flex;
+  align-items: baseline;
+  gap: .6rem;
+}
+
+.hd-comment-head small {
+  color: var(--hd-muted);
+  font-size: .78rem;
+}
+
+.hd-comment-text {
+  font-size: .95rem;
+}
+
+.hd-like {
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+  margin-top: .3rem;
+  padding: .15rem .45rem;
+  font: inherit;
+  font-size: .78rem;
+  color: var(--hd-muted);
+  background: #f1f5f9;
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.hd-like.hd-liked {
+  color: var(--hd-teal);
+  background: var(--hd-teal-soft);
+}
+
+.hd-composer {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: .9rem;
+  margin-top: .75rem;
+  padding: .75rem 0 1.25rem;
+  background: linear-gradient(transparent, #fff 18%);
+}
+
+.hd-composer-box {
+  position: relative;
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  align-items: center;
+  padding: .2rem .4rem .2rem .9rem;
+  border: 1px solid var(--hd-line);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgb(15 23 42 / .04);
+}
+
+.hd-composer-box:focus-within {
+  border-color: var(--hd-teal-line);
+}
+
+/* An error marks the whole box, the field inside stays without a frame */
+.hd-composer-box:has(.is-invalid) {
+  border-color: var(--bs-form-invalid-border-color);
+}
+
+.hd-composer-box textarea.form-control:focus,
+.hd-composer-box textarea.form-control.is-invalid:focus {
+  border: 0;
+  box-shadow: none;
+}
+
+.hd-composer-box label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+/* The box has the frame, the field in it has none, not even when focused or invalid */
+.hd-composer-box textarea.form-control.is-invalid {
+  padding-right: 0;
+  background-image: none;
+}
+
+.hd-composer-box textarea.form-control {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  padding: .6rem 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+  resize: none;
+  field-sizing: content;
+  max-height: 10rem;
+}
+
+.hd-composer-main {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: .25rem;
+}
+
+.hd-send {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  color: #fff;
+  background: var(--hd-teal);
+  border: 0;
+  border-radius: 12px;
+  cursor: pointer;
+  box-shadow: 0 6px 16px rgb(15 118 110 / .25);
+}
+
+.hd-send:disabled {
+  opacity: .6;
+}
+
+.hd-attachments li,
+.hd-history li {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  padding: .6rem 0;
+  border-bottom: 1px solid var(--hd-line);
+}
+
+.hd-attachments li > .hd-icon,
+.hd-history li > .hd-icon {
+  color: var(--hd-muted);
+}
+
+.hd-attachments span {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+
+.hd-attachments a {
+  font-weight: 500;
+  color: var(--hd-teal);
+}
+
+.hd-attachments small,
+.hd-history small {
+  color: var(--hd-muted);
+}
+
+.hd-history span {
+  flex: 1;
+}
+
+/* Quick actions */
+
+.hd-actions {
+  display: flex;
+  flex: 0 0 232px;
+  flex-direction: column;
+  gap: .9rem;
+  padding: 1.25rem 1rem;
+  border-right: 0;
+}
+
+.hd-actions h2 {
+  font-weight: 700;
+  margin-bottom: .25rem;
+  font-size: 1.05rem;
+}
+
+.hd-settings {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding-top: 1.1rem;
+  border-top: 1px solid var(--hd-line);
+}
+
+.hd-field {
+  display: flex;
+  flex-direction: column;
+  gap: .4rem;
+  font-weight: 600;
+}
+
+.hd-field .form-label {
+  margin: 0;
+}
+
+.hd-actions .form-control,
+.hd-actions .form-select {
+  min-height: 44px;
+  font-weight: 500;
+}
+
+/* Menus in Dropdown */
+
+.hd-menu {
+  min-width: 15rem;
+  padding: .35rem;
+  border: 1px solid var(--hd-line);
+  border-radius: var(--hd-radius);
+  box-shadow: 0 16px 40px rgb(15 23 42 / .14);
+}
+
+.hd-menu-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: .5rem .6rem;
+}
+
+.hd-menu-user {
+  justify-content: flex-start;
+  border-bottom: 1px solid var(--hd-line);
+  margin-bottom: .25rem;
+}
+
+.hd-menu-user span {
+  display: flex;
+  flex-direction: column;
+}
+
+.hd-menu-user small {
+  color: var(--hd-muted);
+}
+
+.hd-menu-item {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  width: 100%;
+  padding: .5rem .6rem;
+  font: inherit;
+  color: var(--hd-text);
+  text-align: left;
+  text-decoration: none;
+  background: none;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.hd-menu-item:hover {
+  background: #f1f5f9;
+}
+
+.hd-notifications {
+  width: 22rem;
+}
+
+.hd-notification {
+  display: flex;
+  flex-direction: column;
+  padding: .55rem .6rem .55rem 1.2rem;
+  text-decoration: none;
+  border-radius: 8px;
+  position: relative;
+}
+
+.hd-notification:hover {
+  background: #f1f5f9;
+}
+
+.hd-notification.hd-unread::before {
+  content: "";
+  position: absolute;
+  left: .5rem;
+  top: 1rem;
+  width: 7px;
+  height: 7px;
+  background: var(--hd-teal-bright);
+  border-radius: 50%;
+}
+
+.hd-notification small {
+  color: var(--hd-muted);
+}
+
+.hd-emojis {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  min-width: 0;
+}
+
+.hd-emojis button {
+  padding: .35rem;
+  font-size: 1.2rem;
+  background: none;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.hd-emojis button:hover {
+  background: #f1f5f9;
+}
+
+/* Pages: reports, settings */
+
+.hd-page {
+  flex: 1;
+  padding: 1.5rem 2rem;
+  border: 0;
+}
+
+.hd-page h1 {
+  margin-bottom: 1.25rem;
+  font-size: 1.6rem;
+}
+
+.hd-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.hd-stat {
+  display: flex;
+  flex-direction: column;
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--hd-line);
+  border-radius: 14px;
+}
+
+.hd-stat span {
+  color: var(--hd-muted);
+}
+
+.hd-stat strong {
+  font-size: 1.8rem;
+}
+
+.hd-stat-open strong { color: var(--hd-teal); }
+.hd-stat-progress strong { color: var(--hd-orange); }
+.hd-stat-overdue strong { color: var(--hd-red); }
+
+.hd-report {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.hd-report th,
+.hd-report td {
+  padding: .7rem .75rem;
+  text-align: left;
+  border-bottom: 1px solid var(--hd-line);
+}
+
+.hd-report thead th {
+  font-size: .8rem;
+  font-weight: 600;
+  color: var(--hd-muted);
+}
+
+.hd-report th a {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.hd-bar {
+  display: flex;
+  width: 100%;
+  min-width: 140px;
+  height: 10px;
+  overflow: hidden;
+  background: #f1f5f9;
+  border-radius: 999px;
+}
+
+.hd-bar span {
+  background: currentColor;
+}
+
+.hd-card {
+  max-width: 34rem;
+  margin-bottom: 1.25rem;
+  padding: 1.25rem 1.5rem;
+  border: 1px solid var(--hd-line);
+  border-radius: 14px;
+}
+
+.hd-card h2 {
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+}
+
+.hd-dialog-form textarea {
+  min-height: 7rem;
+}
+
+/* Sign-in */
+
+.hd-sign {
+  background: url("./assets/waves-top.svg") no-repeat center top / 100% 110px;
+  display: grid;
+  place-items: center;
+  height: 100%;
+}
+
+.hd-sign-card {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: min(380px, calc(100vw - 32px));
+  padding: 2rem;
+  background: #fff;
+  border: 1px solid #e3ecee;
+  border-radius: 20px;
+  box-shadow: 0 20px 50px rgb(15 23 42 / .08);
+}
+
+.hd-sign-card h1 {
+  font-size: 1.4rem;
+}
+
+.hd-sign-card .form-control {
+  min-height: 44px;
+}
+
+.hd-sign-hint {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .4rem;
+  margin: 0;
+  font-size: .85rem;
+  color: var(--hd-muted);
+}
+
+.hd-sign-account {
+  padding: .2rem .55rem;
+  font-weight: 500;
+}
+
+/*
+ * Smaller screens, never a horizontal scrollbar of the page:
+ * - up to 1500px the columns get narrower,
+ * - up to 1280px the menu on the left shows icons only,
+ * - up to 1100px (tablets, phones) everything goes under each other and the page scrolls as a whole.
+ */
+
+@media (max-width: 1500px) {
+  .hd-detail { min-width: 360px; padding: 1.1rem 1.25rem 0; }
+  .hd-actions { flex-basis: 210px; }
+  .hd-actions .hd-button-block { white-space: normal; }
+}
+
+@media (max-width: 1280px) {
+  .hd-shell {
+    grid-template-columns: 68px minmax(0, 1fr);
+  }
+
+  .hd-nav-item {
+    justify-content: center;
+    padding: .65rem;
+  }
+
+  .hd-nav-item > span,
+  .hd-help {
+    display: none;
+  }
+
+  /* Here the menu is always narrow, the button would do nothing */
+  .hd-nav-toggle {
+    display: none;
+  }
+}
+
+@media (max-width: 1100px) {
+  .hd-page-body {
+    height: auto;
+    min-height: 100vh;
+  }
+
+  .hd-shell {
+    display: block;
+    height: auto;
+  }
+
+  .hd-header {
+    gap: .75rem;
+    padding: .75rem 1rem;
+  }
+
+  .hd-brand {
+    min-width: 0;
+  }
+
+  .hd-search {
+    flex: 1;
+    min-width: 0;
+  }
+
+  /* The menu hides behind the hamburger, it opens as a panel from the left */
+  .hd-shell > .hd-nav {
+    display: none;
+  }
+
+  .hd-hamburger {
+    display: inline-grid;
+    flex: none;
+  }
+
+  .hd-nav-panel .hd-nav-item {
+    justify-content: flex-start;
+    padding: .7rem .8rem;
+  }
+
+  .hd-nav-panel .hd-nav-item > span {
+    display: inline;
+  }
+
+  .hd-tasks > .phlox-resize-handle,
+  .hd-projects > .phlox-resize-handle {
+    display: none;
+  }
+
+  .hd-workspace {
+    flex-direction: column;
+    overflow: visible;
+    border-radius: 20px 20px 0 0;
+  }
+
+  .hd-workspace > .hd-column {
+    flex: none;
+    width: 100%;
+    min-width: 0;
+    overflow: visible;
+    border-right: 0;
+    border-bottom: 1px solid var(--hd-line);
+  }
+
+  /* Projects as a row of cards that scrolls sideways */
+  .hd-project-list {
+    display: flex;
+    gap: .5rem;
+    padding: 0 1rem 1rem;
+    overflow-x: auto;
+  }
+
+  .hd-project {
+    width: 220px;
+    border: 1px solid var(--hd-line);
+    border-left-width: 3px;
+    border-radius: 10px;
+    background: #fff;
+  }
+
+  /* With a task open, the list stays short so the detail is near */
+  .hd-tasks:has(+ .hd-detail:not(.hd-empty)) .hd-task-list,
+  .hd-tasks:has(~ .hd-detail:not(.hd-empty)) .hd-task-list {
+    max-height: 45vh;
+    overflow-y: auto;
+  }
+
+  .hd-detail.hd-empty {
+    display: none;
+  }
+
+  .hd-composer {
+    position: static;
+  }
+
+  .hd-page {
+    padding: 1.25rem 1rem;
+  }
+
+  .hd-report {
+    display: block;
+    overflow-x: auto;
+  }
+}
+
+@media (max-width: 600px) {
+  .hd-brand {
+    font-size: 0;
+    gap: 0;
+  }
+
+  .hd-header-tools {
+    gap: .25rem;
+  }
+
+  .hd-detail h1 {
+    font-size: 1.4rem;
+  }
+
+  .hd-meta-row {
+    grid-template-columns: 106px minmax(0, 1fr);
+  }
+
+  .hd-task {
+    grid-template-columns: auto 1fr;
+  }
+
+  .hd-task-meta {
+    grid-column: 2;
+  }
+}
+
+/* A narrow detail has its data in one column */
+@container (max-width: 640px) {
+  .hd-meta {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Thin, quiet scrollbars in the columns, like in the design */
+.hd-shell * {
+  scrollbar-width: thin;
+  scrollbar-color: #cfdde0 transparent;
+}
+
+/* Items of the dropdown lists with a template */
+
+.hd-option {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+}
+
+.hd-priority-text.hd-priority-high { color: var(--hd-red); background: none; }
+.hd-priority-text.hd-priority-medium { color: var(--hd-orange); background: none; }
+.hd-priority-text.hd-priority-low { color: var(--hd-blue); background: none; }
+
+.hd-priority-text {
+  font-weight: 500;
+}
+
+.hd-actions .dropdownlist-trigger-text {
+  display: inline-flex;
+  align-items: center;
+  color: var(--hd-text);
+}

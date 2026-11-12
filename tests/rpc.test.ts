@@ -12,10 +12,10 @@ interface Request {
 
 /** A fake server: answers every call by the handler, records what it got. */
 function server(handler: (call: Request) => unknown, options: { status?: number; raw?: unknown } = {}) {
-  const sent: { body: Request | Request[]; headers: Record<string, string>; credentials?: RequestCredentials }[] = [];
-  const fetch = (async (_url: string, init: RequestInit) => {
+  const sent: { url: string; body: Request | Request[]; headers: Record<string, string>; credentials?: RequestCredentials }[] = [];
+  const fetch = (async (url: string, init: RequestInit) => {
     const body = JSON.parse(String(init.body)) as Request | Request[];
-    sent.push({ body, headers: init.headers as Record<string, string>, ...(init.credentials ? { credentials: init.credentials } : {}) });
+    sent.push({ url, body, headers: init.headers as Record<string, string>, ...(init.credentials ? { credentials: init.credentials } : {}) });
     if (options.status) return new Response('', { status: options.status, statusText: 'Bad Gateway' });
     const calls = Array.isArray(body) ? body : [body];
     const answers = calls.filter(call => 'id' in call).map(call => {
@@ -127,4 +127,17 @@ describe('RpcClient', () => {
     const total: string = result.total;
     void total;
   });
+});
+
+test('the names of the methods are in the URL for the network panel, each once', async () => {
+  const { fetch, sent } = server(() => 1);
+  const rpc = new RpcClient('/rpc', { fetch });
+  await Promise.all([rpc.call('task.read'), rpc.call('comment.list'), rpc.call('task.read')]);
+  await rpc.call('user.me');
+  expect(sent.map(request => request.url)).toEqual(['/rpc?task.read,comment.list', '/rpc?user.me']);
+
+  const plain = server(() => 1);
+  await new RpcClient('/api/rpc?v=2', { fetch: plain.fetch }).call('a.b');
+  await new RpcClient('/rpc', { fetch: plain.fetch, methodsInUrl: false }).call('a.b');
+  expect(plain.sent.map(request => request.url)).toEqual(['/api/rpc?v=2&a.b', '/rpc']);
 });

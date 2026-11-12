@@ -592,7 +592,7 @@ Kód: `ui/component.ts`, `ui/presenter.ts`, `ui/dialog.ts`, `application/router.
 
 - **Vzor routy bez `$`.** Routa s `presenter` nebo `dialog` bere začátek URL a zbytek předá dál, jiná routa musí sedět celá. `/` znamená „nic dalšího“, prázdný vzor nebere nic a předá vše (hodí se pro layout).
 - **Presenter bez rout** je jedna stránka s akcí `actionDefault()`.
-- **Query parametry dostane presenter, jehož routa nemá potomka,** tedy konec řetězu, jako jediný presenter v Nette. Změna query tak nespouští akce rodičů.
+- **Query parametry dostane presenter, jehož routa nemá potomka,** tedy konec řetězu, jako jediný presenter v Nette. Změna query tak nespouští akce rodičů. Výjimkou jsou persistentní parametry presenteru, ty dostane i uprostřed řetězu (viz Helpdesk níže).
 - **Kdy se co spouští znovu:** akce při změně routy nebo jejích parametrů. Potomek se vytvoří znovu, když se změní routa nebo parametry jeho rodiče. Jinak by `/users/5/orders` → `/users/6/orders` nechalo na obrazovce objednávky uživatele 5.
 - **Navigace je nedělitelná.** Nové presentery a dialogy se připraví stranou (včetně `startup()` a akcí) a stránka se změní až na konci. Když cokoli selže, stará obrazovka zůstane a chybu dostane `app.onError`. Platí i pro první načtení: selže-li, zůstane jen layout.
 - **Jedna navigace najednou.** Novější čeká, běžící se vzdá při nejbližším kroku. Akce téhož presenteru se tak nikdy nepřekrývají. `redirect()` z běžící navigace převezme její záměr zapsat do historie, takže mezikrok v historii nezůstane.
@@ -627,8 +627,48 @@ Kód: `ui/component.ts`, `ui/presenter.ts`, `ui/dialog.ts`, `application/router.
 
 ### Co zatím chybí
 
-- Persistentní parametry.
 - Práce s `#hash`.
+
+## Helpdesk: co ukázka odhalila (implementováno, čeká na review)
+
+Ukázka `examples/helpdesk` je celá aplikace podle návrhu autora (`d:\Projekty\phlox\Moderní helpdesk pro řízení projektů.png`) proti mock serveru. Při psaní se ukázalo, co frameworku chybí. Testy: `tests/resource.test.tsx`, `tests/dropdown.test.tsx`, SVG v `tests/dom.test.tsx`, efekty v `tests/component.test.tsx`, presentery uprostřed řetězu v `tests/router.test.tsx`, `<Input ref>` v `tests/forms.test.tsx`.
+
+- **Mock server je plugin Vite** (`examples/helpdesk/server/`), JSON-RPC 2.0 se stejnými pravidly jako `phlox-rpc-api`: dávky, chyby s `fields`, `401` bez tokenu. Aplikace tak používá skutečný `RpcClient`, `User` s tokenem a `addServerErrors`, ne falešnou službu v prohlížeči jako ostatní ukázky. Typy API (`api.ts`) jsou psané ručně ve tvaru, který vygeneruje `rpc:types`, a sdílí je server i klient. `npm run build:examples` mock server nemá, helpdesk běží jen přes `npm run dev`.
+- **Chyba: efekty z konstruktoru a `startup()` nepatřily komponentě.** `effect()` se přihlásí k aktuálnímu `Scope`, a ten při vytváření komponenty ani při `startup()` nebyl její. Efekt z inicializátoru pole tak přežil komponentu. Teď se komponenta vytváří a `startup()` spouští v jejím scope. Platí jen do prvního `await`: JS neumí nést kontext přes `await` (AsyncContext zatím není), proto příručka říká „efekty vytvářej před prvním `await`“.
+- **`startup()` presenteru zná své parametry a část URL,** jako v Nette, kde se persistentní parametry načtou před `startup()`. Router dřív spouštěl `startup()` hned po vytvoření, tedy dřív, než presenter dostal svou routu. Teď ho spustí, až na presenter při procházení URL dojde. Kořenový presenter se spouští stejně, z prvního průchodu routeru. Původní rada „ve `startup()` použij absolutní cestu“ tím odpadá.
+- **`props` u routy** (`props: ({ id }) => ({ projectId: Number(id) })`). Vnořený presenter se ke svému parametru dřív dostal jen přes `this.parent.params()`, bez typu. Props jsou typované a stálé, protože se presenter při změně parametrů rodiče vytváří znovu. Stejný tvar jako `dialog: params => [Cls, props]`. Díky tomu jde jeden presenter použít pod víc routami (`/projects/<id>`, `/my`, `/all`).
+- **Persistentní parametry i uprostřed řetězu.** Seznam úkolů má routu s detailem pod sebou, takže by query (`?status=open`) nikdy nedostal, ač je to jeho parametr. Teď je v jeho `params()` a změna spustí jeho akci. Ostatní query dál patří konci řetězu.
+- **`Component.resource(load)`:** data, která se načtou znovu, když se změní stav přečtený v `load` před prvním `await`. Starší odpověď nepřepíše novější, chyba jde do `app.onError` a poslední hodnota zůstane. Bez toho měl každý seznam ručně efekt, počítadlo pořadí a stav načítání. Je to metoda komponenty, ne volná funkce, aby skončila s komponentou a měla kam poslat chybu. Obdoba `createResource` ze Solidu, ale bez Suspense: čekání zajistí `await resource.ready()` ve `startup()`.
+- **`<Dropdown>`:** tlačítko s panelem libovolného obsahu (upozornění, menu uživatele, filtr, emoji). Popover pro `confirm()` už framework měl, ale jen pro text a tlačítka. Panel se umisťuje stejně (`placePopover`), obsah se tvoří při každém otevření a při zavření se uklidí. Zavře ho klik na odkaz nebo tlačítko uvnitř, takže položky menu nemusí nic volat.
+- **`Component.link()` a `Component.presenter`:** komponenta (hledání, upozornění) potřebovala odkaz a neměla jak, jako `Control::link()` a `getPresenter()` v Nette. Presenter se pozná podle symbolu, aby `component.ts` nemusel importovat `presenter.ts` (kruhový import tříd by spadl).
+- **SVG v šablonách.** Ikony bez knihovny. Jmenný prostor se nese při vytváření (uvnitř `<svg>` SVG, ve `<foreignObject>` zase HTML), i pro řádky `<For>` a oblasti přidané později. Typy SVG prvků z DOM nejdou odvodit (atributy jsou jen pro čtení, `SVGAnimatedLength`), proto je seznam běžných atributů ručně. Názvy s pomlčkou TypeScript nekontroluje.
+- **`<Input ref>`** se dřív tiše zahodil, protože prvek si nastavuje vlastní `ref`. Teď dostanou prvek oba.
+- **Položky dropdownlistu, comboboxu a taginputu jako objekty se šablonou** (`itemValue`, `itemLabel`, `template`), rozhodl autor. Návrh má v rychlých akcích tečku stavu, avatar a ikonu priority. Testy v `tests/item-objects.test.tsx`.
+  - **Uvnitř zůstávají dvojice hodnota a text,** objekty si prvek pamatuje zvlášť podle hodnoty. Hledání, klávesnice, kontrola a předvybraná hodnota tak zůstaly beze změny a šablona je jen jiné vykreslení.
+  - **Objekty zapíná `itemValue`, ne tvar dat.** Hodnoty prvku mohou být samy objekty nebo pole, takže podle dat to poznat nejde.
+  - **Typy jsou sjednocení dvou tvarů:** hodnoty a dvojice bez `itemValue`, nebo objekty s povinným `itemValue`. Jinak by kompilátor vzal dvojice `[['x', 'X']]` u číselného pole jako objekty a přestal hlídat jejich typ.
+  - **Typ objektů má jen `addDropDownList()` a spol., ne třída prvku** (`DropDownList<T>`). S typem na třídě by prvek s objekty nešel přiřadit do `DropDownList<number>` a typ by se odvozoval i z dvojic. Kdo prvek vytváří přes `new`, má v šabloně `any`.
+  - **Combobox kreslí šablonu jen v seznamu,** v textovém poli může být jen text.
+
+**Druhé kolo podle připomínek autora (implementováno, čeká na review):**
+- **Názvy metod v URL RPC** (`/rpc?task.read,comment.list`): v záložce Síť bylo jen „rpc rpc rpc“. `phlox-rpc-api` bere jen cestu (`Server.php`), query ignoruje, takže to nic nerozbije. Každá metoda jednou, aby dávka nebyla dlouhá. Jde vypnout (`methodsInUrl: false`), kdyby to vadilo proxy nebo logům.
+- **Kontrola pole až po jeho změně.** Po odeslání komentáře a `reset()` zůstal fokus v poli a jeho opuštění hned ukázalo „Napište text komentáře“. Dvě chyby: `reset()` nevracel stav „pole opuštěno“ a opuštění kontrolovalo i pole, na které uživatel nesáhl. Teď se kontroluje jen pole změněné (u dropdownlistu a stromu v panelu i otevřené), `reset()` volá `pristine()`. Odeslání kontroluje vše jako dřív.
+- **Dialogy: animace, stín, klik vedle, fokus.** Animace jsou v `base.css`, ne v `default.css`, aby je měl i Bootstrap a jiná témata; témata dodávají jen vzhled (stín, barvy). Zavření čeká na konec animace (`getAnimations()`), pojistka 400 ms; bez animací (`setMotion('off')`, jsdom) se okno odstraní hned, testy se tak nemění. Klik vedle okna volá `cancel()` jako Escape v Bootstrapu, stisk i uvolnění musí být mimo okno. Fokus nejde na ×, ale na první pole nebo okno, jako Bootstrap modal.
+- **Panel z boku (`placement: 'end' | 'start'`).** Stejný `<dialog>` jen s jiným rozložením a animací, žádná zvláštní komponenta. O podobě rozhoduje ten, kdo dialog otevírá (`openDialog(…, options)`, třetí položka `dialog` routy), ne komponenta: tentýž formulář může být jednou v okně, jindy v panelu. Rohy se v panelu zarovnají i proti `rounded-3` Bootstrapu (`!important` s vyšší specifičností).
+- **Dropdown a popover uvnitř dialogu** se vkládají do dialogu, ne do `body`. Modální dialog je v horní vrstvě a vše mimo něj by bylo pod jeho pozadím.
+- **Helpdesk je postavený na Bootstrapu** (`BootstrapTheme`), barvy návrhu jsou v proměnných Bootstrapu. Vlnky návrhu jsou dvě SVG v `examples/helpdesk/assets/`.
+
+**Třetí kolo (implementováno, čeká na review):**
+- **`Preferences` a `Component.preference()`:** nastavení uživatele jako `state`, který se při změně uloží. Služba, ne přímo `localStorage`, aby šlo nastavení ukládat na server (autor chce „localStorage nebo jinam“). Rozhraní je `get`/`set` s JSON hodnotou; převod na `state` dělá základní třída, takže vlastní úložiště napíše dvě metody. Grid si dál ukládá rozložení sám přes `localStorage` (`remember`); převést ho na `Preferences` je TODO.
+- **`<ResizeHandle>`:** šířka je `state` předaný zvenku, ne vnitřní stav prvku. Tak ji jde zapamatovat (`preference`), nastavit z kódu, nebo dát do proměnné CSS a nechat rozložení rozhodnout na telefonu. Tažení poslouchá na `window` jako `followPointer()`, ale bez posouvání u okraje, které tu nedává smysl. Prvek se umisťuje přes `:has(> .phlox-resize-handle)`, aby aplikace nemusela nic přidávat.
+- **Patička dialogu bez `actions()`** se v Bootstrapu ukazovala, protože jeho `d-flex` má `!important`. Pravidlo v `base.css` ho má teď taky.
+- **Helpdesk:** seznamy projektů a úkolů mají nastavitelnou šířku (`ResizeHandle` + `preference`), levé menu jde sbalit na ikony kulatým tlačítkem na jeho hraně (zapamatuje se), na telefonu je menu za hamburgerem jako dialog s `placement: 'start'`. Vyhledávací pole jsou jedno `form-control` s ikonou místo obálky s polem uvnitř.
+
+**Zjištěno, zatím neřešeno:**
+- **České texty frameworku** si každá ukázka nastavuje sama (`messageTexts`, `DropDownList.texts`, `Grid.texts`, `Form.messages`…). Hodil by se jeden balíček překladů pro jazyk.
+- **Regulární výraz ve vzoru routy** se v řetězci píše se zdvojeným lomítkem (`'/<id \\d+>'`). S jedním (`'/<id \d+>'`) je to v JS `d+` a routa tiše nesedí. Stalo se mi to dvakrát. Pomohlo by varování v dev režimu, když vzor obsahuje `<x d+>`, nebo zkratky typu `<id:int>`.
+- **Události předané `<Input>`** (`onBlur`, `onInput`) přepíše vlastní obsluha prvku. `ref` je vyřešený, události zatím ne.
+- **Odložené hledání** (debounce): hledání v hlavičce volá server při každém stisku, starší odpovědi zahodí `resource`. Dropdownlist si debounce dělá sám, obecný pomocník chybí.
 
 ## Reaktivní jádro a renderer (implementováno, čeká na review)
 
@@ -678,7 +718,7 @@ Bez virtuálního DOMu: `h()` vrací jen šablonu (předpis). Skutečné uzly se
 - **`render()`** staví view bokem, takže při selhání nic nezůstane v DOM (regrese z TraceJS).
 - **Bez importu `h`:** používá se automatický JSX runtime (`jsx: react-jsx`, `jsxImportSource: phlox-js`), takže soubory s TSX neimportují `h` ani `Fragment`. Kompilátor si sám importuje `src/jsx-runtime.ts`, což je tenký obal nad `h()`. V repu se `phlox-js` převádí na `src/` přes `paths` v `tsconfig.json`, Vite je čte díky `resolve.tsconfigPaths`. Až se balíček bude publikovat, musí `jsx-runtime` a `jsx-dev-runtime` uvést v `exports`.
 
-**Zatím nepodporováno:** SVG. Prvky `<svg>` kompilátor odmítne, takže to neselže potichu. Doplní se, až bude potřeba.
+**SVG** se tvoří ve správném jmenném prostoru: `<svg>` a vše v něm (kromě obsahu `<foreignObject>`), i když přibude později, viz Helpdesk výše.
 
 ### `<If>` a `<For>` (`ui/flow.ts`)
 

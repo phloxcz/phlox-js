@@ -118,3 +118,32 @@ describe('Component', () => {
     expect(() => render(() => <Box />, document.body)).toThrow('only inside a running Application');
   });
 });
+
+describe('effects of a component', () => {
+  test('effects made in a field, in the constructor and in startup() end with the component', async () => {
+    const { effect } = await import('../src/index');
+    const source = state(0);
+    const runs: string[] = [];
+    class Watcher extends Component {
+      field = effect(() => void runs.push(`field ${source()}`));
+      constructor() {
+        super();
+        effect(() => void runs.push(`constructor ${source()}`));
+      }
+      override startup() {
+        effect(() => void runs.push(`startup ${source()}`));
+      }
+      render() { return <i />; }
+    }
+    const shown = state(true);
+    class Page extends Presenter {
+      render() { return <If when={shown}><Watcher /></If>; }
+    }
+    await boot(Page);
+    source.set(1);
+    expect(runs.splice(0)).toEqual(['field 0', 'constructor 0', 'startup 0', 'field 1', 'constructor 1', 'startup 1']);
+    shown.set(false);
+    source.set(2);
+    expect(runs).toEqual([]);
+  });
+});

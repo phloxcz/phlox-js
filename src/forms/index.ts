@@ -18,7 +18,7 @@ export { DropDownTreeSelect } from './dropdowntree';
 export type { DropDownTreeSelectOptions } from './dropdowntree';
 export type { Tag, TagInputOptions } from './taginput';
 export { ListControl, foldText, toPairs } from './listbox';
-export type { ListOptions } from './listbox';
+export type { ItemOptions, ListOptions, ObjectItems, PlainItems } from './listbox';
 export type { DropDownListOptions } from './dropdownlist';
 export { Rules } from './rules';
 export type { Validator } from './rules';

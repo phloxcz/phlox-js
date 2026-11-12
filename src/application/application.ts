@@ -14,6 +14,7 @@ import { THEME, Theme } from '../ui/theme';
 import type { Presenter } from '../ui/presenter';
 import { Router } from './router';
 import { Authenticator, User, UserStorage, userDefaults } from '../security/user';
+import { BrowserPreferences, Preferences } from '../ui/preferences';
 import { Authorizator } from '../security/permission';
 
 export interface Flash {
@@ -121,6 +122,7 @@ export class Application {
     if (!container.has(FlashMessages)) container.add(FlashMessages);
     if (!container.has(Theme)) container.add(new Theme());
     if (!container.has(UserStorage)) container.add(userDefaults.BrowserUserStorage);
+    if (!container.has(Preferences)) container.add(new BrowserPreferences());
     if (!container.has(Authenticator)) container.add(userDefaults.MissingAuthenticator);
     if (!container.has(Authorizator)) container.add(userDefaults.MissingAuthorizator);
     if (!container.has(User)) container.add(User);
@@ -140,7 +142,6 @@ export class Application {
     this.scope.provide(THEME, this.theme);
 
     const presenter = this.presenter = createComponent(root, {}, null, this, this.scope);
-    await presenter.startup();
     document.addEventListener('click', this.onClick);
     window.addEventListener('beforeunload', this.onBeforeUnload);
     await this.router.start(presenter);

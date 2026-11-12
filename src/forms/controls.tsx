@@ -42,7 +42,10 @@ export abstract class FormControl<T = unknown> {
   element: HTMLElement | null = null;
   /** The label is part of the input itself, e.g. a checkbox. */
   readonly labelInInput: boolean = false;
+  /** The user has left the field after changing it: from now on the rules are checked while typing. */
   private touched = false;
+  /** The user has changed the value, or opened its list. Leaving a field nobody has worked with checks nothing. */
+  protected edited = false;
 
   /**
    * The value as a state, like a binding in MVVM. Given to a template without calling it, the text follows
@@ -118,6 +121,13 @@ export abstract class FormControl<T = unknown> {
     this.errors.set([]);
   }
 
+  /** As if the user had not worked with the control yet: no errors, leaving it checks nothing. Used by reset(). */
+  pristine(): void {
+    this.touched = false;
+    this.edited = false;
+    this.errors.set([]);
+  }
+
   /** Checks the rules. A disabled control is not checked, as in Nette. */
   validate(): boolean {
     const error = this.disabled() ? null : this.rules.validate();
@@ -138,6 +148,8 @@ export abstract class FormControl<T = unknown> {
         this.element = element;
       },
       onBlur: (event?: FocusEvent) => {
+        // Tabbing through an empty required field must not shout at the user, the form checks it when sent
+        if (!this.edited && !this.hasErrors()) return;
         this.touched = true;
         // Not when the focus goes to a button: the error would move it away under the mouse and the click
         // would be lost. Sending validates anyway, other buttons let the field be checked on the next blur.
@@ -163,6 +175,7 @@ export abstract class FormControl<T = unknown> {
 
   /** After a change: once there is an error or the user has left the field, the rules are checked live. */
   protected changed(): void {
+    this.edited = true;
     if (this.touched || this.hasErrors()) this.validate();
   }
 }

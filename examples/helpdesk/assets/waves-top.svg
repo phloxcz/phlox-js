@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 110" preserveAspectRatio="none">
+  <defs>
+    <linearGradient id="band" x1="0" x2="1" y1="0" y2="0">
+      <stop offset="0" stop-color="#99f6e4" stop-opacity="0"/>
+      <stop offset="1" stop-color="#14b8a6" stop-opacity=".55"/>
+    </linearGradient>
+    <linearGradient id="deep" x1="0" x2="1" y1="1" y2="0">
+      <stop offset="0" stop-color="#5eead4" stop-opacity=".1"/>
+      <stop offset=".6" stop-color="#14b8a6" stop-opacity=".6"/>
+      <stop offset="1" stop-color="#0f766e" stop-opacity=".95"/>
+    </linearGradient>
+    <!-- The waves fade out towards the bottom edge, so there is no cut where the picture ends -->
+    <linearGradient id="fade" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="#fff"/>
+      <stop offset=".55" stop-color="#fff"/>
+      <stop offset="1" stop-color="#000"/>
+    </linearGradient>
+    <mask id="soft" maskUnits="userSpaceOnUse" x="0" y="0" width="1600" height="110">
+      <rect width="1600" height="110" fill="url(#fade)"/>
+    </mask>
+  </defs>
+  <g mask="url(#soft)">
+  <!-- A soft hump under the logo -->
+  <path d="M120 110 C 300 18, 520 8, 720 68 C 850 106, 1000 112, 1150 92 L1150 110 Z" fill="#ccfbf1" opacity=".6"/>
+  <!-- The teal sweep at the right -->
+  <path d="M980 110 C 1190 104, 1320 64, 1420 0 L1600 0 L1600 110 Z" fill="url(#band)"/>
+  <path d="M1170 110 C 1330 96, 1430 52, 1490 0 L1600 0 L1600 46 C 1530 74, 1440 102, 1290 110 Z" fill="url(#deep)"/>
+  <!-- Thin light lines over it -->
+  <path d="M860 108 C 1130 102, 1350 74, 1530 0" fill="none" stroke="#fff" stroke-opacity=".75" stroke-width="1.5" vector-effect="non-scaling-stroke"/>
+  <path d="M1280 110 C 1410 84, 1500 44, 1600 16" fill="none" stroke="#fff" stroke-opacity=".5" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  </g>
+</svg>

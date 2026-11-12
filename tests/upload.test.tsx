@@ -196,12 +196,17 @@ describe('the drop zone', () => {
     expect(names(root)).toEqual(['a.txt', 'b.txt']);
   });
 
-  test('leaving the whole control checks it, a disabled one takes nothing', () => {
+  test('leaving the whole control checks it once the user has chosen, a disabled one takes nothing', () => {
     const form = new Form<Message>();
     const photo = form.addUpload('photo').setRequired('Vyberte fotku.');
     const root = mount(() => <FormView form={form} />);
     const zone = root.querySelector<HTMLElement>('.pu-dropzone')!;
 
+    // Only passing through by Tab says nothing yet
+    zone.dispatchEvent(new FocusEvent('focusout', { bubbles: true, relatedTarget: document.body }));
+    expect(photo.errors()).toEqual([]);
+    choose(root, [file('a.png', 1, 'image/png')]);
+    photo.setValue(null);
     zone.dispatchEvent(new FocusEvent('focusout', { bubbles: true, relatedTarget: document.body }));
     expect(photo.errors()).toEqual(['Vyberte fotku.']);
     expect(zone.getAttribute('aria-invalid')).toBe('true');

@@ -6,13 +6,13 @@ Jak se s frameworkem pracuje. Popisuje jen to, co je už napsané a otestované.
 
 **Kde co je:** jádro (reaktivita, šablony, komponenty, presentery, aplikace, DI) se importuje z `phlox-js`. Volitelné části mají vlastní vstup: síť (RPC) `phlox-js/net`, přihlášení a oprávnění `phlox-js/security`, formuláře `phlox-js/forms`, překlady `phlox-js/localization` a Vite plugin `phlox-js/vite`. Napojení cizích knihoven (adaptéry) jsou pod `phlox-js/adapters/…`.
 
-Všechno níže je vidět pohromadě v ukázce [examples/shopping-list](../examples/shopping-list/main.ts).
+Všechno níže je vidět pohromadě v ukázce [examples/shopping-list](../examples/shopping-list/main.ts). Celou aplikaci proti serveru (přihlášení, RPC, vnořené presentery, `resource`, `Dropdown`) ukazuje [examples/helpdesk](../examples/helpdesk/main.ts).
 
 ## Spuštění
 
 | Příkaz | Co dělá |
 |---|---|
-| `npm run dev` | spustí ukázky: rozcestník na `/`, každá ukázka pod svou cestou (`/shopping-list`, `/tree`, `/grid`), přepíná se lištou nahoře |
+| `npm run dev` | spustí ukázky: rozcestník na `/`, každá ukázka pod svou cestou (`/shopping-list`, `/tree`, `/grid`, `/helpdesk`), přepíná se lištou nahoře. Helpdesk má mock JSON-RPC server v dev serveru (`examples/helpdesk/server/`), účty jsou na přihlašovací stránce. Sestavené ukázky ho nemají |
 | `npm run build:examples` | sestaví ukázky do `examples/dist` |
 | `npm test` | spustí testy |
 | `npm run typecheck` | zkontroluje typy |
@@ -133,6 +133,72 @@ class UserCard extends Component<{ userId: number }> {
 - **Instanci** dostaneš přes `ref`: `<UserCard userId={15} ref={card => { this.card = card; }} />`.
 - **`this.parent`** je komponenta nebo presenter, ve kterém je použitá.
 - **Funkce jako komponenta** stačí pro kousek šablony bez vlastního stavu: `const Icon = (props: { name: string }) => <i class={props.name} />`.
+- **Odkazy:** `this.link('/projects/5')` nebo `this.link('detail', { id: 5 })` podle rout presenteru, ve kterém komponenta je. Ten je v `this.presenter`, jako `getPresenter()` v Nette.
+- **`effect()` a `computed()` v inicializátoru pole, konstruktoru nebo `startup()`** patří komponentě a skončí s ní. Ve `startup()` jen ty vytvořené před prvním `await`, za ním už JS neví, čí kód běží.
+
+### Zapamatovaná nastavení: `preference`
+
+Nastavení uživatele, které si aplikace pamatuje (šířka sloupce, sbalené menu, zvolený pohled), je `state`, který se při každé změně uloží:
+
+```ts
+readonly collapsed = this.preference('nav.collapsed', false);
+
+this.collapsed.update(value => !value);   // uloží se
+```
+
+- **Kde se ukládá,** rozhoduje služba `Preferences`. Výchozí `BrowserPreferences` píše do `localStorage` jako JSON pod `phlox.` + klíč. Jiné úložiště (server, `sessionStorage`) je vlastní třída s metodami `get(key)` a `set(key, value)`, zaregistrovaná v kontejneru: `services.add(new ServerPreferences())`. Jen jiná předpona: `services.add(new BrowserPreferences('crm.'))`.
+- **Klíč** je společný celé aplikaci, dej mu předponu podle místa: `'tasks.width'`.
+- **Zablokované úložiště** (anonymní okno) nevadí, nastavení se jen nezapamatuje.
+
+### Šířka sloupce: `ResizeHandle`
+
+Úchyt na okraji prvku, kterým uživatel mění jeho šířku. Šířka je `state`, s `preference` se tedy rovnou pamatuje:
+
+```tsx
+import { ResizeHandle } from 'phlox-js';
+
+readonly width = this.preference('tasks.width', 416);
+
+<section style={() => ({ width: `${this.width()}px` })}>
+  …
+  <ResizeHandle size={this.width} min={300} max={760} initial={416} label="Šířka seznamu úkolů" />
+</section>
+```
+
+- **Patří jako poslední dítě** prvku, jehož šířku mění. `base.css` prvku nastaví `position: relative` a úchyt položí na jeho pravý okraj, s `edge="start"` na levý (prvek pak roste doleva).
+- **Ovládání:** tažení myší nebo prstem, Escape během tažení vrátí původní šířku, dvojklik vrátí `initial`. S fokusem na úchytu mění šířku šipky (o 16 px, se Shiftem o 64) a Home a End nastaví `min` a `max`. Čtečky ho znají jako `separator` s hodnotou.
+- **Prvek, který se posouvá** (`overflow: auto`), by úchyt posouval s obsahem. Posouvat má jeho vnitřek, ne on sám.
+- **Šířku jde dát i do proměnné CSS** a nechat ji rozložení: `style={() => `--list-width: ${this.width()}px`}` a v CSS `flex: 0 1 var(--list-width)`. Na telefonu ji pak media query může přebít.
+
+### Data, která se načítají znovu: `resource`
+
+Seznam, který závisí na stavu (záložka, filtr, vybraný projekt), si řekne o data funkcí. Načte se znovu, kdykoli se změní stav přečtený v ní:
+
+```tsx
+import type { Resource } from 'phlox-js';
+
+class TasksPresenter extends Presenter<{ projectId: number }> {
+  readonly status = computed(() => this.params().status ?? null);
+  tasks!: Resource<TaskPage>;
+
+  override async startup() {
+    this.tasks = this.resource(() => this.api.call('task.list', { projectId: this.props.projectId, status: this.status() }));
+    await this.tasks.ready();   // obrazovka se ukáže až s daty
+  }
+
+  render() {
+    return <For each={() => this.tasks()?.data ?? []} key={task => task.id}>{task => <li>{() => task().title}</li>}</For>;
+  }
+}
+```
+
+- **`tasks()`** je poslední načtená hodnota, `undefined` před prvním načtením. Během dalšího načítání zůstává, `tasks.loading()` je mezitím `true`.
+- **Sleduje se stav přečtený před prvním `await`** ve funkci. V `async` funkci tedy čti stav na začátku.
+- **Starší odpověď nepřepíše novější,** i když přijde později.
+- **Chyba** jde do `app.onError`, hodnota zůstane poslední dobrá.
+- **`tasks.reload()`** načte znovu se stejným stavem, `tasks.ready()` počká na běžící načtení.
+- **Vytvoř ho v konstruktoru nebo ve `startup()`.** V inicializátoru pole ještě nejsou služby z konstruktoru. U presenteru, který čte své parametry, ve `startup()`, ten je už zná.
+- **Skončí s komponentou,** po jejím odstranění se nic nenačítá.
 
 ## Presentery a routy
 
@@ -182,17 +248,31 @@ URL `/users/15/orders` se rozdělí takto: `AppPresenter` vezme `/users`, `Users
 ### Routy
 
 - **`name`** určuje akci: routa `detail` volá `actionDetail(params)`. Akce je nepovinná.
-- **`pattern`** je díl URL. Parametr se píše `<id>` nebo s regulárním výrazem `<id \d+>`. Routy se zkoušejí v pořadí, první vyhovující vyhrává.
-- **`presenter`** je presenter pro `<RouteFrame />`. Funkce s `import()` ho načte, až když je potřeba. Soubor pak musí třídu exportovat jako `default`.
+- **`pattern`** je díl URL. Parametr se píše `<id>` nebo s regulárním výrazem `<id \d+>`. V řetězci se lomítko zdvojuje (`'/<id \\d+>'`), s jedním je to `d+` a routa nesedí. Routy se zkoušejí v pořadí, první vyhovující vyhrává.
+- **`presenter`** je presenter pro `<RouteFrame />`, buď třída, nebo funkce s `import()` (viz Líné načítání presenterů).
+- **`props`** udělá z parametrů routy props jejího presenteru: `{ pattern: '/<id \\d+>', presenter: TasksPresenter, props: ({ id }) => ({ projectId: Number(id) }) }`. Presenter se při změně parametrů vytvoří znovu, takže props se za jeho života nemění. Jeden presenter tak může sloužit víc routám: `{ pattern: '/my', presenter: TasksPresenter, props: () => ({ mine: true }) }`.
 - **Routa s `presenter` bere začátek URL,** routa bez něj musí sedět na celý zbytek.
 - **`/`** znamená „nic dalšího“. Prázdný vzor `''` nebere nic a všechno předá dál, hodí se pro layout.
 - **Presenter bez rout** je jedna stránka a jeho akce je `actionDefault()`.
 - **`routes` potřebuje typ `Route[]`,** jinak TypeScript neodvodí typy parametrů ve funkcích uvnitř.
 
+### Líné načítání presenterů
+
+```ts
+{ name: 'projects', pattern: '/projects', presenter: ProjectsPresenter },                 // v hlavním balíku
+{ name: 'reports', pattern: '/reports', presenter: () => import('./ReportsPresenter') },  // až při první návštěvě
+```
+
+- **Třída** je v hlavním balíku JavaScriptu, který prohlížeč stáhne hned při startu.
+- **Funkce s `import()`** z presenteru udělá samostatný soubor (Vite ho oddělí sám). Prohlížeč ho stáhne, až uživatel na routu poprvé přijde. Router na něj počká jako na jinou přípravu obrazovky a stará obrazovka mezitím zůstává.
+- **Kdy co:** co je na první obrazovce nebo skoro všude, importuj přímo, jinak by start čekal na další požadavek. Co je stranou (nastavení, reporty, administrace), načítej líně. V aplikaci se stovkou obrazovek to rozhoduje o velikosti prvního načtení.
+- **Líně načítaný soubor** musí presenter exportovat jako `default`: `export default class ReportsPresenter extends Presenter`. Typy hlídá kompilátor stejně.
+
 ### Akce a parametry
 
 - **Parametry jsou texty:** `actionDetail({ id })` dostane `'15'`, na číslo si ho převeď.
-- **Query parametry** (`?page=2`) dostane presenter na konci řetězu, tedy ten, jehož routa nemá `presenter`. Parametr routy má při stejném názvu přednost.
+- **Query parametry** (`?page=2`) dostane presenter na konci řetězu, tedy ten, jehož routa nemá `presenter`. Parametr routy má při stejném názvu přednost. Své persistentní parametry (viz níže) dostane presenter i uprostřed řetězu.
+- **Ve `startup()` presenter už zná** své `route()`, `params()` a `basePath()`, jako v Nette.
 - **Akce běží,** když se změní routa nebo její parametry. Když zůstanou stejné, presenter i jeho stav zůstávají.
 - **Presenter pod routou se vytvoří znovu,** když se změní parametry routy nad ním. Přechod z `/users/5/orders` na `/users/6/orders` tedy vytvoří nový `UserDetailPresenter`.
 - **`this.route()` a `this.params()`** jsou `state` s aktuální routou a parametry, jdou použít v šabloně.
@@ -329,7 +409,22 @@ const saved = await this.openDialog(UserEdit, { userId: 15 });
 if (saved) await this.reload();
 ```
 
-Zavření křížkem nebo klávesou Escape vrátí `undefined`. Dialog zmizí i s komponentou, která ho otevřela.
+Zavření křížkem, klávesou Escape nebo klikem vedle okna vrátí `undefined`. Dialog zmizí i s komponentou, která ho otevřela.
+
+### Panel z boku
+
+Velký formulář se hodí spíš do panelu, který vyjede zprava přes celou výšku (jako offcanvas v Bootstrapu). Rozhoduje to ten, kdo dialog otevírá, třetím parametrem:
+
+```ts
+await this.openDialog(ProjectEdit, {}, { placement: 'end' });
+
+// u routy jako třetí položka
+{ name: 'edit', pattern: '/<id \\d+>', dialog: ({ id }) => [ItemEdit, { id: Number(id) }, { placement: 'end' }] }
+```
+
+- **`placement`:** `center` (výchozí, okno uprostřed), `end` (panel zprava), `start` (zleva). Panel má hlavičku a patičku na místě a posouvá se jen tělo.
+- **`class`:** třídy okna, třeba pro šířku. Šířku panelu mění i proměnná `--phlox-panel-width` (výchozí `min(36rem, 100vw)`).
+- **Komponenta se nemění,** stejná může být jednou v okně a jindy v panelu.
 
 ### Dialog s URL
 
@@ -393,9 +488,14 @@ override routes: Route[] = [
 
 ### Vzhled a výměna okna
 
-Výchozí okno je nativní `<dialog>` s částmi `header`, tělem a `footer`. Třídy mu dává téma (viz Vzhled a témata), u výchozího tématu `phlox-dialog`, `phlox-dialog-header` a další.
+Výchozí okno je nativní `<dialog>` s částmi `header`, tělem a `footer`. Třídy mu dává téma (viz Vzhled a témata), u výchozího tématu `phlox-dialog`, `phlox-dialog-header` a další. V Bootstrapu vypadá jako jeho modal, se stínem `shadow-lg`.
 
-Okno dodává služba `Dialogs`. Jinou implementaci, třeba nad Kendo Window, zaregistruješ v kontejneru: `services.add(KendoDialogs)`. Zavření okna uživatelem (Escape, ×) musí volat `component.cancel()`, aby se mohl zeptat na neuložené změny.
+- **Animace** jsou v `base.css`, takže je má každé téma: okno při otevření sjede shora, panel se objeví a posune se o posledních 50 px ze své strany (nelétá přes celou šířku), pozadí se ztmaví a při zavření vše odejde zpět. Řídí je `setMotion()` (viz Animace), s `off` je vše okamžité.
+- **Klik vedle okna** (na ztmavené pozadí) je jako Escape: volá `cancel()`, takže se případně zeptá na neuložené změny. Výběr textu, který skončí mimo okno, okno nezavře.
+- **Fokus** po otevření dostane první pole v těle, bez pole celé okno (ne křížek). Prvek s `autofocus` má přednost.
+- **Rozbalovací panely** (`Dropdown`, popover u `confirm`) uvnitř dialogu zůstávají v něm, takže nejsou pod jeho pozadím.
+
+Okno dodává služba `Dialogs`. Jinou implementaci, třeba nad Kendo Window, zaregistruješ v kontejneru: `services.add(KendoDialogs)`. Její `show(component, options)` dostane i `DialogOptions` (`placement`, `class`). Zavření okna uživatelem (Escape, ×, klik vedle) musí volat `component.cancel()`, aby se mohl zeptat na neuložené změny.
 
 ## Flash zprávy
 
@@ -476,6 +576,24 @@ loading.close();
 - **Texty tlačítek:** `messageTexts.ok`, `cancel`, `close`, `loading` z `phlox-js` (`unsaved` a `leave` patří k odchodu s neuloženými změnami). **Vzhled:** místa `message.*` (dialog) a `popover.*` (popover; v Bootstrapu jeho `popover` se šipkou).
 - **Grid** se před akcí s `confirm` ptá popoverem u tlačítka akce.
 
+## Rozbalovací panel: Dropdown
+
+Tlačítko s panelem libovolného obsahu: menu uživatele, upozornění, filtr.
+
+```tsx
+import { Dropdown } from 'phlox-js';
+
+<Dropdown label={<Icon name="bell" />} title="Upozornění" placement="bottom-right" onOpen={() => this.load()}>
+  <For each={this.items}>{item => <a href={this.link(`/tasks/${item.taskId}`)}>{item.text}</a>}</For>
+</Dropdown>
+```
+
+- **Zavření:** klik na odkaz nebo tlačítko v panelu, klik mimo, Escape (zavře jen panel, ne dialog pod ním) nebo druhý klik na tlačítko. Po Escape se fokus vrátí na tlačítko. Zaškrtávátka a pole panel nechají otevřený.
+- **Obsah se tvoří při každém otevření** a při zavření se uklidí. `onOpen` se hodí pro načtení dat.
+- **Umístění** jako u popoveru: `placement` (`bottom-left` výchozí, `bottom-right`, `top-left`, `top-right`), otočí se, když se nevejde, a posuvný kontejner ho neořízne.
+- **Volby:** `label` (obsah tlačítka), `title` (název pro čtečky, když je v tlačítku jen ikona), `class` (třídy tlačítka, může být funkce), `panelClass`.
+- **Vzhled:** místa `dropdown.button` a `dropdown.panel`, v Bootstrapu `btn` a `dropdown-menu`.
+
 ## Vzhled a témata
 
 Framework vykresluje formuláře a okna dialogů. Jaké třídy dostanou, určuje téma. CSS framework si nevnucuje.
@@ -554,6 +672,7 @@ services.add(new FoundationTheme());
 | `invalid`, `error` | prvek s chybou, text chyby |
 | `checkbox`, `checkboxInput`, `radioList`, `checkboxList`, `choiceItem`, `choiceInput` | checkboxy a výběry |
 | `dialog`, `dialogContent`, `dialogHeader`, `dialogTitle`, `dialogClose`, `dialogBody`, `dialogFooter` | okno dialogu |
+| `dropdown.button`, `dropdown.panel` | `<Dropdown>` |
 
 Místo, které téma nemá, dostane prázdnou třídu. Vlastní prvky si mohou zavést svá místa, třeba `dropdownlist.wrapper`, a číst je přes `currentTheme().class('dropdownlist.wrapper')` (`currentTheme` z `phlox-js`).
 
@@ -568,6 +687,7 @@ Místo, které téma nemá, dostane prázdnou třídu. Vlastní prvky si mohou z
 | `Theme` | výchozí třídy `phlox-*` | `BootstrapTheme`, jiný CSS framework |
 | `Translator` | `IntlTranslator` | i18next nebo jiný překladač |
 | `UserStorage` | `sessionStorage` | `localStorage`, cookies |
+| `Preferences` | `localStorage` (`BrowserPreferences`) | nastavení uživatele na serveru |
 | `Authenticator`, `Authorizator` | žádný, chyba při použití | přihlášení a oprávnění aplikace |
 | `FormControl` | prvky formulářů | widgety jiné knihovny jako prvky formuláře |
 
@@ -686,6 +806,7 @@ class TasksPresenter extends Presenter {
 - **`notify()`** zavolá metodu bez čekání na výsledek. Server neodpoví nic, ani chybu.
 - **Session místo tokenu:** `new RpcApi('/rpc', { credentials: 'include' })`, prohlížeč pak posílá cookies i na jiný původ.
 - **Bez typů** jde použít přímo `new RpcClient('/rpc')`, `call()` pak bere libovolnou metodu a vrací `any`.
+- **Názvy metod v URL:** požadavek jde na `/rpc?task.read,comment.list`, takže je v záložce Síť v prohlížeči vidět, co volá (u dávky každá metoda jednou). Server query ignoruje. Vypíná se volbou `methodsInUrl: false`.
 
 ### Soubory přes RPC
 
@@ -811,7 +932,7 @@ class AdminPresenter extends Presenter {
 }
 ```
 
-Přesměrování ze `startup()` nebo akce zastaví celou navigaci, takže chráněná obrazovka se neobjeví ani na okamžik. V `startup()` použij absolutní cestu: presenter v tu chvíli ještě neví, na jaké části URL sedí.
+Přesměrování ze `startup()` nebo akce zastaví celou navigaci, takže chráněná obrazovka se neobjeví ani na okamžik.
 
 Po přihlášení nebo odhlášení přesměruj (`this.redirect(...)`) nebo zavolej `this.app.restart()`, aby se obrazovky postavily znovu pro nového uživatele.
 
@@ -910,7 +1031,9 @@ form.addText('note')
 ### Kdy se kontroluje
 
 - **Při odeslání** se zkontroluje celý formulář. Když neprojde, zavolá se `onError`, u polí se objeví chyby a kurzor skočí na první chybné pole. Při úspěchu se zavolá `onSuccess`.
-- **Během psaní:** po opuštění pole se kontroluje živě. Chyba zmizí, jakmile ji uživatel opraví.
+- **Během psaní:** po opuštění pole, které uživatel změnil, se kontroluje živě. Chyba zmizí, jakmile ji uživatel opraví.
+- **Pole, na které uživatel nesáhl,** se při opuštění nekontroluje: projití prázdného povinného pole Tabem chybu neukáže, ukáže ji až odeslání. U dropdownlistu a stromu v panelu se počítá i otevření seznamu.
+- **`form.reset()`** vrátí formulář do stavu nového, pole se pak zase chovají jako nedotčená. Hodí se po odeslání komentáře, kdy pole zůstává ve fokusu.
 - **Přechod z pole na tlačítko** chybu ještě neukáže. Chyba by tlačítko posunula a klik by skončil vedle. Odeslání stejně zkontroluje celý formulář.
 - **Během `onSuccess`** jsou tlačítka formuláře zakázaná a `form.submitting()` vrací `true`.
 - **Tlačítko bez kontroly**, třeba Zrušit: `addSubmit('cancel').setValidationScope([])`. Které tlačítko formulář odeslalo, řekne v `onSuccess` metoda `button.isSubmittedBy()`.
@@ -956,6 +1079,7 @@ const name = this.form.get('name');
 - **Přístupnost:** chybné pole má `aria-invalid` a `aria-describedby` vede na text chyby.
 - **Checkbox** se vykresluje uvnitř svého `<label>`, jako v Nette.
 - **Třídy dává téma** (viz Vzhled a témata). Třída předaná do `<Input>` se přidá k třídě tématu, u tlačítka ji nahradí: `<Input control={cancel} class="btn btn-secondary" />`.
+- **Prvek** dá `<Input control={text} ref={element => …} />`, nebo kdykoli později `control.element`.
 
 ### Hodnota prvku jinde na stránce
 
@@ -1158,6 +1282,26 @@ Když `search` vrací jen prvních pár záznamů (třeba 100) a uložená hodno
 - **Popisek se dá předat s hodnotou,** pokud ho data ze serveru už obsahují. Pak není potřeba žádný dotaz: `form.get('assignee').setValue(task.assignee.id, task.assignee.name)`.
 - **Jinak ho zjistí `label`** podle ID, i po `setDefaults({ assignee: 5372 })`.
 - **Po otevření seznamu je uložená hodnota první,** i když mezi prvními záznamy není. Uživatel tak vidí, co je vybrané. Jakmile začne psát, zobrazí se jen to, co hledání vrátí.
+
+### Položky jako objekty a vlastní šablona
+
+Dropdownlist, combobox i taginput berou položky i jako objekty, třeba uživatele rovnou ze serveru, a mohou je kreslit vlastní šablonou:
+
+```tsx
+form.addDropDownList('assigneeId', 'Řešitel', {
+  items: users,                                  // UserResource[], nebo search, který objekty vrací
+  itemValue: user => user.id,                    // hodnota prvku
+  itemLabel: user => user.name,                  // text: hledání, čtečky, pole comboboxu
+  template: user => <span><Avatar user={user} /> {user.name}</span>,
+});
+```
+
+- **`itemValue` zapíná objekty** a je pak povinné. Kompilátor hlídá, že vrací typ pole z DTO, a `user` v ostatních funkcích má typ položek.
+- **`itemLabel`** je text položky. Hledá se v něm (u `items` bez ohledu na diakritiku), čte ho čtečka a je v poli comboboxu. Bez něj je textem hodnota.
+- **`template`** kreslí položku v seznamu, ve vybrané hodnotě dropdownlistu a ve štítcích taginputu. Combobox ji má jen v seznamu, v poli je text. Se šablonou se hledaný text nezvýrazňuje.
+- **Hodnota z kódu** se nakreslí šablonou, když je její objekt mezi načtenými položkami. Jinak jde objekt předat s hodnotou (`setValue(5, user)`, u taginputu `setValue(ids, users)`), nebo ho vrátí volba `label` místo textu. Bez objektu se ukáže jen text.
+- **Výčet hodnot se šablonou:** `items: ['open', 'closed'], itemValue: status => status, template: status => <StatusLabel status={status} />`.
+- **Typ voleb** pro vlastní pomocné funkce: `DropDownListOptions<T, O>`, `ComboBoxOptions<T, O>`, `TagInputOptions<T, O>`. Jsou to sjednocení dvou tvarů (hodnoty, nebo objekty s `itemValue`), takže `Omit<…>` na ně nefunguje, použij průnik: `ComboBoxOptions<number> & { allowCustom?: false }`.
 
 ### Kontejnery a řádky
 
@@ -1593,7 +1737,7 @@ Komponenta (funkce jako `Counter` výše) se spustí jednou. Nespouští se znov
 - **`value` a `checked`** se nastavují tak, jak je uživatel vidí, i poté, co do pole psal.
 - **`style`** bere text nebo objekt: `style={{ color: 'red' }}`.
 - **Text se nikdy nevkládá jako HTML.** `innerHTML` mezi atributy záměrně není.
-- **SVG** zatím není podporované.
+- **SVG** funguje přímo v šabloně: `<svg viewBox="0 0 24 24"><path d="M5 12h14" stroke-width="2" /></svg>`. Prvky uvnitř `<svg>` jsou SVG, obsah `<foreignObject>` zase HTML. Atributy s pomlčkou (`stroke-width`, `aria-hidden`) kompilátor nekontroluje.
 
 ### Události
 

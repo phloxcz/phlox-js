@@ -2,7 +2,7 @@
 
 import { Scope, computed, effect, state, untrack } from '../reactive/reactive';
 import type { Accessor, State } from '../reactive/reactive';
-import { insert, templateOf } from './dom';
+import { insert, templateOf, withNamespaceOf } from './dom';
 import type { Child } from './dom';
 
 type Truthy<T> = Exclude<T, null | undefined | false | 0 | ''>;
@@ -186,7 +186,8 @@ export function For<T>(props: {
 
   effect(() => {
     const items = props.each();
-    untrack(() => update(items));
+    // New rows inside <svg> must be SVG too
+    untrack(() => withNamespaceOf(end.parentNode!, () => update(items)));
   });
 
   return fragment;

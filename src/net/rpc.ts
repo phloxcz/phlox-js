@@ -44,6 +44,11 @@ export interface RpcOptions {
   credentials?: RequestCredentials;
   /** Calls made at the same time go as one request. On by default. */
   batch?: boolean;
+  /**
+   * Names of the called methods go to the query of the URL (`/rpc?task.read,comment.list`), so the network
+   * panel of the browser shows what each request calls. The server ignores them. On by default.
+   */
+  methodsInUrl?: boolean;
   fetch?: typeof fetch;
 }
 
@@ -89,6 +94,13 @@ export class RpcClient<M extends { [K in keyof M]: RpcMethod } = Record<string, 
     if (this.queue.length === 1) queueMicrotask(() => void this.send(this.queue.splice(0)));
   }
 
+  /** The URL with the names of the methods, each once, in the order of the calls. */
+  private urlFor(calls: Pending[]): string {
+    if (this.options.methodsInUrl === false) return this.url;
+    const names = [...new Set(calls.map(call => encodeURIComponent(call.method)))].join(',');
+    return `${this.url}${this.url.includes('?') ? '&' : '?'}${names}`;
+  }
+
   private async send(calls: Pending[]): Promise<void> {
     const requests = calls.map(call => ({
       jsonrpc: '2.0',
@@ -100,7 +112,7 @@ export class RpcClient<M extends { [K in keyof M]: RpcMethod } = Record<string, 
 
     let body: Response | Response[] | null;
     try {
-      const response = await (this.options.fetch ?? fetch)(this.url, {
+      const response = await (this.options.fetch ?? fetch)(this.urlFor(calls), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Accept: 'application/json', ...this.options.headers?.() },
         body: JSON.stringify(requests.length === 1 ? requests[0] : requests),

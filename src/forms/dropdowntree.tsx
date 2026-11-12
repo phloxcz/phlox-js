@@ -77,6 +77,8 @@ export class DropDownTreeSelect<K extends TreeKey> extends FormControl<K | null>
 
   open(): void {
     if (untrack(this.opened) || untrack(this.disabled)) return;
+    // Closing the panel without a choice shows an error, as with DropDownList
+    this.edited = true;
     this.opened.set(true);
   }
 

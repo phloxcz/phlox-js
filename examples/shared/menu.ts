@@ -29,6 +29,11 @@ export const EXAMPLES: Example[] = [
     title: 'Grid objednávek',
     description: 'Řazení, hledání, filtry a stránky v URL, akce, souhrny, šířky a pořadí sloupců.',
   },
+  {
+    path: '/helpdesk',
+    title: 'Helpdesk',
+    description: 'Celá aplikace proti mock JSON-RPC serveru: přihlášení, vnořené presentery, data přes resource(), dropdowny, nahrávání souborů.',
+  },
 ];
 
 const link = (example: Example, current: boolean): HTMLAnchorElement => {

@@ -4,12 +4,20 @@ import { Scope, getScope, state, untrack } from '../reactive/reactive';
 import { VIEW, insert } from './dom';
 import type { Child } from './dom';
 import { Dialogs } from './dialog';
+import type { DialogOptions } from './dialog';
+import { resource as createResource } from './resource';
+import { Preferences } from './preferences';
+import type { State } from '../reactive/reactive';
+import type { Resource } from './resource';
 import type { Class } from '../di/container';
 import type { Application } from '../application/application';
+import type { LinkParams, Presenter } from './presenter';
 
 /** Keys under which a scope provides the application and the component that owns it. */
 export const APP = Symbol('application');
 export const COMPONENT = Symbol('component');
+/** Marks presenters, so that a component finds its presenter without importing the class. */
+export const IS_PRESENTER = Symbol('presenter');
 
 type AnyComponent = Component<any, any>;
 type PropsOf<C> = C extends Component<infer P, any> ? P : never;
@@ -74,6 +82,24 @@ export abstract class Component<P extends object = {}, R = void> {
     creation = null;
   }
 
+  /** The nearest presenter above the component (or the component itself), like getPresenter() in Nette. */
+  get presenter(): Presenter<any, any> {
+    for (let owner: AnyComponent | null = this; owner; owner = owner.parent) {
+      if (IS_PRESENTER in owner) return owner as unknown as Presenter<any, any>;
+    }
+    throw new Error(`${this.constructor.name} is not inside a presenter.`);
+  }
+
+  /**
+   * Creates a URL, in a component by the routes of its presenter:
+   * - `link('detail', { id: 5 })` leads to a route of the presenter, extra parameters go to the query,
+   * - `link('this', { page: 2 })` is the current URL with changed query parameters, null removes one,
+   * - `link('/users')` is an absolute path.
+   */
+  link(destination: string, params?: LinkParams): string {
+    return this.app.router.link(this.presenter, destination, params);
+  }
+
   /** The logged-in user, like $this->user in Nette. */
   get user() {
     return this.app.user;
@@ -109,6 +135,24 @@ export abstract class Component<P extends object = {}, R = void> {
     return false;
   }
 
+  /**
+   * Data loaded by the function, again whenever state it read before its first await changes:
+   * `tasks = this.resource(() => this.api.call('task.list', { status: this.status() }))`, in the template `tasks()`.
+   * Create it in the constructor or in startup(), it ends with the component. Errors go to app.onError.
+   */
+  resource<T>(load: () => Promise<T>): Resource<T> {
+    return this.scope.run(() => createResource(load, error => this.app.onError(error)));
+  }
+
+  /**
+   * A setting of the user that the application remembers, e.g. the width of a column:
+   * `width = this.preference('tasks.width', 416)`. It is a state, every change is saved by the Preferences
+   * service (localStorage unless the application registers another).
+   */
+  preference<T>(key: string, initial: T): State<T> {
+    return this.app.container.get(Preferences).state(key, initial);
+  }
+
   /** A message with OK, see Application.alert(). With `anchor` a popover at an element. */
   alert(message: Child, options: Parameters<Application['alert']>[1] = {}): Promise<void> {
     return this.app.alert(message, options, this);
@@ -141,13 +185,13 @@ export abstract class Component<P extends object = {}, R = void> {
   }
 
   /**
-   * Opens a component in a dialog and waits until it is closed.
+   * Opens a component in a dialog and waits until it is closed. `{ placement: 'end' }` slides it in from the right.
    * Returns what the dialog passed to close(), or undefined when it was closed another way.
    */
-  async openDialog<C extends AnyComponent>(cls: Class<C>, props: PropsOf<C>): Promise<ResultOf<C> | undefined> {
+  async openDialog<C extends AnyComponent>(cls: Class<C>, props: PropsOf<C>, options?: DialogOptions): Promise<ResultOf<C> | undefined> {
     const dialog = createComponent(cls, props, this, this.app, this.scope);
     try {
-      await dialog.startup();
+      await startComponent(dialog);
     } catch (error) {
       dialog.scope.dispose();
       throw error;
@@ -162,7 +206,7 @@ export abstract class Component<P extends object = {}, R = void> {
         result = value;
         dialog.scope.dispose();
       };
-      showDialog(dialog);
+      showDialog(dialog, options);
     });
   }
 
@@ -174,7 +218,7 @@ export abstract class Component<P extends object = {}, R = void> {
 
     const component = createComponent(this, props, scope!.find<AnyComponent>(COMPONENT) ?? null, app, scope);
     props.ref?.(component);
-    const started = component.startup();
+    const started = startComponent(component);
     if (!(started instanceof Promise)) return renderComponent(component);
 
     // The view appears when the data is loaded
@@ -191,7 +235,8 @@ export function createComponent<C extends AnyComponent>(
   const scope = new Scope(owner);
   creation = { props, parent, app, scope };
   try {
-    const component = app.container.create(cls);
+    // Effects and computed values made in field initializers and in the constructor belong to the component
+    const component = scope.run(() => app.container.create(cls));
     scope.provide(COMPONENT, component);
     living.add(component);
     scope.onCleanup(() => living.delete(component));
@@ -203,6 +248,11 @@ export function createComponent<C extends AnyComponent>(
   } finally {
     creation = null;
   }
+}
+
+/** Runs startup() of a component. Effects it creates before its first await belong to the component. */
+export function startComponent(component: AnyComponent): void | Promise<void> {
+  return component.scope.run(() => component.startup());
 }
 
 /** Builds the view of a component. Call it once for every component. */
@@ -222,7 +272,7 @@ export function renderComponent(component: AnyComponent): Node {
 }
 
 /** Shows a started component in a window, the window disappears with the component. */
-export function showDialog(dialog: AnyComponent): void {
-  const hide = dialog.app.container.get(Dialogs).show(dialog);
+export function showDialog(dialog: AnyComponent, options?: DialogOptions): void {
+  const hide = dialog.app.container.get(Dialogs).show(dialog, options);
   dialog.scope.onCleanup(hide);
 }

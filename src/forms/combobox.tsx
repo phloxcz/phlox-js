@@ -12,11 +12,12 @@ import type { ExtraAttributes } from './controls';
 import { ListControl, foldText } from './listbox';
 import type { ListOptions } from './listbox';
 
-export interface ComboBoxOptions<T> extends ListOptions<T> {
+export type ComboBoxOptions<T, O = never> = ListOptions<T, O> & {
   /** Typed text that is not an item becomes the value. Only for fields that can hold a text. */
   allowCustom?: boolean;
-}
+};
 
+/** With item objects the template shows in the list only, the field shows the text of the item. */
 export class ComboBox<T = string> extends ListControl<T> {
   /** Texts of the list. Replace them for the language of the application. */
   static texts = {
@@ -28,7 +29,7 @@ export class ComboBox<T = string> extends ListControl<T> {
   private previous: { value: T | null; label: string; custom: boolean } = { value: null, label: '', custom: false };
   private custom = false;
 
-  constructor(label = '', protected override options: ComboBoxOptions<T> = {}) {
+  constructor(label = '', protected override options: ComboBoxOptions<T, any> = {}) {
     super(label, options, 'combobox');
   }
 
@@ -37,7 +38,7 @@ export class ComboBox<T = string> extends ListControl<T> {
     return this.custom;
   }
 
-  override setValue(value: T | null, label?: string): void {
+  override setValue(value: T | null, label?: unknown): void {
     this.editing.set(false);
     this.custom = false;
     super.setValue(value, label);

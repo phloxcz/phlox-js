@@ -31,14 +31,113 @@
   max-height: calc(100vh - 2rem);
 }
 
+/* Focused itself when it has no field, see NativeDialogs: no ring around the whole window */
+.phlox-dialog:focus {
+  outline: none;
+}
+
+/* The backdrop dims the page in every theme; default.css colours it by --phlox-backdrop */
+.phlox-dialog::backdrop {
+  background: rgb(0 0 0 / .5);
+}
+
+/*
+ * Opening and closing: the window comes in from above, the backdrop fades. NativeDialogs adds
+ * .phlox-closing and removes the window after the animation. setMotion('off') makes them instant.
+ * Closing is shorter than opening (150 against 200 ms): it answers the user and must not hold them up.
+ * A panel at the side has the same times, only other keyframes.
+ */
+.phlox-dialog[open] {
+  animation: phlox-dialog-in calc(.2s * var(--phlox-motion, 1)) cubic-bezier(.2, .8, .3, 1);
+}
+
+.phlox-dialog[open]::backdrop {
+  animation: phlox-fade-in calc(.2s * var(--phlox-motion, 1)) ease-out;
+}
+
+.phlox-dialog.phlox-closing {
+  animation: phlox-dialog-out calc(.15s * var(--phlox-motion, 1)) ease-in forwards;
+  pointer-events: none;
+}
+
+.phlox-dialog.phlox-closing::backdrop {
+  animation: phlox-fade-out calc(.15s * var(--phlox-motion, 1)) ease-in forwards;
+}
+
+@keyframes phlox-dialog-in {
+  from { opacity: 0; transform: translateY(-1.5rem) scale(.98); }
+}
+
+@keyframes phlox-dialog-out {
+  to { opacity: 0; transform: translateY(-.75rem) scale(.98); }
+}
+
+@keyframes phlox-fade-in {
+  from { opacity: 0; }
+}
+
+@keyframes phlox-fade-out {
+  to { opacity: 0; }
+}
+
+/* A panel at the side over the whole height (placement: 'end' or 'start'), like offcanvas in Bootstrap */
+.phlox-dialog[data-placement] {
+  width: var(--phlox-panel-width, min(36rem, 100vw));
+  min-width: 0;
+  max-width: 100vw;
+  height: 100%;
+  max-height: 100%;
+  margin: 0 0 0 auto;
+}
+
+.phlox-dialog[data-placement="start"] {
+  margin: 0 auto 0 0;
+}
+
+/* The window fills the panel; header and footer stay, the body scrolls. The corners are square. */
+.phlox-dialog[data-placement] > div {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  box-sizing: border-box;
+  border-radius: 0 !important;
+}
+
+.phlox-dialog[data-placement] > div > div {
+  flex: 1;
+  overflow: auto;
+}
+
+.phlox-dialog[data-placement="end"][open] { animation-name: phlox-panel-in-end; }
+.phlox-dialog[data-placement="end"].phlox-closing { animation-name: phlox-panel-out-end; }
+.phlox-dialog[data-placement="start"][open] { animation-name: phlox-panel-in-start; }
+.phlox-dialog[data-placement="start"].phlox-closing { animation-name: phlox-panel-out-start; }
+
+/* A panel fades in and moves only the last 50px from its side, it does not fly over the whole width */
+@keyframes phlox-panel-in-end {
+  from { opacity: 0; transform: translateX(50px); }
+}
+
+@keyframes phlox-panel-out-end {
+  to { opacity: 0; transform: translateX(50px); }
+}
+
+@keyframes phlox-panel-in-start {
+  from { opacity: 0; transform: translateX(-50px); }
+}
+
+@keyframes phlox-panel-out-start {
+  to { opacity: 0; transform: translateX(-50px); }
+}
+
 /* toggle() hides by the hidden attribute, a display class of a theme (d-flex...) must not win */
 form [hidden] {
   display: none !important;
 }
 
-/* A dialog without actions() has no footer, whatever the theme */
+/* A dialog without actions() has no footer, whatever the theme (Bootstrap's d-flex is !important too) */
 .phlox-dialog footer:empty {
-  display: none;
+  display: none !important;
 }
 
 /* DropDownList – the same layout as phloxcz/forms-dropdownlist, for every theme */
@@ -1071,6 +1170,68 @@ th.phx-grid-drag-over-right {
   z-index: 1080;
   min-width: 220px;
   max-width: 320px;
+  animation: cap-popover-in calc(.15s * var(--phlox-motion)) ease both;
+}
+
+/* ResizeHandle: a thin line at the edge of the element it belongs to, wider for the pointer than it looks */
+:has(> .phlox-resize-handle) {
+  position: relative;
+}
+
+.phlox-resize-handle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 5;
+  width: 9px;
+  cursor: col-resize;
+  touch-action: none;
+}
+
+.phlox-resize-end {
+  right: -5px;
+}
+
+.phlox-resize-start {
+  left: -5px;
+}
+
+.phlox-resize-handle::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 4px;
+  width: 2px;
+  background: transparent;
+  transition: background-color calc(.15s * var(--phlox-motion, 1));
+}
+
+.phlox-resize-handle:hover::after,
+.phlox-resize-handle:focus-visible::after,
+.phlox-resize-handle.phlox-resizing::after {
+  background: color-mix(in srgb, currentColor 35%, transparent);
+}
+
+.phlox-resize-handle:focus-visible {
+  outline: none;
+}
+
+/* While dragging the cursor stays and text is not selected, wherever the pointer goes */
+.phlox-col-resizing,
+.phlox-col-resizing * {
+  cursor: col-resize !important;
+  user-select: none !important;
+}
+
+/* Dropdown: a panel of any content at a button. Above the dropdown-menu of Bootstrap, which has 1000. */
+.phlox-dropdown,
+.phlox-dropdown-bs.dropdown-menu {
+  z-index: 1070;
+  min-width: 12rem;
+  max-width: min(24rem, calc(100vw - 16px));
+  max-height: calc(100vh - 16px);
+  overflow: auto;
   animation: cap-popover-in calc(.15s * var(--phlox-motion)) ease both;
 }
 

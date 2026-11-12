@@ -164,8 +164,8 @@ export class Container<V extends object = Record<string, any>> implements Owner 
   }
 
   /** A select with a search field, see DropDownList. Items are fixed, or come from `search`. */
-  addDropDownList<K extends keyof V & string>(
-    name: K, label = '', options: DropDownListOptions<NonNullable<V[K]>> = {},
+  addDropDownList<K extends keyof V & string, O = never>(
+    name: K, label = '', options: DropDownListOptions<NonNullable<V[K]>, O> = {},
   ): DropDownList<NonNullable<V[K]>> {
     return this.addControl(name, new DropDownList<NonNullable<V[K]>>(label, options));
   }
@@ -174,9 +174,9 @@ export class Container<V extends object = Record<string, any>> implements Owner 
    * A text field with suggestions, see ComboBox. The value is a picked item. `allowCustom` lets a typed text
    * be the value too, so it is allowed only for fields that can hold a text.
    */
-  addComboBox<K extends keyof V & string>(
+  addComboBox<K extends keyof V & string, O = never>(
     name: K, label = '',
-    options: ComboBoxOptions<NonNullable<V[K]>> & { allowCustom?: string extends V[K] ? boolean : false } = {},
+    options: ComboBoxOptions<NonNullable<V[K]>, O> & { allowCustom?: string extends V[K] ? boolean : false } = {},
   ): ComboBox<NonNullable<V[K]>> {
     return this.addControl(name, new ComboBox<NonNullable<V[K]>>(label, options));
   }
@@ -185,9 +185,9 @@ export class Container<V extends object = Record<string, any>> implements Owner 
    * Several values as tags, see TagInput. The field must be a list. `allowNew` makes tags of typed text,
    * so it is allowed only for lists that can hold texts.
    */
-  addTagInput<K extends ListKeys<V>>(
+  addTagInput<K extends ListKeys<V>, O = never>(
     name: K, label = '',
-    options: TagInputOptions<ItemOf<V[K]>> & { allowNew?: string extends ItemOf<V[K]> ? boolean : false } = {},
+    options: TagInputOptions<ItemOf<V[K]>, O> & { allowNew?: string extends ItemOf<V[K]> ? boolean : false } = {},
   ): TagInput<ItemOf<V[K]>> {
     return this.addControl(name, new TagInput<ItemOf<V[K]>>(label, options));
   }
@@ -302,7 +302,7 @@ export class Container<V extends object = Record<string, any>> implements Owner 
       for (const member of this.members.values()) {
         if (member instanceof FormControl) {
           member.setValue((Array.isArray(member.getValue()) ? [] : member instanceof Checkbox ? false : null) as never);
-          member.cleanErrors();
+          member.pristine();
         } else {
           member.reset();
         }

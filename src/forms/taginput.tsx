@@ -10,21 +10,17 @@ import type { Child } from '../ui/dom';
 import { classes, currentTheme } from '../ui/theme';
 import { FormControl } from './controls';
 import type { ExtraAttributes, Items } from './controls';
-import { foldText, highlight, placePanel, toPairs } from './listbox';
+import { foldText, highlight, itemContent, itemPairs, labelOf, placePanel } from './listbox';
+import type { ItemOptions } from './listbox';
 
-export interface TagInputOptions<T> {
-  /** Fixed suggestions, filtered in the browser. */
-  items?: Items<T>;
-  /** Suggestions for the typed text, e.g. from the server. */
-  search?: (query: string) => Promise<Items<T>> | Items<T>;
-  /** Label of a value set from code, when it is not among the items. */
-  label?: (value: T) => Promise<string | null> | string | null;
+/** Suggestions as plain values, or as objects with `itemValue`, see ItemOptions. */
+export type TagInputOptions<T, O = never> = ItemOptions<T, O> & {
   /** Typed text that is not a suggestion becomes a new tag. Only for lists of texts. */
   allowNew?: boolean;
   /** At most this many tags, 0 = no limit. */
   maxTags?: number;
   placeholder?: string;
-}
+};
 
 export interface Tag<T> {
   value: T;
@@ -54,20 +50,22 @@ export class TagInput<T = string> extends FormControl<T[]> {
   readonly opened = computed(() => this.suggestions().length > 0 && this.text().trim() !== '' && !this.full());
   placeholder: string;
   private all: [T, string][] = [];
+  /** Item objects by their values, see ItemOptions. */
+  private readonly objects = new Map<T, unknown>();
   private request = 0;
   private timer: ReturnType<typeof setTimeout> | undefined;
   private readonly listId = `taginput${++lastTagInput}`;
   /** Leaving the field validates, but does not turn the typed text into a tag. */
   private leaving = false;
 
-  constructor(label = '', private options: TagInputOptions<T> = {}) {
+  constructor(label = '', private options: TagInputOptions<T, any> = {}) {
     super(label);
     this.placeholder = options.placeholder ?? '';
     if (options.items) this.setItems(options.items);
   }
 
-  setItems(items: Items<T>): this {
-    this.all = toPairs(items);
+  setItems(items: Items<T> | readonly unknown[]): this {
+    this.all = itemPairs(items, this.options, this.objects);
     return this;
   }
 
@@ -85,19 +83,22 @@ export class TagInput<T = string> extends FormControl<T[]> {
   }
 
   /**
-   * Sets the tags. Labels can be given, e.g. when the data from the server have them,
+   * Sets the tags. Labels (or item objects) can be given, e.g. when the data from the server have them,
    * otherwise they come from the items, or from the `label` option.
    */
-  setValue(values: T[], labels?: string[]): void {
+  setValue(values: T[], labels?: unknown[]): void {
     const tags = (values ?? []).map((value, index): Tag<T> => {
-      const label = labels?.[index] ?? this.all.find(([item]) => Object.is(item, value))?.[1];
+      const given = labels?.[index];
+      const label = given !== undefined ? labelOf(value, given, this.options, this.objects) : this.all.find(([item]) => Object.is(item, value))?.[1];
       return { value, label: label ?? String(value), isNew: false };
     });
     this.tags.set(tags);
     for (const tag of tags) {
       if (labels?.[tags.indexOf(tag)] !== undefined || this.all.some(([item]) => Object.is(item, tag.value))) continue;
       void Promise.resolve(this.options.label?.(tag.value) ?? null).then(label => {
-        if (label !== null) this.tags.update(list => list.map(other => (other === tag ? { ...tag, label } : other)));
+        if (label === null) return;
+        const text = labelOf(tag.value, label, this.options, this.objects);
+        this.tags.update(list => list.map(other => (other === tag ? { ...tag, label: text } : other)));
       });
     }
   }
@@ -167,7 +168,7 @@ export class TagInput<T = string> extends FormControl<T[]> {
     }
     let found: [T, string][];
     if (this.options.search) {
-      found = toPairs(await this.options.search(query));
+      found = itemPairs(await this.options.search(query), this.options, this.objects);
     } else {
       const folded = foldText(query);
       found = this.all.filter(([, label]) => foldText(label).includes(folded));
@@ -287,7 +288,7 @@ export class TagInput<T = string> extends FormControl<T[]> {
                 data-value={String(tag.value)}
                 data-is-new={tag.isNew ? '1' : '0'}
               >
-                <span data-phlox-tag-label>{tag.label}</span>
+                <span data-phlox-tag-label>{itemContent(tag.value, tag.label, this.options, this.objects)}</span>
                 <button
                   type="button"
                   class={slot('tagRemove')}
@@ -358,7 +359,7 @@ export class TagInput<T = string> extends FormControl<T[]> {
                 >
                   {suggestion.isNew
                     ? [<strong>{TagInput.texts.createNew}</strong>, `"${suggestion.label}"`]
-                    : () => highlight(suggestion.label, this.text().trim(), '')}
+                    : itemContent(suggestion.value, () => highlight(suggestion.label, this.text().trim(), ''), this.options, this.objects)}
                 </div>
               )}
             </For>

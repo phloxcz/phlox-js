@@ -21,6 +21,26 @@ const STRINGIFIED = /^(aria-|data-|draggable$|contenteditable$|spellcheck$)/;
 
 const TEMPLATE = Symbol('template');
 
+const SVG = 'http://www.w3.org/2000/svg';
+
+/** SVG while the children of an <svg> are created, so that <path> inside it is an SVG element. */
+let inSvg = false;
+
+/**
+ * Runs the function with the namespace of children of the parent: SVG inside <svg>, except in <foreignObject>.
+ * A fragment is not in the page yet, what is created into it keeps the namespace of the place that creates it.
+ */
+export function withNamespaceOf<T>(parent: Node, fn: () => T): T {
+  if (parent.nodeType === Node.DOCUMENT_FRAGMENT_NODE) return fn();
+  const previous = inSvg;
+  inSvg = (parent as Element).namespaceURI === SVG && parent.nodeName !== 'foreignObject';
+  try {
+    return fn();
+  } finally {
+    inSvg = previous;
+  }
+}
+
 interface TemplateInfo {
   tag: string | Component;
   props: Record<string, unknown> | null;
@@ -39,8 +59,8 @@ export function h(tag: string | Component, props: Record<string, unknown> | null
       return view ? view.call(tag, all) : (tag as (props: object) => Child)(all);
     }
 
-    const element = document.createElement(tag);
-    insert(element, children, null);
+    const element = tag === 'svg' || inSvg ? document.createElementNS(SVG, tag) as unknown as HTMLElement : document.createElement(tag);
+    withNamespaceOf(element, () => insert(element, children, null));
     // After children, a <select> can take its value only when its options exist
     for (const [name, value] of Object.entries(props ?? {})) {
       if (name !== 'ref') setProp(element, name, value);
@@ -126,7 +146,8 @@ function region(parent: Node, read: () => Child, before: Node | null): void {
       text = document.createTextNode(String(value));
       end.parentNode!.insertBefore(text, end);
     } else {
-      insert(end.parentNode!, value, end);
+      // A rerun can come long after the parent was created
+      withNamespaceOf(end.parentNode!, () => insert(end.parentNode!, value, end));
     }
   });
 }

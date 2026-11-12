@@ -522,3 +522,44 @@ describe('rendering', () => {
     expect(pair.hidden).toBe(false);
   });
 });
+
+test('<Input ref> gets the element, the control keeps it too', async () => {
+  const { Presenter } = await import('../src/index');
+  const { boot } = await import('./helpers');
+  const { Form, Input } = await import('../src/forms/index');
+  let element: unknown = null;
+  const form = new Form<{ note: string }>();
+  const note = form.addTextArea('note', 'Note');
+  class Page extends Presenter {
+    render() { return <Input control={note} ref={(el: HTMLElement) => { element = el; }} />; }
+  }
+  await boot(Page);
+  expect(element).toBeInstanceOf(HTMLTextAreaElement);
+  expect(note.element).toBe(element);
+});
+
+test('leaving a field nobody has changed checks nothing; reset() makes the form as new', async () => {
+  const { Form, FormView } = await import('../src/forms/index');
+  const { render } = await import('../src/index');
+  const form = new Form<{ text: string }>();
+  const text = form.addTextArea('text', 'Text').setRequired('Napište text.');
+  const root = document.createElement('div');
+  render(() => <FormView form={form} />, root);
+  const area = root.querySelector('textarea')!;
+  area.dispatchEvent(new FocusEvent('blur'));
+  expect(text.errors()).toEqual([]);
+
+  area.value = 'a';
+  area.dispatchEvent(new Event('input', { bubbles: true }));
+  area.value = '';
+  area.dispatchEvent(new Event('input', { bubbles: true }));
+  area.dispatchEvent(new FocusEvent('blur'));
+  expect(text.errors()).toEqual(['Napište text.']);
+
+  // After sending and reset() the empty field is new again, leaving it says nothing
+  form.reset();
+  area.dispatchEvent(new FocusEvent('blur'));
+  expect(text.errors()).toEqual([]);
+  expect(await form.submit()).toBe(false);
+  expect(text.errors()).toEqual(['Napište text.']);
+});
