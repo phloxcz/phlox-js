@@ -19,10 +19,14 @@ interface Navigation {
   history: 'push' | 'replace' | 'none';
   /** Actions of this presenter and of those below it run even when nothing has changed. */
   refresh: AnyPresenter | null;
+  /** Back or Forward of the browser: the URL has already changed. */
+  pop?: boolean;
 }
 
 /** Thrown inside a navigation that has been replaced by a newer one. */
 const SUPERSEDED = Symbol('superseded');
+/** Thrown when the user stays because of unsaved changes. */
+const CANCELLED = Symbol('cancelled');
 
 /** A presenter without routes is a single page, its action is actionDefault(). */
 const DEFAULT_ROUTES: Route[] = [{ name: 'default', pattern: '/' }];
@@ -106,6 +110,9 @@ export class Router {
   readonly url = state('');
 
   private root: AnyPresenter | null = null;
+  /** The position in history of the page that is shown, to return Back when the user stays. */
+  private index = 0;
+  private returning = false;
   private running: Navigation | null = null;
   private queued: { navigation: Navigation; done: () => void } | null = null;
 
@@ -114,6 +121,7 @@ export class Router {
   /** Starts routing from the current URL of the browser. */
   start(root: AnyPresenter): Promise<void> {
     this.root = root;
+    this.index = history.state?.phlox ?? 0;
     window.addEventListener('popstate', this.onPopState);
     return this.enqueue({ url: location.href, history: 'none', refresh: null });
   }
@@ -174,8 +182,23 @@ export class Router {
   }
 
   private onPopState = (): void => {
-    void this.enqueue({ url: location.href, history: 'none', refresh: null });
+    if (this.returning) {
+      this.returning = false;
+      return;
+    }
+    void this.enqueue({ url: location.href, history: 'none', refresh: null, pop: true });
   };
+
+  /** The user stays after Back or Forward: the browser goes back to the page that is shown. */
+  private returnBack(): void {
+    const steps = (history.state?.phlox ?? 0) - this.index;
+    if (steps) {
+      this.returning = true;
+      history.go(-steps);
+    } else {
+      history.pushState({ phlox: this.index }, '', this.url());
+    }
+  }
 
   private enqueue(navigation: Navigation): Promise<void> {
     if (!this.running) return this.process(navigation);
@@ -192,7 +215,7 @@ export class Router {
     try {
       await this.run(navigation);
     } catch (error) {
-      if (error !== SUPERSEDED) this.app.onError(error);
+      if (error !== SUPERSEDED && error !== CANCELLED) this.app.onError(error);
     } finally {
       this.running = null;
       const next = this.queued;
@@ -211,6 +234,9 @@ export class Router {
     if (!this.owns(path)) return location.assign(full);
     const commits: (() => void)[] = [];
     const created: Component<any, any>[] = [];
+    // Components the new page removes, and how to put back the state of presenters that stay
+    const leaving: Component<any, any>[] = [];
+    const undo: (() => void)[] = [];
     const changed: { presenter: AnyPresenter; matchKey: string }[] = [];
     const check = (): void => {
       if (this.queued) throw SUPERSEDED;
@@ -232,6 +258,10 @@ export class Router {
           // Throws unless the presenter handles an unknown URL itself, then nothing changes
           current.notFound(rest);
           changed.push({ presenter: current, matchKey: routing.matchKey });
+          undo.push(this.snapshot(current));
+          if (routing.dialog) leaving.push(routing.dialog.component);
+          const old = untrack(current.child);
+          if (old) leaving.push(old);
           routing.matchKey = routing.actionKey = '';
           batch(() => {
             current.basePath.set(base);
@@ -252,6 +282,7 @@ export class Router {
         const routeChanged = matchKey !== routing.matchKey;
         const actionChanged = actionKey !== routing.actionKey;
         if (routeChanged || actionChanged) changed.push({ presenter: current, matchKey: routing.matchKey });
+        undo.push(this.snapshot(current));
         routing.matchKey = matchKey;
         routing.actionKey = actionKey;
         batch(() => {
@@ -267,7 +298,7 @@ export class Router {
         }
 
         let next: AnyPresenter | null = null;
-        const dialog = await this.prepareDialog(current, route, params, commits, created);
+        const dialog = await this.prepareDialog(current, route, params, commits, created, leaving);
         check();
         if (dialog instanceof Presenter) next = dialog;
 
@@ -278,6 +309,7 @@ export class Router {
           if (old && !routeChanged && old.constructor === cls) {
             next = old;
           } else {
+            if (old) leaving.push(old);
             const child = createComponent(cls, {}, current, this.app, current.scope);
             created.push(child);
             await child.startup();
@@ -286,6 +318,7 @@ export class Router {
             next = child;
           }
         } else if (untrack(current.child)) {
+          leaving.push(untrack(current.child)!);
           commits.push(() => this.replaceChild(current, null));
         }
 
@@ -298,8 +331,15 @@ export class Router {
         presenter = next;
       }
       check();
+      // The new page is ready aside; components with unsaved changes would be lost, so the user decides
+      if (leaving.length && !(await this.app.mayLeave(leaving))) {
+        if (navigation.pop) this.returnBack();
+        throw CANCELLED;
+      }
+      check();
     } catch (error) {
       for (const component of created) component.scope.dispose();
+      if (error === CANCELLED) for (const restore of undo) restore();
       // Children still belong to the old routes, but the actions must run again next time
       for (const { presenter, matchKey } of changed) presenter.routing.matchKey = matchKey, presenter.routing.actionKey = '';
       throw error;
@@ -310,17 +350,32 @@ export class Router {
     const shown = location.pathname + location.search + location.hash;
     if (navigation.history === 'push' && full !== shown) history.pushState({ phlox: index + 1 }, '', full);
     else if (navigation.history !== 'none') history.replaceState({ phlox: index }, '', full);
+    this.index = history.state?.phlox ?? 0;
     this.url.set(joinUrl(path, query));
+  }
+
+  /** Remembers where the presenter is, to put it back when the user stays. */
+  private snapshot(presenter: AnyPresenter): () => void {
+    const route = untrack(presenter.route), params = untrack(presenter.params), base = untrack(presenter.basePath);
+    return () => batch(() => {
+      presenter.route.set(route);
+      presenter.params.set(params);
+      presenter.basePath.set(base);
+    });
   }
 
   /** Keeps the dialog of the route when it is already open, otherwise prepares a new one and closes the old one. */
   private async prepareDialog(
     presenter: AnyPresenter, route: Route, params: Params, commits: (() => void)[], created: Component<any, any>[],
+    leaving: Component<any, any>[],
   ): Promise<Component<any, any> | null> {
     const active = presenter.routing.dialog;
     const key = route.dialog ? JSON.stringify([route.name, params]) : null;
     if (active && active.key === key) return active.component;
-    if (active) commits.push(() => this.closeDialog(presenter, active));
+    if (active) {
+      leaving.push(active.component);
+      commits.push(() => this.closeDialog(presenter, active));
+    }
     if (!route.dialog) return null;
 
     const [cls, props] = route.dialog(params);

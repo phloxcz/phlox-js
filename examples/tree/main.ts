@@ -13,7 +13,9 @@ if (bootstrap) await import('bootstrap/dist/css/bootstrap.min.css');
 else await import('phlox-js/styles/default.css');
 
 Tree.texts = { expand: 'Rozbalit', collapse: 'Sbalit', loading: 'Načítám…' };
-Object.assign(messageTexts, { ok: 'OK', cancel: 'Zrušit', close: 'Zavřít', loading: 'Načítám…' });
+Object.assign(messageTexts, {
+  ok: 'OK', cancel: 'Zrušit', close: 'Zavřít', loading: 'Načítám…', unsaved: 'Odejít bez uložení změn?', leave: 'Odejít',
+});
 
 const app = new Application(services);
 // All examples run as one site, this one under its own path, see examples/shared/menu.ts

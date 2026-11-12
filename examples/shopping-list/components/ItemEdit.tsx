@@ -71,6 +71,11 @@ export class ItemEdit extends Presenter<{ id: number }, boolean> {
     return t('edit.title');
   }
 
+  /** Leaving with changes asks first: Escape, ×, Back, a link. Cancel and Save close it on purpose. */
+  override hasUnsavedChanges() {
+    return this.form.isChanged();
+  }
+
   /** The buttons are in the footer of the dialog, outside the <form>, so Save sends the form from code. */
   override actions() {
     return (

@@ -132,6 +132,8 @@
     "ok": "OK",
     "cancel": "Zrušit",
     "close": "Zavřít",
-    "loading": "Načítám…"
+    "loading": "Načítám…",
+    "unsaved": "Odejít bez uložení změn?",
+    "leave": "Odejít"
   }
 }

@@ -25,6 +25,31 @@ interface Creation {
 /** What the component being constructed right now receives from the framework. */
 let creation: Creation | null = null;
 
+/** Components that exist now, for the question about unsaved changes. */
+const living = new Set<AnyComponent>();
+/** Dialogs closed by their code: they are leaving on purpose, so nobody asks about them. */
+const closing = new WeakSet<AnyComponent>();
+
+/**
+ * Whether a component of the application has unsaved changes and would be lost with the given ones:
+ * they or a component inside them (a child, a dialog opened from them). Null means the whole application.
+ */
+export function hasUnsaved(app: Application, leaving: AnyComponent[] | null): boolean {
+  for (const component of living) {
+    if (component.app !== app || !untrack(() => component.hasUnsavedChanges())) continue;
+    let lost = leaving === null;
+    for (let owner: AnyComponent | null = component; owner; owner = owner.parent) {
+      if (closing.has(owner)) {
+        lost = false;
+        break;
+      }
+      if (leaving?.includes(owner)) lost = true;
+    }
+    if (lost) return true;
+  }
+  return false;
+}
+
 /**
  * P are the props, R is the result the component returns when it is closed as a dialog.
  * The constructor is for services, they are autowired. Props are ready in `this.props` from the start.
@@ -76,6 +101,14 @@ export abstract class Component<P extends object = {}, R = void> {
     return null;
   }
 
+  /**
+   * True while the component holds changes the user would lose, typically `this.form.isChanged()`.
+   * Before the component leaves (another URL, Escape in its dialog, closing the page) the user is asked.
+   */
+  hasUnsavedChanges(): boolean {
+    return false;
+  }
+
   /** A message with OK, see Application.alert(). With `anchor` a popover at an element. */
   alert(message: Child, options: Parameters<Application['alert']>[1] = {}): Promise<void> {
     return this.app.alert(message, options, this);
@@ -96,9 +129,15 @@ export abstract class Component<P extends object = {}, R = void> {
     return this.app.loading(message, this);
   }
 
-  /** Closes the dialog the component is shown in and hands the result to whoever opened it. */
+  /** Closes the dialog the component is shown in and hands the result to whoever opened it. It does not ask. */
   close(result?: R): void {
+    closing.add(this);
     this.onClose?.(result);
+  }
+
+  /** The user closes the dialog (Escape, ×): with unsaved changes it asks first, then close(). */
+  async cancel(): Promise<void> {
+    if (await this.app.mayLeave([this], this)) this.close();
   }
 
   /**
@@ -154,6 +193,8 @@ export function createComponent<C extends AnyComponent>(
   try {
     const component = app.container.create(cls);
     scope.provide(COMPONENT, component);
+    living.add(component);
+    scope.onCleanup(() => living.delete(component));
     scope.onCleanup(() => component.shutdown());
     return component;
   } catch (error) {

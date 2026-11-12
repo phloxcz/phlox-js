@@ -82,12 +82,16 @@ describe('alert, confirm and prompt in a dialog', () => {
     expect(dialog().textContent).toContain('Smazat položku?');
     expect(dialog().querySelector('h2')!.textContent).toBe('Mazání');
     expect(button(dialog(), 'OK').className).toBe('phlox-button phlox-button-danger');
+    // Dangerous: Enter would press Cancel
+    expect(button(dialog(), messageTexts.cancel).hasAttribute('autofocus')).toBe(true);
+    expect(button(dialog(), 'OK').hasAttribute('autofocus')).toBe(false);
     button(dialog(), 'OK').click();
     expect(await asked).toBe(true);
     expect(document.querySelector('dialog')).toBeNull();
 
     const again = app.presenter!.confirm('Smazat?');
     await tick();
+    expect(button(dialog(), 'OK').hasAttribute('autofocus')).toBe(true);
     dialog().dispatchEvent(new Event('cancel', { cancelable: true }));
     expect(await again).toBe(false);
   });
@@ -131,14 +135,14 @@ describe('alert, confirm and prompt in a dialog', () => {
 });
 
 describe('the popover', () => {
-  test('at an element: the focus on OK, Escape cancels and goes back, a click outside cancels', async () => {
+  test('at an element: the focus on Cancel when dangerous, Escape cancels and goes back, a click outside cancels', async () => {
     const { app, element } = await boot(Page);
     const anchor = element.querySelector<HTMLButtonElement>('#anchor')!;
     const asked = app.presenter!.confirm('Smazat?', { anchor, danger: true });
     const popover = document.querySelector<HTMLElement>('.cap-popover')!;
     expect(popover.getAttribute('role')).toBe('alertdialog');
     expect(popover.style.position).toBe('fixed');
-    expect(document.activeElement).toBe(button(popover, 'OK'));
+    expect(document.activeElement).toBe(button(popover, messageTexts.cancel));
     expect(button(popover, 'OK').className).toBe('cap-pop-btn cap-pop-btn-ok cap-pop-btn-danger');
     const outside = vi.fn();
     document.addEventListener('keydown', outside);
@@ -150,6 +154,7 @@ describe('the popover', () => {
     expect(document.querySelector('.cap-popover')).toBeNull();
 
     const clicked = app.presenter!.confirm('Smazat?', { anchor });
+    expect(document.activeElement).toBe(button(document.querySelector('.cap-popover')!, 'OK'));
     document.body.dispatchEvent(new MouseEvent('pointerdown', { bubbles: true }));
     expect(await clicked).toBe(false);
 

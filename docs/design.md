@@ -177,9 +177,19 @@ Routovaný dialog je obyčejný potomek ve stromu, jen se místo do `<RouteFrame
 - **Nečekat na dialog v `actionXxx`:** navigace běží po jedné, takže čekání na uživatele by blokovalo všechny další.
 - **Okno je výměnné:** jádro používá nativní `<dialog>` bez závislostí, Kendo adaptér ho může nahradit `kendoWindow`. `alert`, `confirm` a `prompt` jsou převzaté z capify (viz Zprávy) a ukazují se v tomto okně.
 
+### Odchod s neuloženými změnami (implementováno, čeká na review)
+
+`Component.hasUnsavedChanges()`, `Component.cancel()`, `Application.mayLeave()`, `Form.isChanged()`, testy `tests/leave.test.tsx`.
+
+- **Komponenta jen odpoví, framework se ptá:** `hasUnsavedChanges()` je synchronní, protože `beforeunload` čekat neumí. Otázka je proto všude stejná (`messageTexts.unsaved`) a v kódu aplikace není žádné čekání ani vlastní dialog.
+- **Ptá se podle toho, co odchází:** router při přípravě nové obrazovky sbírá komponenty, které výměna odstraní (dítě presenteru, routovaný dialog). Ptá se, má-li změny ony nebo komponenta pod nimi (rodiče komponent se dají projít, takže stačí množina živých komponent, ne strom dětí).
+- **Otázka až před výměnou:** dřív to nejde, co odchází, se ukáže až při procházení rout. Akce presenterů, které zůstávají, už proběhly; při Zrušit se nově vytvořené presentery zahodí a `route`, `params` a `basePath` se vrátí.
+- **Zpět vrací URL:** router si pamatuje pozici v historii (`history.state.phlox`) a při Zrušit zavolá `history.go()` zpět. Popstate, který tím vznikne, ignoruje.
+- **`close()` versus `cancel()`:** Escape a × jsou žádost uživatele, `close()` je rozhodnutí kódu (Uložit, vlastní Zrušit). Zavřená komponenta se označí, takže navigace, kterou routovaný dialog po `close()` spustí, se už neptá.
+- **`isChanged()` porovnává hodnoty, ne „dotčení“:** pozná i řádky multiplieru a změnu tam a zpět. Porovnání je hloubkové u prostých objektů a polí, soubory podle identity.
+
 ### Odloženo
 
-- Zadržení odchodu s neuloženými změnami: tlačítko Zpět mění URL dřív, než se framework může zeptat, takže URL by se musela vracet. První verze to neřeší, doplní se až podle potřeby u kanbanu nebo CMS.
 - Dialog nad libovolnou obrazovkou (třeba profil uživatele) nemá přirozenou úroveň ve stromu. Možná ho vyřeší query parametr, ale první verze s ním nepočítá.
 
 ## Závislosti (rozhodnuto)
@@ -618,7 +628,6 @@ Kód: `ui/component.ts`, `ui/presenter.ts`, `ui/dialog.ts`, `application/router.
 ### Co zatím chybí
 
 - Persistentní parametry.
-- Zadržení odchodu s neuloženými změnami.
 - Práce s `#hash`.
 
 ## Reaktivní jádro a renderer (implementováno, čeká na review)

@@ -40,7 +40,11 @@ export interface LoadingHandle {
   close(): void;
 }
 
-export const messageTexts = { ok: 'OK', cancel: 'Cancel', close: 'Close', loading: 'Loading…' };
+export const messageTexts = {
+  ok: 'OK', cancel: 'Cancel', close: 'Close', loading: 'Loading…',
+  /** The question before leaving unsaved changes and its button. */
+  unsaved: 'Leave without saving the changes?', leave: 'Leave',
+};
 
 interface BoxProps {
   kind: MessageKind;
@@ -59,16 +63,18 @@ export class MessageBox extends Component<BoxProps, boolean | string> {
   override actions() {
     const { kind, options } = this.props;
     const theme = currentTheme();
+    // A dangerous question focuses Cancel, so that Enter does not destroy anything
+    const careful = kind === 'confirm' && Boolean(options.danger);
     return [
       kind === 'alert' ? null : (
-        <button type="button" class={theme.class('message.cancel')} onClick={() => this.close()}>
+        <button type="button" class={theme.class('message.cancel')} autofocus={careful} onClick={() => this.close()}>
           {options.cancelText ?? messageTexts.cancel}
         </button>
       ),
       <button
         type="button"
         class={theme.class(options.danger ? 'message.okDanger' : 'message.ok')}
-        autofocus={kind !== 'prompt'}
+        autofocus={kind !== 'prompt' && !careful}
         onClick={() => this.close(kind === 'prompt' ? untrack(this.value) : true)}
       >
         {options.okText ?? messageTexts.ok}
@@ -221,7 +227,9 @@ function showPopover(owner: Scope, kind: MessageKind, message: Child, options: P
     window.addEventListener('scroll', place, true);
     window.addEventListener('resize', place);
     document.addEventListener('pointerdown', outside, true);
-    (popover!.querySelector<HTMLElement>('input') ?? [...popover!.querySelectorAll<HTMLElement>('button')].at(-1))?.focus();
+    // A dangerous question focuses Cancel, otherwise OK
+    const careful = kind === 'confirm' && options.danger;
+    (popover!.querySelector<HTMLElement>('input') ?? [...popover!.querySelectorAll<HTMLElement>('button')].at(careful ? 0 : -1))?.focus();
   });
 }
 

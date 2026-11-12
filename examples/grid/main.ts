@@ -24,7 +24,9 @@ Grid.texts = {
   sum: 'Celkem', avg: 'Průměr', count: 'Počet', min: 'Nejméně', max: 'Nejvíc',
 };
 
-Object.assign(messageTexts, { ok: 'OK', cancel: 'Zrušit', close: 'Zavřít', loading: 'Načítám…' });
+Object.assign(messageTexts, {
+  ok: 'OK', cancel: 'Zrušit', close: 'Zavřít', loading: 'Načítám…', unsaved: 'Odejít bez uložení změn?', leave: 'Odejít',
+});
 DropDownList.texts.filterPlaceholder = 'Hledat…';
 DropDownList.texts.noResults = 'Nic nenalezeno';
 

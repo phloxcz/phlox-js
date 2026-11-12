@@ -8,7 +8,7 @@ import { currentTheme } from './theme';
 export abstract class Dialogs {
   /**
    * Shows the component in a window: its title(), render() and actions().
-   * A request to close the window must go through component.close().
+   * The user's request to close the window (Escape, ×) must go through component.cancel().
    * Returns a function that removes the window.
    */
   abstract show(dialog: Component<any, any>): () => void;
@@ -18,10 +18,10 @@ export abstract class Dialogs {
 export class NativeDialogs extends Dialogs {
   show(dialog: Component<any, any>): () => void {
     const element = document.createElement('dialog');
-    // Escape must close the dialog through the component, so the opener gets its result
+    // Escape must close the dialog through the component: it may ask about unsaved changes, the opener gets its result
     element.addEventListener('cancel', event => {
       event.preventDefault();
-      dialog.close();
+      void dialog.cancel();
     });
 
     dialog.scope.run(() => {
@@ -30,7 +30,7 @@ export class NativeDialogs extends Dialogs {
       insert(element, h('div', { class: theme.class('dialogContent') },
         h('header', { class: theme.class('dialogHeader') },
           h('h2', { class: theme.class('dialogTitle') }, () => dialog.title()),
-          h('button', { type: 'button', class: theme.class('dialogClose'), 'aria-label': 'Close', onClick: () => dialog.close() },
+          h('button', { type: 'button', class: theme.class('dialogClose'), 'aria-label': 'Close', onClick: () => void dialog.cancel() },
             theme.closeText),
         ),
         h('div', { class: theme.class('dialogBody') }, renderComponent(dialog)),

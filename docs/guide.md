@@ -255,6 +255,31 @@ this.link('detail', { id: 5, page: null })   // /orders/5?sort=-price
 - **Když cokoli selže, nezmění se nic** a chybu dostane `app.onError`.
 - **Běží jen jedna navigace.** Když uživatel klikne jinam dřív, než doběhne, vyhrává poslední kliknutí.
 
+### Odchod s neuloženými změnami
+
+Komponenta, která drží rozpracované změny, to řekne metodou `hasUnsavedChanges()`. Typicky podle formuláře:
+
+```ts
+class ItemEdit extends Presenter {
+  override hasUnsavedChanges() {
+    return this.form.isChanged();
+  }
+}
+```
+
+Než taková komponenta odejde, framework se uživatele zeptá „Odejít bez uložení změn?“ s tlačítky Zrušit a Odejít:
+
+- **Jiný odkaz, `redirect`, `navigate`:** nová obrazovka se připraví stranou a před výměnou přijde otázka. Při Zrušit zůstane stará obrazovka i URL.
+- **Tlačítko Zpět a Vpřed:** prohlížeč změní URL dřív, než se framework může zeptat. Při Zrušit ji router vrátí.
+- **Escape a × v okně dialogu** volají `cancel()`, které se zeptá a pak dialog zavře.
+- **Zavření nebo obnovení stránky, odkaz mimo aplikaci:** zeptá se prohlížeč svou vlastní otázkou, text nastavit nejde.
+
+Platí to pro komponentu a všechno uvnitř ní: komponentu v presenteru, který odchází, i dialog otevřený z něj. Komponenta, která zůstává, se neptá.
+
+- **`close()` z kódu se neptá:** tlačítka Uložit a Zrušit v dialogu zavírají záměrně. Kdo chce i u svého Zrušit otázku, zavolá `this.cancel()`.
+- **Akce presenterů, které zůstávají,** proběhnou ještě před otázkou, jako každá příprava nové obrazovky. Při Zrušit se nic nezmění.
+- **Texty:** `messageTexts.unsaved` a `messageTexts.leave`. Ptá se `app.mayLeave(components)`, které jde zavolat i z vlastního kódu.
+
 ## Dialogy
 
 V dialogu se dá otevřít jakákoli komponenta. Sama určuje titulek a tlačítka a zavírá se přes `this.close(výsledek)`. Typ výsledku je druhý typový parametr.
@@ -370,7 +395,7 @@ override routes: Route[] = [
 
 Výchozí okno je nativní `<dialog>` s částmi `header`, tělem a `footer`. Třídy mu dává téma (viz Vzhled a témata), u výchozího tématu `phlox-dialog`, `phlox-dialog-header` a další.
 
-Okno dodává služba `Dialogs`. Jinou implementaci, třeba nad Kendo Window, zaregistruješ v kontejneru: `services.add(KendoDialogs)`.
+Okno dodává služba `Dialogs`. Jinou implementaci, třeba nad Kendo Window, zaregistruješ v kontejneru: `services.add(KendoDialogs)`. Zavření okna uživatelem (Escape, ×) musí volat `component.cancel()`, aby se mohl zeptat na neuložené změny.
 
 ## Flash zprávy
 
@@ -444,11 +469,11 @@ loading.close();
 ```
 
 - **Dialog** je okno frameworku (nativní `<dialog>`), vypadá jako ostatní dialogy aplikace. `confirm` vrátí `true` pro OK, `false` pro Zrušit, Escape i křížek. `prompt` vrátí text, nebo `null`. Enter v poli potvrdí.
-- **Popover** (`anchor: prvek`) se ukáže u prvku, pod ním vlevo, nebo podle `placement` (`bottom-left`, `bottom-right`, `top-left`, `top-right`). Když se nevejde, otočí se. Fokus dostane OK nebo pole, Escape a klik mimo ho zruší, potom se fokus vrátí na prvek. Escape nezavře dialog pod ním.
-- **Volby:** `title`, `okText`, `cancelText`, `danger` (OK varuje, třeba u mazání), u `prompt` `value` a `placeholder`.
+- **Popover** (`anchor: prvek`) se ukáže u prvku, pod ním vlevo, nebo podle `placement` (`bottom-left`, `bottom-right`, `top-left`, `top-right`). Když se nevejde, otočí se. Fokus dostane OK (u `danger` Zrušit) nebo pole, Escape a klik mimo ho zruší, potom se fokus vrátí na prvek. Escape nezavře dialog pod ním.
+- **Volby:** `title`, `okText`, `cancelText`, `danger` (OK varuje, třeba u mazání, a fokus dostane Zrušit, aby Enter nic nezničil), u `prompt` `value` a `placeholder`.
 - **`loading`** uživatel nezavře, ani Escapem; zavře ho `close()`. Zpráva může být šablona, ne jen text.
 - **Zpráva** je text nebo šablona, nikdy HTML v textu, takže nehrozí vložení cizího kódu.
-- **Texty tlačítek:** `messageTexts.ok`, `cancel`, `close`, `loading` z `phlox-js`. **Vzhled:** místa `message.*` (dialog) a `popover.*` (popover; v Bootstrapu jeho `popover` se šipkou).
+- **Texty tlačítek:** `messageTexts.ok`, `cancel`, `close`, `loading` z `phlox-js` (`unsaved` a `leave` patří k odchodu s neuloženými změnami). **Vzhled:** místa `message.*` (dialog) a `popover.*` (popover; v Bootstrapu jeho `popover` se šipkou).
 - **Grid** se před akcí s `confirm` ptá popoverem u tlačítka akce.
 
 ## Vzhled a témata
@@ -826,6 +851,7 @@ class TaskCreatePresenter extends Presenter {
 - **Typ hodnot je DTO.** Kompilátor hlídá názvy prvků i jejich druh: `addText('nmae')` je chyba, stejně jako `addText('priority')`, když je priorita číslo. `onSuccess` dostane hodnoty typu `CreateTask`.
 - **Formulář se tvoří v konstruktoru** nebo jako pole třídy, obdoba `createComponentXxx()`.
 - **Data ze serveru** se do prvků dostanou přes `form.setDefaults({ name: task.name })`, typicky ve `startup()`.
+- **`form.isChanged()`** je `true`, když se hodnoty liší od uložených (reaktivně, jde dát do šablony). Uložené jsou hodnoty z `setDefaults()`, po úspěšném `onSuccess`, po `reset()`, jinak ty, které měl formulář při prvním vykreslení. Změna tam a zpět se nepočítá. `form.markSaved()` označí aktuální hodnoty za uložené, když se ukládá mimo `onSuccess`. Slouží hlavně pro `hasUnsavedChanges()`, viz Odchod s neuloženými změnami.
 
 ### Prvky
 

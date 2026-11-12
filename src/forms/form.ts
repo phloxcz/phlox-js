@@ -14,6 +14,26 @@ import type { DeepPartial } from './container';
 
 let lastId = 0;
 
+/** Equal values: primitives, plain objects and arrays by content, anything else (a File) by identity. */
+function same(a: unknown, b: unknown): boolean {
+  if (Object.is(a, b)) return true;
+  if (Array.isArray(a)) return Array.isArray(b) && a.length === b.length && a.every((item, i) => same(item, b[i]));
+  if (!isPlain(a) || !isPlain(b)) return false;
+  const keys = Object.keys(a);
+  return keys.length === Object.keys(b).length && keys.every(key => same(a[key], b[key]));
+}
+
+function isPlain(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && Object.getPrototypeOf(value) === Object.prototype;
+}
+
+/** A copy of plain objects and arrays, so later changes of the values do not change it. */
+function copy<T>(value: T): T {
+  if (Array.isArray(value)) return value.map(copy) as T;
+  if (isPlain(value)) return Object.fromEntries(Object.entries(value).map(([key, item]) => [key, copy(item)])) as T;
+  return value;
+}
+
 export class Form<V extends object = Record<string, any>> extends Container<V> {
   static Filled = validators.Filled;
   static Required = validators.Filled;
@@ -44,6 +64,18 @@ export class Form<V extends object = Record<string, any>> extends Container<V> {
   readonly buttons = new Map<string, SubmitButton>();
   /** Errors of the whole form, not of one control. */
   readonly errors = state<string[]>([]);
+  /** The values the form was filled with or last saved, see isChanged(). */
+  private saved = state<V | null>(null);
+
+  /**
+   * True when the values differ from the saved ones: those from setDefaults(), after a successful submit,
+   * after reset(), or those the form had when it was first rendered. For Component.hasUnsavedChanges().
+   */
+  readonly isChanged: Accessor<boolean> = computed(() => {
+    const saved = this.saved();
+    return saved !== null && !same(this.getValues(), saved);
+  });
+
   /** True while onSuccess runs. Submit buttons are disabled meanwhile. */
   readonly submitting = state(false);
 
@@ -84,7 +116,19 @@ export class Form<V extends object = Record<string, any>> extends Container<V> {
 
   /** Fills the controls, typically with data loaded from the server. The same as setValues(). */
   setDefaults(values: DeepPartial<V>): this {
-    return this.setValues(values);
+    this.setValues(values);
+    this.markSaved();
+    return this;
+  }
+
+  /** The current values are the saved ones, isChanged() is false. For saving outside onSuccess. */
+  markSaved(): void {
+    this.saved.set(copy(untrack(() => this.getValues())));
+  }
+
+  /** @internal The first rendering remembers the values unless something has been saved before. */
+  markRendered(): void {
+    if (untrack(this.saved) === null) this.markSaved();
   }
 
   /** Checks the given controls, or the whole form. Returns whether they are valid. */
@@ -148,6 +192,7 @@ export class Form<V extends object = Record<string, any>> extends Container<V> {
     this.submitting.set(true);
     try {
       await this.onSuccess?.(untrack(() => this.getValues()), this);
+      this.markSaved();
       return true;
     } catch (error) {
       if (this.addServerErrors(error)) return false;
@@ -163,6 +208,7 @@ export class Form<V extends object = Record<string, any>> extends Container<V> {
     batch(() => {
       super.reset();
       this.errors.set([]);
+      this.markSaved();
     });
   }
 }

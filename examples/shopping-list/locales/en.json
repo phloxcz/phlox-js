@@ -132,6 +132,8 @@
     "ok": "OK",
     "cancel": "Cancel",
     "close": "Close",
-    "loading": "Loading…"
+    "loading": "Loading…",
+    "unsaved": "Leave without saving the changes?",
+    "leave": "Leave"
   }
 }

@@ -5,9 +5,9 @@ import { h, insert } from '../ui/dom';
 import type { Child } from '../ui/dom';
 import { Container } from '../di/container';
 import type { Class } from '../di/container';
-import { APP, createComponent, renderComponent } from '../ui/component';
+import { APP, createComponent, hasUnsaved, renderComponent } from '../ui/component';
 import type { Component } from '../ui/component';
-import { Toasts, showLoading, showMessage } from '../ui/messages';
+import { Toasts, messageTexts, showLoading, showMessage } from '../ui/messages';
 import type { LoadingHandle, MessageOptions, PromptOptions } from '../ui/messages';
 import { Dialogs, NativeDialogs } from '../ui/dialog';
 import { THEME, Theme } from '../ui/theme';
@@ -142,6 +142,7 @@ export class Application {
     const presenter = this.presenter = createComponent(root, {}, null, this, this.scope);
     await presenter.startup();
     document.addEventListener('click', this.onClick);
+    window.addEventListener('beforeunload', this.onBeforeUnload);
     await this.router.start(presenter);
     element.replaceChildren(renderComponent(presenter));
     if (this.flashes.toasts) {
@@ -171,6 +172,15 @@ export class Application {
     return showLoading(this.opener(opener).scope, message);
   }
 
+  /**
+   * Whether the components may leave: true without unsaved changes in them, otherwise the user decides.
+   * Null means the whole application. The router and Component.cancel() ask through it.
+   */
+  async mayLeave(leaving: Component<any, any>[] | null, opener?: Component<any, any>): Promise<boolean> {
+    if (!hasUnsaved(this, leaving)) return true;
+    return this.confirm(messageTexts.unsaved, { danger: true, okText: messageTexts.leave }, opener);
+  }
+
   private opener(component?: Component<any, any>): Component<any, any> {
     const opener = component ?? this.presenter;
     if (!opener) throw new Error('Messages need a running application.');
@@ -180,6 +190,7 @@ export class Application {
   /** Removes everything and stops routing. */
   stop(): void {
     document.removeEventListener('click', this.onClick);
+    window.removeEventListener('beforeunload', this.onBeforeUnload);
     this.router.stop();
     this.toastHost?.remove();
     this.toastHost = null;
@@ -196,6 +207,11 @@ export class Application {
     this.stop();
     await this.run(root, element);
   }
+
+  /** Closing or reloading the page, a link to another site: the browser asks with its own question. */
+  private onBeforeUnload = (event: BeforeUnloadEvent): void => {
+    if (hasUnsaved(this, null)) event.preventDefault();
+  };
 
   /** A click on an ordinary link to this site becomes a navigation without a page reload. */
   private onClick = (event: MouseEvent): void => {

@@ -24,6 +24,7 @@ export function FormTag(props: { form: Form<any>; children?: Child } & Omit<Elem
       noValidate
       ref={element => {
         form.element = element;
+        form.markRendered();
         // Elements switched by toggle() are usually inside the form, so they are found before it is in the page
         effect(() => {
           for (const [id, show] of form.toggles()) {
