@@ -1,0 +1,65 @@
+/* phlox-js/adapters/kendo/kendo.css – what the adapter adds to a theme of Kendo UI */
+
+/* The host of a widget takes the width its widget needs; in a form the control is as wide as other fields */
+.phlox-kendo {
+  display: inline-block;
+}
+
+.phlox-kendo-control,
+.phlox-kendo-control > .phlox-kendo {
+  display: block;
+}
+
+.phlox-kendo-control .k-input,
+.phlox-kendo-control .k-picker {
+  width: 100%;
+}
+
+/* A control with an error, by the invalid class of the theme of the framework */
+.phlox-kendo.is-invalid .k-input,
+.phlox-kendo.is-invalid .k-picker,
+.phlox-kendo.phlox-invalid .k-input,
+.phlox-kendo.phlox-invalid .k-picker {
+  border-color: var(--bs-form-invalid-border-color, #dc3545);
+}
+
+/* A dialog in Kendo Window: the content scrolls, the buttons stay at the bottom */
+.phlox-kendo-window {
+  display: flex;
+  flex-direction: column;
+  min-width: min(22rem, calc(100vw - 2rem));
+  max-height: calc(100vh - 8rem);
+}
+
+.phlox-kendo-window-body {
+  flex: 1;
+  overflow: auto;
+}
+
+.phlox-kendo-window-actions:empty {
+  display: none;
+}
+
+/* placement: 'end' / 'start' – a panel at the side over the whole height */
+.k-window.phlox-kendo-panel {
+  position: fixed !important;
+  top: 0 !important;
+  bottom: 0;
+  width: var(--phlox-panel-width, min(36rem, 100vw)) !important;
+  height: 100% !important;
+  border-radius: 0;
+}
+
+.k-window.phlox-kendo-panel-end {
+  right: 0;
+  left: auto !important;
+}
+
+.k-window.phlox-kendo-panel-start {
+  left: 0 !important;
+}
+
+.k-window.phlox-kendo-panel .phlox-kendo-window {
+  max-height: none;
+  height: 100%;
+}

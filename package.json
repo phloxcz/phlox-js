@@ -11,8 +11,12 @@
     "rpc:types": "node src/net/rpc-types.ts"
   },
   "devDependencies": {
+    "@progress/kendo-theme-bootstrap": "^14.10.0",
+    "@progress/kendo-ui": "^2026.4.1111",
+    "@types/jquery": "^4.0.1",
     "@types/node": "^26.6.6",
     "bootstrap": "^5.3.8",
+    "jquery": "^4.0.0",
     "jsdom": "^29.1.1",
     "typescript": "^7.0.2",
     "vite": "^8.3.6",

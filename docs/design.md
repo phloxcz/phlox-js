@@ -71,10 +71,24 @@ Ověření autora ukázalo černá tlačítka rozbalení ve stromu na světlé B
 Napojení cizích knihoven nejde do jádra, ale do adaptérů. Adaptér nahradí službu frameworku v kontejneru (`FlashMessages`, `Dialogs`, `Translator`, `UserStorage`...) nebo přidá prvek formuláře (`FormControl`). Presentery a komponenty o knihovně nevědí.
 
 - **Adaptéry jsou v `src/adapters/`, každý s vlastním vstupem** (`phlox-js/adapters/capify`, `phlox-js/adapters/kendo`). Kořen `src/` kopíruje jmenné prostory Nette a napojení cizí knihovny mezi ně nepatří (rozhodl autor). Vlastní vstup je proto, aby aplikace bez té knihovny nic navíc nepotřebovala.
-- **Knihovna se adaptéru předá, adaptér ji neimportuje,** pokud to jde: `new CapifyFlashMessages(Capify, options)`. Adaptér pak nemá závislost, potřebuje jen malé rozhraní (`CapifyNotify`) a testuje se s falešnou náhradou. U Kenda to kvůli jQuery a pluginům nejspíš nepůjde, tam bude Kendo volitelná závislost (`peerDependencies`).
+- **Knihovna se adaptéru předá, adaptér ji neimportuje:** `new CapifyFlashMessages(Capify, options)`, `new Kendo(kendo)`. Adaptér pak nemá závislost, potřebuje jen malé rozhraní (`CapifyNotify`, `KendoLike`) a testuje se s falešnou náhradou. U Kenda se dřív čekalo, že kvůli jQuery a pluginům půjde o `peerDependencies`; nebylo to potřeba, widgety se tvoří konstruktory `kendo.ui.*` a jQuery si Kendo bere z `window`.
 - **Vlastní adaptér pro jinou knihovnu** si aplikace napíše stejně, seznam služeb je v příručce.
 
 **Flash zprávy:** výchozí `FlashMessages` drží zprávy a aplikace je ukazuje jako toasty (převzaté z capify, viz Zprávy). Po 5 s je sama maže, chyby zůstávají (`errorDuration = 0`), aby je uživatel nepřehlédl. Layout, který zprávy kreslí sám, nastaví `toasts = false`. `CapifyFlashMessages` je ukazuje jako toasty knihovny capify a časovač nechává na ní. Každý vstup je jeden soubor (`src/index.ts`, `src/net/index.ts`...), ostatní soubory jsou vnitřní. Na kořeni `src/` zůstávají jen vstupy: `index.ts`, `vite.ts` a `jsx-runtime.ts`, který si podle názvu hledá kompilátor.
+
+### Adaptér pro Kendo (implementováno, čeká na review)
+
+`src/adapters/kendo/`, testy `tests/kendo.test.tsx` (proti falešnému Kendu), ukázka `examples/kendo` ověřená se skutečným Kendo UI 2026.4 v prohlížeči.
+
+- **Obdoba knockout-kendo, ale bez textových bindingů:** `<KendoWidget widget="…" value={state}>` místo `data-bind="kendoDatePicker: { value: x }"`. Typy hlídá kompilátor, názvy voleb ne (jsou to volby Kenda, typy Kenda jsou globální a adaptér na nich nezávisí).
+- **Widget na vlastním prvku uvnitř obalu frameworku.** Kendo kolem prvku vkládá své obaly; kdyby widget stál na prvku šablony, renderer by při úklidu odstranil jen svůj prvek a obaly Kenda by zůstaly. Obal frameworku se při úklidu vyprázdní celý, po `destroy()`.
+- **Widget vzniká v `afterRender()`,** kdy je prvek ve stránce. Grid a okna Kenda měří rozměry, mimo dokument by se rozložily špatně.
+- **Hodnota obousměrně přes událost `change` a efekt.** Efekt nastaví widget jen při skutečné změně (`sameValue`: data podle času, seznamy podle obsahu, `null` a `''` jako nic), jinak by zápis zpět do widgetu rozhodil rozepsaný text nebo kurzor.
+- **Buňky gridu šablonou frameworku (`render`):** Kendo dostane prázdný `<span>` s číslem sloupce a po každém `dataBound` do něj framework vloží šablonu ve vlastním scope, který se před dalším překreslením uklidí. Kendo kopíruje řádky do svých objektů, proto si kopie nesou index původního řádku a `render` i `onSelect` dostanou objekt z `data`.
+- **`KendoDialogs` nahrazuje službu `Dialogs`,** takže v Kendo Window jsou i `confirm()` a otázka na neuložené změny, ne jen vlastní dialogy. Událost `close` s `userTriggered` (×, Escape) se zruší a rozhodne `cancel()` komponenty.
+- **`KendoControl` je `FormControl`,** ne nový druh prvku: formulář, pravidla, chyby ze serveru a `isChanged()` o Kendu nevědí. Změnu ve widgetu hlásí jako změnu uživatelem (`changed()`), takže živá kontrola funguje stejně jako u polí frameworku.
+- **Licence:** klíč se nastavuje `setScriptKey()` z `@progress/kendo-licensing` před importem Kenda, v ukázce z `.env.local`. Kendo, jQuery a téma jsou jen `devDependencies` kvůli ukázce a testům.
+- **Zatím neověřeno:** Kendo 2021.3 (verze Tracedo), widgety se zdrojem dat ze serveru v `KendoControl` (ComboBox s `serverFiltering`), Kendo v dialogu frameworku s nativním `<dialog>` místo `KendoDialogs` (popupy Kenda se vkládají do `body`, pod horní vrstvu modálního `<dialog>`).
 
 ## Presenter a Component (rozhodnuto)
 

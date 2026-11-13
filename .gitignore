@@ -5,6 +5,9 @@ node_modules/
 dist/
 coverage/
 
+# Local environment, e.g. the license key of Kendo UI (VITE_KENDO_LICENSE)
+*.local
+
 # Claude Code local settings
 .claude/settings.local.json
 

@@ -30,6 +30,11 @@ export const EXAMPLES: Example[] = [
     description: 'Řazení, hledání, filtry a stránky v URL, akce, souhrny, šířky a pořadí sloupců.',
   },
   {
+    path: '/kendo',
+    title: 'Kendo UI',
+    description: 'Adaptér pro Kendo UI: Kendo Grid s daty ze state, widgety svázané se state, prvky Kenda ve formuláři a dialogy v Kendo Window.',
+  },
+  {
     path: '/helpdesk',
     title: 'Helpdesk',
     description: 'Celá aplikace proti mock JSON-RPC serveru: přihlášení, vnořené presentery, data přes resource(), dropdowny, nahrávání souborů.',

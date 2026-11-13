@@ -134,7 +134,7 @@ Z toho plyne:
 1. ~~Chyby asynchronních obsluh událostí~~ **hotovo 13. 11.:** chyby obsluh jdou do `app.onError`.
 2. ~~Sdílená data mezi obrazovkami~~ **hotovo 13. 11.:** štítky zdrojů, `app.invalidate()`, `app.resource()`; čeká na review, viz design.md.
 3. ~~Titulek stránky a fokus po navigaci~~ **hotovo 13. 11.:** `Presenter.pageTitle()`, `app.formatTitle`, ohlášení navigace čtečkám, fokus na `<h1>`, když zmizel.
-4. **Kanban** jako ověření bodů 2 a 3 (viz TODO helpdesku), pak **adaptér pro Kendo** (bod 4 plánu níže): největší neověřené riziko vlastního rendereru, Kendo mění DOM samo.
+4. **Kanban** jako ověření bodů 2 a 3 (viz TODO helpdesku). Adaptér pro Kendo je hotový (bod 4 plánu níže), zbývá ho vyhodnotit na reálné obrazovce CMS.
 5. **Testování aplikací:** pomocníci jako `boot()` jsou jen v `tests/`. Zobecnit mock server helpdesku na `phlox-js/net/mock` (z tabulky metod falešný RPC pro vývoj ve Vite i pro testy) a nabídnout pomocníky pro testy presenterů s falešnými službami.
 6. **Typované parametry rout:** zápis `'/<task:int>'` dá číslo, umožní kontrolu `link()` proti routě a odstraní chyby s `'\\d+'` v řetězci.
 7. **Velké seznamy:** zátěžový test s 10 000 řádky (bod 5 plánu), případně virtuální posouvání.
@@ -145,7 +145,7 @@ Z toho plyne:
    - `form.autosave` místo ručního `effect` (rychlé akce helpdesku),
    - pomocník pro odložené hledání (debounce) u `resource`,
    - helpdesk vyzkoušet proti skutečnému `phlox-rpc-api` s přihlášením a typy vygenerovanými z OpenRPC.
-4. **Adaptér pro Kendo:** obalit Kendo Grid, jeden formulářový prvek a okno, včetně vazby na `state` a úklidu. Bez toho framework pro CMS nestačí.
+4. **Adaptér pro Kendo:** obalit Kendo Grid, jeden formulářový prvek a okno, včetně vazby na `state` a úklidu. Bez toho framework pro CMS nestačí. **Hotovo 13. 11., čeká na review:** `phlox-js/adapters/kendo` (`KendoWidget`, `KendoGrid`, `KendoDialogs`, `KendoControl`), ukázka `examples/kendo` se skutečným Kendo UI 2026.4; co zbývá ověřit, je v design.md.
 5. **Rozhodnutí před převodem CMS:**
    - Zátěžový test s velkým seznamem, třeba 10 000 řádků.
    - Vyhodnotit, jestli se Kendo adaptér osvědčil na reálné obrazovce.
