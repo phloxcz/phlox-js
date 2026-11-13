@@ -1,4 +1,4 @@
-import { Dropdown, Else, For, If, Presenter, ResizeHandle, RouteFrame, computed } from 'phlox-js';
+import { Dropdown, Else, For, If, Presenter, ResizeHandle, RouteFrame, computed, route } from 'phlox-js';
 import type { Resource, Route } from 'phlox-js';
 import { HelpdeskApi } from '../api';
 import type { Priority, Status, TaskPage, TaskResource } from '../api';
@@ -26,9 +26,11 @@ const PRIORITIES: Priority[] = ['high', 'medium', 'low'];
  */
 export class TasksPresenter extends Presenter<Props> {
   override persistent = ['status', 'sort', 'priority'];
+  readonly detail = route('detail', '/<task:int>', { presenter: TaskDetailPresenter, props: ({ task }) => ({ taskId: task }) });
+
   override routes: Route[] = [
     { name: 'default', pattern: '/' },
-    { name: 'detail', pattern: '/<task \\d+>', presenter: TaskDetailPresenter, props: ({ task }) => ({ taskId: Number(task) }) },
+    this.detail,
   ];
 
   readonly status = computed(() => (this.params().status ?? null) as Status | null);
@@ -129,7 +131,7 @@ export class TasksPresenter extends Presenter<Props> {
                   <li class={() => `hd-task ${current() === task().id ? 'hd-selected' : ''} ${task().status === 'closed' ? 'hd-done' : ''}`}>
                     <input type="checkbox" checked={() => task().status === 'closed'} aria-label={() => `Hotovo: ${task().title}`}
                       onChange={event => void this.handleDone(task(), event.currentTarget.checked)} />
-                    <a href={() => this.link('detail', { task: task().id })} class="hd-task-title"
+                    <a href={() => this.link(this.detail, { task: task().id })} class="hd-task-title"
                       aria-current={() => (current() === task().id ? 'page' : null)}>{() => task().title}</a>
                     <span class="hd-task-meta">
                       {() => <PriorityBadge priority={task().priority} />}

@@ -684,6 +684,13 @@ Ukázka `examples/helpdesk` je celá aplikace podle návrhu autora (`d:\Projekty
 - **`Presenter.pageTitle()` a `app.formatTitle`.** Rozhoduje nejhlubší presenter s titulkem, jako blok `title` v nejvnitřnější šabloně Nette. Je to efekt nad `child()` presenterů, takže sleduje i data načtená později. Routované dialogy titulek nemění; kdyby bylo potřeba, mohly by brát `title()` okna.
 - **Po navigaci ohlášení, ne vždy fokus.** Pravidlo „vždy fokus na `<h1>`“ by v seznamu s detailem po každém kliknutí odneslo fokus ze seznamu. Proto se titulek ohlásí přes `aria-live` (jako route announcer v Next.js) a fokus se přesune jen tehdy, když prvek s ním zmizel se starou stránkou. Ohlašuje se jen změna routy, ne query.
 
+**Body 5 a 6 z TODO (implementováno, čeká na review):**
+- **Typované routy přes `route()`, ne přes typ pole `routes`.** `routes: Route[]` typy literálů ztrácí, a kdyby byl presenter generický podle svých rout, každá třída by musela psát své routy dvakrát. Routa jako pole třídy (`readonly detail = route(…)`) nese typ parametrů z šablonového literálu vzoru a `link(this.detail, …)` ho kontroluje. Odkaz podle názvu (`link('detail')`) zůstává, jen bez kontroly.
+- **`this.params()` a akce zůstaly texty.** Změna `Params` na `string | number` by rozbila kód, který s parametry zachází jako s textem (query, `split`). Převod podle typu dostávají `props` a `dialog`, kde se parametry stejně převáděly ručně (`Number(id)`).
+- **Ztracené lomítko je chyba:** výraz `d+`, `w+`, `s+` ve vzoru je skoro jistě `'\\d+'` s jedním lomítkem. Chyba s radou je lepší než routa, která tiše nesedí (stalo se dvakrát v helpdesku).
+- **`phlox-js/testing` nezávisí na Vitestu:** `bootApp`/`cleanup` místo `afterEach` uvnitř, aby šly použít s jiným nástrojem. Testy frameworku je používají taky (`tests/helpers.ts`).
+- **`createRpcMock` v `phlox-js/net`:** tabulka metod je typovaná podle `RpcMethods` (vygenerovaných z OpenRPC), takže mock hlídá kompilátor stejně jako volání. `handle()` je čistá funkce nad textem, proto slouží testům (`fetch`) i pluginu Vite; helpdesk tak má jeden mock pro obojí.
+
 **Zjištěno, zatím neřešeno:**
 - **České texty frameworku** si každá ukázka nastavuje sama (`messageTexts`, `DropDownList.texts`, `Grid.texts`, `Form.messages`…). Hodil by se jeden balíček překladů pro jazyk.
 - **Regulární výraz ve vzoru routy** se v řetězci píše se zdvojeným lomítkem (`'/<id \\d+>'`). S jedním (`'/<id \d+>'`) je to v JS `d+` a routa tiše nesedí. Stalo se mi to dvakrát. Pomohlo by varování v dev režimu, když vzor obsahuje `<x d+>`, nebo zkratky typu `<id:int>`.

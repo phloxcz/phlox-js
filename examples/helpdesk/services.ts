@@ -5,19 +5,29 @@ import { HelpdeskApi } from './api';
 import { ApiAuthenticator } from './model/ApiAuthenticator';
 import { Store } from './model/Store';
 
-export const services = new Container();
+export interface ServiceOptions {
+  /** Another fetch for the API, e.g. a mock server in tests (createRpcMock). */
+  fetch?: typeof fetch;
+}
 
-services.add(new HelpdeskApi('/helpdesk/rpc', {
-  headers: () => {
-    const token = services.get(User).token;
-    return token ? { Authorization: `Bearer ${token}` } : {};
-  },
-}));
-// Toasts at the bottom, the header has the notifications and the user at the top right
-const flashes = new FlashMessages();
-flashes.position = 'bottom-right';
+/** The services of the application; tests make them with the mock server instead of the network. */
+export function createServices(options: ServiceOptions = {}): Container {
+  const services = new Container();
 
-// The identity under its own key, other examples on the same site have their own users
-services.add(flashes, new BrowserUserStorage('helpdesk.identity'), ApiAuthenticator, Store);
-// Built on Bootstrap: controls, dialogs and toasts of the framework get its classes
-services.add(new BootstrapTheme());
+  services.add(new HelpdeskApi('/helpdesk/rpc', {
+    headers: () => {
+      const token = services.get(User).token;
+      return token ? { Authorization: `Bearer ${token}` } : {};
+    },
+    ...(options.fetch ? { fetch: options.fetch } : {}),
+  }));
+  // Toasts at the bottom, the header has the notifications and the user at the top right
+  const flashes = new FlashMessages();
+  flashes.position = 'bottom-right';
+
+  // The identity under its own key, other examples on the same site have their own users
+  services.add(flashes, new BrowserUserStorage('helpdesk.identity'), ApiAuthenticator, Store);
+  // Built on Bootstrap: controls, dialogs and toasts of the framework get its classes
+  services.add(new BootstrapTheme());
+  return services;
+}

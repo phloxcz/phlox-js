@@ -7,7 +7,7 @@ import { batch, state, untrack } from '../reactive/reactive';
 import { createComponent, showDialog, startComponent } from '../ui/component';
 import type { Component } from '../ui/component';
 import { Presenter } from '../ui/presenter';
-import type { LinkParams, Params, Route, RoutedDialog } from '../ui/presenter';
+import type { LinkParams, Params, Route, RouteParams, RoutedDialog } from '../ui/presenter';
 import type { Class } from '../di/container';
 import type { Application } from './application';
 
@@ -34,12 +34,30 @@ const DEFAULT_ROUTES: Route[] = [{ name: 'default', pattern: '/' }];
 const patterns = new Map<string, RegExp>();
 const loaded = new WeakMap<Route, Class<AnyPresenter>>();
 
-/** `/users/<id \d+>` becomes a regular expression with named groups. It must end at a slash or at the end. */
+/** Types of parameters, `<id:int>`: the regular expression and how the text becomes the value. */
+const TYPES: Record<string, { expression: string; convert: (text: string) => string | number }> = {
+  int: { expression: '\\d+', convert: Number },
+};
+
+/** A pattern part `<name>`, `<name:type>` or `<name expression>`. */
+const PARAM = /<(\w+)(?::(\w+))?(?:\s+([^>]+))?>/g;
+
+/**
+ * `/users/<id:int>` or `/users/<id \d+>` becomes a regular expression with named groups.
+ * It must end at a slash or at the end.
+ */
 function toRegExp(pattern: string): RegExp {
   let regExp = patterns.get(pattern);
   if (!regExp) {
-    const source = pattern.replace(/<(\w+)(?:\s+([^>]+))?>|[.*+?^${}()|[\]\\]/g, (text, name?: string, expression?: string) =>
-      name ? `(?<${name}>${expression ?? '[^/]+'})` : `\\${text}`);
+    const source = pattern.replace(new RegExp(`${PARAM.source}|[.*+?^\${}()|[\\]\\\\]`, 'g'), (text, name?: string, type?: string, expression?: string) => {
+      if (!name) return `\\${text}`;
+      if (type && !TYPES[type]) throw new Error(`Unknown type '${type}' of parameter '${name}' in the route '${pattern}', known: ${Object.keys(TYPES).join(', ')}.`);
+      // '/<id \d+>' in a JS string with one backslash is 'd+': the route would silently never match
+      if (expression && /^[dws][+*]$/.test(expression)) {
+        throw new Error(`The route '${pattern}' has '${expression}' in parameter '${name}': write '\\\\${expression}' in the string, or <${name}:int>.`);
+      }
+      return `(?<${name}>${type ? TYPES[type]!.expression : expression ?? '[^/]+'})`;
+    });
     // `/` is the route for "nothing more", an empty pattern takes nothing and passes everything on
     regExp = new RegExp(pattern === '/' ? '^/?$' : `^${source}(?=/|$)`);
     patterns.set(pattern, regExp);
@@ -53,6 +71,15 @@ function decode(value: string): string {
   } catch {
     return value; // a broken link must not stop the application
   }
+}
+
+/** The parameters converted by their types, for props and dialog of a route. */
+function typed(pattern: string, params: Params): RouteParams {
+  const values: RouteParams = { ...params };
+  for (const [, name, type] of pattern.matchAll(PARAM)) {
+    if (type && name! in params) values[name!] = TYPES[type]!.convert(params[name!]!);
+  }
+  return values;
 }
 
 /** Finds the first route that matches the beginning of the path, or all of it when nothing handles the rest. */
@@ -140,21 +167,24 @@ export class Router {
   }
 
   /** Creates a URL, see Presenter.link(). */
-  link(presenter: AnyPresenter, destination: string, params: LinkParams = {}): string {
+  link(presenter: AnyPresenter, destination: string | Route, params: LinkParams = {}): string {
     if (destination === 'this') {
       const current = splitUrl(this.running ? this.running.url : this.url());
       return joinUrl(current.path, { ...current.query, ...params });
     }
-    if (destination.startsWith('/')) return joinUrl(this.base + destination, params);
+    if (typeof destination === 'string' && destination.startsWith('/')) return joinUrl(this.base + destination, params);
 
-    const route = presenter.routes.find(candidate => candidate.name === destination);
-    if (!route) throw new Error(`${presenter.constructor.name} has no route '${destination}'.`);
+    const route = typeof destination === 'string' ? presenter.routes.find(candidate => candidate.name === destination) : destination;
+    if (!route) throw new Error(`${presenter.constructor.name} has no route '${destination as string}'.`);
     const query = { ...this.persistentOf(presenter), ...params };
-    const path = route.pattern.replace(/<(\w+)[^>]*>/g, (_text, name: string) => {
+    const path = route.pattern.replace(PARAM, (_text, name: string, type?: string) => {
       const value = params[name];
       // 0 and false are valid values
       if (value === undefined || value === null || value === '') {
-        throw new Error(`Missing parameter '${name}' for route '${destination}' of ${presenter.constructor.name}.`);
+        throw new Error(`Missing parameter '${name}' for route '${route.name}' of ${presenter.constructor.name}.`);
+      }
+      if (type && !new RegExp(`^${TYPES[type]!.expression}$`).test(String(value))) {
+        throw new Error(`Parameter '${name}' of route '${route.name}' must be ${type}, got '${String(value)}'.`);
       }
       delete query[name];
       return encodeURIComponent(String(value));
@@ -333,7 +363,7 @@ export class Router {
             next = old;
           } else {
             if (old) leaving.push(old);
-            const child = createComponent(cls, route.props?.(params) ?? {}, current, this.app, current.scope);
+            const child = createComponent(cls, route.props?.(typed(route.pattern, params)) ?? {}, current, this.app, current.scope);
             created.push(child);
             this.pending.add(child);
             commits.push(() => this.replaceChild(current, child));
@@ -403,7 +433,7 @@ export class Router {
     }
     if (!route.dialog) return null;
 
-    const [cls, props, options] = route.dialog(params);
+    const [cls, props, options] = route.dialog(typed(route.pattern, params));
     const component = createComponent(cls, props, presenter, this.app, presenter.scope);
     created.push(component);
     // A presenter in a dialog is started when the router comes to it, as any other presenter

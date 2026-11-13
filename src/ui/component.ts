@@ -10,7 +10,7 @@ import type { State } from '../reactive/reactive';
 import type { Resource, ResourceOptions } from './resource';
 import type { Class } from '../di/container';
 import type { Application } from '../application/application';
-import type { LinkParams, Presenter } from './presenter';
+import type { LinkArgs, LinkParams, Presenter, Route, TypedRoute } from './presenter';
 
 /** Keys under which a scope provides the application and the component that owns it. */
 export const APP = Symbol('application');
@@ -93,9 +93,12 @@ export abstract class Component<P extends object = {}, R = void> {
    * Creates a URL, in a component by the routes of its presenter:
    * - `link('detail', { id: 5 })` leads to a route of the presenter, extra parameters go to the query,
    * - `link('this', { page: 2 })` is the current URL with changed query parameters, null removes one,
-   * - `link('/users')` is an absolute path.
+   * - `link('/users')` is an absolute path,
+   * - `link(this.detail, { id: 5 })` leads to a route made by route(), its parameters are checked by the compiler.
    */
-  link(destination: string, params?: LinkParams): string {
+  link<P extends object>(destination: TypedRoute<P>, ...params: LinkArgs<P>): string;
+  link(destination: string, params?: LinkParams): string;
+  link(destination: string | Route, params?: LinkParams): string {
     return this.app.router.link(this.presenter, destination, params);
   }
 

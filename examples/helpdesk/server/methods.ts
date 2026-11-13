@@ -1,17 +1,17 @@
 // Methods of the mock server, as controllers of phlox-rpc-api would have them. `me` is the logged-in user.
 import { Buffer } from 'node:buffer';
 import type { AttachmentResource, CommentResource, Priority, ProjectResource, RpcMethods, Status, TaskDetail, TaskResource } from '../api.ts';
+import { RpcMockError } from '../../../src/net/mock.ts';
 import { seed } from './data.ts';
 import type { Database } from './data.ts';
 
-/** An error the server sends back, like ApiException or an invalid parameter in phlox-api-core. */
-export class ApiError extends Error {
-  constructor(readonly code: number, message: string, readonly fields?: Record<string, string>) {
-    super(message);
-  }
-}
+export let db: Database = seed();
 
-export const db: Database = seed();
+/** Back to the data of the start, e.g. before every test. */
+export function resetDatabase(): void {
+  db = seed();
+  tokens.clear();
+}
 
 const STATUS_NAMES: Record<Status, string> = { open: 'Otevřený', progress: 'V řešení', closed: 'Uzavřený' };
 const PRIORITY_ORDER: Record<Priority, number> = { high: 0, medium: 1, low: 2 };
@@ -19,12 +19,12 @@ const now = () => new Date().toISOString();
 const fold = (text: string) => text.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase();
 
 function invalid(fields: Record<string, string>): never {
-  throw new ApiError(-32602, 'Invalid params', fields);
+  throw new RpcMockError(-32602, 'Invalid params', fields);
 }
 
 function find<T extends { id: number }>(list: T[], id: number, what: string): T {
   const item = list.find(other => other.id === id);
-  if (!item) throw new ApiError(404, `${what} ${id} neexistuje.`);
+  if (!item) throw new RpcMockError(404, `${what} ${id} neexistuje.`);
   return item;
 }
 
@@ -68,7 +68,7 @@ type Handlers = { [K in keyof RpcMethods]: (params: RpcMethods[K]['params'], me:
 export const methods: Handlers = {
   'sign.in': ({ email, password }) => {
     const found = db.users.find(other => other.email === email.trim().toLowerCase());
-    if (!found || found.password !== password) throw new ApiError(401, 'Nesprávný e-mail nebo heslo.');
+    if (!found || found.password !== password) throw new RpcMockError(401, 'Nesprávný e-mail nebo heslo.');
     const token = `hd-${found.id}-${Math.random().toString(36).slice(2)}`;
     tokens.set(token, found.id);
     return { token, user: user(found.id) };

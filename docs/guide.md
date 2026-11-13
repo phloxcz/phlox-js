@@ -2,7 +2,7 @@
 
 Jak se s frameworkem pracuje. Popisuje jen to, co je už napsané a otestované. Proč je co navržené tak, jak je, najdeš v [design.md](design.md).
 
-**Kde co je:** jádro (reaktivita, šablony, komponenty, presentery, aplikace, DI) se importuje z `phlox-js`. Volitelné části mají vlastní vstup: síť (RPC) `phlox-js/net`, přihlášení a oprávnění `phlox-js/security`, formuláře `phlox-js/forms`, překlady `phlox-js/localization` a Vite plugin `phlox-js/vite`. Napojení cizích knihoven (adaptéry) jsou pod `phlox-js/adapters/…`.
+**Kde co je:** jádro (reaktivita, šablony, komponenty, presentery, aplikace, DI) se importuje z `phlox-js`. Volitelné části mají vlastní vstup: síť (RPC) `phlox-js/net`, přihlášení a oprávnění `phlox-js/security`, formuláře `phlox-js/forms`, překlady `phlox-js/localization`, pomocníci pro testy `phlox-js/testing` a Vite plugin `phlox-js/vite`. Napojení cizích knihoven (adaptéry) jsou pod `phlox-js/adapters/…`.
 
 Všechno níže je vidět pohromadě v ukázce [examples/shopping-list](../examples/shopping-list/main.ts). Celou aplikaci proti serveru (přihlášení, RPC, vnořené presentery, `resource`, `Dropdown`) ukazuje [examples/helpdesk](../examples/helpdesk/main.ts).
 
@@ -264,7 +264,7 @@ URL `/users/15/orders` se rozdělí takto: `AppPresenter` vezme `/users`, `Users
 ### Routy
 
 - **`name`** určuje akci: routa `detail` volá `actionDetail(params)`. Akce je nepovinná.
-- **`pattern`** je díl URL. Parametr se píše `<id>` nebo s regulárním výrazem `<id \d+>`. V řetězci se lomítko zdvojuje (`'/<id \\d+>'`), s jedním je to `d+` a routa nesedí. Routy se zkoušejí v pořadí, první vyhovující vyhrává.
+- **`pattern`** je díl URL. Parametr se píše `<id>` (jeden díl cesty), `<id:int>` (celé číslo) nebo s regulárním výrazem `<id \d+>`. Ve výrazu se v řetězci lomítko zdvojuje (`'/<id \\d+>'`); vzor s jedním (`<id d+>`) skončí chybou s radou, ne routou, která tiše nesedí. Routy se zkoušejí v pořadí, první vyhovující vyhrává.
 - **`presenter`** je presenter pro `<RouteFrame />`, buď třída, nebo funkce s `import()` (viz Líné načítání presenterů).
 - **`props`** udělá z parametrů routy props jejího presenteru: `{ pattern: '/<id \\d+>', presenter: TasksPresenter, props: ({ id }) => ({ projectId: Number(id) }) }`. Presenter se při změně parametrů vytvoří znovu, takže props se za jeho života nemění. Jeden presenter tak může sloužit víc routám: `{ pattern: '/my', presenter: TasksPresenter, props: () => ({ mine: true }) }`.
 - **Routa s `presenter` bere začátek URL,** routa bez něj musí sedět na celý zbytek.
@@ -283,6 +283,28 @@ URL `/users/15/orders` se rozdělí takto: `AppPresenter` vezme `/users`, `Users
 - **Funkce s `import()`** z presenteru udělá samostatný soubor (Vite ho oddělí sám). Prohlížeč ho stáhne, až uživatel na routu poprvé přijde. Router na něj počká jako na jinou přípravu obrazovky a stará obrazovka mezitím zůstává.
 - **Kdy co:** co je na první obrazovce nebo skoro všude, importuj přímo, jinak by start čekal na další požadavek. Co je stranou (nastavení, reporty, administrace), načítej líně. V aplikaci se stovkou obrazovek to rozhoduje o velikosti prvního načtení.
 - **Líně načítaný soubor** musí presenter exportovat jako `default`: `export default class ReportsPresenter extends Presenter`. Typy hlídá kompilátor stejně.
+
+### Typované routy: `route()`
+
+```ts
+import { route } from 'phlox-js';
+
+class TasksPresenter extends Presenter {
+  readonly detail = route('detail', '/<task:int>', { presenter: TaskDetailPresenter, props: ({ task }) => ({ taskId: task }) });
+
+  override routes: Route[] = [{ name: 'default', pattern: '/' }, this.detail];
+
+  render() {
+    return <a href={this.link(this.detail, { task: 5 })}>Úkol 5</a>;   // task chybí nebo je text: chyba kompilace
+  }
+}
+```
+
+- **Typy parametrů** se čtou ze vzoru: `<task:int>` je v `props` a `dialog` číslo, `<slug>` text. `Number(…)` odpadá.
+- **`link(this.detail, { task })`** a `redirect(this.detail, { task })` kompilátor hlídá: chybějící parametr i špatný typ je chyba. Další parametry jdou do query jako u `link('detail', …)`.
+- **I za běhu:** `link()` s textem místo čísla u `:int` vyhodí chybu hned, ne až nefunkční odkaz.
+- **`this.params()` a akce** dostávají parametry dál jako texty z URL, spolu s query. Převedené jsou jen v `props` a `dialog` routy.
+- **Obyčejné routy** (`{ name, pattern }`) fungují dál, `<id:int>` v nich převede hodnotu pro `props` a `dialog` stejně, jen bez typové kontroly odkazů.
 
 ### Akce a parametry
 
@@ -929,6 +951,10 @@ for await (const chunk of fileChunks(file)) {
 ```
 
 Base64 je o třetinu větší než soubor. Na velké soubory je lepší REST API: `fetch(url, { method: 'PUT', body: file })` pošle soubor proudem.
+
+### Mock server
+
+`createRpcMock` z `phlox-js/net` je falešný server z tabulky metod, pro testy i pro vývoj bez backendu, viz Testování aplikací.
 
 ### Chyby
 
@@ -1734,6 +1760,35 @@ S `remember: 'klíč'` si je grid pamatuje v prohlížeči (`localStorage`), pat
 - **Panely filtrů a menu** jsou umístěné `fixed`, takže je posuvná tabulka neořízne. Zavře je Escape (ne dialog kolem), klik mimo nebo odchod fokusu.
 - **Během načítání** tabulka zesvětlí a má `aria-busy`, počet záznamů je v `role="status"`.
 - **Texty** jsou anglicky, přelož je jednou při startu: `Grid.texts = { ...Grid.texts, search: 'Hledat…', … }`. **Vzhled** dodává téma, místa `grid.table`, `grid.th`, `grid.td`, `grid.pageLink`… (výchozí téma a Bootstrap podle PHP knihovny).
+
+## Testování aplikací
+
+Pomocníci pro testy aplikací jsou v `phlox-js/testing`, mock serveru RPC v `phlox-js/net`. Fungují s každým nástrojem, který má DOM, typicky Vitest s jsdom.
+
+```ts
+import { afterEach, expect, test } from 'vitest';
+import { bootApp, cleanup, until } from 'phlox-js/testing';
+import { createRpcMock } from 'phlox-js/net';
+
+afterEach(cleanup);
+
+test('detail úkolu', async () => {
+  const server = createRpcMock<RpcMethods>({
+    'task.read': ({ id }) => ({ id, name: 'Opravit export' }),
+  });
+  const { element, errors, go } = await bootApp(AppPresenter, { url: '/tasks', services: createServices({ fetch: server.fetch }) });
+  await go('/tasks/5');
+  await until(() => element.querySelector('h1')?.textContent === 'Opravit export');
+  expect(server.calls).toEqual([{ method: 'task.read', params: { id: 5 } }]);
+  expect(errors).toEqual([]);
+});
+```
+
+- **`bootApp(root, { url, services, basePath })`** spustí aplikaci se skutečnými presentery. Vrátí `app`, `element`, `go(url)` a `errors`, kam místo konzole jdou chyby aplikace. **`cleanup()`** všechny zastaví a vyprázdní stránku, patří do `afterEach`.
+- **`until(podmínka)`** počká, až se třeba ukážou data. **`tick()`** nechá proběhnout časovače a události, **`type(pole, text)`** a **`press(prvek, 'Enter')`** píšou a mačkají jako uživatel.
+- **Služby jako funkce:** `createServices(options)` místo hotového kontejneru, aby test dostal stejné služby jako aplikace, jen s jiným `fetch` (nebo s falešnou službou místo skutečné). Viz `examples/helpdesk/services.ts`.
+- **`createRpcMock<RpcMethods>(metody, { context, latency })`** odpovídá jako `phlox-rpc-api`: dávky, chyby, notifikace. Chybu pošle `throw new RpcMockError(kód, zpráva, fields)`, `-32602` s `fields` ukáže formulář u polí. `context` z hlaviček udělá třeba přihlášeného uživatele. `fetch` je pro `RpcClient`, `handle(body, headers)` pro server, třeba plugin Vite.
+- **Jedna tabulka metod pro vývoj i testy:** helpdesk má mock server ve Vite i v testu (`tests/helpdesk.test.tsx`) z jedné `helpdeskMock()`.
 
 ## Reaktivní hodnoty
 

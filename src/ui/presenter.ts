@@ -9,6 +9,8 @@ import type { DialogOptions } from './dialog';
 
 export type Params = Record<string, string>;
 export type LinkParams = Record<string, string | number | boolean | null | undefined>;
+/** Parameters of a route converted by their types: `<id:int>` is a number, the others texts. */
+export type RouteParams = Record<string, string | number>;
 
 type AnyPresenter = Presenter<any, any>;
 type PresenterClass = Class<AnyPresenter>;
@@ -24,15 +26,51 @@ export interface Route {
    * Props of the presenter of the route, made from the parameters: `({ id }) => ({ projectId: Number(id) })`.
    * The presenter is created again when the parameters change, so its props never change.
    */
-  props?: (params: Params) => object;
+  props?(params: RouteParams): object;
   /**
    * Component shown in a dialog while the route is active: returns its class, props and how it is shown,
    * e.g. `[ItemEdit, { id }, { placement: 'end' }]` for a panel sliding in from the right.
    */
-  dialog?: (params: Params) => [Class<Component<any, any>>, object] | [Class<Component<any, any>>, object, DialogOptions];
+  dialog?(params: RouteParams): [Class<Component<any, any>>, object] | [Class<Component<any, any>>, object, DialogOptions];
   /** Called when the dialog of the route is closed. The result is undefined when navigation closed it. */
   closed?: (result: any) => void;
 }
+
+/** One parameter of a pattern: `id:int` is a number, `id` or `id \d+` a text. */
+type ParamOf<Inside extends string> =
+  Inside extends `${infer Name}:int` ? { [K in Name]: number }
+    : Inside extends `${infer Name} ${string}` ? { [K in Name]: string }
+      : { [K in Inside]: string };
+
+/** The parameters of a pattern with their types: RouteParamsOf<'/<project:int>/<slug>'> is { project: number; slug: string }. */
+export type RouteParamsOf<Pattern extends string> =
+  Pattern extends `${string}<${infer Inside}>${infer Rest}` ? ParamOf<Inside> & RouteParamsOf<Rest> : {};
+
+/** A route made by route(): it knows the types of its parameters, so link() checks them. */
+export interface TypedRoute<P extends object> extends Route {
+  /** Only for the compiler, it is never set. */
+  readonly params?: P;
+}
+
+export interface RouteOptions<P extends object> {
+  presenter?: Route['presenter'];
+  props?: (params: P) => object;
+  dialog?: (params: P) => [Class<Component<any, any>>, object] | [Class<Component<any, any>>, object, DialogOptions];
+  closed?: (result: any) => void;
+}
+
+/**
+ * A route with typed parameters: `route('detail', '/<task:int>', { presenter: TaskDetail, props: ({ task }) => ({ taskId: task }) })`.
+ * `task` is a number in props and dialog, and link(this.detail, { task: 5 }) is checked by the compiler.
+ */
+export function route<const Pattern extends string>(
+  name: string, pattern: Pattern, options: RouteOptions<RouteParamsOf<Pattern>> = {},
+): TypedRoute<RouteParamsOf<Pattern>> {
+  return { name, pattern, ...options } as TypedRoute<RouteParamsOf<Pattern>>;
+}
+
+/** The parameters of link() for a route: none may be left out, more go to the query. */
+export type LinkArgs<P extends object> = {} extends P ? [params?: LinkParams] : [params: P & LinkParams];
 
 /** The dialog a presenter shows for its current route. */
 export interface RoutedDialog {
@@ -82,8 +120,10 @@ export abstract class Presenter<P extends object = {}, R = void> extends Compone
    * and runs the action of this presenter again. Unlike in Nette it does not end the method,
    * write `return this.redirect(...)`.
    */
-  redirect(destination: string, params?: LinkParams): void {
-    void this.app.router.navigate(this.link(destination, params), { replace: true, refresh: this });
+  redirect<P extends object>(destination: TypedRoute<P>, ...params: LinkArgs<P>): void;
+  redirect(destination: string, params?: LinkParams): void;
+  redirect(destination: string | Route, params?: LinkParams): void {
+    void this.app.router.navigate(this.app.router.link(this, destination, params), { replace: true, refresh: this });
   }
 
   /** Ends the action with an error, like $this->error() in Nette. */

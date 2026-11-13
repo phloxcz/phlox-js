@@ -6,7 +6,7 @@ import { Application, messageTexts } from 'phlox-js';
 import { DropDownList, Form, UploadControl } from 'phlox-js/forms';
 import { RpcError, RpcErrorCode } from 'phlox-js/net';
 import { showExampleMenu } from '../shared/menu';
-import { services } from './services';
+import { createServices } from './services';
 import { AppPresenter } from './presenters/AppPresenter';
 
 Object.assign(messageTexts, {
@@ -17,7 +17,7 @@ DropDownList.texts.noResults = 'Nic nenalezeno';
 UploadControl.texts.heading = 'Přetáhněte soubory sem';
 Form.messages.set(Form.Filled, 'Vyplňte pole %label.');
 
-const app = new Application(services);
+const app = new Application(createServices());
 // All examples run as one site, this one under its own path, see examples/shared/menu.ts
 app.basePath = showExampleMenu();
 

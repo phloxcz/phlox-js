@@ -135,9 +135,14 @@ Z toho plyne:
 2. ~~Sdílená data mezi obrazovkami~~ **hotovo 13. 11.:** štítky zdrojů, `app.invalidate()`, `app.resource()`; čeká na review, viz design.md.
 3. ~~Titulek stránky a fokus po navigaci~~ **hotovo 13. 11.:** `Presenter.pageTitle()`, `app.formatTitle`, ohlášení navigace čtečkám, fokus na `<h1>`, když zmizel.
 4. **Kanban** jako ověření bodů 2 a 3 (viz TODO helpdesku). Adaptér pro Kendo je hotový (bod 4 plánu níže), zbývá ho vyhodnotit na reálné obrazovce CMS.
-5. **Testování aplikací:** pomocníci jako `boot()` jsou jen v `tests/`. Zobecnit mock server helpdesku na `phlox-js/net/mock` (z tabulky metod falešný RPC pro vývoj ve Vite i pro testy) a nabídnout pomocníky pro testy presenterů s falešnými službami.
-6. **Typované parametry rout:** zápis `'/<task:int>'` dá číslo, umožní kontrolu `link()` proti routě a odstraní chyby s `'\\d+'` v řetězci.
+5. ~~Testování aplikací~~ **hotovo 13. 11.:** `phlox-js/testing` (`bootApp`, `cleanup`, `until`, `type`, `press`), `createRpcMock` v `phlox-js/net`, test celé aplikace `tests/helpdesk.test.tsx`.
+6. ~~Typované parametry rout~~ **hotovo 13. 11.:** `<id:int>`, `route()`, `link(route, params)` kontrolovaný kompilátorem, chyba u ztraceného lomítka.
 7. **Velké seznamy:** zátěžový test s 10 000 řádky (bod 5 plánu), případně virtuální posouvání.
+7a. **PWA, jen část (domluveno s autorem 13. 11.):**
+   - **Upozornění na novou verzi ve frameworku:** po nasazení zůstane v otevřené záložce stará SPA a volá nové API. Služba, která novou verzi pozná (service worker nebo kontrola verze) a nabídne „Je dostupná nová verze, načíst?“.
+   - **Stav připojení jako `state`:** `online()`, aby aplikace ukázala „jste offline“ a chyby sítě nešly do toastů.
+   - **Instalovatelnost a cache aplikace** v helpdesku přes `vite-plugin-pwa` (Workbox), v konfiguraci aplikace, ne v jádru.
+   - **Nedělat:** offline práci s daty (fronty zápisů, konflikty). Push notifikace až s Web Push na straně Nette.
 8. **Drobnosti:**
    - jeden balíček českých textů frameworku místo nastavování v každé aplikaci (`messageTexts`, `DropDownList.texts`, `Grid.texts`, `Form.messages`…),
    - události předané do `<Input>` (`onBlur`, `onInput`) přepíše vlastní obsluha prvku, `ref` už je vyřešený,

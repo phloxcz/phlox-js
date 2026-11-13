@@ -5,17 +5,12 @@
  */
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import type { Plugin } from 'vite';
-import { ApiError, db, methods, tokens } from './methods.ts';
-
-interface Request {
-  jsonrpc?: string;
-  method?: string;
-  params?: object;
-  id?: number | string | null;
-}
+import { Buffer } from 'node:buffer';
+import { db } from './methods.ts';
+import { helpdeskMock } from './mock.ts';
 
 /** Like a real server on a network: answers take a while. */
-const LATENCY = 200;
+const mock = helpdeskMock(200);
 
 function read(request: IncomingMessage): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -26,42 +21,15 @@ function read(request: IncomingMessage): Promise<string> {
   });
 }
 
-function call(request: Request, me: number | undefined): object | null {
-  const id = request.id ?? null;
-  const fail = (code: number, message: string, fields?: Record<string, string>) =>
-    ({ jsonrpc: '2.0', id, error: { code, message, ...(fields ? { fields } : {}) } });
-  if (request.jsonrpc !== '2.0' || typeof request.method !== 'string') return fail(-32600, 'Invalid Request');
-  const handler = (methods as Record<string, (params: object, me: number) => unknown>)[request.method];
-  if (!handler) return fail(-32601, 'Method not found');
-  if (request.method !== 'sign.in' && me === undefined) return fail(401, 'Unauthorized');
-  try {
-    const result = handler(request.params ?? {}, me ?? 0);
-    return request.id === undefined ? null : { jsonrpc: '2.0', id, result };
-  } catch (error) {
-    if (error instanceof ApiError) return fail(error.code, error.message, error.fields);
-    console.error(error);
-    return fail(-32603, 'Internal error');
-  }
-}
-
 async function rpc(request: IncomingMessage, response: ServerResponse): Promise<void> {
-  const token = /^Bearer (.+)$/.exec(request.headers.authorization ?? '')?.[1];
-  const me = token ? tokens.get(token) : undefined;
-  let body: Request | Request[];
-  try {
-    body = JSON.parse(await read(request));
-  } catch {
-    body = [];
-  }
-  await new Promise(resolve => setTimeout(resolve, LATENCY));
-  const answers = (Array.isArray(body) ? body : [body]).map(item => call(item, me)).filter(answer => answer !== null);
-  if (!answers.length) {
+  const answer = await mock.handle(await read(request), request.headers as Record<string, string>);
+  if (answer === null) {
     response.statusCode = 204;
     response.end();
     return;
   }
   response.setHeader('Content-Type', 'application/json');
-  response.end(JSON.stringify(Array.isArray(body) ? answers : answers[0]));
+  response.end(answer);
 }
 
 function file(id: number, response: ServerResponse): void {

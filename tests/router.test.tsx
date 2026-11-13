@@ -465,3 +465,47 @@ describe('the title of the page and announcing navigation', () => {
     expect(announcer.textContent).toBe('');
   });
 });
+
+describe('typed parameters of routes', () => {
+  test('<id:int> gives a number to props and dialog, link() takes the route and checks the type', async () => {
+    const { route } = await import('../src/index');
+    const seen: unknown[] = [];
+    class Task extends Presenter<{ taskId: number }> {
+      override startup() { seen.push(this.props.taskId); }
+      render() { return <b>{this.props.taskId}</b>; }
+    }
+    let page!: Tasks;
+    class Tasks extends Presenter {
+      readonly detail = route('detail', '/<task:int>', { presenter: Task, props: ({ task }) => ({ taskId: task }) });
+      readonly bySlug = route('slug', '/by/<slug>');
+      override routes: Route[] = [{ name: 'default', pattern: '/' }, this.detail, this.bySlug];
+      override startup() { page = this; }
+      render() { return <main><RouteFrame /></main>; }
+    }
+    const { go } = await boot(Tasks, '/12');
+    expect(seen).toEqual([12]);
+    expect(page.params()).toEqual({ task: '12' });
+    // Not a number: no route matches
+    const errors: unknown[] = [];
+    page.app.onError = error => errors.push(error);
+    await go('/abc');
+    expect(String(errors[0])).toContain("matches '/abc'");
+
+    expect(page.link(page.detail, { task: 7, tab: 'a' })).toBe('/7?tab=a');
+    expect(page.link(page.bySlug, { slug: 'nove' })).toBe('/by/nove');
+    expect(() => page.link(page.detail, { task: 'x' as unknown as number })).toThrow("Parameter 'task' of route 'detail' must be int, got 'x'");
+    // @ts-expect-error the parameter of the route is missing
+    expect(() => page.link(page.detail, {})).toThrow("Missing parameter 'task'");
+    // @ts-expect-error the parameter must be a number
+    void (() => page.link(page.detail, { task: 'x' }));
+  });
+
+  test('a lost backslash in a pattern is an error, not a route that never matches', async () => {
+    class Page extends Presenter {
+      override routes: Route[] = [{ name: 'default', pattern: '/' }, { name: 'detail', pattern: '/<id d+>' }];
+      render() { return <main />; }
+    }
+    const { errors } = await boot(Page, '/5');
+    expect(String(errors[0])).toContain("write '\\\\d+' in the string, or <id:int>");
+  });
+});

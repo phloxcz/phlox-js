@@ -4,3 +4,5 @@ export { generateRpcTypes } from './openrpc';
 export type { GenerateOptions, OpenRpcDocument } from './openrpc';
 export { fileChunks } from './files';
 export type { FileChunk } from './files';
+export { RpcMockError, createRpcMock } from './mock';
+export type { RpcHandlers, RpcMock, RpcMockOptions } from './mock';
