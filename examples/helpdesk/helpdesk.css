@@ -6,10 +6,10 @@
 
 :root {
   color-scheme: light;
-  --hd-teal: #0f766e;
-  --hd-teal-bright: #14b8a6;
-  --hd-teal-soft: #e3f4f2;
-  --hd-teal-line: #9fd8d2;
+  --hd-teal: #008595;
+  --hd-teal-bright: #1ba3b2;
+  --hd-teal-soft: #d8f4f9;
+  --hd-teal-line: #8fd6df;
   --hd-text: #0f172a;
   --hd-muted: #64748b;
   --hd-line: #e6edf0;
@@ -25,30 +25,30 @@
   --bs-body-font-family: Inter, "Segoe UI", system-ui, sans-serif;
   --bs-body-font-size: 14px;
   --bs-body-color: #0f172a;
-  --bs-primary: #0f766e;
-  --bs-primary-rgb: 15, 118, 110;
-  --bs-link-color: #0f766e;
-  --bs-link-color-rgb: 15, 118, 110;
-  --bs-link-hover-color: #0b5a54;
-  --bs-link-hover-color-rgb: 11, 90, 84;
+  --bs-primary: #008595;
+  --bs-primary-rgb: 0, 133, 149;
+  --bs-link-color: #008595;
+  --bs-link-color-rgb: 0, 133, 149;
+  --bs-link-hover-color: #006370;
+  --bs-link-hover-color-rgb: 0, 99, 112;
   --bs-border-color: #e6edf0;
   --bs-border-radius: 10px;
   --bs-border-radius-lg: 16px;
-  --bs-focus-ring-color: rgb(20 184 166 / .25);
+  --bs-focus-ring-color: rgb(27 163 178 / .25);
   --bs-box-shadow-lg: 0 1.5rem 4rem rgb(15 23 42 / .18);
 }
 
 .btn-primary {
-  --bs-btn-bg: #0f766e;
-  --bs-btn-border-color: #0f766e;
-  --bs-btn-hover-bg: #0d665f;
-  --bs-btn-hover-border-color: #0d665f;
-  --bs-btn-active-bg: #0b5a54;
-  --bs-btn-active-border-color: #0b5a54;
-  --bs-btn-disabled-bg: #0f766e;
-  --bs-btn-disabled-border-color: #0f766e;
-  --bs-btn-focus-shadow-rgb: 20, 184, 166;
-  box-shadow: 0 6px 16px rgb(15 118 110 / .25);
+  --bs-btn-bg: #008595;
+  --bs-btn-border-color: #008595;
+  --bs-btn-hover-bg: #00717f;
+  --bs-btn-hover-border-color: #00717f;
+  --bs-btn-active-bg: #006370;
+  --bs-btn-active-border-color: #006370;
+  --bs-btn-disabled-bg: #008595;
+  --bs-btn-disabled-border-color: #008595;
+  --bs-btn-focus-shadow-rgb: 27, 163, 178;
+  box-shadow: 0 6px 16px rgb(0 133 149 / .25);
 }
 
 .btn-outline-secondary {
@@ -66,13 +66,13 @@
 .form-select:focus,
 .dropdownlist-bs-trigger:focus,
 .dropdownlist-bs-trigger[aria-expanded="true"] {
-  border-color: #9fd8d2;
-  box-shadow: 0 0 0 .2rem rgb(20 184 166 / .18);
+  border-color: #8fd6df;
+  box-shadow: 0 0 0 .2rem rgb(27 163 178 / .18);
 }
 
 .form-check-input:checked {
-  background-color: #14b8a6;
-  border-color: #14b8a6;
+  background-color: #1ba3b2;
+  border-color: #1ba3b2;
 }
 
 /* Bootstrap sizes controls by rem (16px), the design is denser and takes the size of the page */
@@ -87,7 +87,7 @@
 .dropdown-item.active,
 .dropdown-item:active {
   color: #0f172a;
-  background-color: #e3f4f2;
+  background-color: #d8f4f9;
 }
 
 .hd-page-body {
@@ -100,7 +100,7 @@
   /* The waves of the design: at the bottom left under the menu, the header has its own */
   background:
     url("./assets/waves-bottom.svg") no-repeat left bottom / 100% 300px,
-    linear-gradient(180deg, #eef8f8, #f6fafb);
+    linear-gradient(180deg, #eef8fb, #f5fafd);
 }
 
 .hd-page-body .examples-menu {
@@ -294,7 +294,10 @@ h1, h2 {
   align-items: center;
   gap: 1.5rem;
   padding: 0 1.75rem 0 1.75rem;
-  background: url("./assets/waves-top.svg") no-repeat center top / 100% 100%;
+  /* As in the design: the whole header is tinted, lighter at the left, the waves over it */
+  background:
+    url("./assets/waves-top.svg") no-repeat center top / 100% 100%,
+    linear-gradient(90deg, rgb(238 248 251 / .6) 0%, rgb(220 243 248 / .8) 55%, #c4ecf2 100%);
 }
 
 .hd-brand {
@@ -459,7 +462,7 @@ h1, h2 {
 .hd-nav-item[aria-current] {
   font-weight: 600;
   color: var(--hd-teal);
-  background: #d9f1ee;
+  background: #d8f4f9;
   box-shadow: inset 3px 0 0 var(--hd-teal-bright);
 }
 
@@ -583,11 +586,11 @@ h1, h2 {
 }
 
 .hd-project:hover {
-  background: #f6fafb;
+  background: #f5fafd;
 }
 
 .hd-project[aria-current] {
-  background: #eaf7f5;
+  background: #e6f6f9;
   border-left-color: var(--hd-teal-bright);
 }
 
@@ -719,9 +722,9 @@ h1, h2 {
 }
 
 .hd-task.hd-selected {
-  background: #f3fbfa;
+  background: #f0fafc;
   border-color: var(--hd-teal-bright);
-  box-shadow: 0 4px 14px rgb(20 184 166 / .12);
+  box-shadow: 0 4px 14px rgb(27 163 178 / .12);
 }
 
 .hd-task input {
@@ -1095,7 +1098,7 @@ h1, h2 {
   border: 0;
   border-radius: 12px;
   cursor: pointer;
-  box-shadow: 0 6px 16px rgb(15 118 110 / .25);
+  box-shadow: 0 6px 16px rgb(0 133 149 / .25);
 }
 
 .hd-send:disabled {
@@ -1186,6 +1189,12 @@ h1, h2 {
   border: 1px solid var(--hd-line);
   border-radius: var(--hd-radius);
   box-shadow: 0 16px 40px rgb(15 23 42 / .14);
+}
+
+/* A line of text in a menu (Žádná upozornění) has the same padding as the items */
+.hd-menu > .hd-muted {
+  margin: 0;
+  padding: .35rem .6rem .6rem;
 }
 
 .hd-menu-head {

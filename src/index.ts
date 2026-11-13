@@ -8,7 +8,7 @@ export { Fragment, h, render } from './ui/dom';
 export type { Child, Reactive } from './ui/dom';
 export { Else, ElseIf, For, If } from './ui/flow';
 export { Component } from './ui/component';
-export type { Resource } from './ui/resource';
+export type { Resource, ResourceOptions } from './ui/resource';
 export { BadRequestError, Presenter, RouteFrame } from './ui/presenter';
 export type { LinkParams, Params, Route } from './ui/presenter';
 export { Dialogs, NativeDialogs } from './ui/dialog';

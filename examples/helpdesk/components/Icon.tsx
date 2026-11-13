@@ -61,13 +61,13 @@ export function Logo(): Child {
     <svg class="hd-logo-mark" viewBox="0 0 32 32" width="34" height="34" aria-hidden="true">
       <defs>
         <linearGradient id="hd-logo" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stop-color="#2dd4bf" />
-          <stop offset="1" stop-color="#0f766e" />
+          <stop offset="0" stop-color="#3dbcc8" />
+          <stop offset="1" stop-color="#008595" />
         </linearGradient>
       </defs>
       <path d="M16 2 28 9v14l-12 7-12-7V9Z" fill="url(#hd-logo)" />
       <path d="M16 9 22 12.5v7L16 23l-6-3.5v-7Z" fill="#fff" opacity=".9" />
-      <path d="M16 16 22 12.5M16 16v7M16 16l-6-3.5" stroke="#0f766e" stroke-width="1.5" />
+      <path d="M16 16 22 12.5M16 16v7M16 16l-6-3.5" stroke="#008595" stroke-width="1.5" />
     </svg>
   );
 }

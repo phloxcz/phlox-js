@@ -373,7 +373,10 @@ export class Router {
     if (navigation.history === 'push' && full !== shown) history.pushState({ phlox: index + 1 }, '', full);
     else if (navigation.history !== 'none') history.replaceState({ phlox: index }, '', full);
     this.index = history.state?.phlox ?? 0;
+    const first = this.url() === '';
     this.url.set(joinUrl(path, query));
+    // Another page, not only other query parameters (a tab, a filter): screen readers hear about it
+    if (!first && changed.some(({ presenter, matchKey }) => presenter.routing.matchKey !== matchKey)) this.app.navigated();
   }
 
   /** Remembers where the presenter is, to put it back when the user stays. */

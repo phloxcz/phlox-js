@@ -3,7 +3,7 @@
  * Later changes go directly to the nodes that depend on them.
  */
 
-import { Scope, effect, onCleanup, untrack } from '../reactive/reactive';
+import { Scope, effect, getScope, onCleanup, untrack } from '../reactive/reactive';
 import type { Child } from './jsx';
 
 export type { Child, Reactive } from './jsx';
@@ -12,6 +12,9 @@ type Component = ((props: any) => Child) | (abstract new (...args: any[]) => unk
 
 /** A class used as a tag has a static method under this key, it creates the view for the given props. */
 export const VIEW = Symbol('view');
+
+/** Key under which a scope provides where errors of event handlers go; the application gives app.onError. */
+export const ERRORS = Symbol('errors');
 
 /** Set as DOM properties, their attributes hold only the initial value. */
 const PROPERTIES = new Set(['value', 'checked', 'selected', 'muted', 'indeterminate']);
@@ -86,13 +89,31 @@ export function Fragment(props: { children?: Child }): Child {
 function setProp(element: HTMLElement, name: string, value: unknown): void {
   if (/^on[A-Z]/.test(name)) {
     const type = name.slice(2).toLowerCase();
-    element.addEventListener(type, value as EventListener);
-    onCleanup(() => element.removeEventListener(type, value as EventListener));
+    const listener = withErrors(value as (event: Event) => unknown);
+    element.addEventListener(type, listener);
+    onCleanup(() => element.removeEventListener(type, listener));
   } else if (typeof value === 'function') {
     effect(() => applyProp(element, name, value()));
   } else {
     applyProp(element, name, value);
   }
+}
+
+/**
+ * An error of a handler, thrown or of the promise it returns (`onClick={() => this.handleSave()}`),
+ * goes to the application instead of getting lost. Outside an application the handler stays as it is.
+ */
+function withErrors(handler: (event: Event) => unknown): EventListener {
+  const report = getScope()?.find<(error: unknown) => void>(ERRORS);
+  if (!report) return handler as EventListener;
+  return event => {
+    try {
+      const result = handler(event);
+      if (typeof (result as PromiseLike<unknown> | null)?.then === 'function') (result as Promise<unknown>).then(undefined, report);
+    } catch (error) {
+      report(error);
+    }
+  };
 }
 
 function applyProp(element: HTMLElement, name: string, value: unknown): void {

@@ -22,6 +22,10 @@ export class SignPresenter extends Presenter {
     this.form.onSuccess = values => this.handleSignIn(values);
   }
 
+  override pageTitle() {
+    return 'Přihlášení';
+  }
+
   override startup() {
     if (this.user.isLoggedIn()) this.redirect('/projects');
   }
@@ -35,6 +39,8 @@ export class SignPresenter extends Presenter {
       this.form.addError(error.message);
       return;
     }
+    // Another user may have been signed in before: their data must not stay
+    this.app.invalidate('users', 'projects', 'tasks');
     this.redirect('/projects');
   }
 

@@ -1,5 +1,5 @@
 import { describe, expect, test, vi } from 'vitest';
-import { Application, BadRequestError, Container, Presenter, RouteFrame, state } from '../src/index';
+import { Application, BadRequestError, Container, If, Presenter, RouteFrame, state } from '../src/index';
 import type { Params, Route } from '../src/index';
 import { boot, deferred, tick, until, goBack } from './helpers';
 
@@ -405,5 +405,63 @@ describe('presenters in the middle of the chain', () => {
     expect(seen.splice(0)).toEqual(['status closed']);
     await go('/3/8?status=closed');
     expect(seen.splice(0)).toEqual(['status closed', 'task 8 at /3/8']);
+  });
+});
+
+describe('the title of the page and announcing navigation', () => {
+  test('the deepest presenter with a title gives document.title, it follows state', async () => {
+    document.title = 'Aplikace';
+    const name = state('Mléko');
+    class Item extends Presenter {
+      override pageTitle() { return name(); }
+      render() { return <h1>{name}</h1>; }
+    }
+    class List extends Presenter {
+      override routes: Route[] = [{ name: 'default', pattern: '/' }, { name: 'item', pattern: '/<id>', presenter: Item }];
+      override pageTitle() { return 'Seznam'; }
+      render() { return <section><RouteFrame /></section>; }
+    }
+    class Root extends Presenter {
+      override routes: Route[] = [{ name: 'list', pattern: '/list', presenter: List }, { name: 'home', pattern: '/' }];
+      render() { return <main><RouteFrame /></main>; }
+    }
+    const { app, go } = await boot(Root, '/');
+    expect(document.title).toBe('Aplikace');
+    await go('/list');
+    expect(document.title).toBe('Seznam – Aplikace');
+    await go('/list/1');
+    expect(document.title).toBe('Mléko – Aplikace');
+    name.set('Máslo');
+    expect(document.title).toBe('Máslo – Aplikace');
+    app.formatTitle = page => `${page ?? 'Úvod'} | Obchod`;
+    await go('/');
+    expect(document.title).toBe('Úvod | Obchod');
+    app.stop();
+    expect(document.title).toBe('Aplikace');
+  });
+
+  test('another page is announced, other query parameters are not; a lost focus goes to the heading', async () => {
+    class Page extends Presenter {
+      override routes: Route[] = [{ name: 'a', pattern: '/a' }, { name: 'b', pattern: '/b' }];
+      override pageTitle() { return this.route() === 'a' ? 'Stránka A' : 'Stránka B'; }
+      render() {
+        return <main><If when={() => this.route() === 'a'}><a id="link" href="/b">B</a></If><h1>{() => this.pageTitle()}</h1></main>;
+      }
+    }
+    document.title = 'Web';
+    const { go } = await boot(Page, '/a');
+    const announcer = document.querySelector('.phlox-announcer')!;
+    expect(announcer.getAttribute('aria-live')).toBe('polite');
+    document.querySelector<HTMLElement>('#link')!.focus();
+    await go('/b');
+    await until(() => announcer.textContent === 'Stránka B – Web');
+    // The focused link went away with the old page
+    expect(document.activeElement?.tagName).toBe('H1');
+
+    announcer.textContent = '';
+    await go('/b?tab=2');
+    await tick();
+    await tick();
+    expect(announcer.textContent).toBe('');
   });
 });

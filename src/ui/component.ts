@@ -5,10 +5,9 @@ import { VIEW, insert } from './dom';
 import type { Child } from './dom';
 import { Dialogs } from './dialog';
 import type { DialogOptions } from './dialog';
-import { resource as createResource } from './resource';
 import { Preferences } from './preferences';
 import type { State } from '../reactive/reactive';
-import type { Resource } from './resource';
+import type { Resource, ResourceOptions } from './resource';
 import type { Class } from '../di/container';
 import type { Application } from '../application/application';
 import type { LinkParams, Presenter } from './presenter';
@@ -138,10 +137,11 @@ export abstract class Component<P extends object = {}, R = void> {
   /**
    * Data loaded by the function, again whenever state it read before its first await changes:
    * `tasks = this.resource(() => this.api.call('task.list', { status: this.status() }))`, in the template `tasks()`.
+   * With `{ tags: ['tasks'] }` also after app.invalidate('tasks').
    * Create it in the constructor or in startup(), it ends with the component. Errors go to app.onError.
    */
-  resource<T>(load: () => Promise<T>): Resource<T> {
-    return this.scope.run(() => createResource(load, error => this.app.onError(error)));
+  resource<T>(load: () => Promise<T>, options: ResourceOptions = {}): Resource<T> {
+    return this.app.createResource(this.scope, load, options);
   }
 
   /**

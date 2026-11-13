@@ -664,6 +664,12 @@ Ukázka `examples/helpdesk` je celá aplikace podle návrhu autora (`d:\Projekty
 - **Patička dialogu bez `actions()`** se v Bootstrapu ukazovala, protože jeho `d-flex` má `!important`. Pravidlo v `base.css` ho má teď taky.
 - **Helpdesk:** seznamy projektů a úkolů mají nastavitelnou šířku (`ResizeHandle` + `preference`), levé menu jde sbalit na ikony kulatým tlačítkem na jeho hraně (zapamatuje se), na telefonu je menu za hamburgerem jako dialog s `placement: 'start'`. Vyhledávací pole jsou jedno `form-control` s ikonou místo obálky s polem uvnitř.
 
+**Čtvrté kolo, body 1–3 z TODO (implementováno, čeká na review):**
+- **Chyby obsluh událostí do `app.onError`.** Renderer obalí obsluhu, jen když scope poskytuje `ERRORS` (dává ho `Application`), takže `render()` bez aplikace zůstává beze změny. Chytá výjimku i zamítnutý promise, který obsluha vrátí; bez toho se chyby asynchronních `handleXxx` ztrácely v konzoli.
+- **Štítky dat a `app.invalidate()`.** Každý štítek má v aplikaci `state` s verzí, zdroj ji čte před `load()` a `invalidate()` ji zvýší. Žádný seznam zdrojů ani odhlašování: obnovu dělá reaktivita a se zdrojem končí i odběr. Zvažoval jsem cache dotazů podle klíče (jako TanStack Query), ale to je jiný model (sdílená data mezi komponentami, deduplikace, doba platnosti) a zatím ho nic nepotřebuje. `app.resource()` je pro služby s daty celé aplikace, aby nemusely mít vlastní počítadlo. Helpdesk už `Store.version` nemá.
+- **`Presenter.pageTitle()` a `app.formatTitle`.** Rozhoduje nejhlubší presenter s titulkem, jako blok `title` v nejvnitřnější šabloně Nette. Je to efekt nad `child()` presenterů, takže sleduje i data načtená později. Routované dialogy titulek nemění; kdyby bylo potřeba, mohly by brát `title()` okna.
+- **Po navigaci ohlášení, ne vždy fokus.** Pravidlo „vždy fokus na `<h1>`“ by v seznamu s detailem po každém kliknutí odneslo fokus ze seznamu. Proto se titulek ohlásí přes `aria-live` (jako route announcer v Next.js) a fokus se přesune jen tehdy, když prvek s ním zmizel se starou stránkou. Ohlašuje se jen změna routy, ne query.
+
 **Zjištěno, zatím neřešeno:**
 - **České texty frameworku** si každá ukázka nastavuje sama (`messageTexts`, `DropDownList.texts`, `Grid.texts`, `Form.messages`…). Hodil by se jeden balíček překladů pro jazyk.
 - **Regulární výraz ve vzoru routy** se v řetězci píše se zdvojeným lomítkem (`'/<id \\d+>'`). S jedním (`'/<id \d+>'`) je to v JS `d+` a routa tiše nesedí. Stalo se mi to dvakrát. Pomohlo by varování v dev režimu, když vzor obsahuje `<x d+>`, nebo zkratky typu `<id:int>`.

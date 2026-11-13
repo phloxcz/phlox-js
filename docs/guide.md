@@ -200,6 +200,24 @@ class TasksPresenter extends Presenter<{ projectId: number }> {
 - **Vytvoř ho v konstruktoru nebo ve `startup()`.** V inicializátoru pole ještě nejsou služby z konstruktoru. U presenteru, který čte své parametry, ve `startup()`, ten je už zná.
 - **Skončí s komponentou,** po jejím odstranění se nic nenačítá.
 
+### Data sdílená obrazovkami: štítky a `invalidate`
+
+Po uložení se mají obnovit i jiné části obrazovky: seznam, počty v záložkách, číslo v menu. Zdroj proto řekne, jaká data ukazuje, a po změně stačí ta data zneplatnit:
+
+```ts
+// seznam úkolů
+this.tasks = this.resource(() => this.api.call('task.list', { … }), { tags: ['tasks'] });
+
+// detail po uložení: načte se znovu všechno se štítkem 'tasks', na kterékoli obrazovce
+await this.api.call('task.update', { id, input });
+this.app.invalidate('tasks');
+```
+
+- **Štítky** jsou libovolné texty, obvykle podle druhu dat: `'tasks'`, `'projects'`, `'users'`. Zdroj jich může mít víc.
+- **`invalidate()`** jich přijme víc najednou: `this.app.invalidate('tasks', 'projects')`. Zdroje, které se tím spustí, se volají v jednom okamžiku, takže jdou na server jednou dávkou.
+- **Data celé aplikace** (uživatelé, číselníky), která drží služba, ne komponenta: `app.resource(load, { tags })`. Žije, dokud aplikace běží. Služba si `Application` řekne v konstruktoru jako každou jinou službu.
+- **Po přihlášení jiného uživatele** zneplatni data, která drží služby: `this.app.invalidate('users', 'projects', 'tasks')`.
+
 ## Presentery a routy
 
 Presenter je komponenta, na kterou vede URL. Každý presenter si z URL vezme svůj díl a zbytek předá presenteru pod sebou. Ten se zobrazí v místě `<RouteFrame />`.
@@ -334,6 +352,21 @@ this.link('detail', { id: 5, page: null })   // /orders/5?sort=-price
 - **Stará obrazovka zůstává, dokud nová není připravená.** Nové presentery se vytvoří stranou, proběhne jejich `startup()` a akce, a teprve pak se obrazovka vymění.
 - **Když cokoli selže, nezmění se nic** a chybu dostane `app.onError`.
 - **Běží jen jedna navigace.** Když uživatel klikne jinam dřív, než doběhne, vyhrává poslední kliknutí.
+
+### Titulek stránky a čtečky
+
+```ts
+class TaskDetailPresenter extends Presenter {
+  override pageTitle() {
+    return this.task()?.title ?? null;   // jako {block title} v Nette, může číst state
+  }
+}
+```
+
+- **`document.title`** dá nejhlubší presenter, který titulek má. Na `/projects/1/5` tedy úkol, ne seznam. Mění se se stavem, který `pageTitle()` čte.
+- **Složení** dělá `app.formatTitle`: ve výchozím stavu „Úkol – <titulek z index.html>“, bez titulku stránky jen titulek z `index.html`. Jinak: `app.formatTitle = page => page ? `${page} | Obchod` : 'Obchod'`.
+- **Čtečky** se po přechodu na jinou stránku dozví její titulek (skrytá oblast `aria-live`). Změna jen query (záložka, filtr) se neohlašuje.
+- **Fokus** po navigaci zůstává, kde byl, aby seznam s detailem neztratil místo. Když ale prvek s fokusem zmizel se starou stránkou, přejde fokus na první `<h1>` nové stránky.
 
 ### Odchod s neuloženými změnami
 
@@ -1747,6 +1780,8 @@ Události jsou `on` + název s velkým písmenem. `event.currentTarget` má typ 
 <input value={draft} onInput={event => draft.set(event.currentTarget.value)} />
 <form onSubmit={save} />
 ```
+
+**Chyby obsluh** jdou do `app.onError`, vyhozené i z promise, který obsluha vrátí. `onClick={() => this.handleSave()}` tak chybu serveru neztratí, ukáže se jako každá jiná chyba aplikace. Mimo běžící aplikaci (`render()`) se obsluha volá beze změny.
 
 ### Přístup k prvku: `ref`
 

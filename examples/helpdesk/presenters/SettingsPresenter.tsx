@@ -18,9 +18,13 @@ export default class SettingsPresenter extends Presenter {
     this.form.addSubmit('save', 'Uložit profil');
     this.form.onSuccess = async input => {
       await this.api.call('user.updateProfile', { input });
-      await this.store.load();
+      this.app.invalidate('users');
       this.flashMessage('Profil je uložený.', 'success');
     };
+  }
+
+  override pageTitle() {
+    return 'Nastavení';
   }
 
   override startup() {

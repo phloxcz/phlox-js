@@ -89,3 +89,44 @@ describe('Component.resource', () => {
     expect(loads).toBe(before);
   });
 });
+
+describe('tags of data and app.invalidate', () => {
+  test('invalidate() loads again every resource with the tag, in any component, at once', async () => {
+    const calls: string[] = [];
+    const load = (name: string) => async () => {
+      calls.push(name);
+      return name;
+    };
+    class List extends Component {
+      tasks = this.resource(load('list'), { tags: ['tasks'] });
+      render() { return <i>{() => this.tasks()}</i>; }
+    }
+    class Count extends Component {
+      count = this.resource(load('count'), { tags: ['tasks', 'projects'] });
+      other = this.resource(load('users'), { tags: ['users'] });
+      plain = this.resource(load('plain'));
+      render() { return <b>{() => this.count()}</b>; }
+    }
+    let shared!: Resource<string>;
+    class Page extends Presenter {
+      override startup() {
+        shared = this.app.resource(load('app'), { tags: ['projects'] });
+      }
+      render() { return <main><List /><Count /></main>; }
+    }
+    const { app } = await boot(Page);
+    await tick();
+    expect(calls.sort()).toEqual(['app', 'count', 'list', 'plain', 'users']);
+    calls.length = 0;
+
+    app.invalidate('tasks');
+    await tick();
+    expect(calls.sort()).toEqual(['count', 'list']);
+    calls.length = 0;
+
+    app.invalidate('projects', 'users');
+    await tick();
+    expect(calls.sort()).toEqual(['app', 'count', 'users']);
+    expect(shared()).toBe('app');
+  });
+});

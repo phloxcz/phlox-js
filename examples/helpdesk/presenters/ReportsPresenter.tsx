@@ -14,6 +14,10 @@ export default class ReportsPresenter extends Presenter {
     super();
   }
 
+  override pageTitle() {
+    return 'Reporty';
+  }
+
   override async startup() {
     this.rows.set(await this.api.call('report.projects'));
   }

@@ -35,7 +35,7 @@ export class WorkspacePresenter extends Presenter {
       ({ href: this.link(route), icon, text, current: () => this.route() === route, ...(count ? { count } : {}) });
     return [
       entry('projects', 'folder', 'Projekty'),
-      entry('my', 'squareCheck', 'Moje úkoly', this.store.mine),
+      entry('my', 'squareCheck', 'Moje úkoly', () => this.store.mine()),
       entry('all', 'clipboard', 'Všechny úkoly'),
       entry('reports', 'chart', 'Reporty'),
       entry('settings', 'settings', 'Nastavení'),
@@ -49,7 +49,7 @@ export class WorkspacePresenter extends Presenter {
 
   override async startup() {
     if (!this.user.isLoggedIn()) return this.redirect('/sign');
-    await this.store.load();
+    await this.store.start();
   }
 
   actionHome() {

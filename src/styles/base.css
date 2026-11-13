@@ -130,6 +130,21 @@
   to { opacity: 0; transform: translateX(-50px); }
 }
 
+/* The announcer of navigation: read by screen readers, not seen */
+.phlox-announcer {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* A heading that got the focus after navigation is no control, it has no ring */
+h1[tabindex="-1"]:focus {
+  outline: none;
+}
+
 /* toggle() hides by the hidden attribute, a display class of a theme (d-flex...) must not win */
 form [hidden] {
   display: none !important;

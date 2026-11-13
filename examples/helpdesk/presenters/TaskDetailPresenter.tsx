@@ -79,6 +79,10 @@ export class TaskDetailPresenter extends Presenter<{ taskId: number }> {
     this.settings.setDefaults({ status: task.status, priority: task.priority, assigneeId: task.assigneeId, due: task.due });
   }
 
+  override pageTitle() {
+    return this.task()?.title ?? null;
+  }
+
   /** A comment being written would be lost. */
   override hasUnsavedChanges() {
     return this.composer.isChanged();
@@ -88,7 +92,8 @@ export class TaskDetailPresenter extends Presenter<{ taskId: number }> {
     const task = await this.api.call('task.update', { id: this.props.taskId, input });
     this.task.set(task);
     this.history.set(await this.api.call('history.list', { taskId: task.id }));
-    await this.store.changed();
+    // The lists, the counts of tabs and of the menu load again, wherever they are
+    this.app.invalidate('tasks');
   }
 
   async handleComment(text: string): Promise<void> {

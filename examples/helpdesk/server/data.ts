@@ -41,11 +41,11 @@ const USERS: [string, string, string][] = [
 ];
 
 const PROJECTS: [string, string, string][] = [
-  ['Apollo – Nová platforma', 'Vývoj a nasazení', '#14b8a6'],
+  ['Apollo – Nová platforma', 'Vývoj a nasazení', '#1ba3b2'],
   ['Datové centrum', 'Infrastruktura', '#2563eb'],
   ['Marketing 2026', 'Kampaň a obsah', '#f59e0b'],
   ['Interní nástroje', 'Produktivita', '#ef4444'],
-  ['Klient ABC', 'Implementace', '#0d9488'],
+  ['Klient ABC', 'Implementace', '#0e95a8'],
   ['Bezpečnostní audit', 'Audit a compliance', '#eab308'],
   ['Roadmapa Q1', 'Plánování', '#1d4ed8'],
 ];

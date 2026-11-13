@@ -4,7 +4,7 @@ import { HelpdeskApi } from '../api';
 import type { ProjectInput, ProjectResource } from '../api';
 
 const COLORS: [string, string][] = [
-  ['#14b8a6', 'Tyrkysová'], ['#2563eb', 'Modrá'], ['#f59e0b', 'Oranžová'], ['#ef4444', 'Červená'], ['#8b5cf6', 'Fialová'], ['#1d4ed8', 'Tmavě modrá'],
+  ['#1ba3b2', 'Tyrkysová'], ['#2563eb', 'Modrá'], ['#f59e0b', 'Oranžová'], ['#ef4444', 'Červená'], ['#8b5cf6', 'Fialová'], ['#1d4ed8', 'Tmavě modrá'],
 ];
 
 /** A new project in a dialog. A name that already exists is refused by the server, the error shows at the field. */

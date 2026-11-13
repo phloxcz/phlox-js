@@ -147,3 +147,25 @@ describe('effects of a component', () => {
     expect(runs).toEqual([]);
   });
 });
+
+describe('errors of event handlers', () => {
+  test('a thrown error and a rejected promise of a handler go to app.onError', async () => {
+    class Page extends Presenter {
+      async handleSave() {
+        await Promise.resolve();
+        throw new Error('server is down');
+      }
+      render() {
+        return <p>
+          <button id="async" onClick={() => this.handleSave()}>Uložit</button>
+          <button id="sync" onClick={() => { throw new Error('broken'); }}>Rozbité</button>
+        </p>;
+      }
+    }
+    const { element, errors } = await boot(Page);
+    element.querySelector<HTMLButtonElement>('#async')!.click();
+    element.querySelector<HTMLButtonElement>('#sync')!.click();
+    await tick();
+    expect(errors.map(String)).toEqual(['Error: broken', 'Error: server is down']);
+  });
+});

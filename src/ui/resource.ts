@@ -6,6 +6,14 @@
 import { batch, effect, state, untrack } from '../reactive/reactive';
 import type { Accessor } from '../reactive/reactive';
 
+export interface ResourceOptions {
+  /**
+   * What data the resource shows, e.g. ['tasks']. After app.invalidate('tasks') it loads again,
+   * wherever it is on the screen.
+   */
+  tags?: string[];
+}
+
 export interface Resource<T> extends Accessor<T | undefined> {
   /** True while a load runs. The last value stays readable meanwhile. */
   readonly loading: Accessor<boolean>;

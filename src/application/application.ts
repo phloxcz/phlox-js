@@ -1,7 +1,10 @@
 /** Application: starts the root presenter and the router. Together with the container it is the bootstrap. */
 
-import { Scope, state } from '../reactive/reactive';
-import { h, insert } from '../ui/dom';
+import { Scope, batch, effect, state, untrack } from '../reactive/reactive';
+import type { State } from '../reactive/reactive';
+import { resource as createResource } from '../ui/resource';
+import type { Resource, ResourceOptions } from '../ui/resource';
+import { ERRORS, h, insert } from '../ui/dom';
 import type { Child } from '../ui/dom';
 import { Container } from '../di/container';
 import type { Class } from '../di/container';
@@ -108,12 +111,24 @@ export class Application {
    */
   basePath = '';
 
+  /**
+   * Composes document.title from the title of the page (Presenter.pageTitle()). By default
+   * "Page – <the title in index.html>", without a page only the title in index.html.
+   */
+  formatTitle: (page: string | null) => string = page => (page ? `${page} – ${this.baseTitle}` : this.baseTitle);
+
   /** Receives errors from navigation and from life cycle methods that nobody awaits. */
   onError: (error: unknown) => void = error => console.error(error);
 
   private scope: Scope | null = null;
+  /** Versions of the tags of data, see invalidate(). */
+  private versions = new Map<string, State<number>>();
   private started: { root: Class<Presenter<any, any>>; element: Element } | null = null;
   private toastHost: HTMLElement | null = null;
+  /** The title of the page before the application changed it. */
+  private baseTitle = '';
+  /** Tells screen readers that another page is shown, see navigated(). */
+  private announcer: HTMLElement | null = null;
 
   /** The container holds services of the application. Services of the framework are added unless it has its own. */
   constructor(readonly container = new Container()) {
@@ -140,12 +155,23 @@ export class Application {
     this.scope = new Scope(null);
     this.scope.provide(APP, this);
     this.scope.provide(THEME, this.theme);
+    // Errors of event handlers, also of async ones, go to onError like errors of navigation
+    this.scope.provide(ERRORS, (error: unknown) => this.onError(error));
 
     const presenter = this.presenter = createComponent(root, {}, null, this, this.scope);
     document.addEventListener('click', this.onClick);
     window.addEventListener('beforeunload', this.onBeforeUnload);
     await this.router.start(presenter);
     element.replaceChildren(renderComponent(presenter));
+    this.baseTitle = document.title;
+    this.scope.run(() => effect(() => {
+      document.title = this.formatTitle(this.pageTitle());
+    }));
+    const announcer = this.announcer = document.createElement('div');
+    announcer.className = 'phlox-announcer';
+    announcer.setAttribute('aria-live', 'polite');
+    announcer.setAttribute('aria-atomic', 'true');
+    document.body.append(announcer);
     if (this.flashes.toasts) {
       const host = this.toastHost = document.createElement('div');
       document.body.append(host);
@@ -174,6 +200,41 @@ export class Application {
   }
 
   /**
+   * The data with these tags have changed on the server: every resource with one of them loads again,
+   * on whatever screen it is. Calls made at once go to the server as one batch.
+   *   await this.api.call('task.update', …); this.app.invalidate('tasks');
+   */
+  invalidate(...tags: string[]): void {
+    batch(() => {
+      for (const tag of tags) this.version(tag).update(version => version + 1);
+    });
+  }
+
+  /**
+   * A resource of the whole application, for services that hold data many screens show (users, projects).
+   * It lives while the application runs. Components use Component.resource().
+   */
+  resource<T>(load: () => Promise<T>, options: ResourceOptions = {}): Resource<T> {
+    if (!this.scope) throw new Error('app.resource() needs a running application.');
+    return this.createResource(this.scope, load, options);
+  }
+
+  /** A resource owned by the scope, reading the versions of its tags. Used by resource() and Component.resource(). */
+  createResource<T>(scope: Scope, load: () => Promise<T>, options: ResourceOptions = {}): Resource<T> {
+    const tags = options.tags ?? [];
+    return scope.run(() => createResource(() => {
+      for (const tag of tags) this.version(tag)();
+      return load();
+    }, error => this.onError(error)));
+  }
+
+  private version(tag: string): State<number> {
+    let version = this.versions.get(tag);
+    if (!version) this.versions.set(tag, version = state(0));
+    return version;
+  }
+
+  /**
    * Whether the components may leave: true without unsaved changes in them, otherwise the user decides.
    * Null means the whole application. The router and Component.cancel() ask through it.
    */
@@ -188,6 +249,34 @@ export class Application {
     return opener;
   }
 
+  /** The title of the deepest presenter that has one. Reactive. */
+  private pageTitle(): string | null {
+    let title: string | null = null;
+    for (let presenter = this.presenter; presenter; presenter = presenter.child()) title = presenter.pageTitle() ?? title;
+    return title;
+  }
+
+  /**
+   * After a navigation has changed the page. Screen readers hear the title of the new page. When the focus
+   * was on something the old page took away, it goes to the main heading of the new one; otherwise it stays
+   * (a list with its detail would lose its place).
+   */
+  navigated(): void {
+    const announcer = this.announcer;
+    if (!announcer) return;
+    // Emptied first, the same text twice would not be read again
+    announcer.textContent = '';
+    setTimeout(() => {
+      announcer.textContent = document.title;
+    }, 50);
+    const active = document.activeElement;
+    if (active && active !== document.body && active.isConnected) return;
+    const heading = untrack(() => this.started?.element.querySelector<HTMLElement>('h1'));
+    if (!heading) return;
+    if (!heading.hasAttribute('tabindex')) heading.tabIndex = -1;
+    heading.focus({ preventScroll: true });
+  }
+
   /** Removes everything and stops routing. */
   stop(): void {
     document.removeEventListener('click', this.onClick);
@@ -195,6 +284,9 @@ export class Application {
     this.router.stop();
     this.toastHost?.remove();
     this.toastHost = null;
+    this.announcer?.remove();
+    this.announcer = null;
+    if (this.baseTitle) document.title = this.baseTitle;
     this.scope?.dispose();
     this.scope = null;
     this.presenter = null;

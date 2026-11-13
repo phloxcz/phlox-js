@@ -96,6 +96,14 @@ export abstract class Presenter<P extends object = {}, R = void> extends Compone
     this.app.flashes.add(text, type, options);
   }
 
+  /**
+   * The title of the page, like {block title} in Nette. The deepest presenter with a title gives
+   * document.title, composed by app.formatTitle(). It may read state: `() => this.task()?.name`.
+   */
+  pageTitle(): string | null {
+    return null;
+  }
+
   /** Called when the rest of the URL matches no route of this presenter. Override it to show something else. */
   notFound(path: string): void {
     this.error(404, `No route of ${this.constructor.name} matches '${path}'.`);

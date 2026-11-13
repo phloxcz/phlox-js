@@ -46,7 +46,6 @@ export class TasksPresenter extends Presenter<Props> {
   override async startup() {
     // Here the parameters are known; the list loads again when a parameter or the data change
     this.tasks = this.resource(() => {
-      this.store.version();
       const priority = this.priority().split(',').filter(Boolean) as Priority[];
       return this.api.call('task.list', {
         query: {
@@ -57,8 +56,14 @@ export class TasksPresenter extends Presenter<Props> {
           sort: this.sort(),
         },
       });
-    });
+      // After app.invalidate('tasks'), e.g. a change in the detail, the list loads again
+    }, { tags: ['tasks'] });
     await this.tasks.ready();
+  }
+
+  /** The tab of the browser shows the list, or the task when one is open (TaskDetailPresenter is deeper). */
+  override pageTitle() {
+    return this.heading();
   }
 
   heading(): string {
@@ -73,7 +78,7 @@ export class TasksPresenter extends Presenter<Props> {
       id: task.id,
       input: { status: done ? 'closed' : 'open', priority: task.priority, assigneeId: task.assigneeId, due: task.due },
     });
-    await this.store.changed();
+    this.app.invalidate('tasks');
   }
 
   private togglePriority(priority: Priority, on: boolean): string | null {

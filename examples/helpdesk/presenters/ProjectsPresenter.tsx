@@ -25,6 +25,10 @@ export class ProjectsPresenter extends Presenter {
     super();
   }
 
+  override pageTitle() {
+    return 'Projekty';
+  }
+
   /** Without a chosen project the first one opens. */
   actionDefault() {
     const first = this.store.projects()[0];
@@ -35,7 +39,7 @@ export class ProjectsPresenter extends Presenter {
     // A form as a panel sliding in from the right, like offcanvas
     const project = await this.openDialog(ProjectEdit, {}, { placement: 'end' });
     if (!project) return;
-    await this.store.load();
+    this.app.invalidate('projects');
     this.flashMessage(`Projekt ${project.name} je založený.`, 'success');
     void this.app.router.navigate(this.link('project', { project: project.id }));
   }
