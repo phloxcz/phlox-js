@@ -128,7 +128,15 @@ Z toho plyne:
 
 **TODO helpdesku (zadal autor 12. 11. 2026):**
 - **Worklogy:** u úkolu vykázat, kolik hodin kdo kdy na něm strávil (záznamy s datem, časem a poznámkou, součty).
-- **Kanban pohled** podle návrhu `d:\Projekty\phlox\Kanban HelpDesk Pro v češtině.png`: úkoly ve sloupcích podle stavu, přetahování mezi nimi.
+- **Kanban pohled** podle návrhu `d:\Projekty\phlox\Kanban HelpDesk Pro v češtině.png`: úkoly ve sloupcích podle stavu, přetahování mezi nimi. **Samostatná položka v hlavním menu** (doplnil autor 13. 11.).
+- **Požadavky (v kódu a API `ticket`: `ticket.list`, `ticket.convert`, `TicketResource`), samostatná položka v hlavním menu** (zadal autor 13. 11., název rozhodl autor; ne „request“, pletl by se s HTTP požadavkem): požadavky, které do helpdesku přijdou zvenku.
+  - **Údaje:** priorita, typ (požadavek na novou funkcionalitu, chyba, dotaz…), stav (Nové, Zpracované, Zamítnuté), zdroj (web, widget, e-mail), odesílatel, předmět, text, přílohy. V menu počet nezpracovaných. **Požadavek není úkol:** operátor ho projde, zvolí projekt a řešitele a vytvoří z něj úkoly, z jednoho požadavku jich může vzniknout víc (třeba dva úkoly pro dva lidi). Požadavek si má pamatovat, jaké úkoly z něj vznikly.
+  - **Odkud přicházejí:**
+    - přes API z formuláře na webu,
+    - přes API z widgetu pro hlášení chyb vložitelného do jiné aplikace,
+    - e-mailem: backend poslouchá na schránce přes IMAP, co tam kdo pošle, stáhne a založí jako požadavek (předmět, text, odesílatel, přílohy).
+  - Pro backend (mock teď, `phlox-rpc-api` později): metody pro založení požadavku zvenku (bez přihlášení operátora, s ochranou proti spamu) a pro převod požadavku na úkoly.
+- **Mock RPC v prohlížeči pro statické sestavení** (cesta 1; zatím není potřeba, autor spouští sestavení přes `vite preview`, kde mock běží; udělat, až budou ukázky potřeba vystavit na statický hosting): `npm run build:examples` dá `dist`, které jde pustit z libovolného statického serveru (`php -S`, GitHub Pages). Helpdesk ve statickém sestavení použije `createRpcMock(...).fetch` místo sítě; v mocku nahradit Node `Buffer` prohlížečovou variantou a data ukládat do `localStorage`, aby přežila obnovení stránky. Dev server a `vite preview` dál s mockem ve Vite.
 
 **TODO frameworku (z helpdesku, sepsáno 12. 11. 2026, v navrženém pořadí):**
 1. ~~Chyby asynchronních obsluh událostí~~ **hotovo 13. 11.:** chyby obsluh jdou do `app.onError`.
@@ -148,8 +156,11 @@ Z toho plyne:
    - **Kód na webu je kód, který běží:** soubor ukázky se načte i jako text (`?raw` ve Vite), zobrazený kód se nerozejde se skutečným.
    - **Každá ukázka je zároveň test:** Vitest je všechny vykreslí, nefunkční ukázka se pozná při `npm test`.
    - **Dosavadní ukázky** se rozpustí do sekcí (strom kategorií ke Stromu, objednávky ke Gridu, Kendo ke Kendu), helpdesk zůstane jako celá aplikace.
-   - **Text:** rozhodnout, jestli web ukáže přímo oddíly `guide.md` (jeden zdroj textu, navrženo), nebo ukázky dostanou krátké vlastní popisy s odkazem do příručky.
-   - **Postup:** kostra webu a tři až čtyři sekce, pak přidávat.
+   - **Text (rozhodl autor 13. 11.):** příručka se rozdělí do markdownu po stránkách vedle ukázek, např. `examples/docs/forms/dropdownlist.md` vedle `dropdownlist-basic.tsx` a `dropdownlist-remote.tsx`. Živou ukázku vloží značka `<!-- demo: dropdownlist-remote -->`, aplikace na jejím místě vykreslí ukázku a záložku s jejím kódem (`?raw`). Markdown převede na HTML Vite při sestavení, aplikace knihovnu na markdown nepotřebuje.
+   - **Menu** podle složek (`reactive/`, `templates/`, `components/`, `presenters/`, `forms/`, `grid/`, `tree/`, `net/`, `offline/`, `kendo/`), pořadí a názvy v jednom souboru s obsahem.
+   - **`guide.md` zůstane jen rozcestník** (co kde je, jak spustit, odkaz na web ukázek); žádný text na dvou místech. **CLAUDE.md se upraví:** příručka jsou `examples/docs/**/*.md`, s každou změnou API se upraví stránka i její ukázka; důvody návrhu dál v `design.md`.
+   - **Test:** Vitest projde všechny značky `demo`, ověří, že ukázka existuje a vykreslí se.
+   - **Postup:** kostra webu a sekce, které už ukázky mají (Strom, Grid, Formuláře, Kendo), pak ostatní; rozdělení stávající příručky je hlavně přesun textu.
 8. **Drobnosti:**
    - jeden balíček českých textů frameworku místo nastavování v každé aplikaci (`messageTexts`, `DropDownList.texts`, `Grid.texts`, `Form.messages`…),
    - události předané do `<Input>` (`onBlur`, `onInput`) přepíše vlastní obsluha prvku, `ref` už je vyřešený,
