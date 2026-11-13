@@ -49,6 +49,8 @@ export interface RpcOptions {
    * panel of the browser shows what each request calls. The server ignores them. On by default.
    */
   methodsInUrl?: boolean;
+  /** Working offline: kept results of reading methods and a queue of writing ones, see RpcOffline. */
+  offline?: { handles(method: string): boolean; attach(send: (method: string, params?: object) => Promise<unknown>): void; call(method: string, params: unknown): Promise<unknown> };
   fetch?: typeof fetch;
 }
 
@@ -73,10 +75,19 @@ export class RpcClient<M extends { [K in keyof M]: RpcMethod } = Record<string, 
   private queue: Pending[] = [];
   private lastId = 0;
 
-  constructor(readonly url: string, private options: RpcOptions = {}) {}
+  constructor(readonly url: string, private options: RpcOptions = {}) {
+    options.offline?.attach((method, params) => this.request(method, params));
+  }
 
   /** Calls a method and returns its result, or rejects with RpcError. */
   call<K extends keyof M & string>(method: K, ...[params]: ParamsArgs<M[K]['params']>): Promise<M[K]['result']> {
+    const offline = this.options.offline;
+    if (offline?.handles(method)) return offline.call(method, params) as Promise<M[K]['result']>;
+    return this.request(method, params);
+  }
+
+  /** A call over the network, without the offline layer. */
+  private request(method: string, params: object | undefined): Promise<any> {
     return new Promise((resolve, reject) => this.enqueue({ method, params, id: ++this.lastId, resolve, reject }));
   }
 

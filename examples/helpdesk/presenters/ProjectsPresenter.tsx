@@ -4,6 +4,7 @@ import { foldText } from 'phlox-js/forms';
 import { Icon } from '../components/Icon';
 import { ProjectEdit } from '../components/ProjectEdit';
 import { Store } from '../model/Store';
+import { OfflineWork } from '../model/offline';
 import { TasksPresenter } from './TasksPresenter';
 
 /** The column of projects at /projects; the tasks of the chosen one are at /projects/<id>. */
@@ -24,7 +25,7 @@ export class ProjectsPresenter extends Presenter {
     return this.store.projects().filter(project => foldText(project.name).includes(words));
   });
 
-  constructor(private store: Store) {
+  constructor(private store: Store, private work: OfflineWork) {
     super();
   }
 
@@ -75,6 +76,9 @@ export class ProjectsPresenter extends Presenter {
                         <strong>{() => project().name}</strong>
                         <small>{() => project().subtitle}</small>
                       </span>
+                      <If when={() => this.work.prepared().includes(`project-${project().id}`)}>
+                        <span class="hd-offline-ready" title="Připraveno pro offline"><Icon name="cloudCheck" size={15} /></span>
+                      </If>
                       <span class="hd-count">{() => project().taskCount}</span>
                     </a>
                   </li>

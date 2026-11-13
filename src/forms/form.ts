@@ -116,8 +116,11 @@ export class Form<V extends object = Record<string, any>> extends Container<V> {
 
   /** Fills the controls, typically with data loaded from the server. The same as setValues(). */
   setDefaults(values: DeepPartial<V>): this {
-    this.setValues(values);
-    this.markSaved();
+    // One batch: an effect watching isChanged() (autosave) must never see the defaults as a change
+    batch(() => {
+      this.setValues(values);
+      this.markSaved();
+    });
     return this;
   }
 

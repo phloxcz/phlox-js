@@ -1,10 +1,11 @@
 // The helpdesk example: projects, tasks and their detail against a mock JSON-RPC server (server/).
 import 'phlox-js/styles/base.css';
-import 'bootstrap/dist/css/bootstrap.min.css';
+// Bootstrap is imported at the top of helpdesk.css: in the build the order of separate imports is not kept
 import './helpdesk.css';
 import { Application, messageTexts } from 'phlox-js';
 import { DropDownList, Form, UploadControl } from 'phlox-js/forms';
 import { RpcError, RpcErrorCode } from 'phlox-js/net';
+import { registerSW } from 'virtual:pwa-register';
 import { showExampleMenu } from '../shared/menu';
 import { createServices } from './services';
 import { AppPresenter } from './presenters/AppPresenter';
@@ -33,3 +34,13 @@ app.onError = error => {
 };
 
 void app.run(AppPresenter, document.getElementById('app')!);
+
+// PWA: the service worker keeps the application for offline; a new version is offered, not forced
+const updateServiceWorker = registerSW({
+  onOfflineReady: () => app.flashes.add('Aplikace je připravená i pro práci bez signálu.', 'success'),
+  onNeedRefresh: async () => {
+    if (await app.confirm('Je dostupná nová verze aplikace. Načíst ji?', { okText: 'Načíst', cancelText: 'Později' })) {
+      void updateServiceWorker(true);
+    }
+  },
+});

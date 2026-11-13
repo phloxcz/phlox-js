@@ -6,3 +6,7 @@ export { fileChunks } from './files';
 export type { FileChunk } from './files';
 export { RpcMockError, createRpcMock } from './mock';
 export type { RpcHandlers, RpcMock, RpcMockOptions } from './mock';
+export { RpcOffline } from './offline';
+export type { OfflineCache, OfflineChange, OfflineRules, ReadRule, WriteRule } from './offline';
+export { IndexedDbStore, MemoryStore, OfflineStore } from './store';
+export { online } from './online';

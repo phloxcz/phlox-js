@@ -1,9 +1,12 @@
-import { Presenter, RouteFrame } from 'phlox-js';
+import { Presenter, RouteFrame, effect, untrack } from 'phlox-js';
 import type { Route } from 'phlox-js';
 import { Icon, Logo } from '../components/Icon';
 import { MainMenu, MenuLinks } from '../components/MainMenu';
 import type { MenuEntry } from '../components/MainMenu';
+import { ConflictQuestion } from '../components/ConflictQuestion';
 import { Notifications } from '../components/Notifications';
+import { OfflineStatus } from '../components/OfflineStatus';
+import { OfflineWork } from '../model/offline';
 import { SearchBox } from '../components/SearchBox';
 import { SupportContact } from '../components/SupportContact';
 import { UserMenu } from '../components/UserMenu';
@@ -26,8 +29,29 @@ export class WorkspacePresenter extends Presenter {
   /** The menu on the left shows icons only; the user's choice is remembered in the browser. */
   readonly collapsed = this.preference('helpdesk.nav.collapsed', false);
 
-  constructor(private store: Store) {
+  /** A question about a changed record is open, the next one waits for it. */
+  private asking = false;
+
+  constructor(private store: Store, private work: OfflineWork) {
     super();
+    // Changes of records changed meanwhile: the user decides one by one
+    effect(() => {
+      if (this.work.offline.conflicts().length && !this.asking) void this.handleConflicts();
+    });
+  }
+
+  async handleConflicts(): Promise<void> {
+    this.asking = true;
+    try {
+      for (const change of untrack(this.work.offline.conflicts)) {
+        const decision = await this.openDialog(ConflictQuestion, { change });
+        // Escape or ×: the change waits in the menu of waiting changes, nobody asks again now
+        if (!decision) return;
+        await this.work.offline.resolve(change, decision);
+      }
+    } finally {
+      this.asking = false;
+    }
   }
 
   private entries(): MenuEntry[] {
@@ -50,6 +74,9 @@ export class WorkspacePresenter extends Presenter {
   override async startup() {
     if (!this.user.isLoggedIn()) return this.redirect('/sign');
     await this.store.start();
+    // After changes made offline were sent: lists and counts load again
+    this.scope.onCleanup(this.work.offline.onSynced(() => this.app.invalidate('tasks', 'projects')));
+    void this.work.offline.sync();
   }
 
   actionHome() {
@@ -70,6 +97,7 @@ export class WorkspacePresenter extends Presenter {
           <a href={this.link('projects')} class="hd-brand"><Logo /> <span>HelpDesk Pro</span></a>
           <SearchBox />
           <div class="hd-header-tools">
+            <OfflineStatus />
             <Notifications />
             <UserMenu />
           </div>

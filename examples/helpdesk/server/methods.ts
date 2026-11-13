@@ -1,7 +1,8 @@
 // Methods of the mock server, as controllers of phlox-rpc-api would have them. `me` is the logged-in user.
 import { Buffer } from 'node:buffer';
-import type { AttachmentResource, CommentResource, Priority, ProjectResource, RpcMethods, Status, TaskDetail, TaskResource } from '../api.ts';
+import type { AttachmentResource, CommentResource, ProjectResource, RpcMethods, Status, TaskDetail } from '../api.ts';
 import { RpcMockError } from '../../../src/net/mock.ts';
+import { queryTasks, taskItem } from '../model/queries.ts';
 import { seed } from './data.ts';
 import type { Database } from './data.ts';
 
@@ -14,7 +15,6 @@ export function resetDatabase(): void {
 }
 
 const STATUS_NAMES: Record<Status, string> = { open: 'Otevřený', progress: 'V řešení', closed: 'Uzavřený' };
-const PRIORITY_ORDER: Record<Priority, number> = { high: 0, medium: 1, low: 2 };
 const now = () => new Date().toISOString();
 const fold = (text: string) => text.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase();
 
@@ -38,8 +38,6 @@ const project = (id: number): ProjectResource => {
   return { ...item, taskCount: db.tasks.filter(task => task.projectId === id).length };
 };
 
-const taskItem = ({ id, projectId, title, status, priority, assigneeId, due }: TaskResource): TaskResource =>
-  ({ id, projectId, title, status, priority, assigneeId, due });
 
 const taskDetail = (id: number): TaskDetail => {
   const task = find(db.tasks, id, 'Úkol');
@@ -93,23 +91,7 @@ export const methods: Handlers = {
     return project(id);
   },
 
-  'task.list': ({ query }) => {
-    let tasks = db.tasks.filter(task => (query.projectId === undefined || task.projectId === query.projectId)
-      && (query.assigneeId === undefined || task.assigneeId === query.assigneeId)
-      && (!query.priority?.length || query.priority.includes(task.priority)));
-    const counts = {
-      all: tasks.length,
-      open: tasks.filter(task => task.status === 'open').length,
-      progress: tasks.filter(task => task.status === 'progress').length,
-      closed: tasks.filter(task => task.status === 'closed').length,
-    };
-    if (query.status) tasks = tasks.filter(task => task.status === query.status);
-    const byDue = (a: TaskResource, b: TaskResource) => (a.due ?? '9999').localeCompare(b.due ?? '9999');
-    const sorted = [...tasks].sort(query.sort === 'priority'
-      ? (a, b) => PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority] || byDue(a, b)
-      : (a, b) => byDue(a, b) || PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority]);
-    return { data: sorted.map(taskItem), counts };
-  },
+  'task.list': ({ query }) => queryTasks(db.tasks, query),
 
   'task.read': ({ id }) => taskDetail(id),
 

@@ -9,6 +9,8 @@ import type { IconName } from '../components/Icon';
 import { Avatar, PriorityBadge, StatusLabel } from '../components/ui';
 import { PRIORITY, STATUS, ago, dateTime, daysFrom, fileSize, longDate } from '../format';
 import { Store } from '../model/Store';
+import { OfflineWork } from '../model/offline';
+import { online } from 'phlox-js/net';
 
 type Tab = 'comments' | 'attachments' | 'history';
 
@@ -34,7 +36,7 @@ export class TaskDetailPresenter extends Presenter<{ taskId: number }> {
   private fileInput!: HTMLInputElement;
   private textArea: HTMLTextAreaElement | null = null;
 
-  constructor(private api: HelpdeskApi, private store: Store) {
+  constructor(private api: HelpdeskApi, private store: Store, private work: OfflineWork) {
     super();
     // Items as objects with a template: a dot of the state, the avatar of the user, the icon of the priority
     this.settings.addDropDownList('status', 'Změnit stav', {
@@ -62,6 +64,12 @@ export class TaskDetailPresenter extends Presenter<{ taskId: number }> {
   }
 
   override async startup() {
+    await this.load();
+    // Changes made offline were sent: the detail shows what the server has now
+    this.scope.onCleanup(this.work.offline.onSynced(() => void this.load()));
+  }
+
+  async load(): Promise<void> {
     // Four calls at once, one request to the server
     const id = this.props.taskId;
     const [task, comments, attachments, history] = await Promise.all([
@@ -282,7 +290,7 @@ export class TaskDetailPresenter extends Presenter<{ taskId: number }> {
           <Dropdown class="hd-icon-button" panelClass="hd-menu hd-emojis" placement="top-right" title="Vložit emoji" label={<Icon name="smile" size={19} />}>
             <For each={() => EMOJIS}>{emoji => <button type="button" onClick={() => this.insertEmoji(emoji)}>{emoji}</button>}</For>
           </Dropdown>
-          <button type="button" class="hd-icon-button" title="Přiložit soubor" aria-label="Přiložit soubor" onClick={() => this.fileInput.click()}>
+          <button type="button" class="hd-icon-button" title="Přiložit soubor" aria-label="Přiložit soubor" disabled={() => !online()} onClick={() => this.fileInput.click()}>
             <Icon name="paperclip" size={18} />
           </button>
         </div>
@@ -355,7 +363,8 @@ export class TaskDetailPresenter extends Presenter<{ taskId: number }> {
       <aside class="hd-column hd-actions" aria-labelledby="hd-actions-title">
         <h2 id="hd-actions-title">Rychlé akce</h2>
         <Button primary class="hd-button-block" onClick={() => this.writeComment()}><Icon name="message" size={18} /> Přidat komentář</Button>
-        <Button class="hd-button-block hd-button-soft" disabled={this.uploading} onClick={() => this.fileInput.click()}>
+        {/* Files need the network, they are not kept offline */}
+        <Button class="hd-button-block hd-button-soft" disabled={() => this.uploading() || !online()} onClick={() => this.fileInput.click()}>
           <Icon name="paperclip" size={18} /> {() => (this.uploading() ? 'Nahrávám…' : 'Přiložit soubor')}
         </Button>
         <input type="file" multiple hidden ref={input => { this.fileInput = input; }}

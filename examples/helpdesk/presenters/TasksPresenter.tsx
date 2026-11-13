@@ -1,11 +1,13 @@
 import { Dropdown, Else, For, If, Presenter, ResizeHandle, RouteFrame, computed, route } from 'phlox-js';
 import type { Resource, Route } from 'phlox-js';
 import { HelpdeskApi } from '../api';
-import type { Priority, Status, TaskPage, TaskResource } from '../api';
+import type { Priority, Status, TaskPage, TaskQuery, TaskResource } from '../api';
 import { Icon } from '../components/Icon';
 import { Avatar, PriorityBadge } from '../components/ui';
 import { PRIORITY, dueLabel, isUrgent } from '../format';
 import { Store } from '../model/Store';
+import { OfflineWork } from '../model/offline';
+import { online } from 'phlox-js/net';
 import { TaskDetailPresenter } from './TaskDetailPresenter';
 
 interface Props {
@@ -41,7 +43,7 @@ export class TasksPresenter extends Presenter<Props> {
   readonly width = this.preference('helpdesk.tasks.width', 416);
   tasks!: Resource<TaskPage>;
 
-  constructor(private api: HelpdeskApi, private store: Store) {
+  constructor(private api: HelpdeskApi, private store: Store, private work: OfflineWork) {
     super();
   }
 
@@ -66,6 +68,20 @@ export class TasksPresenter extends Presenter<Props> {
   /** The tab of the browser shows the list, or the task when one is open (TaskDetailPresenter is deeper). */
   override pageTitle() {
     return this.heading();
+  }
+
+  /** The key of this list among prepared ones, and its query: a project, my tasks, all tasks. */
+  private offlineList(): [key: string, query: TaskQuery] {
+    if (this.props.projectId) return [`project-${this.props.projectId}`, { projectId: this.props.projectId }];
+    if (this.props.mine) return ['mine', { assigneeId: Number(this.user.getId()) }];
+    return ['all', {}];
+  }
+
+  /** Downloads the tasks of this list with their details, for working without a network. */
+  async handlePrepare(): Promise<void> {
+    const [key, query] = this.offlineList();
+    const count = await this.work.prepare(key, query);
+    this.flashMessage(`Připraveno pro offline: ${count} ${count === 1 ? 'úkol' : count < 5 ? 'úkoly' : 'úkolů'} s komentáři a historií.`, 'success');
   }
 
   heading(): string {
@@ -101,6 +117,12 @@ export class TasksPresenter extends Presenter<Props> {
               title={() => (this.sort() === 'due' ? 'Řazeno podle termínu, řadit podle priority' : 'Řazeno podle priority, řadit podle termínu')}>
               <Icon name="sort" size={19} />
             </a>
+            <button type="button" class={() => `hd-icon-button ${this.work.prepared().includes(this.offlineList()[0]) ? 'hd-active' : ''}`}
+              disabled={() => !online() || this.work.preparing() !== null} onClick={() => this.handlePrepare()}
+              title={() => (this.work.prepared().includes(this.offlineList()[0]) ? 'Připraveno pro offline, stáhnout znovu' : 'Připravit pro offline: stáhne úkoly s detaily')}>
+              {() => <Icon name={this.work.preparing() === this.offlineList()[0] ? 'refresh' : this.work.prepared().includes(this.offlineList()[0]) ? 'cloudCheck' : 'cloudDownload'} size={19}
+                class={this.work.preparing() === this.offlineList()[0] ? 'hd-spin' : ''} />}
+            </button>
             <Dropdown class={() => `hd-icon-button hd-filter-button ${this.priority() ? 'hd-active' : ''}`} panelClass="hd-menu"
               placement="bottom-right" title="Filtr" label={<Icon name="filter" size={18} />}>
               <div class="hd-menu-head"><strong>Priorita</strong></div>

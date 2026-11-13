@@ -697,6 +697,46 @@ Ukázka `examples/helpdesk` je celá aplikace podle návrhu autora (`d:\Projekty
 - **Události předané `<Input>`** (`onBlur`, `onInput`) přepíše vlastní obsluha prvku. `ref` je vyřešený, události zatím ne.
 - **Odložené hledání** (debounce): hledání v hlavičce volá server při každém stisku, starší odpovědi zahodí `resource`. Dropdownlist si debounce dělá sám, obecný pomocník chybí.
 
+## Práce offline (implementováno, čeká na review)
+
+Zadání autora (13. 11. 2026): technici v terénu bez signálu si vyberou úkoly nebo celý projekt, stáhnou je, pracují offline a po návratu signálu se jejich práce odešle. Kolize se neslučují: když se záznam mezitím změnil na serveru, aplikace se zeptá, jestli změnu uložit i tak. Obecně, bez ohledu na to, jestli jsou offline hodiny, nebo dny.
+
+Kód: `src/net/offline.ts`, `store.ts`, `online.ts`; testy `tests/offline.test.ts`, offline scénář v `tests/helpdesk.test.tsx`; v prohlížeči ověřeno na helpdesku (odpojení sítě, změna stejného úkolu z jiného okna, PWA po zavření a otevření bez sítě).
+
+### Vrstvy
+
+| Vrstva | Kde | Co dělá |
+|---|---|---|
+| Kostra aplikace | service worker (`vite-plugin-pwa`), konfigurace aplikace | stránka, JS, CSS a ikony se otevřou i bez signálu |
+| Stav připojení | `online()` v `phlox-js/net` | reaktivní stav |
+| Data a fronta | `RpcOffline` v `phlox-js/net`, volba `offline` u `RpcClient` | uložené výsledky čtecích metod, fronta zapisujících, stažení, synchronizace |
+| Úložiště | `OfflineStore`: `IndexedDbStore`, `MemoryStore` | klíče a hodnoty; IndexedDB v prohlížeči, paměť v testech |
+
+### Rozhodnutí
+
+- **Jedna služba `RpcOffline` místo `RpcCache` a `RpcOutbox` z návrhu.** Fronta potřebuje uložená data (promítnutí změny, verze záznamu) a čtení potřebuje vědět o frontě; dvě služby by se volaly navzájem.
+- **Aplikace řekne pravidla, framework je obecný:** `reads` (metoda se ukládá; `offline` spočítá odpověď z jiných uložených dat, třeba seznam s jiným filtrem z uložených úkolů) a `writes` (`apply` promítne změnu do uložených dat a vrátí výsledek, `version`/`current` pro dotaz na změněný záznam, `describe` pro lidi). Kód, který změnu promítne, se obecně napsat nedá, je to logika aplikace.
+- **Ukládá se každá odpověď čtecí metody,** ne jen stažená. Co technik otevřel, má offline i bez přípravy; příprava jen zajistí, že tam je všechno.
+- **Kolize: dotaz, ne slučování (rozhodl autor).** Před odesláním změny se porovná verze záznamu, ze které změna vznikla, s verzí na serveru (u helpdesku čas poslední změny). Liší-li se, změna čeká v `conflicts` a uživatel ji uloží i tak, nebo zahodí. Escape rozhodnutí odloží, neznamená zahodit.
+- **Odmítnutá změna** (validace, oprávnění) jde do `failed` s důvodem a fronta pokračuje. Chyba sítě nebo 401 frontu zastaví, změny čekají.
+- **Data a fronta patří uživateli** (`scope`, u helpdesku id přihlášeného): jiný uživatel na stejném zařízení je neuvidí a fronta se neodešle jeho jménem.
+- **Dvě záložky** by poslaly stejnou frontu dvakrát. Synchronizace běží pod zámkem Web Locks API a v něm frontu znovu načte.
+- **Fronta se posílá popořadě, po jedné změně,** po návratu signálu (událost `online`), po startu aplikace a ručně. Background Sync ne, funguje jen v Chromiu.
+- **Soubory offline nejsou** (přikládání je bez sítě vypnuté). Kontrola opakovaného zápisu na serveru zatím také ne: výpadek uprostřed odeslání může změnu poslat dvakrát. Obojí je další krok, viz níže.
+- **Služba aplikace musí být vlastní třída** (`HelpdeskOffline extends RpcOffline<RpcMethods>`), autowiring generika záměrně nerozlišuje.
+
+### Chyby nalezené cestou
+
+- **`setDefaults()` byl vidět jako změna:** hodnoty se nastavily v jedné dávce a označení „uloženo“ až po ní. Efekt nad `isChanged()` (automatické ukládání v detailu úkolu) tak po synchronizaci odeslal stará data jako změnu uživatele. Teď je to jedna dávka, test v `tests/leave.test.tsx`.
+- **Pořadí CSS v sestavení:** sestavení sdílí CSS Bootstrapu mezi ukázkami a vloží ho za styly helpdesku. Helpdesk ho proto importuje na začátku svého CSS.
+
+### Další kroky
+
+- **`phlox-rpc-api` (autor souhlasí s rozšířením, je-li obecné):** značky čtecích a zapisujících metod v OpenRPC, aby pravidla `reads` a `writes` nemusela vznikat ručně; kontrola opakovaného zápisu podle ID změny.
+- **Přílohy offline** (fotky z terénu): soubory do IndexedDB, nahrání po odeslání záznamu.
+- **Worklogy** jako druhý případ zápisu offline (jen přidávání).
+- **Stáří a velikost uložených dat,** smazání po odhlášení na přání uživatele.
+
 ## Reaktivní jádro a renderer (implementováno, čeká na review)
 
 Kód je v `src/`, ukázka v `examples/shopping-list`. Spuštění: `npm test`, `npm run typecheck`, `npm run dev`.

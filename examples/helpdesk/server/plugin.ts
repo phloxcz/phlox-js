@@ -44,17 +44,19 @@ function file(id: number, response: ServerResponse): void {
   response.end(found.content);
 }
 
+function middleware(request: IncomingMessage, response: ServerResponse, next: () => void): void {
+  const path = (request.url ?? '').split('?')[0]!;
+  if (path === '/helpdesk/rpc' && request.method === 'POST') return void rpc(request, response);
+  const download = /^\/helpdesk\/files\/(\d+)\//.exec(path);
+  if (download && request.method === 'GET') return file(Number(download[1]), response);
+  next();
+}
+
+/** In the dev server and in `vite preview` of the build too, there the service worker of the PWA runs. */
 export function helpdeskServer(): Plugin {
   return {
     name: 'helpdesk-server',
-    configureServer(server) {
-      server.middlewares.use((request, response, next) => {
-        const path = (request.url ?? '').split('?')[0]!;
-        if (path === '/helpdesk/rpc' && request.method === 'POST') return void rpc(request, response);
-        const download = /^\/helpdesk\/files\/(\d+)\//.exec(path);
-        if (download && request.method === 'GET') return file(Number(download[1]), response);
-        next();
-      });
-    },
+    configureServer: server => void server.middlewares.use(middleware),
+    configurePreviewServer: server => void server.middlewares.use(middleware),
   };
 }

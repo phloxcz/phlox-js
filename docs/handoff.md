@@ -138,11 +138,18 @@ Z toho plyne:
 5. ~~Testování aplikací~~ **hotovo 13. 11.:** `phlox-js/testing` (`bootApp`, `cleanup`, `until`, `type`, `press`), `createRpcMock` v `phlox-js/net`, test celé aplikace `tests/helpdesk.test.tsx`.
 6. ~~Typované parametry rout~~ **hotovo 13. 11.:** `<id:int>`, `route()`, `link(route, params)` kontrolovaný kompilátorem, chyba u ztraceného lomítka.
 7. **Velké seznamy:** zátěžový test s 10 000 řádky (bod 5 plánu), případně virtuální posouvání.
-7a. **PWA, jen část (domluveno s autorem 13. 11.):**
+7b. ~~Offline pro techniky v terénu~~ **hotovo 13. 11., čeká na review:** `RpcOffline` v `phlox-js/net` (uložená data, fronta, příprava, dotaz u změněného záznamu), helpdesk jako PWA s přípravou projektu pro offline. Další kroky (značky metod v `phlox-rpc-api`, přílohy offline, kontrola opakovaného zápisu) jsou v design.md v oddílu „Práce offline“.
+7a. **PWA, jen část (domluveno s autorem 13. 11.):** instalovatelnost a cache helpdesku hotové (viz 7b), `online()` hotové; zbývá obecné upozornění na novou verzi ve frameworku (v helpdesku je zatím v `main.ts` přes `vite-plugin-pwa`).
    - **Upozornění na novou verzi ve frameworku:** po nasazení zůstane v otevřené záložce stará SPA a volá nové API. Služba, která novou verzi pozná (service worker nebo kontrola verze) a nabídne „Je dostupná nová verze, načíst?“.
    - **Stav připojení jako `state`:** `online()`, aby aplikace ukázala „jste offline“ a chyby sítě nešly do toastů.
    - **Instalovatelnost a cache aplikace** v helpdesku přes `vite-plugin-pwa` (Workbox), v konfiguraci aplikace, ne v jádru.
-   - **Nedělat:** offline práci s daty (fronty zápisů, konflikty). Push notifikace až s Web Push na straně Nette.
+   - **Push notifikace** až s Web Push na straně Nette. Práce offline s daty nakonec vznikla, viz 7b.
+7c. **Web s ukázkami jako dokumentace** (nápad autora 13. 11.): jedna aplikace na frameworku, vlevo menu podle částí frameworku (Reaktivita, Šablony, Komponenty, Presentery a routy, Dialogy, Formuláře a prvky, Grid, Strom, RPC, Offline, Kendo…), u každé části ukázky od jednoduché po složitou, jako dema Kendo UI: popis, živá ukázka a záložka s kódem.
+   - **Kód na webu je kód, který běží:** soubor ukázky se načte i jako text (`?raw` ve Vite), zobrazený kód se nerozejde se skutečným.
+   - **Každá ukázka je zároveň test:** Vitest je všechny vykreslí, nefunkční ukázka se pozná při `npm test`.
+   - **Dosavadní ukázky** se rozpustí do sekcí (strom kategorií ke Stromu, objednávky ke Gridu, Kendo ke Kendu), helpdesk zůstane jako celá aplikace.
+   - **Text:** rozhodnout, jestli web ukáže přímo oddíly `guide.md` (jeden zdroj textu, navrženo), nebo ukázky dostanou krátké vlastní popisy s odkazem do příručky.
+   - **Postup:** kostra webu a tři až čtyři sekce, pak přidávat.
 8. **Drobnosti:**
    - jeden balíček českých textů frameworku místo nastavování v každé aplikaci (`messageTexts`, `DropDownList.texts`, `Grid.texts`, `Form.messages`…),
    - události předané do `<Input>` (`onBlur`, `onInput`) přepíše vlastní obsluha prvku, `ref` už je vyřešený,

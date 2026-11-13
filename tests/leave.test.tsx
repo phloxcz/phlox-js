@@ -189,3 +189,17 @@ describe('Form.isChanged', () => {
     expect(form.isChanged()).toBe(true);
   });
 });
+
+test('setDefaults() is never seen as a change, an autosave effect stays quiet', async () => {
+  const { effect } = await import('../src/index');
+  const form = new Form<{ name: string; tags: string[] }>();
+  form.addText('name');
+  form.addTagInput('tags');
+  form.setDefaults({ name: 'a', tags: [] });
+  const seen: boolean[] = [];
+  const stop = effect(() => void seen.push(form.isChanged()));
+  form.setDefaults({ name: 'b', tags: ['x'] });
+  form.setValues({ name: 'c' });
+  stop();
+  expect(seen).toEqual([false, true]);
+});

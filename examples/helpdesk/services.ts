@@ -3,6 +3,7 @@ import { BootstrapTheme, Container, FlashMessages } from 'phlox-js';
 import { BrowserUserStorage, User } from 'phlox-js/security';
 import { HelpdeskApi } from './api';
 import { ApiAuthenticator } from './model/ApiAuthenticator';
+import { OfflineWork, createOffline } from './model/offline';
 import { Store } from './model/Store';
 
 export interface ServiceOptions {
@@ -13,8 +14,11 @@ export interface ServiceOptions {
 /** The services of the application; tests make them with the mock server instead of the network. */
 export function createServices(options: ServiceOptions = {}): Container {
   const services = new Container();
+  // Working offline: kept data and a queue of changes, per signed-in user
+  const offline = createOffline(() => Number(services.get(User).getId()));
 
-  services.add(new HelpdeskApi('/helpdesk/rpc', {
+  services.add(offline, OfflineWork, new HelpdeskApi('/helpdesk/rpc', {
+    offline,
     headers: () => {
       const token = services.get(User).token;
       return token ? { Authorization: `Bearer ${token}` } : {};
