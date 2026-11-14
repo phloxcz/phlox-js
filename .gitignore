@@ -1,8 +1,8 @@
 # Dependencies
 node_modules/
 
-# Build artifacts
-dist/
+# Build artifacts; dist/ of the package is in git, so it installs from GitHub without a build
+examples/dist/
 coverage/
 
 # Local environment, e.g. license keys

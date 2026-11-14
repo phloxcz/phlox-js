@@ -8,7 +8,15 @@ Tato dokumentace je sama aplikace na PhloxJS. Ukázky na stránkách jsou živé
 
 Celou aplikaci proti serveru (přihlášení, RPC, vnořené presentery, `resource`, offline, PWA) ukazuje [Helpdesk](/helpdesk), odkaz je i v hlavičce. Jeho kód je v `examples/helpdesk`.
 
-## Spuštění
+## Instalace
+
+```bash
+npm install github:phloxcz/phlox-js#v0.1.0
+```
+
+Balíček zatím není na npm, instaluje se z GitHubu podle tagu. Projekt potřebuje Vite (od verze 7) s pluginem `phlox()` a v `tsconfig.json` `"jsx": "react-jsx"`, `"jsxImportSource": "phlox-js"` a `"moduleResolution": "Bundler"` (viz Aplikace a bootstrap). Styly: `import 'phlox-js/styles/base.css'` a k nim `phlox-js/styles/default.css`, nebo Bootstrap.
+
+## Spuštění tohoto repozitáře
 
 | Příkaz | Co dělá |
 |---|---|

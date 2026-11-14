@@ -140,7 +140,7 @@ Z toho plyne:
   - Pro backend (mock teď, `phlox-rpc-api` později): metody pro založení požadavku zvenku (bez přihlášení operátora, s ochranou proti spamu) a pro převod požadavku na úkoly.
 - **Mock RPC v prohlížeči pro statické sestavení** (cesta 1; zatím není potřeba, autor spouští sestavení přes `vite preview`, kde mock běží; udělat, až budou ukázky potřeba vystavit na statický hosting): `npm run build:examples` dá `dist`, které jde pustit z libovolného statického serveru (`php -S`, GitHub Pages). Helpdesk ve statickém sestavení použije `createRpcMock(...).fetch` místo sítě; v mocku nahradit Node `Buffer` prohlížečovou variantou a data ukládat do `localStorage`, aby přežila obnovení stránky. Dev server a `vite preview` dál s mockem ve Vite.
 
-**Vydání frameworku (rozhodl autor 14. 11.):** phlox-js se vydá, až bude konzistentní a bude mít web s ukázkami pro jednotlivé funkce (bod 7c). Co vydání brání, je v bodě 9 níže.
+**Vydání frameworku:** vydáno jako `v0.1.0` 14. 11. 2026 (autor: review oddílů „čeká na review“ zatím přeskočit, framework průběžně testoval). Instalace `npm install github:phloxcz/phlox-js#v0.1.0`. Další krok: CMS (přepis ze starého Knockoutu) na vydané verzi. Jak se vydává další verze, je v design.md v oddílu „Balíček a vydávání“.
 
 **TODO frameworku (z helpdesku, sepsáno 12. 11. 2026, v navrženém pořadí):**
 1. ~~Chyby asynchronních obsluh událostí~~ **hotovo 13. 11.:** chyby obsluh jdou do `app.onError`.

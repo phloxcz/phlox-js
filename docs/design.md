@@ -697,6 +697,15 @@ Ukázka `examples/helpdesk` je celá aplikace podle návrhu autora (`d:\Projekty
 - **Události předané `<Input>`** (`onBlur`, `onInput`) přepíše vlastní obsluha prvku. `ref` je vyřešený, události zatím ne.
 - **Odložené hledání** (debounce): hledání v hlavičce volá server při každém stisku, starší odpovědi zahodí `resource`. Dropdownlist si debounce dělá sám, obecný pomocník chybí.
 
+## Balíček a vydávání (rozhodnuto 14. 11. 2026)
+
+- **Sestavení `npm run build`:** JavaScript sestaví Vite v režimu knihovny po modulech (`build.config.ts`, `preserveModules`), takže aplikace si přibalí jen to, co importuje. Typy dělá `tsc -p tsconfig.build.json` (jen deklarace), CSS se kopíruje. Výstup je `dist/` a mapuje ho `exports` v `package.json`.
+- **`dist/` je v gitu,** instalace z GitHubu podle tagu tak nic nesestavuje (stejně jako `assets` phlox-editoru). Na npm balíček zatím není.
+- **Relativní importy ve zdrojácích s `.js`, ne `.ts`,** kde přípona být musí (soubory, které načítá i konfigurace Vite): TypeScript i Vite je přeloží na `.ts` a v typech v `dist/` zůstanou správně. `rewriteRelativeImportExtensions` typy nepřepisuje.
+- **Plugin `phlox-js/vite` běží v Node,** proto balíček musí být JS. `vite` je peer závislost (od verze 7), editor běžná závislost (`github:phloxcz/forms-editor`).
+- **Ověřeno v čistém projektu** z `npm pack`: kontrola typů se `skipLibCheck: false`, sestavení, autowiring přes plugin, líně načtený editor, grid, české texty, příkaz `phlox-rpc-types`.
+- **Další verze:** změny do `CHANGELOG.md`, verze v `package.json`, `npm run build`, commit včetně `dist/`, tag `vX.Y.Z`, push tagu.
+
 ## Web s ukázkami jako příručka (implementováno, čeká na review)
 
 Zadání autora (13. a 14. 11. 2026): každá funkce frameworku s ukázkou, text příručky rozdělený do markdownu vedle ukázek, web sám na frameworku. Tím se má API ukonzistentnit a ukázat nedostatky.

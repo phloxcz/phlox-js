@@ -4,6 +4,14 @@ Frontendový framework, který přenáší způsob práce z Nette do prohlíže�
 
 Ve frameworku jsou i grid, strom, dialogy, WYSIWYG editor, JSON-RPC klient pro [phlox-rpc-api](https://github.com/phloxcz/rpc-api), práce offline a pomocníci pro testy. Vzhled je výchozí, nebo Bootstrap 5.
 
+## Instalace
+
+```bash
+npm install github:phloxcz/phlox-js#v0.1.0
+```
+
+Balíček zatím není na npm, instaluje se z GitHubu podle tagu. Potřebuje Vite (od verze 7) a TypeScript s `"moduleResolution": "Bundler"`. Typy z OpenRPC dokumentu `phlox-rpc-api` vygeneruje `npx phlox-rpc-types <url> src/api/rpc.ts`.
+
 ## Příklad
 
 ```tsx

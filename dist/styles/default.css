@@ -1,0 +1,876 @@
+/**
+ * phlox-js/styles/default.css – look of the default theme. Not needed with Bootstrap.
+ *
+ * It uses CSS system colors (Canvas, Field, ButtonFace, Highlight, GrayText...), like the other phlox
+ * components. They follow color-scheme of the page: with `:root { color-scheme: light dark; }` the forms and
+ * dialogs turn dark together with the system, without it they stay light. Change the look by the variables.
+ */
+
+:root {
+  --phlox-radius: .25rem;
+  --phlox-error: light-dark(#c62828, #ef9a9a);
+  --phlox-backdrop: rgb(0 0 0 / .4);
+}
+
+/* Forms */
+
+.phlox-form-row {
+  margin-bottom: .75rem;
+}
+
+.phlox-label {
+  display: block;
+  margin-bottom: .25rem;
+}
+
+.phlox-input,
+.phlox-select,
+.phlox-textarea {
+  box-sizing: border-box;
+  font: inherit;
+  padding: .375rem .5rem;
+  border: 1px solid GrayText;
+  border-radius: var(--phlox-radius);
+  background: Field;
+  color: FieldText;
+}
+
+.phlox-textarea {
+  min-height: 5rem;
+}
+
+.phlox-input:focus-visible,
+.phlox-select:focus-visible,
+.phlox-textarea:focus-visible,
+.phlox-button:focus-visible {
+  outline: 2px solid Highlight;
+  outline-offset: 1px;
+}
+
+.phlox-invalid {
+  border-color: var(--phlox-error);
+}
+
+.phlox-form-error {
+  display: block;
+  margin-top: .25rem;
+  color: var(--phlox-error);
+  font-size: .875em;
+}
+
+.phlox-form-errors {
+  margin: 0 0 .75rem;
+  padding: .5rem 1rem;
+  list-style: none;
+  border-left: 3px solid var(--phlox-error);
+  color: var(--phlox-error);
+}
+
+.phlox-checkbox,
+.phlox-choice {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  margin-right: 1rem;
+}
+
+.phlox-form-buttons {
+  display: flex;
+  gap: .5rem;
+}
+
+.phlox-button {
+  font: inherit;
+  padding: .375rem .9rem;
+  border: 1px solid ButtonBorder;
+  border-radius: var(--phlox-radius);
+  background: ButtonFace;
+  color: ButtonText;
+  cursor: pointer;
+}
+
+.phlox-button-primary {
+  color: HighlightText;
+  background: Highlight;
+  border-color: Highlight;
+}
+
+.phlox-button-danger {
+  color: #fff;
+  background: var(--phlox-error);
+  border-color: var(--phlox-error);
+}
+
+.phlox-button:disabled {
+  color: GrayText;
+  cursor: default;
+}
+
+.phlox-button-primary:disabled {
+  color: HighlightText;
+  opacity: .5;
+}
+
+.phlox-button-danger:disabled {
+  color: #fff;
+  opacity: .5;
+}
+
+/* Dialogs */
+
+.phlox-dialog {
+  border: 1px solid color-mix(in srgb, CanvasText 12%, transparent);
+  border-radius: calc(var(--phlox-radius) * 3);
+  background: Canvas;
+  color: CanvasText;
+  box-shadow: 0 1.5rem 4rem rgb(0 0 0 / .25), 0 .25rem 1rem rgb(0 0 0 / .1);
+}
+
+.phlox-dialog[data-placement] {
+  border-radius: 0;
+  border-width: 0 0 0 1px;
+}
+
+.phlox-dialog[data-placement="start"] {
+  border-width: 0 1px 0 0;
+}
+
+.phlox-dialog::backdrop {
+  background: var(--phlox-backdrop);
+}
+
+.phlox-dialog-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: .75rem 1rem;
+  border-bottom: 1px solid color-mix(in srgb, CanvasText 12%, transparent);
+}
+
+.phlox-dialog-title {
+  flex: 1;
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.phlox-dialog-close {
+  border: 0;
+  background: none;
+  color: inherit;
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.phlox-dialog-body {
+  padding: 1rem;
+}
+
+.phlox-dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: .5rem;
+  padding: .75rem 1rem;
+  border-top: 1px solid color-mix(in srgb, CanvasText 12%, transparent);
+}
+
+/* DropDownList – the same look as the default theme of phloxcz/forms-dropdownlist */
+
+.dropdownlist-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 6px 10px 6px 12px;
+  font: inherit;
+  color: ButtonText;
+  background: ButtonFace;
+  border: 1px solid ButtonBorder;
+  border-radius: var(--phlox-radius);
+  cursor: pointer;
+  user-select: none;
+  min-height: 2.25em;
+  text-align: left;
+  outline: none;
+}
+
+.dropdownlist-trigger:focus,
+.dropdownlist-trigger[aria-expanded="true"] {
+  outline: 2px solid Highlight;
+  outline-offset: 1px;
+}
+
+.dropdownlist-trigger.phlox-invalid {
+  border-color: var(--phlox-error);
+}
+
+.dropdownlist-trigger-text {
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dropdownlist-trigger-placeholder {
+  color: GrayText;
+}
+
+.dropdownlist-trigger-arrow {
+  flex: 0 0 auto;
+  display: inline-block;
+  margin-left: 8px;
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 5px solid currentColor;
+  opacity: .6;
+  transition: transform calc(.18s * var(--phlox-motion)) ease;
+}
+
+.dropdownlist-trigger[aria-expanded="true"] .dropdownlist-trigger-arrow {
+  transform: rotate(180deg);
+}
+
+.dropdownlist-dropdown {
+  background: Canvas;
+  color: CanvasText;
+  border: 1px solid ButtonBorder;
+  border-radius: var(--phlox-radius);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, .12);
+}
+
+.dropdownlist-filter {
+  padding: 6px 8px;
+  border-bottom: 1px solid ButtonBorder;
+}
+
+.dropdownlist-filter-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 5px 10px 5px 28px;
+  font-size: .875em;
+  font-family: inherit;
+  color: FieldText;
+  background-color: Field;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: 8px center;
+  border: 1px solid ButtonBorder;
+  border-radius: 3px;
+  outline: none;
+}
+
+.dropdownlist-filter-input:focus {
+  outline: 2px solid Highlight;
+  outline-offset: 1px;
+}
+
+.dropdownlist-dropdown [role="option"][data-value] {
+  display: block;
+  padding: 7px 14px;
+  cursor: pointer;
+  color: inherit;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dropdownlist-dropdown [role="option"][data-value]:hover,
+.dropdownlist-dropdown [role="option"].dropdownlist-active {
+  background-color: Highlight;
+  color: HighlightText;
+}
+
+.dropdownlist-dropdown [role="option"].dropdownlist-selected {
+  font-weight: 600;
+}
+
+.dropdownlist-no-results {
+  display: block;
+  padding: 8px 14px;
+  font-size: .875em;
+  font-style: italic;
+  color: GrayText;
+  cursor: default;
+}
+
+.dropdownlist-dropdown mark {
+  background: transparent;
+  color: Highlight;
+  font-weight: 700;
+  padding: 0;
+}
+
+/* ComboBox – the classes of phloxcz/forms-combobox, in system colors like the rest of the default theme */
+
+.combobox-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: .375rem 1.75rem .375rem .5rem;
+  font: inherit;
+  color: FieldText;
+  background: Field url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888'/%3E%3C/svg%3E") no-repeat right 10px center / 10px 6px;
+  border: 1px solid GrayText;
+  border-radius: var(--phlox-radius);
+}
+
+.combobox-input:focus-visible {
+  outline: 2px solid Highlight;
+  outline-offset: 1px;
+}
+
+.combobox-input.phlox-invalid {
+  border-color: var(--phlox-error);
+}
+
+.combobox-dropdown {
+  background: Canvas;
+  color: CanvasText;
+  border: 1px solid ButtonBorder;
+  border-radius: var(--phlox-radius);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, .12);
+}
+
+.combobox-dropdown [role="option"][data-value] {
+  display: block;
+  padding: 7px 14px;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.combobox-dropdown [role="option"][data-value]:hover,
+.combobox-dropdown [role="option"].combobox-active {
+  background-color: Highlight;
+  color: HighlightText;
+}
+
+.combobox-dropdown [role="option"].combobox-selected {
+  font-weight: 600;
+}
+
+.combobox-no-results {
+  display: block;
+  padding: 8px 14px;
+  font-size: .875em;
+  font-style: italic;
+  color: GrayText;
+  cursor: default;
+}
+
+.combobox-dropdown mark {
+  background: transparent;
+  color: Highlight;
+  font-weight: 700;
+  padding: 0;
+}
+
+/* TagInput – the classes of phloxcz/forms-taginput. Tag colors follow color-scheme of the page */
+
+.phlox-taginput--theme-default .phlox-taginput__container {
+  border: 1px solid GrayText;
+  border-radius: var(--phlox-radius);
+  background: Field;
+  color: FieldText;
+}
+
+.phlox-taginput--theme-default .phlox-taginput__container.phlox-taginput--focused {
+  outline: 2px solid Highlight;
+  outline-offset: 1px;
+}
+
+.phlox-taginput--theme-default .phlox-taginput__container.phlox-invalid {
+  border-color: var(--phlox-error);
+}
+
+.phlox-taginput--theme-default .phlox-tag-existing {
+  background-color: light-dark(#dbeafe, #1e3a5f);
+  color: light-dark(#1e40af, #bfdbfe);
+}
+
+.phlox-taginput--theme-default .phlox-tag-new {
+  background-color: light-dark(#dcfce7, #14532d);
+  color: light-dark(#166534, #bbf7d0);
+}
+
+.phlox-taginput--theme-default .phlox-taginput__dropdown {
+  padding: 4px 0;
+  background: Canvas;
+  color: CanvasText;
+  border: 1px solid ButtonBorder;
+  border-radius: var(--phlox-radius);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, .12);
+}
+
+.phlox-taginput--theme-default .phlox-taginput__option {
+  padding: 7px 14px;
+}
+
+.phlox-taginput--theme-default .phlox-taginput__option:hover,
+.phlox-taginput--theme-default .phlox-taginput__option--active {
+  background-color: Highlight;
+  color: HighlightText;
+}
+
+.phlox-taginput--theme-default .phlox-taginput__option--new:not(.phlox-taginput__option--active) {
+  color: light-dark(#166534, #86efac);
+}
+
+.phlox-taginput--theme-default .phlox-taginput__option mark {
+  background: transparent;
+  color: inherit;
+  font-weight: 700;
+  padding: 0;
+}
+
+/* Groups (containers) and multiplier rows */
+
+.phlox-group,
+.phlox-multiplier {
+  margin: 0 0 .75rem;
+  padding: .5rem .75rem .75rem;
+  border: 1px solid GrayText;
+  border-radius: var(--phlox-radius);
+}
+
+.phlox-legend {
+  padding: 0 .25rem;
+  font-weight: 600;
+}
+
+.phlox-multiplier-row {
+  margin-bottom: .5rem;
+  padding: .5rem;
+  border: 1px solid ButtonBorder;
+  border-radius: var(--phlox-radius);
+  background: Canvas;
+}
+
+.phlox-multiplier-field .phlox-input,
+.phlox-multiplier-field .phlox-select {
+  width: 100%;
+}
+
+.phlox-multiplier-buttons {
+  display: flex;
+  gap: .25rem;
+}
+
+.phlox-button-small {
+  padding: .125rem .5rem;
+}
+
+/* Upload */
+
+.phlox-upload-dropzone {
+  margin-bottom: .5rem;
+  padding: 1.5rem 1rem;
+  border: 2px dashed GrayText;
+  border-radius: var(--phlox-radius);
+  text-align: center;
+  color: GrayText;
+}
+
+.phlox-upload-dropzone .phlox-button {
+  margin-top: .5rem;
+}
+
+.phlox-upload-dropzone:hover,
+.phlox-upload-dropzone-active {
+  border-color: Highlight;
+  color: CanvasText;
+}
+
+.phlox-upload-dropzone-active {
+  background: color-mix(in srgb, Highlight 10%, transparent);
+}
+
+.phlox-upload-dropzone.phlox-invalid {
+  border-color: var(--phlox-error);
+}
+
+.phlox-upload-table td {
+  padding: .25rem .25rem;
+  border-bottom: 1px solid color-mix(in srgb, GrayText 35%, transparent);
+}
+
+.phlox-upload-row-error {
+  color: var(--phlox-error);
+}
+
+.phlox-upload-size {
+  text-align: right;
+  white-space: nowrap;
+  color: GrayText;
+  font-size: .875em;
+}
+
+.phlox-upload-remove-cell {
+  text-align: right;
+  width: 1%;
+}
+
+.phlox-upload-remove {
+  padding: .25rem;
+  border-radius: 3px;
+}
+
+.phlox-upload-remove:hover {
+  color: var(--phlox-error);
+}
+
+/* Tree select */
+
+.phlox-treeselect-box {
+  padding: .25rem;
+  border: 1px solid ButtonBorder;
+  border-radius: var(--phlox-radius);
+}
+
+.phlox-treeselect-box.phlox-invalid {
+  border-color: var(--phlox-error);
+}
+
+/* Grid */
+
+.phx-grid-table {
+  border-collapse: collapse;
+}
+
+.phx-grid-th,
+.phx-grid-td {
+  padding: .4rem .6rem;
+  border-bottom: 1px solid color-mix(in srgb, GrayText 40%, transparent);
+  text-align: start;
+}
+
+.phx-grid-th {
+  background: color-mix(in srgb, CanvasText 5%, Canvas);
+}
+
+.phx-grid-filter-th {
+  padding: .3rem .4rem;
+  background: color-mix(in srgb, CanvasText 3%, Canvas);
+  border-bottom: 1px solid color-mix(in srgb, GrayText 40%, transparent);
+}
+
+.phx-grid-th.phx-grid-sorted {
+  background: color-mix(in srgb, Highlight 12%, Canvas);
+}
+
+.phx-grid-table tbody tr:hover {
+  background: color-mix(in srgb, CanvasText 4%, transparent);
+}
+
+.phx-grid-row-selected,
+.phx-grid-table tbody tr.phx-grid-row-selected:hover {
+  background: color-mix(in srgb, Highlight 14%, transparent);
+}
+
+.phx-grid-td-footer {
+  border-top: 2px solid color-mix(in srgb, GrayText 50%, transparent);
+  border-bottom: 0;
+}
+
+.phx-grid-no-data {
+  padding: 2rem;
+  text-align: center;
+  color: GrayText;
+}
+
+.phx-grid-bool-no {
+  color: GrayText;
+}
+
+.phx-grid-danger {
+  color: var(--phlox-error);
+}
+
+.phx-grid-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: .5rem;
+  margin-top: .5rem;
+}
+
+.phx-grid-pagination-info {
+  color: GrayText;
+}
+
+.phx-grid-page-list {
+  display: flex;
+  gap: .2rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.phx-grid-page-link {
+  min-width: 2rem;
+  padding: .2rem .5rem;
+  font: inherit;
+  color: ButtonText;
+  background: ButtonFace;
+  border: 1px solid ButtonBorder;
+  border-radius: var(--phlox-radius);
+  cursor: pointer;
+}
+
+.phx-grid-page-active .phx-grid-page-link {
+  color: HighlightText;
+  background: Highlight;
+  border-color: Highlight;
+}
+
+.phx-grid-page-disabled .phx-grid-page-link {
+  opacity: .45;
+  cursor: default;
+}
+
+.phx-grid-popup {
+  padding: .25rem 0;
+  color: CanvasText;
+  background: Canvas;
+  border: 1px solid ButtonBorder;
+  border-radius: var(--phlox-radius);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, .15);
+}
+
+.phx-grid-ms-item,
+.phx-grid-coltoggle-item {
+  padding: .2rem .6rem;
+}
+
+.phx-grid-menu-item {
+  padding: .3rem .8rem;
+  font: inherit;
+  color: inherit;
+  text-decoration: none;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.phx-grid-menu-item:hover,
+.phx-grid-menu-item:focus-visible,
+.phx-grid-ms-item:hover {
+  background: color-mix(in srgb, Highlight 15%, transparent);
+}
+
+.phx-grid-ms-apply {
+  width: 100%;
+}
+
+.phx-grid-bulk {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .5rem;
+  padding: .4rem .6rem;
+  background: color-mix(in srgb, Highlight 10%, Canvas);
+  border: 1px solid color-mix(in srgb, Highlight 30%, transparent);
+  border-radius: var(--phlox-radius);
+  margin-bottom: .5rem;
+}
+
+/* Messages: the look of @phloxcz/capify in the colours of the system */
+
+.phlox-message-text {
+  line-height: 1.5;
+}
+
+.phlox-message-input {
+  display: block;
+  width: 100%;
+  margin-top: .75rem;
+  box-sizing: border-box;
+}
+
+.phlox-message-loading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cap-notify {
+  --phlox-toast-accent: light-dark(#2563eb, #60a5fa);
+  padding: 12px 36px 12px 14px;
+  font-size: .875rem;
+  line-height: 1.45;
+  color: CanvasText;
+  background: Canvas;
+  border: 1px solid color-mix(in srgb, GrayText 40%, transparent);
+  border-left: 3px solid var(--phlox-toast-accent);
+  border-radius: 10px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, .15);
+}
+
+.cap-notify[data-type="success"] { --phlox-toast-accent: light-dark(#16a34a, #4ade80); }
+.cap-notify[data-type="warning"] { --phlox-toast-accent: light-dark(#d97706, #fbbf24); }
+.cap-notify[data-type="error"] { --phlox-toast-accent: var(--phlox-error); }
+
+.cap-notify-title {
+  margin: 0 0 2px;
+  font-weight: 600;
+}
+
+.cap-notify-msg {
+  opacity: .85;
+}
+
+.cap-notify-card .cap-notify-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  font-size: 16px;
+  line-height: 1;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  border-radius: 4px;
+  opacity: .5;
+  cursor: pointer;
+}
+
+.cap-notify-card .cap-notify-close:hover {
+  opacity: .9;
+  background: color-mix(in srgb, CanvasText 10%, transparent);
+}
+
+.phlox-dropdown-button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.phlox-dropdown {
+  padding: .25rem;
+  color: CanvasText;
+  background: Canvas;
+  border: 1px solid ButtonBorder;
+  border-radius: 10px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, .2);
+}
+
+.phlox-dropdown-item {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  padding: .35rem .75rem;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  text-decoration: none;
+  white-space: nowrap;
+  background: none;
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.phlox-dropdown-item:hover,
+.phlox-dropdown-item:focus-visible {
+  background: color-mix(in srgb, CanvasText 8%, transparent);
+}
+
+.phlox-dropdown-item.phlox-active {
+  font-weight: 600;
+}
+
+.phlox-dropdown-item:disabled {
+  opacity: .5;
+  cursor: default;
+}
+
+.cap-popover {
+  padding: 14px 16px;
+  color: CanvasText;
+  background: Canvas;
+  border: 1px solid ButtonBorder;
+  border-radius: 10px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, .2);
+}
+
+.cap-popover-arrow {
+  position: absolute;
+  left: calc(var(--phlox-arrow) - 6px);
+  width: 10px;
+  height: 10px;
+  background: Canvas;
+  border: 1px solid ButtonBorder;
+  transform: rotate(45deg);
+}
+
+.cap-popover[data-placement="bottom"] .cap-popover-arrow {
+  top: -6px;
+  border-right: 0;
+  border-bottom: 0;
+}
+
+.cap-popover[data-placement="top"] .cap-popover-arrow {
+  bottom: -6px;
+  border-left: 0;
+  border-top: 0;
+}
+
+.cap-pop-label {
+  margin: 0 0 8px;
+  font-size: .875rem;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.cap-pop-input {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0 0 10px;
+  padding: 6px 9px;
+  font: inherit;
+  font-size: .875rem;
+  color: inherit;
+  background: Field;
+  border: 1px solid ButtonBorder;
+  border-radius: 6px;
+}
+
+.cap-pop-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.cap-pop-btn {
+  padding: 4px 12px;
+  font: inherit;
+  font-size: .8125rem;
+  font-weight: 500;
+  border: 1px solid ButtonBorder;
+  border-radius: 6px;
+  cursor: pointer;
+  color: ButtonText;
+  background: ButtonFace;
+}
+
+.cap-pop-btn-ok {
+  color: HighlightText;
+  background: Highlight;
+  border-color: Highlight;
+}
+
+.cap-pop-btn-danger {
+  color: #fff;
+  background: var(--phlox-error);
+  border-color: var(--phlox-error);
+}

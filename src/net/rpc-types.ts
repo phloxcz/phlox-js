@@ -1,8 +1,11 @@
+#!/usr/bin/env node
 /**
- * Writes TypeScript types for an RPC endpoint from its OpenRPC document.
+ * Writes TypeScript types for an RPC endpoint from its OpenRPC document. In an application with the package:
  *
- *   node src/net/rpc-types.ts <url or file> <output.ts> [--class RpcApi] [--import phlox-js/net]
- *   node src/net/rpc-types.ts http://localhost:9079/rpc/openrpc.json src/api/rpc.ts
+ *   npx phlox-rpc-types <url or file> <output.ts> [--class RpcApi] [--import phlox-js/net]
+ *   npx phlox-rpc-types http://localhost:9079/rpc/openrpc.json src/api/rpc.ts
+ *
+ * In this repository: node src/net/rpc-types.ts …, or npm run rpc:types -- ….
  */
 
 /// <reference types="node" />
@@ -19,7 +22,7 @@ const importFrom = option('--import');
 const [source, output] = args;
 
 if (!source || !output) {
-  console.error('Usage: node src/net/rpc-types.ts <url or file> <output.ts> [--class RpcApi] [--import phlox-js/net]');
+  console.error('Usage: phlox-rpc-types <url or file> <output.ts> [--class RpcApi] [--import phlox-js/net]');
   process.exit(1);
 }
 

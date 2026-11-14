@@ -1,9 +1,85 @@
 {
   "name": "phlox-js",
-  "version": "0.0.0",
-  "private": true,
+  "version": "0.1.0",
+  "description": "Frontendový framework, který přenáší způsob práce z Nette do prohlížeče.",
+  "license": "MIT",
+  "homepage": "https://github.com/phloxcz/phlox-js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/phloxcz/phlox-js.git"
+  },
   "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./jsx-runtime": {
+      "types": "./dist/jsx-runtime.d.ts",
+      "default": "./dist/jsx-runtime.js"
+    },
+    "./jsx-dev-runtime": {
+      "types": "./dist/jsx-dev-runtime.d.ts",
+      "default": "./dist/jsx-dev-runtime.js"
+    },
+    "./vite": {
+      "types": "./dist/vite.d.ts",
+      "default": "./dist/vite.js"
+    },
+    "./forms": {
+      "types": "./dist/forms/index.d.ts",
+      "default": "./dist/forms/index.js"
+    },
+    "./components": {
+      "types": "./dist/components/index.d.ts",
+      "default": "./dist/components/index.js"
+    },
+    "./net": {
+      "types": "./dist/net/index.d.ts",
+      "default": "./dist/net/index.js"
+    },
+    "./security": {
+      "types": "./dist/security/index.d.ts",
+      "default": "./dist/security/index.js"
+    },
+    "./localization": {
+      "types": "./dist/localization/index.d.ts",
+      "default": "./dist/localization/index.js"
+    },
+    "./testing": {
+      "types": "./dist/testing/index.d.ts",
+      "default": "./dist/testing/index.js"
+    },
+    "./locales/cs": {
+      "types": "./dist/locales/cs.d.ts",
+      "default": "./dist/locales/cs.js"
+    },
+    "./adapters/kendo": {
+      "types": "./dist/adapters/kendo/index.d.ts",
+      "default": "./dist/adapters/kendo/index.js"
+    },
+    "./adapters/capify": {
+      "types": "./dist/adapters/capify/index.d.ts",
+      "default": "./dist/adapters/capify/index.js"
+    },
+    "./styles/base.css": "./dist/styles/base.css",
+    "./styles/default.css": "./dist/styles/default.css",
+    "./adapters/kendo/kendo.css": "./dist/adapters/kendo/kendo.css"
+  },
+  "bin": {
+    "phlox-rpc-types": "./dist/net/rpc-types.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
+  "sideEffects": [
+    "*.css"
+  ],
   "scripts": {
+    "build": "vite build --config build.config.ts && tsc -p tsconfig.build.json",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "dev": "vite --config examples/vite.config.ts",
@@ -12,6 +88,9 @@
   },
   "dependencies": {
     "@phloxcz/forms-editor": "github:phloxcz/forms-editor#v0.2.1"
+  },
+  "peerDependencies": {
+    "vite": ">=7"
   },
   "devDependencies": {
     "@types/jsdom": "^30.0.0",
