@@ -1,7 +1,9 @@
 // Methods of the mock server, as controllers of phlox-rpc-api would have them. `me` is the logged-in user.
 import { Buffer } from 'node:buffer';
+import { JSDOM } from 'jsdom';
 import type { AttachmentResource, CommentResource, ProjectResource, RpcMethods, Status, TaskDetail } from '../api.ts';
 import { RpcMockError } from '../../../src/net/mock.ts';
+import { sanitizeHtml } from '../../../src/ui/sanitize.ts';
 import { queryTasks, taskItem } from '../model/queries.ts';
 import { seed } from './data.ts';
 import type { Database } from './data.ts';
@@ -16,6 +18,10 @@ export function resetDatabase(): void {
 
 const STATUS_NAMES: Record<Status, string> = { open: 'Otevřený', progress: 'V řešení', closed: 'Uzavřený' };
 const now = () => new Date().toISOString();
+// Comments are HTML from the editor: cleaned the same way <Html> cleans them in the browser
+const server = new JSDOM('').window.document;
+const clean = (html: string) => sanitizeHtml(html, { document: server }).trim();
+const textOf = (html: string) => html.replace(/<[^>]*>|&nbsp;/g, '').trim();
 const fold = (text: string) => text.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase();
 
 function invalid(fields: Record<string, string>): never {
@@ -125,9 +131,10 @@ export const methods: Handlers = {
 
   'comment.create': ({ taskId, text }, me) => {
     const task = find(db.tasks, taskId, 'Úkol');
-    if (!text.trim()) invalid({ text: 'Napište text komentáře.' });
-    if (text.length > 2000) invalid({ text: 'Komentář může mít nejvýš 2000 znaků.' });
-    const item = { id: ++db.lastId, taskId, authorId: me, text: text.trim(), created: now(), likedBy: [] };
+    const html = clean(text);
+    if (!textOf(html) && !/<img/.test(html)) invalid({ text: 'Napište text komentáře.' });
+    if (textOf(html).length > 2000) invalid({ text: 'Komentář může mít nejvýš 2000 znaků.' });
+    const item = { id: ++db.lastId, taskId, authorId: me, text: html, created: now(), likedBy: [] };
     db.comments.push(item);
     task.updated = item.created;
     return comment(me, item);

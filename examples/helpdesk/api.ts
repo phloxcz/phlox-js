@@ -97,6 +97,7 @@ export interface CommentResource {
   id: number;
   taskId: number;
   authorId: number;
+  /** HTML from the editor, cleaned by the server. */
   text: string;
   /** Format: date-time */
   created: string;

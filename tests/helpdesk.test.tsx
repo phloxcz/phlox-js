@@ -43,6 +43,31 @@ describe('helpdesk', () => {
     expect(errors).toEqual([]);
   });
 
+  test('a comment from the editor: HTML cleaned by the server, shown by <Html>', async () => {
+    const server = helpdeskMock();
+    const { element, errors } = await bootApp(AppPresenter, {
+      url: '/helpdesk/sign', basePath: '/helpdesk', services: createServices({ fetch: server.fetch }),
+    });
+    element.querySelector<HTMLButtonElement>('.hd-sign-account')!.click();
+    element.querySelector<HTMLButtonElement>('.hd-sign-card [type=submit]')!.click();
+    await until(() => element.querySelectorAll('.hd-task').length === 24);
+    element.querySelector<HTMLElement>('.hd-task-title')!.click();
+    await until(() => element.querySelector('.hd-composer [contenteditable]') !== null);
+    expect(element.querySelector('.hd-comment-text ul')).not.toBeNull();
+
+    // What the user writes; jsdom has no execCommand, so the pane changes and sends input
+    const pane = element.querySelector<HTMLElement>('.hd-composer [contenteditable]')!;
+    pane.innerHTML = '<p><b>Hotovo</b> u zákazníka<img src="x" onerror="alert(1)"></p>';
+    pane.dispatchEvent(new Event('input', { bubbles: true }));
+    pane.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', ctrlKey: true, bubbles: true }));
+
+    await until(() => element.querySelector('.hd-comment-text')!.innerHTML.includes('Hotovo'));
+    expect(element.querySelector('.hd-comment-text')!.innerHTML).toBe('<p><strong>Hotovo</strong> u zákazníka<img src="x"></p>');
+    expect(db.comments.at(-1)!.text).toBe('<p><strong>Hotovo</strong> u zákazníka<img src="x"></p>');
+    await until(() => pane.innerHTML === '');
+    expect(errors).toEqual([]);
+  });
+
   test('offline: a prepared project works without a network, changes are sent when it is back', async () => {
     const server = helpdeskMock();
     const { element, errors, go } = await bootApp(AppPresenter, {

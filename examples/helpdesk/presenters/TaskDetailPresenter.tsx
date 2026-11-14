@@ -1,6 +1,7 @@
-import { Button, Dropdown, Else, ElseIf, For, If, Presenter, batch, effect, state } from 'phlox-js';
+import { Button, Dropdown, Else, ElseIf, For, Html, If, Presenter, batch, effect, state } from 'phlox-js';
 import type { Child } from 'phlox-js';
 import { Form, FormTag, Input, InputError, Label } from 'phlox-js/forms';
+import type { EditorControl } from 'phlox-js/forms';
 import { fileChunks } from 'phlox-js/net';
 import { HelpdeskApi } from '../api';
 import type { AttachmentResource, CommentResource, HistoryResource, Priority, Status, TaskDetail, TaskSettings } from '../api';
@@ -34,7 +35,8 @@ export class TaskDetailPresenter extends Presenter<{ taskId: number }> {
   readonly settings = new Form<TaskSettings>();
   readonly composer = new Form<{ text: string }>();
   private fileInput!: HTMLInputElement;
-  private textArea: HTMLTextAreaElement | null = null;
+  /** The comment being written, HTML from the editor; its images are attachments of the task. */
+  private readonly commentText: EditorControl;
 
   constructor(private api: HelpdeskApi, private store: Store, private work: OfflineWork) {
     super();
@@ -57,9 +59,14 @@ export class TaskDetailPresenter extends Presenter<{ taskId: number }> {
       if (this.settings.isChanged()) void this.settings.submit();
     });
 
-    this.composer.addTextArea('text', 'Komentář')
-      .setRequired('Napište text komentáře.')
-      .addRule(Form.MaxLength, 'Komentář může mít nejvýš %d znaků.', 2000);
+    this.commentText = this.composer.addEditor('text', 'Komentář', {
+      toolbar: 'format,lists,link,image',
+      minHeight: 44,
+      maxHeight: 240,
+      placeholder: 'Napsat komentář…',
+      upload: file => this.uploadImage(file),
+      inlineImages: false,
+    }).setRequired('Napište text komentáře.');
     this.composer.onSuccess = values => this.handleComment(values.text);
   }
 
@@ -119,17 +126,39 @@ export class TaskDetailPresenter extends Presenter<{ taskId: number }> {
     if (!files.length) return;
     this.uploading.set(true);
     try {
-      for (const file of files) {
-        const uploadId = crypto.randomUUID();
-        for await (const chunk of fileChunks(file, 256 * 1024)) {
-          await this.api.call('attachment.chunk', {
-            taskId: this.props.taskId, uploadId, name: file.name, type: file.type, index: chunk.index, total: chunk.total, data: chunk.data,
-          });
-        }
-      }
+      for (const file of files) await this.uploadFile(file);
     } finally {
       this.uploading.set(false);
     }
+    await this.loadAttachments();
+    this.tab.set('attachments');
+    this.flashMessage(files.length === 1 ? `Soubor ${files[0]!.name} je přiložený.` : `Přiloženo souborů: ${files.length}.`, 'success');
+  }
+
+  /** An image put in a comment becomes an attachment of the task, the comment shows it by its address. */
+  private async uploadImage(file: File): Promise<string> {
+    if (!online()) {
+      this.flashMessage('Obrázky jde vkládat jen se signálem, offline se soubory neukládají.', 'warning');
+      throw new Error('offline');
+    }
+    const attachment = await this.uploadFile(file);
+    await this.loadAttachments();
+    return attachment.url;
+  }
+
+  /** A file sent in parts; the server answers the last one with the attachment. */
+  private async uploadFile(file: File): Promise<AttachmentResource> {
+    const uploadId = crypto.randomUUID();
+    let attachment: AttachmentResource | null = null;
+    for await (const chunk of fileChunks(file, 256 * 1024)) {
+      attachment = await this.api.call('attachment.chunk', {
+        taskId: this.props.taskId, uploadId, name: file.name, type: file.type, index: chunk.index, total: chunk.total, data: chunk.data,
+      });
+    }
+    return attachment!;
+  }
+
+  private async loadAttachments(): Promise<void> {
     const [attachments, history] = await Promise.all([
       this.api.call('attachment.list', { taskId: this.props.taskId }),
       this.api.call('history.list', { taskId: this.props.taskId }),
@@ -137,20 +166,16 @@ export class TaskDetailPresenter extends Presenter<{ taskId: number }> {
     batch(() => {
       this.attachments.set(attachments);
       this.history.set(history);
-      this.tab.set('attachments');
     });
-    this.flashMessage(files.length === 1 ? `Soubor ${files[0]!.name} je přiložený.` : `Přiloženo souborů: ${files.length}.`, 'success');
   }
 
   private writeComment(): void {
     this.tab.set('comments');
-    queueMicrotask(() => this.textArea?.focus());
+    queueMicrotask(() => this.commentText.element?.focus());
   }
 
   private insertEmoji(emoji: string): void {
-    const text = this.composer.get('text');
-    text.setValue(`${text.getValue()}${emoji}`);
-    this.textArea?.focus();
+    this.commentText.editor?.insertText(emoji);
   }
 
   render() {
@@ -261,7 +286,7 @@ export class TaskDetailPresenter extends Presenter<{ taskId: number }> {
                     <strong>{() => this.store.user(comment().authorId)?.name}</strong>
                     <small>{() => ago(comment().created)}</small>
                   </p>
-                  <p class="hd-comment-text">{() => comment().text}</p>
+                  <Html class="hd-comment-text" html={() => comment().text} />
                   <button type="button" class={() => `hd-like ${comment().liked ? 'hd-liked' : ''}`} aria-pressed={() => String(comment().liked)}
                     onClick={() => this.handleLike(comment())}>
                     <Icon name="thumbsUp" size={14} /> {() => comment().likes || ''}
@@ -277,26 +302,27 @@ export class TaskDetailPresenter extends Presenter<{ taskId: number }> {
       <FormTag form={this.composer} class="hd-composer">
         {() => <Avatar user={this.store.user(Number(this.user.getId()))} size="large" />}
         <div class="hd-composer-main">
-        <div class="hd-composer-box">
+        {/* Enter makes a new paragraph in the editor, Ctrl+Enter sends */}
+        <div class="hd-composer-box" onKeydown={event => {
+          if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) {
+            event.preventDefault();
+            void this.composer.submit();
+          }
+        }}>
           <Label control={text}>Napsat komentář</Label>
-          <Input control={text} rows={1} placeholder="Napsat komentář…" ref={(element: HTMLTextAreaElement) => { this.textArea = element; }}
-            onKeydown={(event: KeyboardEvent) => {
-              // Enter sends, Shift+Enter makes a new line
-              if (event.key === 'Enter' && !event.shiftKey) {
-                event.preventDefault();
-                void this.composer.submit();
-              }
-            }} />
+          <Input control={text} />
+          <div class="hd-composer-tools">
           <Dropdown class="hd-icon-button" panelClass="hd-menu hd-emojis" placement="top-right" title="Vložit emoji" label={<Icon name="smile" size={19} />}>
             <For each={() => EMOJIS}>{emoji => <button type="button" onClick={() => this.insertEmoji(emoji)}>{emoji}</button>}</For>
           </Dropdown>
           <button type="button" class="hd-icon-button" title="Přiložit soubor" aria-label="Přiložit soubor" disabled={() => !online()} onClick={() => this.fileInput.click()}>
             <Icon name="paperclip" size={18} />
           </button>
+          </div>
         </div>
         <InputError control={text} />
         </div>
-        <button type="submit" class="hd-send" title="Odeslat" aria-label="Odeslat komentář" disabled={this.composer.submitting}>
+        <button type="submit" class="hd-send" title="Odeslat (Ctrl+Enter)" aria-label="Odeslat komentář" disabled={this.composer.submitting}>
           <Icon name="send" size={19} />
         </button>
       </FormTag>

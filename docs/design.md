@@ -697,6 +697,40 @@ Ukázka `examples/helpdesk` je celá aplikace podle návrhu autora (`d:\Projekty
 - **Události předané `<Input>`** (`onBlur`, `onInput`) přepíše vlastní obsluha prvku. `ref` je vyřešený, události zatím ne.
 - **Odložené hledání** (debounce): hledání v hlavičce volá server při každém stisku, starší odpovědi zahodí `resource`. Dropdownlist si debounce dělá sám, obecný pomocník chybí.
 
+## WYSIWYG editor a HTML od uživatelů (implementováno, čeká na review)
+
+Zadání autora (14. 11. 2026): komentáře v helpdesku s tučným písmem, kurzívou a obrázky. Editor převzít z `phlox-editor` (autorova knihovna pro Nette), zasahovat do něj jen zpětně kompatibilně, obrázky ukládat jako přílohy, ne jako base64.
+
+Kód: `src/ui/html.tsx`, `src/ui/sanitize.ts`, `src/forms/editor.tsx`, v `phlox-editor` `assets/wysiwyg.js`, `index.mjs`, `index.d.ts`, `package.json`; testy `tests/editor.test.tsx`, scénář komentáře v `tests/helpdesk.test.tsx`. V prohlížeči ověřeno na helpdesku (Ctrl+B, emoji, obrázek přes okno, Ctrl+Enter, úzký sloupec, mobil) a na demu phlox-editoru (klasické zakládání z `data-*` atributů).
+
+### Rozhodnutí
+
+- **`execCommand` zůstává (rozhodl autor).** Zastaralý je jen formálně: prohlížeče ho neodstraní a dává zadarmo Ctrl+Z, psaní přes IME (Android, asijské jazyky) a kontrolu pravopisu. Editory s vlastním modelem (CKEditor 5, ProseMirror, Lexical) to všechno píší samy a mají desítky tisíc řádků. Jeho skutečná vada, různé HTML v různých prohlížečích, se řeší **normalizací ukládané hodnoty** (`normalizeHtml`): `<b>` na `<strong>`, `<font color>` na styl, sloučení sousedů, prázdný editor je `''`. Normalizuje se kopie plochy při uložení, ne živá plocha, protože přepisování prvků pod kurzorem by kurzor rozbíjelo. Vlastní model by dával smysl, až bude potřeba sledování změn nebo psaní ve více lidech, a pak spíš ProseMirror jako jádro pod UI phlox-editoru.
+- **Adaptér, ne kopie editoru.** Editor zůstává jeden pro Nette i Phlox. phlox-editor dostal zpětně kompatibilní úpravy, Nette se nemění:
+  - konstruktor s volbami místo `data-*`,
+  - výchozí témata v JS,
+  - událost `phx-editor:change`, metody `getValue`, `setValue` a `insertText`,
+  - `upload` jako funkce a `inlineImages: false`,
+  - `placeholder`,
+  - `autoInit(false)`, které vypne sledování celé stránky (`MutationObserver`), protože stránku kreslí framework,
+  - `index.mjs` jako ES modul nad původním skriptem a `package.json`.
+- **Opravy v phlox-editoru nalezené cestou:**
+  - okno „Vložit obrázek“ hledalo soubor pod špatným `id`, takže nahrání souboru z okna nikdy nefungovalo,
+  - lišta bez stylů odstavce padala na `styleSelect`,
+  - lišta bez prvních skupin začínala oddělovačem.
+- **Odolnost v jsdom:** `execCommand` a `queryCommand*` se volají volitelně, takže editor jde založit i v testech aplikací bez podvrhů. Tlačítka tam nic nedělají.
+- **Editor je součástí formulářů (`addEditor()`), ne adaptér (rozhodl autor 14. 11.).** WYSIWYG editor potřebuje skoro každý projekt, nemá to být další balíček k instalaci a nastavování. phlox-editor je proto běžná závislost phlox-js (`github:phloxcz/forms-editor#v0.2.0`, na npm zatím není). **Nepřepisuje se do TSX** jako strom a grid: ty jsou s frameworkem srostlé (reaktivní řádky, líné načítání, stav v URL), editor si s okolím vyměňuje jen HTML. Přepis by znamenal dva editory o zhruba 3 000 řádcích pro Nette a Phlox a každou opravu dvakrát. Cenou je, že lištu nekreslí šablony frameworku a nejde měnit přes theme sloty. Vzhled se ladí proměnnými CSS a mapami tříd phlox-editoru, výchozí podobu vybere téma (`Theme.editorTheme`).
+- **Líné načtení:** knihovna i CSS se načtou dynamickým `import()` při prvním vykreslení editoru. V sestavení je to samostatný kus (83 kB JS, 34 kB CSS), který stránka dopředu nestahuje. PWA ho má v cache jako ostatní JS. Důsledek: CSS editoru je v hlavičce za CSS aplikace, takže úpravy vzhledu potřebují silnější selektor (stalo se v helpdesku, lišta byla o 4 px vyšší).
+- **`<Html>` a čištění.** JSX dál zakazuje `innerHTML`, jediná cesta k HTML je `<Html>`, které čistí podle seznamu povolených značek a atributů. Seznam je záměrně přísný: třídy pryč (mohly by obsah přestylovat přes CSS stránky), ze stylů jen vlastnosti textu, obrázky `data:` jen rastrové (SVG může nést skript). **Úklid vloženého HTML v editoru** (`cleanPastedHtml`) je jiná věc: odstraňuje balast z Wordu a nebezpečné atributy, ale třídy a strukturu nechává, aby šel kopírovat grid uvnitř editoru. Bezpečnost zajišťuje čištění při zobrazení a na serveru, ne editor.
+- **Server čistí stejným kódem:** `sanitizeHtml` je v čistém `.ts` bez JSX a umí cizí `document`, mock server mu dává jsdom. V PHP backendu na to bude potřeba obdobný seznam (HTML Purifier nebo vlastní filtr), viz oddíl Bezpečnost v README phlox-editoru.
+- **Obrázky v komentáři jsou přílohy úkolu (rozhodl autor).** Editor dostane `upload`, helpdesk soubor pošle po částech přes `attachment.chunk` a do komentáře vloží adresu přílohy. Base64 by nafukovalo záznamy i offline frontu. Offline se obrázek nevloží a helpdesk to oznámí, protože přílohy offline zatím nejsou.
+
+### Zjištěno, zatím neřešeno
+
+- **`<Label>` na editor:** plocha `contenteditable` není prvek, na který jde vést `for`, takže kliknutí na popisek fokus nepřesune. Plocha má `aria-label` s textem prvku.
+- **Okna phlox-editoru** (odkaz, obrázek) jsou jeho vlastní modální okna na `<body>`. V nativním `<dialog>` frameworku by byla pod ním (top layer). V helpdesku je editor na stránce, v dialogu zatím nebyl potřeba.
+- **Kontrola délky** komentáře je jen na serveru (počítá text bez značek). Pravidlo pro délku textu v HTML ve formulářích chybí.
+
 ## Práce offline (implementováno, čeká na review)
 
 Zadání autora (13. 11. 2026): technici v terénu bez signálu si vyberou úkoly nebo celý projekt, stáhnou je, pracují offline a po návratu signálu se jejich práce odešle. Kolize se neslučují: když se záznam mezitím změnil na serveru, aplikace se zeptá, jestli změnu uložit i tak. Obecně, bez ohledu na to, jestli jsou offline hodiny, nebo dny.

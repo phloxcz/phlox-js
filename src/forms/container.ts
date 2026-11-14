@@ -14,6 +14,8 @@ import { ComboBox } from './combobox';
 import type { ComboBoxOptions } from './combobox';
 import { TagInput } from './taginput';
 import { UploadControl } from './upload';
+import { EditorControl } from './editor';
+import type { EditorOptions } from './editor';
 import { TreeSelect } from './treeselect';
 import type { TreeSelectOptions } from './treeselect';
 import { DropDownTreeSelect } from './dropdowntree';
@@ -126,6 +128,11 @@ export class Container<V extends object = Record<string, any>> implements Owner 
 
   addTextArea(name: KeysFor<V, string>, label = ''): TextArea {
     return this.addControl(name, new TextArea(label));
+  }
+
+  /** WYSIWYG editor, the value is HTML. Options of phlox-editor: toolbar, upload, placeholder… */
+  addEditor(name: KeysFor<V, string>, label = '', options: EditorOptions = {}): EditorControl {
+    return this.addControl(name, new EditorControl(label, options));
   }
 
   /** A whole number, null when empty. */

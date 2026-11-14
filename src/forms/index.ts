@@ -12,6 +12,8 @@ export { ComboBox } from './combobox';
 export type { ComboBoxOptions } from './combobox';
 export { TagInput } from './taginput';
 export { UploadControl, formatFileSize } from './upload';
+export { Editor, EditorControl } from './editor';
+export type { EditorInstance, EditorOptions, EditorProps } from './editor';
 export { TreeSelect } from './treeselect';
 export type { TreeSelectOptions } from './treeselect';
 export { DropDownTreeSelect } from './dropdowntree';

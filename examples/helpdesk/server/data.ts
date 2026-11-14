@@ -138,9 +138,9 @@ export function seed(): Database {
   first.updated = at(0, 16, 20);
   db.history.find(change => change.taskId === first.id)!.created = first.created;
   db.comments.push(
-    { id: ++id, taskId: first.id, authorId: 3, text: 'Díky, čekáme na další update.', created: at(-1, 17, 12), likedBy: [] },
-    { id: ++id, taskId: first.id, authorId: 2, text: 'Dodám logy z produkce, jakmile je budu mít k dispozici.', created: at(0, 15, 45), likedBy: [3] },
-    { id: ++id, taskId: first.id, authorId: 1, text: 'Problém potvrzen i na testovacím prostředí. Pracuji na analýze možných příčin.', created: at(0, 16, 20), likedBy: [2] },
+    { id: ++id, taskId: first.id, authorId: 3, text: '<p>Díky, čekáme na další update.</p>', created: at(-1, 17, 12), likedBy: [] },
+    { id: ++id, taskId: first.id, authorId: 2, text: '<p>Dodám logy z produkce, jakmile je budu mít k <strong>dispozici</strong>.</p>', created: at(0, 15, 45), likedBy: [3] },
+    { id: ++id, taskId: first.id, authorId: 1, text: '<p>Problém potvrzen i na testovacím prostředí. Pracuji na analýze možných příčin:</p><ul><li>pomalé dotazy na <code>/api/stats</code></li><li>chybějící cache</li></ul>', created: at(0, 16, 20), likedBy: [2] },
   );
   const har = Buffer.from('{"log":{"version":"1.2","entries":[]}}');
   const notes = Buffer.from('Měření načítání dashboardu\n\n/api/stats  8,4 s\n/api/tasks  2,1 s\n');
