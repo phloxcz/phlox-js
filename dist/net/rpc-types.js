@@ -5,7 +5,7 @@ import { readFile, writeFile } from "node:fs/promises";
 /**
 * Writes TypeScript types for an RPC endpoint from its OpenRPC document. In an application with the package:
 *
-*   npx phlox-rpc-types <url or file> <output.ts> [--class RpcApi] [--import phlox-js/net]
+*   npx phlox-rpc-types <url or file> <output.ts> [--class RpcApi] [--import @phloxcz/phlox-js/net]
 *   npx phlox-rpc-types http://localhost:9079/rpc/openrpc.json src/api/rpc.ts
 *
 * In this repository: node src/net/rpc-types.ts …, or npm run rpc:types -- ….
@@ -19,7 +19,7 @@ var className = option("--class");
 var importFrom = option("--import");
 var [source, output] = args;
 if (!source || !output) {
-	console.error("Usage: phlox-rpc-types <url or file> <output.ts> [--class RpcApi] [--import phlox-js/net]");
+	console.error("Usage: phlox-rpc-types <url or file> <output.ts> [--class RpcApi] [--import @phloxcz/phlox-js/net]");
 	process.exit(1);
 }
 var text = /^https?:\/\//.test(source) ? await fetch(source).then((response) => {

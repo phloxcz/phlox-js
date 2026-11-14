@@ -3,7 +3,7 @@
 Aplikace může pracovat bez signálu: data, která uživatel otevřel nebo si připravil, má k dispozici, a co udělá, odešle se po návratu signálu. Celé je to vidět v helpdesku (tlačítko „Připravit pro offline“ u seznamu úkolů).
 
 ```ts
-import { IndexedDbStore, RpcOffline } from 'phlox-js/net';
+import { IndexedDbStore, RpcOffline } from '@phloxcz/phlox-js/net';
 
 class AppOffline extends RpcOffline<RpcMethods> {}     // vlastní třída, aby ji služby našly podle typu
 
@@ -37,6 +37,6 @@ services.add(offline, new RpcApi('/rpc', { offline }));
 - **Odeslání:** samo po návratu signálu a ručně `offline.sync()`. Fronta je v IndexedDB, přežije zavření aplikace. `offline.onSynced(() => app.invalidate('tasks'))` načte obrazovky znovu.
 - **Záznam změněný mezitím:** s `version` a `current` se před odesláním porovná verze záznamu (třeba čas poslední změny) s tou na serveru. Liší-li se, změna čeká v `offline.conflicts()` a aplikace se zeptá; `offline.resolve(změna, 'send' | 'drop')`.
 - **Odmítnuté změny** (validace, oprávnění) jsou v `offline.failed()` s důvodem: `offline.retry(změna)`, `offline.drop(změna)`. Čekající v `offline.pending()`, průběh v `offline.syncing()`. Vše je `state`, takže jde rovnou do šablony.
-- **`online()`** z `phlox-js/net` je stav připojení: `<If when={() => !online()}>Offline</If>`.
+- **`online()`** z `@phloxcz/phlox-js/net` je stav připojení: `<If when={() => !online()}>Offline</If>`.
 - **Testy** dostanou `MemoryStore` místo `IndexedDbStore` (jsdom IndexedDB nemá).
 - **Kostra aplikace offline (PWA):** `vite-plugin-pwa` v konfiguraci Vite uloží stránku, JS a CSS do service workeru. V helpdesku je nastavení v `examples/vite.config.ts` a registrace s nabídkou nové verze v `examples/helpdesk/main.ts`. Funguje v sestavené verzi (`npm run build:examples`, pak `npx vite preview --config examples/vite.config.ts`), dev server ji nemá.

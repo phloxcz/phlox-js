@@ -1,6 +1,6 @@
-import { Component } from 'phlox-js';
-import { Form, FormView } from 'phlox-js/forms';
-import { RpcError, RpcErrorCode } from 'phlox-js/net';
+import { Component } from '@phloxcz/phlox-js';
+import { Form, FormView } from '@phloxcz/phlox-js/forms';
+import { RpcError, RpcErrorCode } from '@phloxcz/phlox-js/net';
 
 interface Customer { name: string; email: string }
 

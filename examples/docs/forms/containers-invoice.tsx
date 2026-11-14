@@ -1,6 +1,6 @@
-import { Component, computed } from 'phlox-js';
-import { Form, FormView } from 'phlox-js/forms';
-import type { Multiplier } from 'phlox-js/forms';
+import { Component, computed } from '@phloxcz/phlox-js';
+import { Form, FormView } from '@phloxcz/phlox-js/forms';
+import type { Multiplier } from '@phloxcz/phlox-js/forms';
 
 interface Line { name: string; quantity: number | null; price: number | null }
 interface Invoice { number: string; customer: { name: string; city: string }; lines: Line[] }

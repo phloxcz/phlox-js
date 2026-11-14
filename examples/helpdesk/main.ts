@@ -1,11 +1,11 @@
 // The helpdesk example: projects, tasks and their detail against a mock JSON-RPC server (server/).
-import 'phlox-js/styles/base.css';
+import '@phloxcz/phlox-js/styles/base.css';
 // Bootstrap is imported at the top of helpdesk.css: in the build the order of separate imports is not kept
 import './helpdesk.css';
-import { Application, setTexts } from 'phlox-js';
-import cs from 'phlox-js/locales/cs';
-import { Form } from 'phlox-js/forms';
-import { RpcError, RpcErrorCode } from 'phlox-js/net';
+import { Application, setTexts } from '@phloxcz/phlox-js';
+import cs from '@phloxcz/phlox-js/locales/cs';
+import { Form } from '@phloxcz/phlox-js/forms';
+import { RpcError, RpcErrorCode } from '@phloxcz/phlox-js/net';
 import { registerSW } from 'virtual:pwa-register';
 import { createServices } from './services';
 import { AppPresenter } from './presenters/AppPresenter';

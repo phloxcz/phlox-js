@@ -1,5 +1,5 @@
-import { Button, For, Presenter, state } from 'phlox-js';
-import type { Route } from 'phlox-js';
+import { Button, For, Presenter, state } from '@phloxcz/phlox-js';
+import type { Route } from '@phloxcz/phlox-js';
 
 interface Item { id: number; name: string; history: string[] }
 

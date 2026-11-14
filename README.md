@@ -7,7 +7,7 @@ Ve frameworku jsou i grid, strom, dialogy, WYSIWYG editor, JSON-RPC klient pro [
 ## Instalace
 
 ```bash
-npm install github:phloxcz/phlox-js#v0.1.0
+npm install github:phloxcz/phlox-js#v0.2.0
 ```
 
 Balíček zatím není na npm, instaluje se z GitHubu podle tagu. Potřebuje Vite (od verze 7) a TypeScript s `"moduleResolution": "Bundler"`. Typy z OpenRPC dokumentu `phlox-rpc-api` vygeneruje `npx phlox-rpc-types <url> src/api/rpc.ts`.
@@ -15,7 +15,7 @@ Balíček zatím není na npm, instaluje se z GitHubu podle tagu. Potřebuje Vit
 ## Příklad
 
 ```tsx
-import { Application, Container, Presenter, state } from 'phlox-js';
+import { Application, Container, Presenter, state } from '@phloxcz/phlox-js';
 
 class HomePresenter extends Presenter {
   readonly count = state(0);
@@ -28,10 +28,10 @@ class HomePresenter extends Presenter {
 void new Application(new Container()).run(HomePresenter, document.getElementById('app')!);
 ```
 
-`vite.config.ts` potřebuje plugin kvůli autowiringu a `tsconfig.json` TSX s `"jsxImportSource": "phlox-js"`:
+`vite.config.ts` potřebuje plugin kvůli autowiringu a `tsconfig.json` TSX s `"jsxImportSource": "@phloxcz/phlox-js"`:
 
 ```ts
-import { phlox } from 'phlox-js/vite';
+import { phlox } from '@phloxcz/phlox-js/vite';
 
 export default defineConfig({ plugins: [phlox()] });
 ```

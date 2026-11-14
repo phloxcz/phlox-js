@@ -1,5 +1,5 @@
-import { Application } from 'phlox-js';
-import type { Resource } from 'phlox-js';
+import { Application } from '@phloxcz/phlox-js';
+import type { Resource } from '@phloxcz/phlox-js';
 import { HelpdeskApi } from '../api';
 import type { ProjectResource, UserResource } from '../api';
 

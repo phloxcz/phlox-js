@@ -1,5 +1,5 @@
-import { Component, Html } from 'phlox-js';
-import { Form, FormView } from 'phlox-js/forms';
+import { Component, Html } from '@phloxcz/phlox-js';
+import { Form, FormView } from '@phloxcz/phlox-js/forms';
 
 interface Note { text: string }
 

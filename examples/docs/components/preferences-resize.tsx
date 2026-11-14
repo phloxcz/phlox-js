@@ -1,4 +1,4 @@
-import { Button, Component, ResizeHandle } from 'phlox-js';
+import { Button, Component, ResizeHandle } from '@phloxcz/phlox-js';
 
 /** Preferences remembered in the browser: the width of a column and a collapsed note. Reload the page, they stay. */
 export default class Layout extends Component {

@@ -1,6 +1,6 @@
-import { Button, Component, For, state } from 'phlox-js';
-import { RpcClient, RpcError, createRpcMock } from 'phlox-js/net';
-import { RpcMockError } from 'phlox-js/net';
+import { Button, Component, For, state } from '@phloxcz/phlox-js';
+import { RpcClient, RpcError, createRpcMock } from '@phloxcz/phlox-js/net';
+import { RpcMockError } from '@phloxcz/phlox-js/net';
 
 interface Task { id: number; title: string }
 

@@ -1,5 +1,5 @@
 // What every screen needs. Optional parts have their own entry points:
-// phlox-js/net, phlox-js/security, phlox-js/localization and the Vite plugin phlox-js/vite.
+// @phloxcz/phlox-js/net, @phloxcz/phlox-js/security, @phloxcz/phlox-js/localization and the Vite plugin @phloxcz/phlox-js/vite.
 
 export { Scope, batch, computed, effect, onCleanup, state, untrack } from './reactive/reactive';
 export type { Accessor, State } from './reactive/reactive';

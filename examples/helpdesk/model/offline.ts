@@ -1,8 +1,8 @@
 // What of the API works offline in the helpdesk: reading methods give back kept data, writing ones wait in a queue.
-import { Preferences, state } from 'phlox-js';
-import type { State } from 'phlox-js';
-import { IndexedDbStore, MemoryStore, RpcOffline } from 'phlox-js/net';
-import type { OfflineCache, OfflineRules } from 'phlox-js/net';
+import { Preferences, state } from '@phloxcz/phlox-js';
+import type { State } from '@phloxcz/phlox-js';
+import { IndexedDbStore, MemoryStore, RpcOffline } from '@phloxcz/phlox-js/net';
+import type { OfflineCache, OfflineRules } from '@phloxcz/phlox-js/net';
 import { HelpdeskApi } from '../api';
 import type { CommentResource, ProjectResource, RpcMethods, TaskDetail, TaskQuery } from '../api';
 import { queryTasks, taskItem } from './queries';

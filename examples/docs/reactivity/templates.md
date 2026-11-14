@@ -4,10 +4,10 @@
 
 ```json
 "jsx": "react-jsx",
-"jsxImportSource": "phlox-js"
+"jsxImportSource": "@phloxcz/phlox-js"
 ```
 
-Název balíčku `phlox-js` je předběžný. Uvnitř tohoto repa ho na `src/` převádí `paths` v `tsconfig.json`.
+Uvnitř repozitáře frameworku převádí `@phloxcz/phlox-js` na `src/` volba `paths` v `tsconfig.json`.
 
 Šablonu vrací `render()` komponenty nebo presenteru. Kousek šablony jde vyčlenit do funkce:
 

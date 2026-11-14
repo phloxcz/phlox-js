@@ -71,7 +71,7 @@ Ručně, třeba jako tabulku bez popisků v každém řádku:
 
 ## Řazení tažením jinde
 
-Tažení řádků stojí na funkci `dragToSort` z `phlox-js`, kterou jde použít pro jakýkoli seznam:
+Tažení řádků stojí na funkci `dragToSort` z `@phloxcz/phlox-js`, kterou jde použít pro jakýkoli seznam:
 
 ```tsx
 render() {

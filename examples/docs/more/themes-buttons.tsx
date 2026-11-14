@@ -1,5 +1,5 @@
-import { Button, Component, allowsMotion, motion, setMotion, state } from 'phlox-js';
-import type { Motion } from 'phlox-js';
+import { Button, Component, allowsMotion, motion, setMotion, state } from '@phloxcz/phlox-js';
+import type { Motion } from '@phloxcz/phlox-js';
 
 /** Buttons with the classes of the theme, and the one switch of animations. Switch the look in the header. */
 export default class Looks extends Component {

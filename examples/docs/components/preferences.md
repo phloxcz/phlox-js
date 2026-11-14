@@ -17,7 +17,7 @@ this.collapsed.update(value => !value);   // uloží se
 Úchyt na okraji prvku, kterým uživatel mění jeho šířku. Šířka je `state`, s `preference` se tedy rovnou pamatuje:
 
 ```tsx
-import { ResizeHandle } from 'phlox-js';
+import { ResizeHandle } from '@phloxcz/phlox-js';
 
 readonly width = this.preference('tasks.width', 416);
 

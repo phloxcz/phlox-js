@@ -1,6 +1,6 @@
-import { Else, For, If, Presenter, ResizeHandle, RouteFrame, computed, route, state } from 'phlox-js';
-import type { Route } from 'phlox-js';
-import { foldText } from 'phlox-js/forms';
+import { Else, For, If, Presenter, ResizeHandle, RouteFrame, computed, route, state } from '@phloxcz/phlox-js';
+import type { Route } from '@phloxcz/phlox-js';
+import { foldText } from '@phloxcz/phlox-js/forms';
 import { Icon } from '../components/Icon';
 import { ProjectEdit } from '../components/ProjectEdit';
 import { Store } from '../model/Store';

@@ -1,5 +1,5 @@
-import { Component, computed } from 'phlox-js';
-import { Form, FormView } from 'phlox-js/forms';
+import { Component, computed } from '@phloxcz/phlox-js';
+import { Form, FormView } from '@phloxcz/phlox-js/forms';
 import { searchPeople } from './_people';
 
 interface Values { members: number[]; labels: string[] }

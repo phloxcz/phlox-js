@@ -1,5 +1,5 @@
-import { For, Presenter, RouteFrame, route } from 'phlox-js';
-import type { Route } from 'phlox-js';
+import { For, Presenter, RouteFrame, route } from '@phloxcz/phlox-js';
+import type { Route } from '@phloxcz/phlox-js';
 
 class TaskPresenter extends Presenter<{ taskId: number }> {
   render() {

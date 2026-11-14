@@ -1,8 +1,8 @@
 // A demo of the documentation that is a presenter: it runs here, in a frame of its page, at /frame/<section>/<demo>/…,
 // with routes of its own. The bar at the top shows its address, so it is seen how links and dialogs change it.
-import 'phlox-js/styles/base.css';
-import { Application, BootstrapTheme, Container, Theme, setTexts } from 'phlox-js';
-import cs from 'phlox-js/locales/cs';
+import '@phloxcz/phlox-js/styles/base.css';
+import { Application, BootstrapTheme, Container, Theme, setTexts } from '@phloxcz/phlox-js';
+import cs from '@phloxcz/phlox-js/locales/cs';
 import { bootstrap, startAppearance } from '../shared/appearance';
 import { isPresenter } from '../docs/page';
 import type { DemoModule } from '../docs/page';
@@ -21,7 +21,7 @@ if (!isPresenter(module.default)) throw new Error(`The demo ${section}/${name} i
 // The look chosen in the header of the documentation
 startAppearance();
 if (bootstrap) await import('bootstrap/dist/css/bootstrap.min.css');
-else await import('phlox-js/styles/default.css');
+else await import('@phloxcz/phlox-js/styles/default.css');
 
 const services = new Container().add(bootstrap ? new BootstrapTheme() : new Theme());
 module.services?.(services);

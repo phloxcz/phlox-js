@@ -1,6 +1,6 @@
 # Volání serveru: RPC
 
-Klient pro JSON-RPC 2.0, na druhé straně je [phloxcz/rpc-api](https://github.com/phloxcz/rpc-api). Importuje se z `phlox-js/net`.
+Klient pro JSON-RPC 2.0, na druhé straně je [phloxcz/rpc-api](https://github.com/phloxcz/rpc-api). Importuje se z `@phloxcz/phlox-js/net`.
 
 ## Typy z PHP
 
@@ -56,7 +56,7 @@ class TasksPresenter extends Presenter {
 
 ## Soubory přes RPC
 
-JSON-RPC přenáší jen text. `fileChunks(file, size)` z `phlox-js/net` přečte soubor po částech (výchozí 1 MB) a každou vrátí v base64, takže velký soubor nikdy není v paměti celý:
+JSON-RPC přenáší jen text. `fileChunks(file, size)` z `@phloxcz/phlox-js/net` přečte soubor po částech (výchozí 1 MB) a každou vrátí v base64, takže velký soubor nikdy není v paměti celý:
 
 ```ts
 for await (const chunk of fileChunks(file)) {
@@ -69,7 +69,7 @@ Base64 je o třetinu větší než soubor. Na velké soubory je lepší REST API
 
 ## Mock server
 
-`createRpcMock` z `phlox-js/net` je falešný server z tabulky metod, pro testy i pro vývoj bez backendu, viz Testování aplikací.
+`createRpcMock` z `@phloxcz/phlox-js/net` je falešný server z tabulky metod, pro testy i pro vývoj bez backendu, viz Testování aplikací.
 
 ## Chyby
 

@@ -1,4 +1,4 @@
-import { For, If, Presenter, state } from 'phlox-js';
+import { For, If, Presenter, state } from '@phloxcz/phlox-js';
 import { PAGES } from './contents';
 import { DemoBox } from './page';
 import type { Demo } from './page';

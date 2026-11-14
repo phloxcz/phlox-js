@@ -2,7 +2,7 @@
 
 ```ts
 // main.ts
-import { Application } from 'phlox-js';
+import { Application } from '@phloxcz/phlox-js';
 import { services } from './services';
 import { AppPresenter } from './presenters/AppPresenter';
 
@@ -20,7 +20,7 @@ void app.run(AppPresenter, document.getElementById('app')!);
 Projekt potřebuje ve `vite.config.ts` plugin kvůli autowiringu a v `tsconfig.json` nastavení TSX (viz Šablony):
 
 ```ts
-import { phlox } from 'phlox-js/vite';
+import { phlox } from '@phloxcz/phlox-js/vite';
 
 export default defineConfig({ plugins: [phlox()] });
 ```

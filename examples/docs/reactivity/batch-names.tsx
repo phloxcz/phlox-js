@@ -1,4 +1,4 @@
-import { Button, Component, batch, computed, effect, state } from 'phlox-js';
+import { Button, Component, batch, computed, effect, state } from '@phloxcz/phlox-js';
 
 /** Two changes in one batch: the effect runs once, not with a half-changed name. */
 export default class Names extends Component {

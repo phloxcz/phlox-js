@@ -1,8 +1,8 @@
-import { Button, Dropdown, DropdownItem, Else, ElseIf, For, Html, If, Presenter, batch, effect, state } from 'phlox-js';
-import type { Child } from 'phlox-js';
-import { Form, FormTag, Input, InputError, Label } from 'phlox-js/forms';
-import type { EditorControl } from 'phlox-js/forms';
-import { fileChunks } from 'phlox-js/net';
+import { Button, Dropdown, DropdownItem, Else, ElseIf, For, Html, If, Presenter, batch, effect, state } from '@phloxcz/phlox-js';
+import type { Child } from '@phloxcz/phlox-js';
+import { Form, FormTag, Input, InputError, Label } from '@phloxcz/phlox-js/forms';
+import type { EditorControl } from '@phloxcz/phlox-js/forms';
+import { fileChunks } from '@phloxcz/phlox-js/net';
 import { HelpdeskApi } from '../api';
 import type { AttachmentResource, CommentResource, HistoryResource, Priority, Status, TaskDetail, TaskSettings } from '../api';
 import { Icon } from '../components/Icon';
@@ -11,7 +11,7 @@ import { Avatar, PriorityBadge, StatusLabel } from '../components/ui';
 import { PRIORITY, STATUS, ago, dateTime, daysFrom, fileSize, longDate } from '../format';
 import { Store } from '../model/Store';
 import { OfflineWork } from '../model/offline';
-import { online } from 'phlox-js/net';
+import { online } from '@phloxcz/phlox-js/net';
 
 type Tab = 'comments' | 'attachments' | 'history';
 

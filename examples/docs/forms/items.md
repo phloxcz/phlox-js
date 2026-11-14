@@ -23,7 +23,7 @@ form.addDropDownList('taskId', 'Úkol:', {
 });
 ```
 
-- **Hledání bez ohledu na diakritiku** platí jen pro `items`. U `search` záleží na serveru. Pro vlastní filtrování v JS je `foldText()` z `phlox-js/forms`.
+- **Hledání bez ohledu na diakritiku** platí jen pro `items`. U `search` záleží na serveru. Pro vlastní filtrování v JS je `foldText()` z `@phloxcz/phlox-js/forms`.
 - **`label` je potřeba jen u `search`,** pro hodnotu nastavenou z kódu, která mezi načtenými záznamy není. U `items` se popisek najde v seznamu.
 - **Obojí najednou:** seznam bere `search`, `items` slouží jen k hledání popisků.
 

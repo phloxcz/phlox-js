@@ -1,5 +1,5 @@
-import { Component, For, If, state } from 'phlox-js';
-import { Form, FormView, formatFileSize } from 'phlox-js/forms';
+import { Component, For, If, state } from '@phloxcz/phlox-js';
+import { Form, FormView, formatFileSize } from '@phloxcz/phlox-js/forms';
 
 /** A form type of its own, not a generated DTO: that one has no File. */
 interface ArticleInput { title: string; cover: File | null; attachments: File[] }

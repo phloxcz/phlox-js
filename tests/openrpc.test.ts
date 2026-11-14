@@ -64,6 +64,6 @@ describe('generateRpcTypes', () => {
     expect(output).toContain('Requires login and roles: admin or editor, and publisher.');
     expect(output).toContain('  "ping": {\n    params: Record<string, never>;\n    result: string;');
     expect(output).toContain('export class RpcApi extends RpcClient<RpcMethods> {}');
-    expect(output).toContain('import { RpcClient } from "phlox-js/net";');
+    expect(output).toContain('import { RpcClient } from "@phloxcz/phlox-js/net";');
   });
 });

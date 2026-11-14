@@ -1,4 +1,4 @@
-import { Button, Component, computed, state } from 'phlox-js';
+import { Button, Component, computed, state } from '@phloxcz/phlox-js';
 
 /** A state, a computed value from it, and a template that follows both. */
 export default class Counter extends Component {

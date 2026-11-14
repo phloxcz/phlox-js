@@ -1,6 +1,6 @@
 # Formuláře
 
-Jako `Nette\Forms`. Importuje se z `phlox-js/forms`.
+Jako `Nette\Forms`. Importuje se z `@phloxcz/phlox-js/forms`.
 
 ```tsx
 // CreateTask je DTO vygenerované z PHP (npm run rpc:types)

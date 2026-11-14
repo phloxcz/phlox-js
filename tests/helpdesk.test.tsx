@@ -1,5 +1,5 @@
 /**
- * A test of a whole application, as an application would write it with phlox-js/testing:
+ * A test of a whole application, as an application would write it with @phloxcz/phlox-js/testing:
  * the helpdesk with its real presenters and services, the API answered by its mock server in memory.
  */
 import { afterEach, beforeEach, describe, expect, test } from 'vitest';

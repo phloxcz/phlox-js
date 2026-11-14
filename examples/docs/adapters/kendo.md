@@ -1,17 +1,17 @@
 # Kendo UI
 
-Adaptér `phlox-js/adapters/kendo` napojí Kendo UI for jQuery, podobně jako knockout-kendo v Knockoutu: widgety svázané se `state`, zničené spolu se svou částí šablony, Kendo Grid, dialogy v Kendo Window a widgety jako prvky formulářů.
+Adaptér `@phloxcz/phlox-js/adapters/kendo` napojí Kendo UI for jQuery, podobně jako knockout-kendo v Knockoutu: widgety svázané se `state`, zničené spolu se svou částí šablony, Kendo Grid, dialogy v Kendo Window a widgety jako prvky formulářů.
 
 **PhloxJS na Kendu nezávisí,** ani při vývoji: Kendo je placená knihovna a licenci má aplikace, která ho používá. Proto tu není živá ukázka. Adaptér testují testy s náhradou Kenda stejného tvaru (`tests/kendo.test.tsx`), se skutečným Kendem ho ověřuje aplikace, která ho nasadí.
 
 ## Zapojení
 
-`phlox-js` Kendo neimportuje, aplikace ho adaptéru předá. Kendo hledá jQuery ve `window`, proto se nastaví před importem Kenda:
+`@phloxcz/phlox-js` Kendo neimportuje, aplikace ho adaptéru předá. Kendo hledá jQuery ve `window`, proto se nastaví před importem Kenda:
 
 ```ts
 // main.ts
 import '@progress/kendo-theme-bootstrap/dist/bootstrap-main.css';
-import 'phlox-js/adapters/kendo/kendo.css';
+import '@phloxcz/phlox-js/adapters/kendo/kendo.css';
 import jQuery from 'jquery';
 import { setScriptKey } from '@progress/kendo-licensing';
 
@@ -29,7 +29,7 @@ services.add(new Kendo(kendo), KendoDialogs);          // KendoDialogs: dialogy 
   ```ts
   // kendo.d.ts
   declare module '@progress/kendo-ui' {
-    const kendo: import('phlox-js/adapters/kendo').KendoLike & { culture(name: string): void };
+    const kendo: import('@phloxcz/phlox-js/adapters/kendo').KendoLike & { culture(name: string): void };
     export default kendo;
   }
   ```
@@ -37,7 +37,7 @@ services.add(new Kendo(kendo), KendoDialogs);          // KendoDialogs: dialogy 
 ## Widget v šabloně: `KendoWidget`
 
 ```tsx
-import { KendoWidget } from 'phlox-js/adapters/kendo';
+import { KendoWidget } from '@phloxcz/phlox-js/adapters/kendo';
 
 readonly status = state<string>('');
 

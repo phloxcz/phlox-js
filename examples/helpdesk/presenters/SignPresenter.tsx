@@ -1,6 +1,6 @@
-import { Button, For, Presenter } from 'phlox-js';
-import { Form, FormErrors, FormTag, Input, InputError, Label } from 'phlox-js/forms';
-import { RpcError } from 'phlox-js/net';
+import { Button, For, Presenter } from '@phloxcz/phlox-js';
+import { Form, FormErrors, FormTag, Input, InputError, Label } from '@phloxcz/phlox-js/forms';
+import { RpcError } from '@phloxcz/phlox-js/net';
 import { Logo } from '../components/Icon';
 
 interface SignIn {

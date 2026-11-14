@@ -1,7 +1,7 @@
-import { Component, For, state, untrack } from 'phlox-js';
-import type { Child } from 'phlox-js';
-import { Form, FormControl, FormView } from 'phlox-js/forms';
-import type { ExtraAttributes } from 'phlox-js/forms';
+import { Component, For, state, untrack } from '@phloxcz/phlox-js';
+import type { Child } from '@phloxcz/phlox-js';
+import { Form, FormControl, FormView } from '@phloxcz/phlox-js/forms';
+import type { ExtraAttributes } from '@phloxcz/phlox-js/forms';
 
 /** An own control: stars from 1 to 5, the value is a number or null. */
 class RatingControl extends FormControl<number | null> {

@@ -1,4 +1,4 @@
-import { Component, For, dragToSort, state } from 'phlox-js';
+import { Component, For, dragToSort, state } from '@phloxcz/phlox-js';
 
 interface Card { id: number; name: string }
 

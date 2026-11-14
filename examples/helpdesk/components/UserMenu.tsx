@@ -1,4 +1,4 @@
-import { Component, Dropdown, DropdownItem } from 'phlox-js';
+import { Component, Dropdown, DropdownItem } from '@phloxcz/phlox-js';
 import { Store } from '../model/Store';
 import { Icon } from './Icon';
 import { Avatar } from './ui';

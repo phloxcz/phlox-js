@@ -10,7 +10,7 @@ function texts(name, defaults) {
 /**
 * Texts of the framework in another language, before the application starts:
 *
-*   import cs from 'phlox-js/locales/cs';
+*   import cs from '@phloxcz/phlox-js/locales/cs';
 *   setTexts(cs);
 *
 * Single texts can be changed afterwards as before: DropDownList.texts.noResults = '…'.

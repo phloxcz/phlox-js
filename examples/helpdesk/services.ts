@@ -1,6 +1,6 @@
 // Services of the helpdesk, the counterpart of `services` in config.neon.
-import { BootstrapTheme, Container, FlashMessages } from 'phlox-js';
-import { BrowserUserStorage, User } from 'phlox-js/security';
+import { BootstrapTheme, Container, FlashMessages } from '@phloxcz/phlox-js';
+import { BrowserUserStorage, User } from '@phloxcz/phlox-js/security';
 import { HelpdeskApi } from './api';
 import { ApiAuthenticator } from './model/ApiAuthenticator';
 import { OfflineWork, createOffline } from './model/offline';

@@ -1,5 +1,5 @@
-import { Button, Component, For, If, state } from 'phlox-js';
-import { MemoryStore, RpcClient, RpcOffline, createRpcMock } from 'phlox-js/net';
+import { Button, Component, For, If, state } from '@phloxcz/phlox-js';
+import { MemoryStore, RpcClient, RpcOffline, createRpcMock } from '@phloxcz/phlox-js/net';
 
 interface Note { id: number; text: string; updated: string }
 

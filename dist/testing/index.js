@@ -2,7 +2,7 @@ import { Application } from "../application/application.js";
 import { Container } from "../di/container.js";
 // src/testing/index.ts
 /**
-* phlox-js/testing: helpers for tests of applications, with any runner that has a DOM (Vitest with jsdom…).
+* @phloxcz/phlox-js/testing: helpers for tests of applications, with any runner that has a DOM (Vitest with jsdom…).
 *
 *   afterEach(cleanup);
 *   const { element, go } = await bootApp(AppPresenter, { url: '/tasks', services });

@@ -1,6 +1,6 @@
-import { BadRequestError, Button, Component, Presenter, state } from 'phlox-js';
-import type { Container, Route } from 'phlox-js';
-import { Grid, GridView } from 'phlox-js/components';
+import { BadRequestError, Button, Component, Presenter, state } from '@phloxcz/phlox-js';
+import type { Container, Route } from '@phloxcz/phlox-js';
+import { Grid, GridView } from '@phloxcz/phlox-js/components';
 import { CATEGORIES, OrderStore } from './_orders';
 import type { Order } from './_orders';
 

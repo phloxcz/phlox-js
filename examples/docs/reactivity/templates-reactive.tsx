@@ -1,4 +1,4 @@
-import { Button, Component, state } from 'phlox-js';
+import { Button, Component, state } from '@phloxcz/phlox-js';
 
 /** What is a state or a function follows changes; a value read in the template is read once. */
 export default class Reactive extends Component {

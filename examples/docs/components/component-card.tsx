@@ -1,5 +1,5 @@
-import { Component, For, state } from 'phlox-js';
-import type { Child, Container } from 'phlox-js';
+import { Component, For, state } from '@phloxcz/phlox-js';
+import type { Child, Container } from '@phloxcz/phlox-js';
 
 interface User { id: number; name: string; role: string }
 

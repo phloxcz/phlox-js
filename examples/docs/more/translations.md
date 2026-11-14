@@ -4,7 +4,7 @@ Texty jsou v JSON souboru pro každý jazyk. Aplikace si vytvoří překladač a
 
 ```ts
 // i18n.ts
-import { IntlTranslator } from 'phlox-js/localization';
+import { IntlTranslator } from '@phloxcz/phlox-js/localization';
 import cs from './locales/cs.json';
 import en from './locales/en.json';
 
@@ -51,8 +51,8 @@ void this.app.restart();
 Tlačítka dialogů, grid, prvky formulářů a hlášky pravidel mají výchozí texty anglicky. Česky je přepne jedno volání před startem aplikace:
 
 ```ts
-import { setTexts } from 'phlox-js';
-import cs from 'phlox-js/locales/cs';
+import { setTexts } from '@phloxcz/phlox-js';
+import cs from '@phloxcz/phlox-js/locales/cs';
 
 setTexts(cs);
 ```
@@ -60,7 +60,7 @@ setTexts(cs);
 - **Platí pro všechny části,** i ty, které se načtou později (líně načítaný presenter s gridem). Část, kterou aplikace nepoužívá, se kvůli překladu nestáhne.
 - **Hlášky pravidel** jsou ve znění českého Nette, takže formulář na serveru i v prohlížeči hlásí totéž.
 - **Jednotlivé texty** jde po `setTexts()` dál měnit: `Form.messages.set(Form.Filled, 'Vyplňte pole %label.')`, `DropDownList.texts.noResults = '…'`.
-- **Jiný jazyk** je objekt stejného tvaru, typ `TextsLocale` z `phlox-js` hlídá názvy částí i textů. Stačí uvést, co se liší: `setTexts({ grid: { search: 'Suchen…' } })`.
+- **Jiný jazyk** je objekt stejného tvaru, typ `TextsLocale` z `@phloxcz/phlox-js` hlídá názvy částí i textů. Stačí uvést, co se liší: `setTexts({ grid: { search: 'Suchen…' } })`.
 - **Při změně jazyka za běhu** zavolej `setTexts()` s novým jazykem a postav obrazovky znovu (`app.restart()`), jako u textů aplikace.
 
 **Jiný překladač:** `Translator` je abstraktní třída s metodou `translate(key, params)`, obdoba `Nette\Localization\Translator`. Služba, která ji potřebuje, si o ni řekne v konstruktoru, a v kontejneru jde `IntlTranslator` nahradit jinou implementací.

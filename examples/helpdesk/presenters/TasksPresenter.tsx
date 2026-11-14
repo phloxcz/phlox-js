@@ -1,5 +1,5 @@
-import { Dropdown, Else, For, If, Presenter, ResizeHandle, RouteFrame, computed, route } from 'phlox-js';
-import type { Resource, Route } from 'phlox-js';
+import { Dropdown, Else, For, If, Presenter, ResizeHandle, RouteFrame, computed, route } from '@phloxcz/phlox-js';
+import type { Resource, Route } from '@phloxcz/phlox-js';
 import { HelpdeskApi } from '../api';
 import type { Priority, Status, TaskPage, TaskQuery, TaskResource } from '../api';
 import { Icon } from '../components/Icon';
@@ -7,7 +7,7 @@ import { Avatar, PriorityBadge } from '../components/ui';
 import { PRIORITY, dueLabel, isUrgent } from '../format';
 import { Store } from '../model/Store';
 import { OfflineWork } from '../model/offline';
-import { online } from 'phlox-js/net';
+import { online } from '@phloxcz/phlox-js/net';
 import { TaskDetailPresenter } from './TaskDetailPresenter';
 
 interface Props {

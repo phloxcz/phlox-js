@@ -33,8 +33,8 @@ function copyCss(): Plugin {
 export default defineConfig({
   plugins: [copyCss()],
   // The JSX of the framework imports its own runtime, inside the package it is a module like the others
-  resolve: { alias: [{ find: /^phlox-js\/(jsx-runtime|jsx-dev-runtime)$/, replacement: `${src}$1.ts` }] },
-  oxc: { jsx: { runtime: 'automatic', importSource: 'phlox-js', development: false } },
+  resolve: { alias: [{ find: /^@phloxcz\/phlox-js\/(jsx-runtime|jsx-dev-runtime)$/, replacement: `${src}$1.ts` }] },
+  oxc: { jsx: { runtime: 'automatic', importSource: '@phloxcz/phlox-js', development: false } },
   build: {
     outDir: dist,
     emptyOutDir: true,

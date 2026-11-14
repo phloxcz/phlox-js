@@ -1,9 +1,9 @@
 # Grid
 
-Tabulka dat jako [phloxcz/components-grid](https://github.com/phloxcz/components-grid), se stejným HTML, třídami a CSS. Importuje se z `phlox-js/components`. Model (`Grid`) a vykreslení (`<GridView>`) jsou zvlášť jako u formuláře a stromu.
+Tabulka dat jako [phloxcz/components-grid](https://github.com/phloxcz/components-grid), se stejným HTML, třídami a CSS. Importuje se z `@phloxcz/phlox-js/components`. Model (`Grid`) a vykreslení (`<GridView>`) jsou zvlášť jako u formuláře a stromu.
 
 ```tsx
-import { Grid, GridView } from 'phlox-js/components';
+import { Grid, GridView } from '@phloxcz/phlox-js/components';
 
 class OrdersPresenter extends Presenter {
   override routes: Route[] = [

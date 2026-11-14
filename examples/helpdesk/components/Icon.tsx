@@ -1,5 +1,5 @@
 // Icons as SVG in templates, drawn in the style of Lucide (24×24, a stroke of the current colour).
-import type { Child } from 'phlox-js';
+import type { Child } from '@phloxcz/phlox-js';
 
 const ICONS = {
   search: <><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></>,

@@ -1,4 +1,4 @@
-import { Authenticator, Identity } from 'phlox-js/security';
+import { Authenticator, Identity } from '@phloxcz/phlox-js/security';
 import { HelpdeskApi } from '../api';
 
 /** Login by the e-mail and the password through the API, like an Authenticator in Nette. */

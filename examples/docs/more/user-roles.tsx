@@ -1,6 +1,6 @@
-import { Button, If, Presenter, RouteFrame } from 'phlox-js';
-import type { Container, Route } from 'phlox-js';
-import { Identity, Permission } from 'phlox-js/security';
+import { Button, If, Presenter, RouteFrame } from '@phloxcz/phlox-js';
+import type { Container, Route } from '@phloxcz/phlox-js';
+import { Identity, Permission } from '@phloxcz/phlox-js/security';
 
 export function services(container: Container) {
   container.add(new Permission()

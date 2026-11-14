@@ -1,5 +1,5 @@
-import { For, Presenter, RouteFrame } from 'phlox-js';
-import type { Route } from 'phlox-js';
+import { For, Presenter, RouteFrame } from '@phloxcz/phlox-js';
+import type { Route } from '@phloxcz/phlox-js';
 
 class OrderPresenter extends Presenter<{ id: number }> {
   render() {

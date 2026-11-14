@@ -1,5 +1,5 @@
-import { Component, computed } from 'phlox-js';
-import { Form, FormView } from 'phlox-js/forms';
+import { Component, computed } from '@phloxcz/phlox-js';
+import { Form, FormView } from '@phloxcz/phlox-js/forms';
 import { PEOPLE, readPerson, searchPeople } from './_people';
 import type { Person } from './_people';
 

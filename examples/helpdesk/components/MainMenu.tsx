@@ -1,5 +1,5 @@
-import { Component, For, If } from 'phlox-js';
-import type { Child } from 'phlox-js';
+import { Component, For, If } from '@phloxcz/phlox-js';
+import type { Child } from '@phloxcz/phlox-js';
 import { Icon } from './Icon';
 import type { IconName } from './Icon';
 

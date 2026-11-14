@@ -1,6 +1,6 @@
 // Types of the helpdesk API in the shape `npm run rpc:types` generates from phlox-rpc-api.
 // Written by hand here, because the server is a mock (see server/), and shared by the mock and the client.
-import { RpcClient } from 'phlox-js/net';
+import { RpcClient } from '@phloxcz/phlox-js/net';
 
 export type Status = 'open' | 'progress' | 'closed';
 export type Priority = 'low' | 'medium' | 'high';

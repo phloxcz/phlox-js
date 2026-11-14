@@ -1,7 +1,7 @@
-import { Component, Dropdown, For, If } from 'phlox-js';
-import type { Child } from 'phlox-js';
-import { online } from 'phlox-js/net';
-import type { OfflineChange } from 'phlox-js/net';
+import { Component, Dropdown, For, If } from '@phloxcz/phlox-js';
+import type { Child } from '@phloxcz/phlox-js';
+import { online } from '@phloxcz/phlox-js/net';
+import type { OfflineChange } from '@phloxcz/phlox-js/net';
 import { OfflineWork } from '../model/offline';
 import { ago } from '../format';
 import { Icon } from './Icon';

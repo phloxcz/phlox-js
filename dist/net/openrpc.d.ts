@@ -48,7 +48,7 @@ export interface OpenRpcDocument {
 export interface GenerateOptions {
     /** Name of the generated client class, `RpcApi` by default. */
     className?: string;
-    /** Where the client is imported from, `phlox-js/net` by default. */
+    /** Where the client is imported from, `@phloxcz/phlox-js/net` by default. */
     importFrom?: string;
 }
 /** Returns the content of a TypeScript file with the types of the document and a typed client class. */

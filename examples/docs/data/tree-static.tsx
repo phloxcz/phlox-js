@@ -1,6 +1,6 @@
-import { Component, If } from 'phlox-js';
-import { Tree, TreeView } from 'phlox-js/components';
-import type { TreeNode } from 'phlox-js/components';
+import { Component, If } from '@phloxcz/phlox-js';
+import { Tree, TreeView } from '@phloxcz/phlox-js/components';
+import type { TreeNode } from '@phloxcz/phlox-js/components';
 
 /** All nodes at once, with icons; the selection is a state, selected by a click, Enter or the arrows. */
 export default class StaticTree extends Component {

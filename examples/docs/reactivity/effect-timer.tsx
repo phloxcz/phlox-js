@@ -1,4 +1,4 @@
-import { Component, effect, state } from 'phlox-js';
+import { Component, effect, state } from '@phloxcz/phlox-js';
 
 /** An effect with its own cleanup: the timer starts again whenever the delay changes. */
 export default class Timer extends Component {

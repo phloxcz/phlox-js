@@ -39,7 +39,7 @@ export interface OpenRpcDocument {
 export interface GenerateOptions {
   /** Name of the generated client class, `RpcApi` by default. */
   className?: string;
-  /** Where the client is imported from, `phlox-js/net` by default. */
+  /** Where the client is imported from, `@phloxcz/phlox-js/net` by default. */
   importFrom?: string;
 }
 
@@ -115,7 +115,7 @@ export function generateRpcTypes(document: OpenRpcDocument, options: GenerateOpt
   const source = [document.info?.title, document.info?.version].filter(Boolean).join(' ');
   const out: string[] = [
     `// Generated from the OpenRPC document${source ? ` of ${source}` : ''}. Do not edit, generate it again.`,
-    `import { RpcClient } from ${JSON.stringify(options.importFrom ?? 'phlox-js/net')};`,
+    `import { RpcClient } from ${JSON.stringify(options.importFrom ?? '@phloxcz/phlox-js/net')};`,
     '',
   ];
 

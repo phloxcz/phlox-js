@@ -3,7 +3,7 @@ import { Container } from '../src/index';
 import type { Class, Presenter } from '../src/index';
 import { bootApp, cleanup, tick as wait, until } from '../src/testing/index';
 
-// The tests of the framework use the same helpers as tests of applications, see phlox-js/testing
+// The tests of the framework use the same helpers as tests of applications, see @phloxcz/phlox-js/testing
 afterEach(cleanup);
 
 /** Starts an application at the given URL. Errors reported to the application are collected. */

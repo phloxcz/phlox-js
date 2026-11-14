@@ -1,4 +1,4 @@
-import { Component, Dropdown, Else, For, If, computed, state } from 'phlox-js';
+import { Component, Dropdown, Else, For, If, computed, state } from '@phloxcz/phlox-js';
 import { HelpdeskApi } from '../api';
 import type { NotificationResource } from '../api';
 import { ago } from '../format';

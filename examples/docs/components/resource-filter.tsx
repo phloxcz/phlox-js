@@ -1,5 +1,5 @@
-import { Component, For, If, state } from 'phlox-js';
-import type { Container, Resource } from 'phlox-js';
+import { Component, For, If, state } from '@phloxcz/phlox-js';
+import type { Container, Resource } from '@phloxcz/phlox-js';
 
 interface Task { id: number; title: string; status: 'open' | 'closed' }
 

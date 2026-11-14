@@ -1,5 +1,5 @@
-import { Button, Component, If, state } from 'phlox-js';
-import { Form, FormView } from 'phlox-js/forms';
+import { Button, Component, If, state } from '@phloxcz/phlox-js';
+import { Form, FormView } from '@phloxcz/phlox-js/forms';
 
 /** The values of the form, like a DTO generated from PHP. */
 interface CreateTask {

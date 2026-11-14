@@ -1,5 +1,5 @@
-import { Button, Component, For, computed, state } from 'phlox-js';
-import type { State } from 'phlox-js';
+import { Button, Component, For, computed, state } from '@phloxcz/phlox-js';
+import type { State } from '@phloxcz/phlox-js';
 
 interface Item { name: string; done: State<boolean> }
 

@@ -59,10 +59,10 @@ export default defineConfig({
       },
     }),
   ],
-  // `phlox-js` and the JSX runtime resolve to src/ through `paths` in tsconfig.json
+  // `@phloxcz/phlox-js` and the JSX runtime resolve to src/ through `paths` in tsconfig.json
   resolve: { tsconfigPaths: true },
-  // The scan of dependencies at the start does not read jsxImportSource from tsconfig.json: TSX of phlox-js, not React
-  optimizeDeps: { rolldownOptions: { transform: { jsx: { runtime: 'automatic', importSource: 'phlox-js' } } } },
+  // The scan of dependencies at the start does not read jsxImportSource from tsconfig.json: TSX of @phloxcz/phlox-js, not React
+  optimizeDeps: { rolldownOptions: { transform: { jsx: { runtime: 'automatic', importSource: '@phloxcz/phlox-js' } } } },
   build: {
     rollupOptions: {
       input: { index: `${root}/index.html`, ...Object.fromEntries(examples.map(name => [name, `${root}/${name}/index.html`])) },

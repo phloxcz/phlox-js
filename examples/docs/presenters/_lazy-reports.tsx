@@ -1,4 +1,4 @@
-import { Presenter } from 'phlox-js';
+import { Presenter } from '@phloxcz/phlox-js';
 
 /** Loaded with the first visit of its route: a file of its own in the build. The export must be default. */
 export default class ReportsPresenter extends Presenter {

@@ -1,6 +1,6 @@
 /**
  * The service through which the adapter reaches Kendo UI. The application passes the `kendo` object in,
- * phlox-js does not import Kendo nor jQuery:
+ * @phloxcz/phlox-js does not import Kendo nor jQuery:
  *
  *   import jQuery from 'jquery';
  *   window.jQuery = window.$ = jQuery;

@@ -1,5 +1,5 @@
-import { Presenter, RouteFrame } from 'phlox-js';
-import type { Route } from 'phlox-js';
+import { Presenter, RouteFrame } from '@phloxcz/phlox-js';
+import type { Route } from '@phloxcz/phlox-js';
 
 class HomePresenter extends Presenter {
   render() {

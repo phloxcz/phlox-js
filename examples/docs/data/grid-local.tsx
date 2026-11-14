@@ -1,5 +1,5 @@
-import { Component } from 'phlox-js';
-import { Grid, GridView } from 'phlox-js/components';
+import { Component } from '@phloxcz/phlox-js';
+import { Grid, GridView } from '@phloxcz/phlox-js/components';
 import { CATEGORIES, ORDERS } from './_orders';
 import type { Order } from './_orders';
 

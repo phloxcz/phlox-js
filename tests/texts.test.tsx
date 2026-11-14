@@ -1,4 +1,4 @@
-/** Texts of the framework in another language: setTexts() and the Czech texts in phlox-js/locales/cs. */
+/** Texts of the framework in another language: setTexts() and the Czech texts in @phloxcz/phlox-js/locales/cs. */
 import { describe, expect, test } from 'vitest';
 import { messageTexts, setTexts } from '../src/index';
 import type { FrameworkTexts } from '../src/index';

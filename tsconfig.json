@@ -5,10 +5,10 @@
     "moduleResolution": "Bundler",
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "jsx": "react-jsx",
-    "jsxImportSource": "phlox-js",
+    "jsxImportSource": "@phloxcz/phlox-js",
     "paths": {
-      "phlox-js": ["./src/index.ts"],
-      "phlox-js/*": ["./src/*"]
+      "@phloxcz/phlox-js": ["./src/index.ts"],
+      "@phloxcz/phlox-js/*": ["./src/*"]
     },
     "strict": true,
     "noUncheckedIndexedAccess": true,

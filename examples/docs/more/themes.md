@@ -4,13 +4,13 @@ Framework vykresluje formuláře a okna dialogů. Jaké třídy dostanou, určuj
 
 ```ts
 // main.ts: rozložení pro každé téma, k tomu vzhled
-import 'phlox-js/styles/base.css';
-import 'phlox-js/styles/default.css';          // výchozí téma
+import '@phloxcz/phlox-js/styles/base.css';
+import '@phloxcz/phlox-js/styles/default.css';          // výchozí téma
 ```
 
 ```ts
 // nebo s Bootstrapem 5
-import 'phlox-js/styles/base.css';
+import '@phloxcz/phlox-js/styles/base.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 services.add(new BootstrapTheme());              // services.ts
@@ -27,7 +27,7 @@ services.add(new BootstrapTheme());              // services.ts
 Vlastní tlačítka (v `actions()` dialogu, v seznamu, v layoutu) kresli přes `<Button>`, dostanou třídy tématu:
 
 ```tsx
-import { Button } from 'phlox-js';
+import { Button } from '@phloxcz/phlox-js';
 
 <Button onClick={() => this.close(false)}>Zrušit</Button>
 <Button primary disabled={() => this.form.submitting()} onClick={() => this.form.submit()}>Uložit</Button>
@@ -45,7 +45,7 @@ import { Button } from 'phlox-js';
 Animace frameworku (rozbalování stromu, uhýbání při řazení, otáčení šipek a jiné přechody) mají jeden přepínač:
 
 ```ts
-import { setMotion } from 'phlox-js';
+import { setMotion } from '@phloxcz/phlox-js';
 
 setMotion('system');   // výchozí: podle nastavení systému „omezit pohyb“
 setMotion('on');       // vždy, i když systém žádá omezení
@@ -80,4 +80,4 @@ services.add(new FoundationTheme());
 | `dialog`, `dialogContent`, `dialogHeader`, `dialogTitle`, `dialogClose`, `dialogBody`, `dialogFooter` | okno dialogu |
 | `dropdown.button`, `dropdown.panel`, `dropdown.item`, `dropdown.itemActive` | `<Dropdown>`, `<DropdownItem>` |
 
-Místo, které téma nemá, dostane prázdnou třídu. Vlastní prvky si mohou zavést svá místa, třeba `dropdownlist.wrapper`, a číst je přes `currentTheme().class('dropdownlist.wrapper')` (`currentTheme` z `phlox-js`).
+Místo, které téma nemá, dostane prázdnou třídu. Vlastní prvky si mohou zavést svá místa, třeba `dropdownlist.wrapper`, a číst je přes `currentTheme().class('dropdownlist.wrapper')` (`currentTheme` z `@phloxcz/phlox-js`).

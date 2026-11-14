@@ -1,4 +1,4 @@
-import { For, Presenter, computed, state } from 'phlox-js';
+import { For, Presenter, computed, state } from '@phloxcz/phlox-js';
 import { HelpdeskApi } from '../api';
 import type { ReportRow } from '../api';
 

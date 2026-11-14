@@ -1,6 +1,6 @@
-import { For, Presenter, motion, setMotion } from 'phlox-js';
-import type { Motion } from 'phlox-js';
-import { Form, FormView } from 'phlox-js/forms';
+import { For, Presenter, motion, setMotion } from '@phloxcz/phlox-js';
+import type { Motion } from '@phloxcz/phlox-js';
+import { Form, FormView } from '@phloxcz/phlox-js/forms';
 import { HelpdeskApi } from '../api';
 import type { ProfileInput } from '../api';
 import { Store } from '../model/Store';

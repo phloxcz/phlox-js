@@ -44,9 +44,9 @@ Adaptér pro aplikace, které chtějí přímo knihovnu capify, třeba kvůli st
 ```ts
 import * as Capify from '@phloxcz/capify';
 import '@phloxcz/capify/capify.css';
-import { CapifyFlashMessages } from 'phlox-js/adapters/capify';
+import { CapifyFlashMessages } from '@phloxcz/phlox-js/adapters/capify';
 
 services.add(new CapifyFlashMessages(Capify, { position: 'top-right', theme: 'bootstrap' }));
 ```
 
-Druhý parametr jsou volby `Capify.notify()` pro všechny zprávy. Toasty frameworku se pak neukazují. `phlox-js` capify nevyžaduje, instaluje ho aplikace.
+Druhý parametr jsou volby `Capify.notify()` pro všechny zprávy. Toasty frameworku se pak neukazují. `@phloxcz/phlox-js` capify nevyžaduje, instaluje ho aplikace.

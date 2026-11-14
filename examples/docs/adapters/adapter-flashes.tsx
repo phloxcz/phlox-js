@@ -1,5 +1,5 @@
-import { Button, FlashMessages, For, Presenter, state } from 'phlox-js';
-import type { Container, Flash, FlashOptions } from 'phlox-js';
+import { Button, FlashMessages, For, Presenter, state } from '@phloxcz/phlox-js';
+import type { Container, Flash, FlashOptions } from '@phloxcz/phlox-js';
 
 /** An adapter: another service for flash messages, here a log line instead of toasts. */
 class LogFlashMessages extends FlashMessages {

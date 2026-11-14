@@ -1,4 +1,4 @@
-import { Button, Component, Else, ElseIf, If, state } from 'phlox-js';
+import { Button, Component, Else, ElseIf, If, state } from '@phloxcz/phlox-js';
 
 interface Profile { name: string }
 

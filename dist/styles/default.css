@@ -1,5 +1,5 @@
 /**
- * phlox-js/styles/default.css – look of the default theme. Not needed with Bootstrap.
+ * @phloxcz/phlox-js/styles/default.css – look of the default theme. Not needed with Bootstrap.
  *
  * It uses CSS system colors (Canvas, Field, ButtonFace, Highlight, GrayText...), like the other phlox
  * components. They follow color-scheme of the page: with `:root { color-scheme: light dark; }` the forms and

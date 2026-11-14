@@ -1,6 +1,6 @@
-import { Component, computed } from 'phlox-js';
-import type { Container } from 'phlox-js';
-import { Form, FormView } from 'phlox-js/forms';
+import { Component, computed } from '@phloxcz/phlox-js';
+import type { Container } from '@phloxcz/phlox-js';
+import { Form, FormView } from '@phloxcz/phlox-js/forms';
 import { CategoryStore } from '../data/_categories';
 
 interface Values { parentId: number | null; shownIn: number[]; moveTo: number | null }

@@ -1,4 +1,4 @@
-import { Component, state } from 'phlox-js';
+import { Component, state } from '@phloxcz/phlox-js';
 
 /** Events, a live attribute, the element through ref, and SVG right in the template. */
 export default class Events extends Component {

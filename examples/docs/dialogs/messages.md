@@ -25,5 +25,5 @@ loading.close();
 - **Volby:** `title`, `okText`, `cancelText`, `danger` (OK varuje, třeba u mazání, a fokus dostane Zrušit, aby Enter nic nezničil), u `prompt` `value` a `placeholder`.
 - **`showLoading`** uživatel nezavře, ani Escapem; zavře ho `close()`. Zpráva může být šablona, ne jen text.
 - **Zpráva** je text nebo šablona, nikdy HTML v textu, takže nehrozí vložení cizího kódu.
-- **Texty tlačítek:** `messageTexts.ok`, `cancel`, `close`, `loading` z `phlox-js` (`unsaved` a `leave` patří k odchodu s neuloženými změnami). **Vzhled:** místa `message.*` (dialog) a `popover.*` (popover; v Bootstrapu jeho `popover` se šipkou).
+- **Texty tlačítek:** `messageTexts.ok`, `cancel`, `close`, `loading` z `@phloxcz/phlox-js` (`unsaved` a `leave` patří k odchodu s neuloženými změnami). **Vzhled:** místa `message.*` (dialog) a `popover.*` (popover; v Bootstrapu jeho `popover` se šipkou).
 - **Grid** se před akcí s `confirm` ptá popoverem u tlačítka akce.

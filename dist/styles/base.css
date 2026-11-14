@@ -18,7 +18,7 @@
 }
 
 /**
- * phlox-js/styles/base.css – layout for every theme. Import it always, with or without Bootstrap.
+ * @phloxcz/phlox-js/styles/base.css – layout for every theme. Import it always, with or without Bootstrap.
  * It has no colors and no fonts, the look comes from the theme (default.css, Bootstrap...).
  */
 

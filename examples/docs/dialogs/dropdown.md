@@ -3,7 +3,7 @@
 Tlačítko s panelem libovolného obsahu: menu uživatele, upozornění, filtr.
 
 ```tsx
-import { Dropdown, DropdownItem } from 'phlox-js';
+import { Dropdown, DropdownItem } from '@phloxcz/phlox-js';
 
 <Dropdown label={<Icon name="bell" />} title="Upozornění" placement="bottom-right" onOpen={() => this.load()}>
   <For each={this.items}>{item => <DropdownItem href={this.link(`/tasks/${item.taskId}`)}>{item.text}</DropdownItem>}</For>

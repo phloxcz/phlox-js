@@ -1,5 +1,5 @@
 // Categories for the demos of trees: a stand-in for a server that answers one level at a time, like an API.
-import type { TreeNode } from 'phlox-js/components';
+import type { TreeNode } from '@phloxcz/phlox-js/components';
 
 export interface CategoryNode extends TreeNode<number> {
   /** A category the server refuses to move, to show what happens then. */

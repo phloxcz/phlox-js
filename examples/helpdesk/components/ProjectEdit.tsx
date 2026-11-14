@@ -1,5 +1,5 @@
-import { Button, Component } from 'phlox-js';
-import { Form, FormView } from 'phlox-js/forms';
+import { Button, Component } from '@phloxcz/phlox-js';
+import { Form, FormView } from '@phloxcz/phlox-js/forms';
 import { HelpdeskApi } from '../api';
 import type { ProjectInput, ProjectResource } from '../api';
 

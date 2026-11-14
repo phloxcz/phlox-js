@@ -1,4 +1,4 @@
-import { Button, Component, For, state } from 'phlox-js';
+import { Button, Component, For, state } from '@phloxcz/phlox-js';
 
 interface Task { id: number; name: string; done: boolean }
 

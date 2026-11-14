@@ -1,9 +1,9 @@
 # Strom
 
-Strom jako [phloxcz/components-tree](https://github.com/phloxcz/components-tree), se stejným HTML, třídami a CSS. Importuje se z `phlox-js/components`. Stejně jako u formuláře je zvlášť model (`Tree`) a vykreslení (`<TreeView>`).
+Strom jako [phloxcz/components-tree](https://github.com/phloxcz/components-tree), se stejným HTML, třídami a CSS. Importuje se z `@phloxcz/phlox-js/components`. Stejně jako u formuláře je zvlášť model (`Tree`) a vykreslení (`<TreeView>`).
 
 ```tsx
-import { Tree, TreeView } from 'phlox-js/components';
+import { Tree, TreeView } from '@phloxcz/phlox-js/components';
 
 class CategoriesPresenter extends Presenter {
   override routes: Route[] = [

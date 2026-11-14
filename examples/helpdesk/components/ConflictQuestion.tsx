@@ -1,5 +1,5 @@
-import { Button, Component } from 'phlox-js';
-import type { OfflineChange } from 'phlox-js/net';
+import { Button, Component } from '@phloxcz/phlox-js';
+import type { OfflineChange } from '@phloxcz/phlox-js/net';
 import { ago } from '../format';
 
 /**

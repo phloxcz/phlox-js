@@ -1,4 +1,4 @@
-import { Button, Component, state } from 'phlox-js';
+import { Button, Component, state } from '@phloxcz/phlox-js';
 
 /** alert, confirm and prompt as dialogs of the application, confirm as a popover by its button, loading. */
 export default class Messages extends Component {

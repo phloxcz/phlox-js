@@ -4,17 +4,17 @@ PhloxJS je frontendový framework, který přenáší způsob práce z Nette do 
 
 Tato dokumentace je sama aplikace na PhloxJS. Ukázky na stránkách jsou živé: záložka Kód ukazuje přesně ten soubor, který běží. Ukázky s routami běží v rámu s vlastním adresním řádkem. Vzhled (výchozí nebo Bootstrap), světlý a tmavý režim a animace se přepínají v hlavičce. Popisuje se jen to, co je napsané a otestované. Proč je co navržené tak, jak je, je v `docs/design.md` v repozitáři.
 
-**Kde co je:** jádro (reaktivita, šablony, komponenty, presentery, aplikace, DI) se importuje z `phlox-js`. Volitelné části mají vlastní vstup: síť (RPC) `phlox-js/net`, přihlášení a oprávnění `phlox-js/security`, formuláře `phlox-js/forms`, překlady `phlox-js/localization`, pomocníci pro testy `phlox-js/testing` a Vite plugin `phlox-js/vite`. Napojení cizích knihoven (adaptéry) jsou pod `phlox-js/adapters/…`.
+**Kde co je:** jádro (reaktivita, šablony, komponenty, presentery, aplikace, DI) se importuje z `@phloxcz/phlox-js`. Volitelné části mají vlastní vstup: síť (RPC) `@phloxcz/phlox-js/net`, přihlášení a oprávnění `@phloxcz/phlox-js/security`, formuláře `@phloxcz/phlox-js/forms`, překlady `@phloxcz/phlox-js/localization`, pomocníci pro testy `@phloxcz/phlox-js/testing` a Vite plugin `@phloxcz/phlox-js/vite`. Napojení cizích knihoven (adaptéry) jsou pod `@phloxcz/phlox-js/adapters/…`.
 
 Celou aplikaci proti serveru (přihlášení, RPC, vnořené presentery, `resource`, offline, PWA) ukazuje [Helpdesk](/helpdesk), odkaz je i v hlavičce. Jeho kód je v `examples/helpdesk`.
 
 ## Instalace
 
 ```bash
-npm install github:phloxcz/phlox-js#v0.1.0
+npm install github:phloxcz/phlox-js#v0.2.0
 ```
 
-Balíček zatím není na npm, instaluje se z GitHubu podle tagu. Projekt potřebuje Vite (od verze 7) s pluginem `phlox()` a v `tsconfig.json` `"jsx": "react-jsx"`, `"jsxImportSource": "phlox-js"` a `"moduleResolution": "Bundler"` (viz Aplikace a bootstrap). Styly: `import 'phlox-js/styles/base.css'` a k nim `phlox-js/styles/default.css`, nebo Bootstrap.
+Balíček zatím není na npm, instaluje se z GitHubu podle tagu. Projekt potřebuje Vite (od verze 7) s pluginem `phlox()` a v `tsconfig.json` `"jsx": "react-jsx"`, `"jsxImportSource": "@phloxcz/phlox-js"` a `"moduleResolution": "Bundler"` (viz Aplikace a bootstrap). Styly: `import '@phloxcz/phlox-js/styles/base.css'` a k nim `@phloxcz/phlox-js/styles/default.css`, nebo Bootstrap.
 
 ## Spuštění tohoto repozitáře
 

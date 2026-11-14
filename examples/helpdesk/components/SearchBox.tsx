@@ -1,5 +1,5 @@
-import { Component, Else, For, If, computed, state, untrack } from 'phlox-js';
-import type { Resource } from 'phlox-js';
+import { Component, Else, For, If, computed, state, untrack } from '@phloxcz/phlox-js';
+import type { Resource } from '@phloxcz/phlox-js';
 import { HelpdeskApi } from '../api';
 import type { SearchResult } from '../api';
 import { Icon } from './Icon';

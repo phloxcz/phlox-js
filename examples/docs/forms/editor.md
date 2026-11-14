@@ -18,7 +18,7 @@ this.form.addEditor('text', 'Komentář', {
 - **Chová se jako ostatní prvky:** chyby u pole i ze serveru, `setDefaults()`, `reset()`, `isChanged()`, `setDisabled()`. Kontrola proběhne po opuštění celého editoru, ne už při přechodu do jeho lišty.
 - **Vzhled podle tématu:** s `BootstrapTheme` editor dostane podobu pro Bootstrap, jinak výchozí. Volba `theme` to přepíše.
 - **Skupiny lišty:** `styles`, `format`, `script`, `fontsize`, `color`, `bgcolor`, `align`, `case`, `blocks`, `lists`, `link`, `image`, `table`, `emoji`, `specialchar`, `hr`, `clearfmt`, `grid`, `source`, `fullscreen`, a s volbami `variables` a `widgets` i stejnojmenné skupiny. Bez `toolbar` jsou v liště všechny.
-- **Volby pro celou aplikaci:** `Editor.defaults = { colorScheme: 'auto' }` (z `phlox-js/forms`). Vlastní volby editoru jdou přes ně.
+- **Volby pro celou aplikaci:** `Editor.defaults = { colorScheme: 'auto' }` (z `@phloxcz/phlox-js/forms`). Vlastní volby editoru jdou přes ně.
 - **`control.editor`** je běžící editor, například pro `insertText('👍')` z vlastní nabídky emoji. Text se vloží tam, kde byl kurzor. Dokud se editor nenačte, je `null`.
 - **`control.element`** je editovatelná plocha. Dostane `id` prvku a `role="textbox"`. Dokud se editor nenačte, je `null`.
 - **`control.focus()`** dá fokus do editoru, i když ještě není načtený: pak hned, jak vznikne. Proto ho používej místo `control.element?.focus()`.
@@ -30,7 +30,7 @@ this.form.addEditor('text', 'Komentář', {
 Bez formuláře, HTML vázané na stav oběma směry:
 
 ```tsx
-import { Editor } from 'phlox-js/forms';
+import { Editor } from '@phloxcz/phlox-js/forms';
 
 <Editor value={this.text} options={{ toolbar: 'format,lists', minHeight: 120 }} label="Poznámka" />
 ```

@@ -1,11 +1,11 @@
 # Testování aplikací
 
-Pomocníci pro testy aplikací jsou v `phlox-js/testing`, mock serveru RPC v `phlox-js/net`. Fungují s každým nástrojem, který má DOM, typicky Vitest s jsdom.
+Pomocníci pro testy aplikací jsou v `@phloxcz/phlox-js/testing`, mock serveru RPC v `@phloxcz/phlox-js/net`. Fungují s každým nástrojem, který má DOM, typicky Vitest s jsdom.
 
 ```ts
 import { afterEach, expect, test } from 'vitest';
-import { bootApp, cleanup, until } from 'phlox-js/testing';
-import { createRpcMock } from 'phlox-js/net';
+import { bootApp, cleanup, until } from '@phloxcz/phlox-js/testing';
+import { createRpcMock } from '@phloxcz/phlox-js/net';
 
 afterEach(cleanup);
 

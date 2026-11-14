@@ -1,5 +1,5 @@
-import { Button, Component, state } from 'phlox-js';
-import { IntlTranslator } from 'phlox-js/localization';
+import { Button, Component, state } from '@phloxcz/phlox-js';
+import { IntlTranslator } from '@phloxcz/phlox-js/localization';
 
 // In an application these are locales/cs.json and locales/en.json
 const cs = {

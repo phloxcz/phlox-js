@@ -1,6 +1,6 @@
-import { Presenter, state } from 'phlox-js';
-import type { Container, Params, Route } from 'phlox-js';
-import { Tree, TreeView } from 'phlox-js/components';
+import { Presenter, state } from '@phloxcz/phlox-js';
+import type { Container, Params, Route } from '@phloxcz/phlox-js';
+import { Tree, TreeView } from '@phloxcz/phlox-js/components';
 import { CategoryStore } from './_categories';
 import type { CategoryNode } from './_categories';
 

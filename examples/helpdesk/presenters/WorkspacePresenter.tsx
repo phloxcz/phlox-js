@@ -1,5 +1,5 @@
-import { Presenter, RouteFrame, effect, untrack } from 'phlox-js';
-import type { Route } from 'phlox-js';
+import { Presenter, RouteFrame, effect, untrack } from '@phloxcz/phlox-js';
+import type { Route } from '@phloxcz/phlox-js';
 import { Icon, Logo } from '../components/Icon';
 import { MainMenu, MenuLinks } from '../components/MainMenu';
 import type { MenuEntry } from '../components/MainMenu';

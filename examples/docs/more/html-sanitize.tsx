@@ -1,4 +1,4 @@
-import { Component, Html, computed, sanitizeHtml, state } from 'phlox-js';
+import { Component, Html, computed, sanitizeHtml, state } from '@phloxcz/phlox-js';
 
 const SAMPLE = '<p onclick="steal()">Ahoj <strong>světe</strong>, <a href="javascript:alert(1)">klikni</a>.</p>\n'
   + '<img src="x" onerror="alert(2)">\n<script>alert(3)</script>\n<p style="color: crimson; position: fixed; top: 0">Červený text</p>';

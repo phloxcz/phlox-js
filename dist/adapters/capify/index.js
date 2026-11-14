@@ -2,7 +2,7 @@ import { FlashMessages } from "../../application/application.js";
 // src/adapters/capify/index.ts
 /**
 * Adapter for @phloxcz/capify: flash messages shown as its toasts.
-* It does not import capify, the application passes it in, so phlox-js itself has no dependency on it:
+* It does not import capify, the application passes it in, so @phloxcz/phlox-js itself has no dependency on it:
 *
 *   import * as Capify from '@phloxcz/capify';
 *   services.add(new CapifyFlashMessages(Capify, { position: 'top-right' }));

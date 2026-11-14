@@ -1,5 +1,5 @@
-import { Button, For, If, Presenter, RouteFrame, state } from 'phlox-js';
-import type { Params, Route } from 'phlox-js';
+import { Button, For, If, Presenter, RouteFrame, state } from '@phloxcz/phlox-js';
+import type { Params, Route } from '@phloxcz/phlox-js';
 
 const ALL = Array.from({ length: 12 }, (_, i) => ({ id: i + 1, name: `Dokument ${i + 1}` }));
 let documents = [...ALL];

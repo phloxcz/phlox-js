@@ -3,8 +3,8 @@
  * and animations. The choice is remembered in the browser. ?theme=bootstrap or ?theme=default in the URL wins.
  */
 
-import { For, motion, setMotion } from 'phlox-js';
-import type { Child, Motion } from 'phlox-js';
+import { For, motion, setMotion } from '@phloxcz/phlox-js';
+import type { Child, Motion } from '@phloxcz/phlox-js';
 
 export type Look = 'default' | 'bootstrap';
 export type Scheme = 'system' | 'light' | 'dark';

@@ -1,6 +1,6 @@
 // Orders for the demos of the grid: generated data and a stand-in for an API with phloxcz/api-query.
-import { applyQuery } from 'phlox-js/components';
-import type { GridQuery, GridResult } from 'phlox-js/components';
+import { applyQuery } from '@phloxcz/phlox-js/components';
+import type { GridQuery, GridResult } from '@phloxcz/phlox-js/components';
 
 export interface Order {
   id: number;

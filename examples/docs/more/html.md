@@ -3,7 +3,7 @@
 Text se do šablony píše jako `{text}` a prohlížeč ho ukáže jako text, nic se nespustí. HTML, které napsal uživatel (komentář z editoru, obsah CMS), ukáže `<Html>`. Je to obdoba `|noescape` v Latte, ale HTML se před zobrazením vyčistí:
 
 ```tsx
-import { Html } from 'phlox-js';
+import { Html } from '@phloxcz/phlox-js';
 
 <Html html={() => comment().text} class="comment-text" />        // <div class="comment-text">…</div>
 <Html html={note} tag="span" />                                  // jiný obal: span, section, article
@@ -22,7 +22,7 @@ import { Html } from 'phlox-js';
 
 ```ts
 import { JSDOM } from 'jsdom';
-import { sanitizeHtml } from 'phlox-js';
+import { sanitizeHtml } from '@phloxcz/phlox-js';
 
 const document = new JSDOM('').window.document;
 const clean = (html: string) => sanitizeHtml(html, { document });

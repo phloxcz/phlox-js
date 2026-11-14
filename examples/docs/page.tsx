@@ -3,8 +3,8 @@
  * in the page; a presenter (routes, links, dialogs with a URL) runs in a frame with its own address bar.
  */
 
-import { Component, If, Presenter, h, state } from 'phlox-js';
-import type { Class, Container } from 'phlox-js';
+import { Component, If, Presenter, h, state } from '@phloxcz/phlox-js';
+import type { Class, Container } from '@phloxcz/phlox-js';
 
 /** A module of a demo: its default export, and services it needs. */
 export interface DemoModule {

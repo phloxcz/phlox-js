@@ -1,5 +1,5 @@
-import { For, If, Presenter, RouteFrame, state } from 'phlox-js';
-import type { Route } from 'phlox-js';
+import { For, If, Presenter, RouteFrame, state } from '@phloxcz/phlox-js';
+import type { Route } from '@phloxcz/phlox-js';
 
 interface User { id: number; name: string; email: string }
 

@@ -4,7 +4,7 @@
 
 | Služba | Výchozí | K čemu adaptér |
 |---|---|---|
-| `FlashMessages` | zprávy pro layout, s časovačem | `CapifyFlashMessages` (`phlox-js/adapters/capify`), jiná knihovna toastů |
+| `FlashMessages` | zprávy pro layout, s časovačem | `CapifyFlashMessages` (`@phloxcz/phlox-js/adapters/capify`), jiná knihovna toastů |
 | `Dialogs` | nativní `<dialog>` | `KendoDialogs` (Kendo Window), okna jiné knihovny |
 | `Theme` | výchozí třídy `phlox-*` | `BootstrapTheme`, jiný CSS framework |
 | `Translator` | `IntlTranslator` | i18next nebo jiný překladač |

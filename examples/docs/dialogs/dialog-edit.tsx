@@ -1,4 +1,4 @@
-import { Button, Component, state } from 'phlox-js';
+import { Button, Component, state } from '@phloxcz/phlox-js';
 
 /** A component for a dialog: its title, its buttons, and close(result). The result type is the second type parameter. */
 class NameEdit extends Component<{ name: string }, string> {

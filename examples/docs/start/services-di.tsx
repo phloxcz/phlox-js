@@ -1,5 +1,5 @@
-import { Button, Component, state } from 'phlox-js';
-import type { Container } from 'phlox-js';
+import { Button, Component, state } from '@phloxcz/phlox-js';
+import type { Container } from '@phloxcz/phlox-js';
 
 /** A service: one instance for the whole application, found by its type. */
 class Greeter {

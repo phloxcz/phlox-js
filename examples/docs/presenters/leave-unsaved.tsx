@@ -1,6 +1,6 @@
-import { Presenter, RouteFrame } from 'phlox-js';
-import type { Route } from 'phlox-js';
-import { Form, FormView } from 'phlox-js/forms';
+import { Presenter, RouteFrame } from '@phloxcz/phlox-js';
+import type { Route } from '@phloxcz/phlox-js';
+import { Form, FormView } from '@phloxcz/phlox-js/forms';
 
 class EditPresenter extends Presenter {
   readonly form = new Form<{ title: string }>();

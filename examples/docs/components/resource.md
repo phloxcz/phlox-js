@@ -3,7 +3,7 @@
 Seznam, který závisí na stavu (záložka, filtr, vybraný projekt), si řekne o data funkcí. Načte se znovu, kdykoli se změní stav přečtený v ní:
 
 ```tsx
-import type { Resource } from 'phlox-js';
+import type { Resource } from '@phloxcz/phlox-js';
 
 class TasksPresenter extends Presenter<{ projectId: number }> {
   readonly status = computed(() => this.params().status ?? null);

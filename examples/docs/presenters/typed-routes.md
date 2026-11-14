@@ -1,7 +1,7 @@
 # Typované routy
 
 ```ts
-import { route } from 'phlox-js';
+import { route } from '@phloxcz/phlox-js';
 
 class TasksPresenter extends Presenter {
   readonly detail = route('detail', '/<task:int>', { presenter: TaskDetailPresenter, props: ({ task }) => ({ taskId: task }) });

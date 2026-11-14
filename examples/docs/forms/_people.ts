@@ -1,5 +1,5 @@
 // Data for the demos of selections: people and a search like on a server (it waits, filters, returns the first ones).
-import { foldText } from 'phlox-js/forms';
+import { foldText } from '@phloxcz/phlox-js/forms';
 
 export interface Person { id: number; name: string; team: string }
 

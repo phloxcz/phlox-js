@@ -23,9 +23,9 @@ Adresáře `src/` odpovídají jmenným prostorům Nette:
 - **Šablony jsou v `ui/`,** ne zvlášť jako obdoba Latte. Jsou s komponentami těsně propojené (rozhodl autor).
 - **Flash zprávy:** `flashMessage()` je metoda presenteru jako v Nette, služba, která zprávy drží, patří k aplikaci.
 
-**Importy:** `phlox-js` dává to, co potřebuje každá obrazovka (reaktivita, šablony, komponenty, presentery, aplikace, DI). Volitelné části mají vlastní vstup: `phlox-js/net`, `phlox-js/security`, `phlox-js/forms`, `phlox-js/components`, `phlox-js/localization`, `phlox-js/vite` a adaptéry (`phlox-js/adapters/capify`, později `phlox-js/adapters/kendo`).
+**Importy:** `@phloxcz/phlox-js` dává to, co potřebuje každá obrazovka (reaktivita, šablony, komponenty, presentery, aplikace, DI). Volitelné části mají vlastní vstup: `@phloxcz/phlox-js/net`, `@phloxcz/phlox-js/security`, `@phloxcz/phlox-js/forms`, `@phloxcz/phlox-js/components`, `@phloxcz/phlox-js/localization`, `@phloxcz/phlox-js/vite` a adaptéry (`@phloxcz/phlox-js/adapters/capify`, později `@phloxcz/phlox-js/adapters/kendo`).
 
-**`components/`** (rozhodl autor): velké volitelné widgety jako strom, později grid podle `phlox-grid` a kanban. Název odpovídá PHP knihovnám `phloxcz/components-*`. Do `ui/` nepatří, protože to je jádro, které importuje každá obrazovka, a do `forms/` taky ne, protože to nejsou formulářové prvky. Formulářové prvky postavené na nich (`addTreeSelect`) jsou ve `forms/` a widget si berou z `components/`. Pro projekty s licencí Kendo zůstane `phlox-js/adapters/kendo`.
+**`components/`** (rozhodl autor): velké volitelné widgety jako strom, později grid podle `phlox-grid` a kanban. Název odpovídá PHP knihovnám `phloxcz/components-*`. Do `ui/` nepatří, protože to je jádro, které importuje každá obrazovka, a do `forms/` taky ne, protože to nejsou formulářové prvky. Formulářové prvky postavené na nich (`addTreeSelect`) jsou ve `forms/` a widget si berou z `components/`. Pro projekty s licencí Kendo zůstane `@phloxcz/phlox-js/adapters/kendo`.
 
 ## Vzhled a témata (rozhodnuto)
 
@@ -70,7 +70,7 @@ Ověření autora ukázalo černá tlačítka rozbalení ve stromu na světlé B
 
 Napojení cizích knihoven nejde do jádra, ale do adaptérů. Adaptér nahradí službu frameworku v kontejneru (`FlashMessages`, `Dialogs`, `Translator`, `UserStorage`...) nebo přidá prvek formuláře (`FormControl`). Presentery a komponenty o knihovně nevědí.
 
-- **Adaptéry jsou v `src/adapters/`, každý s vlastním vstupem** (`phlox-js/adapters/capify`, `phlox-js/adapters/kendo`). Kořen `src/` kopíruje jmenné prostory Nette a napojení cizí knihovny mezi ně nepatří (rozhodl autor). Vlastní vstup je proto, aby aplikace bez té knihovny nic navíc nepotřebovala.
+- **Adaptéry jsou v `src/adapters/`, každý s vlastním vstupem** (`@phloxcz/phlox-js/adapters/capify`, `@phloxcz/phlox-js/adapters/kendo`). Kořen `src/` kopíruje jmenné prostory Nette a napojení cizí knihovny mezi ně nepatří (rozhodl autor). Vlastní vstup je proto, aby aplikace bez té knihovny nic navíc nepotřebovala.
 - **Knihovna se adaptéru předá, adaptér ji neimportuje:** `new CapifyFlashMessages(Capify, options)`, `new Kendo(kendo)`. Adaptér pak nemá závislost, potřebuje jen malé rozhraní (`CapifyNotify`, `KendoLike`) a testuje se s falešnou náhradou. U Kenda se dřív čekalo, že kvůli jQuery a pluginům půjde o `peerDependencies`; nebylo to potřeba, widgety se tvoří konstruktory `kendo.ui.*` a jQuery si Kendo bere z `window`.
 - **Vlastní adaptér pro jinou knihovnu** si aplikace napíše stejně, seznam služeb je v příručce.
 
@@ -262,7 +262,7 @@ Ten seznam je celé rozhraní mezi pluginem a kontejnerem. Bez pluginu jde napsa
 
 ### Stav
 
-Implementováno: kontejner v `src/di/container.ts`, plugin v `src/di/vite.ts` (import `phlox-js/vite`, `phlox()` ve `vite.config.ts`). Pokrývají je `tests/di.test.ts`: autowiring, abstraktní předek, zděděný konstruktor, parametr s výchozí hodnotou, instance jako služba, `use()`, běžná třída beze změny a chyby pro interface, skalár, generikum, nejednoznačnost, chybějící službu a cyklus. V prohlížeči ověřeno na ukázce přes dev server i v produkčním buildu, soubory `.tsx` fungují.
+Implementováno: kontejner v `src/di/container.ts`, plugin v `src/di/vite.ts` (import `@phloxcz/phlox-js/vite`, `phlox()` ve `vite.config.ts`). Pokrývají je `tests/di.test.ts`: autowiring, abstraktní předek, zděděný konstruktor, parametr s výchozí hodnotou, instance jako služba, `use()`, běžná třída beze změny a chyby pro interface, skalár, generikum, nejednoznačnost, chybějící službu a cyklus. V prohlížeči ověřeno na ukázce přes dev server i v produkčním buildu, soubory `.tsx` fungují.
 
 **Známé nedostatky:**
 - Build vypisuje varování `IMPORT_IS_UNDEFINED` u tříd s parametrem typu interface z jiného souboru.
@@ -290,7 +290,7 @@ export const services = new Container()
 
 Přebírá se princip z Nette, ne kód z TraceJS: `User`, `Identity`, abstraktní `Authorizator` a `Permission` s rolemi, zdroji a privilegii.
 
-**Implementováno** v `src/security/` (import `phlox-js/security`), testy `tests/permission.test.ts` a `tests/user.test.tsx`. Rozhodnutí při implementaci:
+**Implementováno** v `src/security/` (import `@phloxcz/phlox-js/security`), testy `tests/permission.test.ts` a `tests/user.test.tsx`. Rozhodnutí při implementaci:
 
 - **`Permission` hledá jako Nette:** zdroj před rodiči, role před rodiči (do hloubky, později přidaný rodič dřív) a před „všemi rolemi“, privilegium před „všemi privilegii“. Dotaz na všechna privilegia je kladný, jen když žádné konkrétní není zakázané. Neznámá role nebo zdroj je chyba.
 - **`Identity` má navíc `token`.** V prohlížeči se uživatel serveru prokazuje tokenem (viz `TokenStorage` v `phlox-api-sample`), Nette ho v identitě nepotřebuje.
@@ -301,7 +301,7 @@ Přebírá se princip z Nette, ne kód z TraceJS: `User`, `Identity`, abstraktn�
 
 ## Formuláře (implementováno, čeká na review)
 
-`src/forms/` (import `phlox-js/forms`), testy `tests/forms.test.tsx`. API podle `Nette\Forms`: `addText()`, `setRequired()`, `addRule()`, `addCondition()`, `addConditionOn()`, `elseCondition()`, `endCondition()`, `toggle()`, `onSuccess`, `onError`, `setValidationScope()`, `isSubmittedBy()`.
+`src/forms/` (import `@phloxcz/phlox-js/forms`), testy `tests/forms.test.tsx`. API podle `Nette\Forms`: `addText()`, `setRequired()`, `addRule()`, `addCondition()`, `addConditionOn()`, `elseCondition()`, `endCondition()`, `toggle()`, `onSuccess`, `onError`, `setValidationScope()`, `isSubmittedBy()`.
 
 - **Typ hodnot je typový parametr:** `new Form<CreateTask>()` s DTO vygenerovaným z PHP (rozhodl autor). Názvy prvků i jejich druh hlídá kompilátor, `onSuccess` dostane DTO. Že formulář má prvek pro každé povinné pole DTO, kompilátor nezkontroluje.
 - **Validace v prohlížeči je pro uživatele, rozhoduje server.** Chyby `-32602` z `phlox-rpc-api` (`fields`: cesta → zpráva) se ukážou u prvků, první část cesty (název parametru, třeba `input`) se odřízne. Pravidla se tedy píšou dvakrát, ale rozejití je jen nepohodlí. Převzít pravidla z OpenRPC (`required`, `minimum`, `enum`) je možné později.
@@ -447,7 +447,7 @@ Přebírá se princip z Nette, ne kód z TraceJS: `User`, `Identity`, abstraktn�
 
 ## Síť: RPC (implementováno, čeká na review)
 
-`src/net/` (import `phlox-js/net`): klient `RpcClient` pro `phlox-rpc-api` a generátor typů z OpenRPC.
+`src/net/` (import `@phloxcz/phlox-js/net`): klient `RpcClient` pro `phlox-rpc-api` a generátor typů z OpenRPC.
 
 - **Typy z dokumentu OpenRPC,** který `phlox-rpc-api` generuje při kompilaci kontejneru a publikuje na `/rpc/openrpc.json`. V PHP se tak nic nepřidává a typy vznikají ze stejného zdroje, podle kterého běží server. Generátor čte jen JSON Schema, kompilátor TypeScriptu nepotřebuje.
 - **Vygenerovaný soubor obsahuje třídu `RpcApi extends RpcClient<RpcMethods>`.** Autowiring generika nerozliší, vlastní třída se dá najít podle typu.
@@ -477,7 +477,7 @@ t('cart.items', { count })    // plurál přes Intl.PluralRules
 html('trial.exceeded')        // text s HTML, jen na výslovné vyžádání
 ```
 
-Implementováno v `src/localization/translator.ts` (import `phlox-js/localization`) jako `Translator` a `IntlTranslator` (80 řádků), testy v `tests/i18n.test.ts`. `t` a `html` si aplikace exportuje ze svého překladače, viz `examples/shopping-list/i18n.ts`.
+Implementováno v `src/localization/translator.ts` (import `@phloxcz/phlox-js/localization`) jako `Translator` a `IntlTranslator` (80 řádků), testy v `tests/i18n.test.ts`. `t` a `html` si aplikace exportuje ze svého překladače, viz `examples/shopping-list/i18n.ts`.
 
 ```json
 {
@@ -688,8 +688,8 @@ Ukázka `examples/helpdesk` je celá aplikace podle návrhu autora (`d:\Projekty
 - **Typované routy přes `route()`, ne přes typ pole `routes`.** `routes: Route[]` typy literálů ztrácí, a kdyby byl presenter generický podle svých rout, každá třída by musela psát své routy dvakrát. Routa jako pole třídy (`readonly detail = route(…)`) nese typ parametrů z šablonového literálu vzoru a `link(this.detail, …)` ho kontroluje. Odkaz podle názvu (`link('detail')`) zůstává, jen bez kontroly.
 - **`this.params()` a akce zůstaly texty.** Změna `Params` na `string | number` by rozbila kód, který s parametry zachází jako s textem (query, `split`). Převod podle typu dostávají `props` a `dialog`, kde se parametry stejně převáděly ručně (`Number(id)`).
 - **Ztracené lomítko je chyba:** výraz `d+`, `w+`, `s+` ve vzoru je skoro jistě `'\\d+'` s jedním lomítkem. Chyba s radou je lepší než routa, která tiše nesedí (stalo se dvakrát v helpdesku).
-- **`phlox-js/testing` nezávisí na Vitestu:** `bootApp`/`cleanup` místo `afterEach` uvnitř, aby šly použít s jiným nástrojem. Testy frameworku je používají taky (`tests/helpers.ts`).
-- **`createRpcMock` v `phlox-js/net`:** tabulka metod je typovaná podle `RpcMethods` (vygenerovaných z OpenRPC), takže mock hlídá kompilátor stejně jako volání. `handle()` je čistá funkce nad textem, proto slouží testům (`fetch`) i pluginu Vite; helpdesk tak má jeden mock pro obojí.
+- **`@phloxcz/phlox-js/testing` nezávisí na Vitestu:** `bootApp`/`cleanup` místo `afterEach` uvnitř, aby šly použít s jiným nástrojem. Testy frameworku je používají taky (`tests/helpers.ts`).
+- **`createRpcMock` v `@phloxcz/phlox-js/net`:** tabulka metod je typovaná podle `RpcMethods` (vygenerovaných z OpenRPC), takže mock hlídá kompilátor stejně jako volání. `handle()` je čistá funkce nad textem, proto slouží testům (`fetch`) i pluginu Vite; helpdesk tak má jeden mock pro obojí.
 
 **Zjištěno, zatím neřešeno:**
 - **České texty frameworku** si každá ukázka nastavuje sama (`messageTexts`, `DropDownList.texts`, `Grid.texts`, `Form.messages`…). Hodil by se jeden balíček překladů pro jazyk.
@@ -700,9 +700,10 @@ Ukázka `examples/helpdesk` je celá aplikace podle návrhu autora (`d:\Projekty
 ## Balíček a vydávání (rozhodnuto 14. 11. 2026)
 
 - **Sestavení `npm run build`:** JavaScript sestaví Vite v režimu knihovny po modulech (`build.config.ts`, `preserveModules`), takže aplikace si přibalí jen to, co importuje. Typy dělá `tsc -p tsconfig.build.json` (jen deklarace), CSS se kopíruje. Výstup je `dist/` a mapuje ho `exports` v `package.json`.
-- **`dist/` je v gitu,** instalace z GitHubu podle tagu tak nic nesestavuje (stejně jako `assets` phlox-editoru). Na npm balíček zatím není.
+- **Název `@phloxcz/phlox-js` (rozhodl autor 14. 11.):** všechny knihovny ekosystému jsou pod organizací `@phloxcz` na npm (`@phloxcz/capify`, `@phloxcz/forms-editor`), framework k nim patří a název mu nikdo nezabere. Cenou jsou delší importy a `"jsxImportSource": "@phloxcz/phlox-js"`. Repozitář se dál jmenuje `phlox-js`. Přejmenováno před prvním projektem, ve vydání `v0.2.0`.
+- **`dist/` je v gitu,** instalace z GitHubu podle tagu tak nic nesestavuje (stejně jako `assets` phlox-editoru). Na npm balíček zatím není. Až bude: nejdřív publikovat `@phloxcz/forms-editor` a přepnout na něj závislost, pak `npm run build` a `npm publish --access public` (scoped balíček je jinak soukromý).
 - **Relativní importy ve zdrojácích s `.js`, ne `.ts`,** kde přípona být musí (soubory, které načítá i konfigurace Vite): TypeScript i Vite je přeloží na `.ts` a v typech v `dist/` zůstanou správně. `rewriteRelativeImportExtensions` typy nepřepisuje.
-- **Plugin `phlox-js/vite` běží v Node,** proto balíček musí být JS. `vite` je peer závislost (od verze 7), editor běžná závislost (`github:phloxcz/forms-editor`).
+- **Plugin `@phloxcz/phlox-js/vite` běží v Node,** proto balíček musí být JS. `vite` je peer závislost (od verze 7), editor běžná závislost (`github:phloxcz/forms-editor`).
 - **Ověřeno v čistém projektu** z `npm pack`: kontrola typů se `skipLibCheck: false`, sestavení, autowiring přes plugin, líně načtený editor, grid, české texty, příkaz `phlox-rpc-types`.
 - **Další verze:** změny do `CHANGELOG.md`, verze v `package.json`, `npm run build`, commit včetně `dist/`, tag `vX.Y.Z`, push tagu.
 
@@ -727,7 +728,7 @@ Kód: `examples/docs/` (aplikace, plugin `markdown.ts`, 47 stránek a 53 ukázek
 
 - **`DropdownItem`** (sloty `dropdown.item`, `dropdown.itemActive`): položky `Dropdown` neměly ve výchozím tématu žádný vzhled, aplikace psaly třídu `dropdown-item` z Bootstrapu ručně (helpdesk taky).
 - **`flashMessage()` v `Component`:** měl ho jen presenter, přitom `alert()`, `confirm()` a `loading()` komponenta měla. V Nette ho má i `Control`.
-- **Texty frameworku česky: `setTexts()` a `phlox-js/locales/cs`.** Části frameworku registrují své texty pod jménem (`texts('grid', {...})`), `setTexts()` přeloží registrované i později načtené. Překlad tak nestáhne části, které aplikace nepoužívá (jediná funkce, která by nastavovala `Grid.texts`, by grid přibalila vždy). Hlášky pravidel zůstávají v `Form.messages` (aplikace do ní zapisují), registr na ni míří přes jména pravidel. Test hlídá, že český slovník pokrývá každý text.
+- **Texty frameworku česky: `setTexts()` a `@phloxcz/phlox-js/locales/cs`.** Části frameworku registrují své texty pod jménem (`texts('grid', {...})`), `setTexts()` přeloží registrované i později načtené. Překlad tak nestáhne části, které aplikace nepoužívá (jediná funkce, která by nastavovala `Grid.texts`, by grid přibalila vždy). Hlášky pravidel zůstávají v `Form.messages` (aplikace do ní zapisují), registr na ni míří přes jména pravidel. Test hlídá, že český slovník pokrývá každý text.
 - **`FormControl.focus()`:** líně načtený editor neměl `element`, `element?.focus()` z tlačítka „Přidat komentář“ v helpdesku nic neudělal. `EditorControl.focus()` počká, až editor vznikne; formulář po chybě validace volá `focus()`.
 - **Chyba v příkladu adaptéru** `FlashMessages` (vracel `Flash` bez povinného `duration`), odhalil ji kompilátor v ukázce.
 
@@ -761,7 +762,7 @@ Kód: `src/ui/html.tsx`, `src/ui/sanitize.ts`, `src/forms/editor.tsx`, v `phlox-
   - lišta bez stylů odstavce padala na `styleSelect`,
   - lišta bez prvních skupin začínala oddělovačem.
 - **Odolnost v jsdom:** `execCommand` a `queryCommand*` se volají volitelně, takže editor jde založit i v testech aplikací bez podvrhů. Tlačítka tam nic nedělají.
-- **Editor je součástí formulářů (`addEditor()`), ne adaptér (rozhodl autor 14. 11.).** WYSIWYG editor potřebuje skoro každý projekt, nemá to být další balíček k instalaci a nastavování. phlox-editor je proto běžná závislost phlox-js (`github:phloxcz/forms-editor#v0.2.1`, na npm zatím není). **Nepřepisuje se do TSX** jako strom a grid: ty jsou s frameworkem srostlé (reaktivní řádky, líné načítání, stav v URL), editor si s okolím vyměňuje jen HTML. Přepis by znamenal dva editory o zhruba 3 000 řádcích pro Nette a Phlox a každou opravu dvakrát. Cenou je, že lištu nekreslí šablony frameworku a nejde měnit přes theme sloty. Vzhled se ladí proměnnými CSS a mapami tříd phlox-editoru, výchozí podobu vybere téma (`Theme.editorTheme`).
+- **Editor je součástí formulářů (`addEditor()`), ne adaptér (rozhodl autor 14. 11.).** WYSIWYG editor potřebuje skoro každý projekt, nemá to být další balíček k instalaci a nastavování. phlox-editor je proto běžná závislost @phloxcz/phlox-js (`github:phloxcz/forms-editor#v0.2.1`, na npm zatím není). **Nepřepisuje se do TSX** jako strom a grid: ty jsou s frameworkem srostlé (reaktivní řádky, líné načítání, stav v URL), editor si s okolím vyměňuje jen HTML. Přepis by znamenal dva editory o zhruba 3 000 řádcích pro Nette a Phlox a každou opravu dvakrát. Cenou je, že lištu nekreslí šablony frameworku a nejde měnit přes theme sloty. Vzhled se ladí proměnnými CSS a mapami tříd phlox-editoru, výchozí podobu vybere téma (`Theme.editorTheme`).
 - **Líné načtení:** knihovna i CSS se načtou dynamickým `import()` při prvním vykreslení editoru. V sestavení je to samostatný kus (83 kB JS, 34 kB CSS), který stránka dopředu nestahuje. PWA ho má v cache jako ostatní JS. Důsledek: CSS editoru je v hlavičce za CSS aplikace, takže úpravy vzhledu potřebují silnější selektor (stalo se v helpdesku, lišta byla o 4 px vyšší).
 - **`<Html>` a čištění.** JSX dál zakazuje `innerHTML`, jediná cesta k HTML je `<Html>`, které čistí podle seznamu povolených značek a atributů. Seznam je záměrně přísný: třídy pryč (mohly by obsah přestylovat přes CSS stránky), ze stylů jen vlastnosti textu, obrázky `data:` jen rastrové (SVG může nést skript). **Úklid vloženého HTML v editoru** (`cleanPastedHtml`) je jiná věc: odstraňuje balast z Wordu a nebezpečné atributy, ale třídy a strukturu nechává, aby šel kopírovat grid uvnitř editoru. Bezpečnost zajišťuje čištění při zobrazení a na serveru, ne editor.
 - **Server čistí stejným kódem:** `sanitizeHtml` je v čistém `.ts` bez JSX a umí cizí `document`, mock server mu dává jsdom. V PHP backendu na to bude potřeba obdobný seznam (HTML Purifier nebo vlastní filtr), viz oddíl Bezpečnost v README phlox-editoru.
@@ -784,8 +785,8 @@ Kód: `src/net/offline.ts`, `store.ts`, `online.ts`; testy `tests/offline.test.t
 | Vrstva | Kde | Co dělá |
 |---|---|---|
 | Kostra aplikace | service worker (`vite-plugin-pwa`), konfigurace aplikace | stránka, JS, CSS a ikony se otevřou i bez signálu |
-| Stav připojení | `online()` v `phlox-js/net` | reaktivní stav |
-| Data a fronta | `RpcOffline` v `phlox-js/net`, volba `offline` u `RpcClient` | uložené výsledky čtecích metod, fronta zapisujících, stažení, synchronizace |
+| Stav připojení | `online()` v `@phloxcz/phlox-js/net` | reaktivní stav |
+| Data a fronta | `RpcOffline` v `@phloxcz/phlox-js/net`, volba `offline` u `RpcClient` | uložené výsledky čtecích metod, fronta zapisujících, stažení, synchronizace |
 | Úložiště | `OfflineStore`: `IndexedDbStore`, `MemoryStore` | klíče a hodnoty; IndexedDB v prohlížeči, paměť v testech |
 
 ### Rozhodnutí
@@ -859,7 +860,7 @@ Bez virtuálního DOMu: `h()` vrací jen šablonu (předpis). Skutečné uzly se
 - **Typy** se odvozují z DOM typů TypeScriptu. Chybí `innerHTML` a podobné, `className` nahrazuje `class`.
 - **Text** se nikdy neparsuje jako HTML.
 - **`render()`** staví view bokem, takže při selhání nic nezůstane v DOM (regrese z TraceJS).
-- **Bez importu `h`:** používá se automatický JSX runtime (`jsx: react-jsx`, `jsxImportSource: phlox-js`), takže soubory s TSX neimportují `h` ani `Fragment`. Kompilátor si sám importuje `src/jsx-runtime.ts`, což je tenký obal nad `h()`. V repu se `phlox-js` převádí na `src/` přes `paths` v `tsconfig.json`, Vite je čte díky `resolve.tsconfigPaths`. Až se balíček bude publikovat, musí `jsx-runtime` a `jsx-dev-runtime` uvést v `exports`.
+- **Bez importu `h`:** používá se automatický JSX runtime (`jsx: react-jsx`, `jsxImportSource: @phloxcz/phlox-js`), takže soubory s TSX neimportují `h` ani `Fragment`. Kompilátor si sám importuje `src/jsx-runtime.ts`, což je tenký obal nad `h()`. V repu se `@phloxcz/phlox-js` převádí na `src/` přes `paths` v `tsconfig.json`, Vite je čte díky `resolve.tsconfigPaths`. Až se balíček bude publikovat, musí `jsx-runtime` a `jsx-dev-runtime` uvést v `exports`.
 
 **SVG** se tvoří ve správném jmenném prostoru: `<svg>` a vše v něm (kromě obsahu `<foreignObject>`), i když přibude později, viz Helpdesk výše.
 

@@ -1,4 +1,4 @@
-import { Component, Dropdown, DropdownItem, For, state } from 'phlox-js';
+import { Component, Dropdown, DropdownItem, For, state } from '@phloxcz/phlox-js';
 
 /** A menu and a panel with a filter; the content is made at every opening, onOpen loads data. */
 export default class Dropdowns extends Component {

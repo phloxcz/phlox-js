@@ -1,5 +1,5 @@
 // Small pieces used on more screens: an avatar, the badge of a priority and of a state.
-import type { Child } from 'phlox-js';
+import type { Child } from '@phloxcz/phlox-js';
 import type { Priority, Status, UserResource } from '../api';
 import { PRIORITY, STATUS, initials } from '../format';
 import { Icon } from './Icon';

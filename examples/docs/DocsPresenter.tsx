@@ -1,5 +1,5 @@
-import { For, Presenter, RouteFrame, state } from 'phlox-js';
-import type { Route } from 'phlox-js';
+import { For, Presenter, RouteFrame, state } from '@phloxcz/phlox-js';
+import type { Route } from '@phloxcz/phlox-js';
 import { AppearanceSwitch } from '../shared/appearance';
 import { CONTENTS } from './contents';
 import { PagePresenter } from './PagePresenter';

@@ -1,4 +1,4 @@
-import { Button, Component, If, onCleanup, state } from 'phlox-js';
+import { Button, Component, If, onCleanup, state } from '@phloxcz/phlox-js';
 
 /** A function component with its own cleanup: the timer stops when its branch goes away. */
 function Clock() {

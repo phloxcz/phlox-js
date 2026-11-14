@@ -62,7 +62,7 @@ function generateRpcTypes(document, options = {}) {
 	const source = [document.info?.title, document.info?.version].filter(Boolean).join(" ");
 	const out = [
 		`// Generated from the OpenRPC document${source ? ` of ${source}` : ""}. Do not edit, generate it again.`,
-		`import { RpcClient } from ${JSON.stringify(options.importFrom ?? "phlox-js/net")};`,
+		`import { RpcClient } from ${JSON.stringify(options.importFrom ?? "@phloxcz/phlox-js/net")};`,
 		""
 	];
 	for (const [name, schema] of Object.entries(document.components?.schemas ?? {}).sort(([a], [b]) => a.localeCompare(b))) {

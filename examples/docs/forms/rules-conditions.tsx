@@ -1,5 +1,5 @@
-import { Component, state } from 'phlox-js';
-import { Form, FormView } from 'phlox-js/forms';
+import { Component, state } from '@phloxcz/phlox-js';
+import { Form, FormView } from '@phloxcz/phlox-js/forms';
 
 interface SignUp {
   login: string;

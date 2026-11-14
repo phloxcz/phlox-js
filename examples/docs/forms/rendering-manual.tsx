@@ -1,5 +1,5 @@
-import { Component } from 'phlox-js';
-import { Form, FormErrors, FormTag, Input, InputError, Label } from 'phlox-js/forms';
+import { Component } from '@phloxcz/phlox-js';
+import { Form, FormErrors, FormTag, Input, InputError, Label } from '@phloxcz/phlox-js/forms';
 
 interface Category { name: string; description: string }
 
