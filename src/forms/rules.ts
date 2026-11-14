@@ -1,6 +1,7 @@
 /** Validation rules and conditions, like Nette\Forms\Rules. */
 
 import type { FormControl } from './controls';
+import { texts } from '../ui/texts';
 
 /** Checks a control. `arg` is what was passed to addRule(), e.g. the length for MinLength. */
 export type Validator = (control: FormControl<any>, arg?: any) => boolean;
@@ -131,6 +132,14 @@ export const messages = new Map<Validator, string>([
   [validators.MimeType, 'The uploaded file is not in the expected format.'],
   [validators.Image, 'The uploaded file must be image in format JPEG, GIF, PNG, WebP or AVIF.'],
 ]);
+
+// The messages by the names of the rules for setTexts() ({ rules: { Filled: '…' } }), kept in the map above
+const ruleTexts: Record<string, string> = {};
+for (const [name, validator] of Object.entries(validators)) {
+  if (!messages.has(validator)) continue;
+  Object.defineProperty(ruleTexts, name, { enumerable: true, get: () => messages.get(validator), set: text => messages.set(validator, text) });
+}
+texts('rules', ruleTexts);
 
 /** %label, %name and %value, then %d and %s in order of the arguments. */
 function format(message: string, control: FormControl<any>, arg: unknown): string {

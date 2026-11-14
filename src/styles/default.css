@@ -763,6 +763,36 @@
   box-shadow: 0 8px 32px rgba(0, 0, 0, .2);
 }
 
+.phlox-dropdown-item {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  padding: .35rem .75rem;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  text-decoration: none;
+  white-space: nowrap;
+  background: none;
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.phlox-dropdown-item:hover,
+.phlox-dropdown-item:focus-visible {
+  background: color-mix(in srgb, CanvasText 8%, transparent);
+}
+
+.phlox-dropdown-item.phlox-active {
+  font-weight: 600;
+}
+
+.phlox-dropdown-item:disabled {
+  opacity: .5;
+  cursor: default;
+}
+
 .cap-popover {
   padding: 14px 16px;
   color: CanvasText;

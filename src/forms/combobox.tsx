@@ -11,6 +11,7 @@ import { classes, currentTheme } from '../ui/theme';
 import type { ExtraAttributes } from './controls';
 import { ListControl, foldText } from './listbox';
 import type { ListOptions } from './listbox';
+import { texts } from '../ui/texts';
 
 export type ComboBoxOptions<T, O = never> = ListOptions<T, O> & {
   /** Typed text that is not an item becomes the value. Only for fields that can hold a text. */
@@ -20,9 +21,9 @@ export type ComboBoxOptions<T, O = never> = ListOptions<T, O> & {
 /** With item objects the template shows in the list only, the field shows the text of the item. */
 export class ComboBox<T = string> extends ListControl<T> {
   /** Texts of the list. Replace them for the language of the application. */
-  static texts = {
+  static texts = texts('combobox', {
     noResults: 'No results',
-  };
+  });
 
   /** True while the field shows what the user is typing, not the label of the value. */
   readonly editing = state(false);

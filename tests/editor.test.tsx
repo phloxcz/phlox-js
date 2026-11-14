@@ -138,6 +138,22 @@ describe('editor', () => {
     expect(text.isFilled()).toBe(false);
   });
 
+  test('focus() before the editor is loaded puts the focus in once it is made', async () => {
+    const form = new Form<{ text: string }>();
+    const text = form.addEditor('text', 'Komentář');
+    const shown = state(false);
+    class Page extends Presenter {
+      render() {
+        return <If when={shown}><FormView form={form} /></If>;
+      }
+    }
+    const { element } = await boot(Page, '/', new Container().add(new BootstrapTheme()));
+    shown.set(true);
+    text.focus();   // the editor is made only after its module is loaded
+    const pane = await paneOf(element);
+    expect(document.activeElement).toBe(pane);
+  });
+
   test('images: upload() gives the address; when it fails and inlineImages is off, nothing is inserted', async () => {
     const html = state('');
     let fail = false;

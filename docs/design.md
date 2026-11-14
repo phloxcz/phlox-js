@@ -78,7 +78,7 @@ Napojení cizích knihoven nejde do jádra, ale do adaptérů. Adaptér nahradí
 
 ### Adaptér pro Kendo (implementováno, čeká na review)
 
-`src/adapters/kendo/`, testy `tests/kendo.test.tsx` (proti falešnému Kendu), ukázka `examples/kendo` ověřená se skutečným Kendo UI 2026.4 v prohlížeči.
+`src/adapters/kendo/`, testy `tests/kendo.test.tsx` (proti falešnému Kendu), ukázka ověřená se skutečným Kendo UI 2026.4 v prohlížeči (13. 11.; 14. 11. odstraněná i se závislostmi, PhloxJS na Kendu nezávisí, se skutečným Kendem ho ověří CMS).
 
 - **Obdoba knockout-kendo, ale bez textových bindingů:** `<KendoWidget widget="…" value={state}>` místo `data-bind="kendoDatePicker: { value: x }"`. Typy hlídá kompilátor, názvy voleb ne (jsou to volby Kenda, typy Kenda jsou globální a adaptér na nich nezávisí).
 - **Widget na vlastním prvku uvnitř obalu frameworku.** Kendo kolem prvku vkládá své obaly; kdyby widget stál na prvku šablony, renderer by při úklidu odstranil jen svůj prvek a obaly Kenda by zůstaly. Obal frameworku se při úklidu vyprázdní celý, po `destroy()`.
@@ -697,6 +697,39 @@ Ukázka `examples/helpdesk` je celá aplikace podle návrhu autora (`d:\Projekty
 - **Události předané `<Input>`** (`onBlur`, `onInput`) přepíše vlastní obsluha prvku. `ref` je vyřešený, události zatím ne.
 - **Odložené hledání** (debounce): hledání v hlavičce volá server při každém stisku, starší odpovědi zahodí `resource`. Dropdownlist si debounce dělá sám, obecný pomocník chybí.
 
+## Web s ukázkami jako příručka (implementováno, čeká na review)
+
+Zadání autora (13. a 14. 11. 2026): každá funkce frameworku s ukázkou, text příručky rozdělený do markdownu vedle ukázek, web sám na frameworku. Tím se má API ukonzistentnit a ukázat nedostatky.
+
+Kód: `examples/docs/` (aplikace, plugin `markdown.ts`, 47 stránek a 53 ukázek), `examples/frame/` (rám pro ukázky s routami); test `tests/docs.test.tsx`. Ověřeno v prohlížeči na dev serveru i v sestavení (`vite preview`), na šířce telefonu i v obou tématech.
+
+### Rozhodnutí
+
+- **Markdown se převádí při sestavení** pluginem Vite (`marked`, zvýraznění kódu `shiki` ve světlé i tmavé barvě), aplikace webu knihovnu na markdown nemá. Stránka je modul `{ title, html, toc, demos }`.
+- **Kód ukázky je soubor, který běží:** plugin ho přečte a zvýrazní, záložka Kód tedy nemůže ukazovat něco jiného. Změna ukázky v dev serveru obnoví i stránku (`addWatchFile`).
+- **Dva druhy ukázek podle výchozího exportu:** komponenta se vykreslí ve stránce, presenter běží v `<iframe>` (`/frame/<sekce>/<ukázka>/…`) s vlastním `basePath`, adresním řádkem a titulkem. Routy, odkazy, persistentní parametry, dialogy s URL a `pageTitle()` jsou tak vidět, jak se chovají, a nezasahují do routeru webu. Rám se přizpůsobuje výšce obsahu.
+- **Ukázka si přinese služby** (`export function services(container)`). Pomocné soubory začínají `_`.
+- **Kendo UI bez živé ukázky (rozhodl autor 14. 11.):** PhloxJS na Kendu nezávisí ani vývojovými závislostmi, licenci má firma, pro kterou vznikne CMS. Adaptér hlídají testy s náhradou Kenda, se skutečným ho ověří CMS.
+- **Test webu** hlídá, že je každá stránka v menu, každá značka `demo` má soubor, každá ukázka je na nějaké stránce a vykreslí se bez chyby (presenter jako aplikace). Kompilátor kontroluje i ukázky, takže text a kód nejdou od sebe.
+- **Staré příklady** (nákupní seznam, strom, grid, Kendo) se rozpustily do sekcí. Helpdesk zůstal jako celá aplikace, s `basePath` `/helpdesk`. Odkazy na jinou aplikaci téhož webu dostávají `target="_self"`, jinak by je zachytil router webu.
+- **`docs/guide.md` je rozcestník,** příručka jsou stránky webu (CLAUDE.md upravené).
+
+### Co ukázky v API našly a opravilo se
+
+- **`DropdownItem`** (sloty `dropdown.item`, `dropdown.itemActive`): položky `Dropdown` neměly ve výchozím tématu žádný vzhled, aplikace psaly třídu `dropdown-item` z Bootstrapu ručně (helpdesk taky).
+- **`flashMessage()` v `Component`:** měl ho jen presenter, přitom `alert()`, `confirm()` a `loading()` komponenta měla. V Nette ho má i `Control`.
+- **Texty frameworku česky: `setTexts()` a `phlox-js/locales/cs`.** Části frameworku registrují své texty pod jménem (`texts('grid', {...})`), `setTexts()` přeloží registrované i později načtené. Překlad tak nestáhne části, které aplikace nepoužívá (jediná funkce, která by nastavovala `Grid.texts`, by grid přibalila vždy). Hlášky pravidel zůstávají v `Form.messages` (aplikace do ní zapisují), registr na ni míří přes jména pravidel. Test hlídá, že český slovník pokrývá každý text.
+- **`FormControl.focus()`:** líně načtený editor neměl `element`, `element?.focus()` z tlačítka „Přidat komentář“ v helpdesku nic neudělal. `EditorControl.focus()` počká, až editor vznikne; formulář po chybě validace volá `focus()`.
+- **Chyba v příkladu adaptéru** `FlashMessages` (vracel `Flash` bez povinného `duration`), odhalil ji kompilátor v ukázce.
+
+### Rozhodnuté nálezy (autor 14. 11.: „rovnou oprav“)
+
+- **Vyhrazená jména v komponentě:** `loading()` je teď `showLoading()` (i `app.showLoading()`), protože `loading = state(false)` je běžné pole a kolize s metodou byla chyba kompilace, kterou nikdo nečeká. `user` zůstává kvůli `$this->user` v Nette. Seznam vyhrazených jmen je na stránce Komponenty.
+- **Čísla ve `style`:** typ `StyleObject` bere `string | number`. Číslo se zapíše bez jednotky (`opacity: 0.5`, `flexGrow: 1`). React k číslům přidává `px`, to je past u `lineHeight` a nejasné u vlastních vlastností, proto ne.
+- **`form.get()` zůstává obecný:** typovat ho podle přidaných prvků by chtělo přestavět `Form` (prvky se přidávají za běhu, typ formuláře se po vytvoření nemění). Prvek s vlastními metodami se drží z `addXxx()`, stránky Formuláře a Položky to tak popisují.
+- **phlox-editor, řádky lišty:** skupiny jdou v pořadí zadání i ve více řádcích (opraveno v phlox-editoru v0.2.1).
+- **Kendo bez závislostí:** viz rozhodnutí výše, ukázka i balíčky Kenda pryč.
+
 ## WYSIWYG editor a HTML od uživatelů (implementováno, čeká na review)
 
 Zadání autora (14. 11. 2026): komentáře v helpdesku s tučným písmem, kurzívou a obrázky. Editor převzít z `phlox-editor` (autorova knihovna pro Nette), zasahovat do něj jen zpětně kompatibilně, obrázky ukládat jako přílohy, ne jako base64.
@@ -719,7 +752,7 @@ Kód: `src/ui/html.tsx`, `src/ui/sanitize.ts`, `src/forms/editor.tsx`, v `phlox-
   - lišta bez stylů odstavce padala na `styleSelect`,
   - lišta bez prvních skupin začínala oddělovačem.
 - **Odolnost v jsdom:** `execCommand` a `queryCommand*` se volají volitelně, takže editor jde založit i v testech aplikací bez podvrhů. Tlačítka tam nic nedělají.
-- **Editor je součástí formulářů (`addEditor()`), ne adaptér (rozhodl autor 14. 11.).** WYSIWYG editor potřebuje skoro každý projekt, nemá to být další balíček k instalaci a nastavování. phlox-editor je proto běžná závislost phlox-js (`github:phloxcz/forms-editor#v0.2.0`, na npm zatím není). **Nepřepisuje se do TSX** jako strom a grid: ty jsou s frameworkem srostlé (reaktivní řádky, líné načítání, stav v URL), editor si s okolím vyměňuje jen HTML. Přepis by znamenal dva editory o zhruba 3 000 řádcích pro Nette a Phlox a každou opravu dvakrát. Cenou je, že lištu nekreslí šablony frameworku a nejde měnit přes theme sloty. Vzhled se ladí proměnnými CSS a mapami tříd phlox-editoru, výchozí podobu vybere téma (`Theme.editorTheme`).
+- **Editor je součástí formulářů (`addEditor()`), ne adaptér (rozhodl autor 14. 11.).** WYSIWYG editor potřebuje skoro každý projekt, nemá to být další balíček k instalaci a nastavování. phlox-editor je proto běžná závislost phlox-js (`github:phloxcz/forms-editor#v0.2.1`, na npm zatím není). **Nepřepisuje se do TSX** jako strom a grid: ty jsou s frameworkem srostlé (reaktivní řádky, líné načítání, stav v URL), editor si s okolím vyměňuje jen HTML. Přepis by znamenal dva editory o zhruba 3 000 řádcích pro Nette a Phlox a každou opravu dvakrát. Cenou je, že lištu nekreslí šablony frameworku a nejde měnit přes theme sloty. Vzhled se ladí proměnnými CSS a mapami tříd phlox-editoru, výchozí podobu vybere téma (`Theme.editorTheme`).
 - **Líné načtení:** knihovna i CSS se načtou dynamickým `import()` při prvním vykreslení editoru. V sestavení je to samostatný kus (83 kB JS, 34 kB CSS), který stránka dopředu nestahuje. PWA ho má v cache jako ostatní JS. Důsledek: CSS editoru je v hlavičce za CSS aplikace, takže úpravy vzhledu potřebují silnější selektor (stalo se v helpdesku, lišta byla o 4 px vyšší).
 - **`<Html>` a čištění.** JSX dál zakazuje `innerHTML`, jediná cesta k HTML je `<Html>`, které čistí podle seznamu povolených značek a atributů. Seznam je záměrně přísný: třídy pryč (mohly by obsah přestylovat přes CSS stránky), ze stylů jen vlastnosti textu, obrázky `data:` jen rastrové (SVG může nést skript). **Úklid vloženého HTML v editoru** (`cleanPastedHtml`) je jiná věc: odstraňuje balast z Wordu a nebezpečné atributy, ale třídy a strukturu nechává, aby šel kopírovat grid uvnitř editoru. Bezpečnost zajišťuje čištění při zobrazení a na serveru, ne editor.
 - **Server čistí stejným kódem:** `sanitizeHtml` je v čistém `.ts` bez JSX a umí cizí `document`, mock server mu dává jsdom. V PHP backendu na to bude potřeba obdobný seznam (HTML Purifier nebo vlastní filtr), viz oddíl Bezpečnost v README phlox-editoru.

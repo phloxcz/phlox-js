@@ -25,13 +25,22 @@ type EventProps<E> = {
   [K in keyof GlobalEventHandlersEventMap as `on${Capitalize<K>}`]?: (event: GlobalEventHandlersEventMap[K] & { currentTarget: E }) => void;
 };
 
+/** Properties of element.style whose values are text (not methods, not length). */
+type CssProperty = { [K in keyof CSSStyleDeclaration]: CSSStyleDeclaration[K] extends string ? K : never }[keyof CSSStyleDeclaration] & string;
+
+/**
+ * The style as an object, names as in element.style: { marginTop: '1rem', opacity: 0.5 }. A number is written
+ * as it is, without a unit, so opacity: 0.5 and flexGrow: 1 work and width: 100 does not (write '100px').
+ */
+export type StyleObject = Partial<Record<CssProperty, string | number>>;
+
 export type ElementProps<E> =
   & { [K in AttributeKeys<E>]?: Reactive<E[K] | null | undefined> }
   & EventProps<E>
   & {
     class?: Reactive<string | null | undefined>;
     for?: Reactive<string | null | undefined>;
-    style?: Reactive<string | Partial<CSSStyleDeclaration> | null | undefined>;
+    style?: Reactive<string | StyleObject | null | undefined>;
     ref?: (element: E) => void;
     children?: Child;
   };
@@ -50,7 +59,7 @@ export type SvgProps<E> =
   & EventProps<E>
   & {
     class?: Reactive<string | null | undefined>;
-    style?: Reactive<string | Partial<CSSStyleDeclaration> | null | undefined>;
+    style?: Reactive<string | StyleObject | null | undefined>;
     ref?: (element: E) => void;
     children?: Child;
   };

@@ -11,6 +11,7 @@ import { classes, currentTheme } from '../ui/theme';
 import { FormControl } from './controls';
 import type { ExtraAttributes } from './controls';
 import { IMAGE_TYPES, fileChecks, validators } from './rules';
+import { texts } from '../ui/texts';
 
 // Icons of phloxcz/components-upload
 const UPLOAD_ICON = '<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>';
@@ -29,14 +30,14 @@ const sameFile = (a: File, b: File): boolean => a.name === b.name && a.size === 
 
 /** One file (File | null) or several (File[]). */
 export class UploadControl<T extends File | null | File[]> extends FormControl<T> {
-  static texts = {
+  static texts = texts('upload', {
     dropzone: 'Upload area – click or drop files here',
     heading: 'Drop files here',
     or: 'or',
     browseMultiple: 'Choose files',
     browseSingle: 'Choose a file',
     remove: 'Remove %s',
-  };
+  });
 
   readonly files = state<File[]>([]);
 

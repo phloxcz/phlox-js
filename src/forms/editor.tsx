@@ -109,6 +109,8 @@ export class EditorControl extends FormControl<string> {
   private readonly current = state('');
   /** The editor while it is shown, e.g. for insertText(). */
   editor: EditorInstance | null = null;
+  /** focus() came before the editor was loaded: it gets the focus once it is there. */
+  private focusWhenReady = false;
 
   constructor(label = '', private options: EditorOptions = {}) {
     super(label);
@@ -120,6 +122,12 @@ export class EditorControl extends FormControl<string> {
 
   setValue(value: string): void {
     this.current.set(value ?? '');
+  }
+
+  /** The editor is loaded lazily: focus() before that puts the focus in as soon as it is made. */
+  override focus(): void {
+    if (this.element?.isConnected) this.element.focus();
+    else this.focusWhenReady = true;
   }
 
   /** Text, or an image, a table… An empty editor gives '', but HTML from elsewhere can be just <p></p>. */
@@ -161,6 +169,10 @@ export class EditorControl extends FormControl<string> {
             this.editor = editor;
             this.element = pane;
             if (pane) pane.id = this.htmlId;
+            if (this.focusWhenReady) {
+              this.focusWhenReady = false;
+              pane?.focus();
+            }
           }}
         />
       </div>

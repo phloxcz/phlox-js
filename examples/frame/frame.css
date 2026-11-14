@@ -1,0 +1,46 @@
+/* A demo in a frame of the documentation: its address on top, then the demo. */
+body {
+  margin: 0;
+  font: 15px/1.5 system-ui, sans-serif;
+  background: Canvas;
+  color: CanvasText;
+}
+
+.frame-url {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  padding: .3rem .75rem;
+  font: 13px/1.4 ui-monospace, monospace;
+  color: GrayText;
+  background: light-dark(#f4f5f7, #22252b);
+  border-bottom: 1px solid #8884;
+}
+
+.frame-url {
+  display: flex;
+  gap: 1rem;
+}
+
+.frame-url::before {
+  content: 'URL';
+  font-weight: 600;
+}
+
+.frame-url::after {
+  content: 'titulek: ' attr(data-title);
+  margin-left: auto;
+  font-family: system-ui, sans-serif;
+}
+
+#app {
+  padding: 1rem;
+}
+
+nav a + a {
+  margin-left: .75rem;
+}
+
+nav a[aria-current=page], nav a.active {
+  font-weight: 600;
+}

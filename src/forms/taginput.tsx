@@ -12,6 +12,7 @@ import { FormControl } from './controls';
 import type { ExtraAttributes, Items } from './controls';
 import { foldText, highlight, itemContent, itemPairs, labelOf, placePanel } from './listbox';
 import type { ItemOptions } from './listbox';
+import { texts } from '../ui/texts';
 
 /** Suggestions as plain values, or as objects with `itemValue`, see ItemOptions. */
 export type TagInputOptions<T, O = never> = ItemOptions<T, O> & {
@@ -36,10 +37,10 @@ let lastTagInput = 0;
 
 export class TagInput<T = string> extends FormControl<T[]> {
   /** Texts of the control. Replace them for the language of the application. */
-  static texts = {
+  static texts = texts('taginput', {
     createNew: 'Create: ',
     remove: 'Remove',
-  };
+  });
 
   readonly tags = state<Tag<T>[]>([]);
   readonly text = state('');

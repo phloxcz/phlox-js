@@ -121,7 +121,7 @@ describe('alert, confirm and prompt in a dialog', () => {
 
   test('loading: no buttons, Escape does not close it, the code does', async () => {
     const { app } = await boot(Page);
-    const loading = app.presenter!.loading('Ukládám…');
+    const loading = app.presenter!.showLoading('Ukládám…');
     const element = dialog();
     expect(element.querySelector('[role=status]')!.textContent).toBe('Ukládám…');
     expect(element.querySelectorAll('button')).toHaveLength(0);

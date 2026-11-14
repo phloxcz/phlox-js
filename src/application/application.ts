@@ -195,7 +195,7 @@ export class Application {
   }
 
   /** A dialog without buttons while something runs; close it by the returned handle. */
-  loading(message: Child = undefined, opener?: Component<any, any>): LoadingHandle {
+  showLoading(message: Child = undefined, opener?: Component<any, any>): LoadingHandle {
     return showLoading(this.opener(opener).scope, message);
   }
 

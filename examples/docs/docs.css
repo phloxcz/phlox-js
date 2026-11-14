@@ -1,0 +1,305 @@
+/*
+ * The look of the documentation, the same with both themes of the demos (default and Bootstrap) and in light
+ * and dark mode: colours by light-dark(), the mode is color-scheme on <html> (shared/appearance.tsx).
+ */
+
+:root {
+  --docs-line: light-dark(#e3e6ea, #33373e);
+  --docs-muted: light-dark(#5f6b7a, #9aa4b1);
+  --docs-soft: light-dark(#f5f7f9, #1c1f24);
+  --docs-accent: light-dark(#0b7285, #4fc3d6);
+  --docs-menu: 16rem;
+}
+
+body {
+  margin: 0;
+  font: 16px/1.6 system-ui, -apple-system, 'Segoe UI', sans-serif;
+  background: Canvas;
+  color: CanvasText;
+}
+
+.docs-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .5rem 1.25rem;
+  padding: .6rem 1.25rem;
+  background: Canvas;
+  border-bottom: 1px solid var(--docs-line);
+}
+
+.docs-logo {
+  font-weight: 800;
+  font-size: 1.15rem;
+  color: inherit;
+  text-decoration: none;
+}
+
+.docs-app-link {
+  color: var(--docs-accent);
+  font-size: .9rem;
+}
+
+.docs-header .appearance {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .25rem .75rem;
+  font-size: .8rem;
+  color: var(--docs-muted);
+}
+
+.docs-menu-button,
+.docs-narrow {
+  display: none;
+}
+
+.docs-header > .docs-wide {
+  margin-left: auto;
+}
+
+.docs-menu-appearance .appearance {
+  display: grid;
+  gap: .5rem;
+  margin-top: 1.5rem;
+  font-size: .85rem;
+}
+
+.docs-menu {
+  box-sizing: border-box;
+  position: fixed;
+  top: 3.2rem;
+  bottom: 0;
+  left: 0;
+  width: var(--docs-menu);
+  overflow-y: auto;
+  padding: 1rem 1rem 2rem 1.25rem;
+  border-right: 1px solid var(--docs-line);
+  scrollbar-width: thin;
+}
+
+.docs-menu h2 {
+  margin: 1rem 0 .3rem;
+  font-size: .75rem;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--docs-muted);
+}
+
+.docs-menu ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.docs-menu a {
+  display: block;
+  padding: .15rem .5rem;
+  margin-left: -.5rem;
+  border-radius: 6px;
+  color: inherit;
+  font-size: .92rem;
+  text-decoration: none;
+}
+
+.docs-menu a:hover {
+  background: var(--docs-soft);
+}
+
+.docs-menu a[aria-current=page] {
+  color: var(--docs-accent);
+  font-weight: 600;
+  background: var(--docs-soft);
+}
+
+.docs-main {
+  margin-left: var(--docs-menu);
+  padding: 1.5rem 2.5rem 4rem;
+}
+
+.docs-page {
+  max-width: 52rem;
+}
+
+.docs-text {
+  display: contents;
+}
+
+.docs-page h1 {
+  margin: .5rem 0 1rem;
+  font-size: 2rem;
+  line-height: 1.2;
+}
+
+.docs-page h2 {
+  margin: 2.25rem 0 .75rem;
+  padding-top: .5rem;
+  font-size: 1.35rem;
+  border-top: 1px solid var(--docs-line);
+}
+
+.docs-page h3 {
+  margin: 1.5rem 0 .5rem;
+  font-size: 1.1rem;
+}
+
+.docs-page :not(pre) > code {
+  padding: .1em .3em;
+  font-size: .88em;
+  background: var(--docs-soft);
+  border-radius: 4px;
+}
+
+.docs-page table {
+  width: 100%;
+  margin: 1rem 0;
+  border-collapse: collapse;
+  font-size: .92rem;
+}
+
+.docs-page th,
+.docs-page td {
+  padding: .4rem .6rem;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--docs-line);
+}
+
+.docs-page li {
+  margin-bottom: .3rem;
+}
+
+/* Code highlighted by shiki in both colours */
+.shiki {
+  margin: 1rem 0;
+  padding: .9rem 1rem;
+  overflow-x: auto;
+  font: 13.5px/1.55 ui-monospace, 'Cascadia Code', Consolas, monospace;
+  border-radius: 8px;
+  background: var(--docs-soft) !important;
+  border: 1px solid var(--docs-line);
+}
+
+.shiki span {
+  color: light-dark(var(--shiki-light), var(--shiki-dark));
+}
+
+/* A demo: tabs, the live demo or its code */
+.docs-demo {
+  margin: 1.25rem 0 1.75rem;
+  border: 1px solid var(--docs-line);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.docs-demo-tabs {
+  display: flex;
+  align-items: center;
+  gap: .25rem;
+  padding: .3rem .5rem;
+  background: var(--docs-soft);
+  border-bottom: 1px solid var(--docs-line);
+}
+
+.docs-demo-tabs button {
+  padding: .2rem .7rem;
+  font: inherit;
+  font-size: .85rem;
+  color: var(--docs-muted);
+  background: none;
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.docs-demo-tabs button[aria-selected=true] {
+  color: CanvasText;
+  background: Canvas;
+  box-shadow: 0 1px 2px #0002;
+}
+
+.docs-demo-file {
+  margin-left: auto;
+  font: 12px ui-monospace, monospace;
+  color: var(--docs-muted);
+}
+
+.docs-demo-view {
+  padding: 1.25rem;
+}
+
+.docs-demo-view:has(> .docs-demo-frame) {
+  padding: 0;
+}
+
+.docs-demo-frame {
+  display: block;
+  width: 100%;
+  height: 22rem;
+  min-height: 22rem;
+  max-height: 60rem;
+  border: 0;
+}
+
+.docs-demo-code .shiki {
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  max-height: 32rem;
+}
+
+.docs-pager {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 3rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--docs-line);
+}
+
+.docs-pager a {
+  color: var(--docs-accent);
+  text-decoration: none;
+}
+
+/* A phone: the menu opens over the page from the button in the header */
+@media (width < 900px) {
+  .docs-menu-button {
+    display: inline-block;
+    padding: .25rem .6rem;
+    font: inherit;
+    font-size: .85rem;
+    background: var(--docs-soft);
+    border: 1px solid var(--docs-line);
+    border-radius: 6px;
+    color: inherit;
+  }
+
+  .docs-menu {
+    z-index: 15;
+    display: none;
+    width: min(20rem, 85vw);
+    background: Canvas;
+    box-shadow: 4px 0 20px #0003;
+  }
+
+  .docs-menu-open .docs-menu {
+    display: block;
+  }
+
+  .docs-main {
+    margin-left: 0;
+    padding: 1rem 1rem 3rem;
+  }
+
+  .docs-wide {
+    display: none !important;
+  }
+
+  .docs-narrow {
+    display: block;
+  }
+}

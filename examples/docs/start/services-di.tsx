@@ -1,0 +1,35 @@
+import { Button, Component, state } from 'phlox-js';
+import type { Container } from 'phlox-js';
+
+/** A service: one instance for the whole application, found by its type. */
+class Greeter {
+  private count = 0;
+
+  greet(name: string): string {
+    this.count++;
+    return `Ahoj, ${name}! (pozdrav číslo ${this.count})`;
+  }
+}
+
+/** Registered like in config.neon; the documentation calls this before it shows the demo. */
+export function services(container: Container) {
+  container.add(Greeter);
+}
+
+/** The component writes what it needs into its constructor, the Vite plugin wires it. */
+export default class Greeting extends Component {
+  readonly text = state('');
+
+  constructor(private greeter: Greeter) {
+    super();
+  }
+
+  render() {
+    return (
+      <p>
+        <Button onClick={() => this.text.set(this.greeter.greet('Jano'))}>Pozdravit</Button>{' '}
+        {this.text}
+      </p>
+    );
+  }
+}

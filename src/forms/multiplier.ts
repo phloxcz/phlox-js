@@ -7,6 +7,7 @@ import { batch, state, untrack } from '../reactive/reactive';
 import { Container } from './container';
 import type { DeepPartial, Member, Owner } from './container';
 import type { Form } from './form';
+import { texts } from '../ui/texts';
 
 export interface MultiplierOptions {
   /** At least this many rows. As many empty rows are there from the start and the last ones cannot be removed. */
@@ -21,7 +22,7 @@ let lastRow = 0;
 
 export class Multiplier<R extends object> implements Owner {
   /** Texts of the rows. Replace them for the language of the application. %d is the limit. */
-  static texts = {
+  static texts = texts('multiplier', {
     add: 'Add',
     remove: 'Remove',
     moveUp: 'Move up',
@@ -29,7 +30,7 @@ export class Multiplier<R extends object> implements Owner {
     drag: 'Drag to change the order, or use the arrow keys',
     min: 'Please add at least %d rows.',
     max: 'Please add no more than %d rows.',
-  };
+  });
 
   /** The rows in their order. */
   readonly rows = state<Container<R>[]>([]);

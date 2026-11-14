@@ -14,6 +14,7 @@ import { FormControl } from './controls';
 import type { ExtraAttributes } from './controls';
 import { placePanel } from './listbox';
 import type { TreeSelectOptions } from './treeselect';
+import { texts } from '../ui/texts';
 
 let lastId = 0;
 
@@ -25,7 +26,7 @@ export interface DropDownTreeSelectOptions<K extends TreeKey> extends TreeSelect
 }
 
 export class DropDownTreeSelect<K extends TreeKey> extends FormControl<K | null> {
-  static texts = { clear: 'Clear' };
+  static texts = texts('dropdowntree', { clear: 'Clear' });
 
   readonly tree: Tree<TreeNode<K>>;
   /** The picked id, the value of the control. */

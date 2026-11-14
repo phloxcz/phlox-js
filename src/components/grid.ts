@@ -13,6 +13,7 @@ import type { LinkParams, Params, Presenter } from '../ui/presenter';
 import { toPairs } from '../forms/controls';
 import type { Items } from '../forms/controls';
 import { foldText } from '../forms/listbox';
+import { texts } from '../ui/texts';
 
 export type SortDir = 'asc' | 'desc';
 export type Aggregate = 'sum' | 'avg' | 'count' | 'min' | 'max';
@@ -279,7 +280,7 @@ interface Layout {
 }
 
 export class Grid<R extends object> {
-  static texts = {
+  static texts = texts('grid', {
     search: 'Search…', reset: 'Reset', filter: 'Filter', all: 'All', yes: 'Yes', no: 'No', apply: 'Apply',
     from: 'From', to: 'To', clearFilter: 'Clear the filter', noData: 'No records', loading: 'Loading…',
     shown: '%d–%d of %d', perPage: 'Rows on a page', first: 'First page', previous: 'Previous page',
@@ -287,7 +288,7 @@ export class Grid<R extends object> {
     moveRight: 'Move right', selected: 'Selected: %d', selectAll: 'Select all on the page', selectRow: 'Select the row',
     actions: 'Actions', sortBy: 'Sort by %s', resize: 'Change the width of %s',
     sum: 'Total', avg: 'Average', count: 'Count', min: 'Minimum', max: 'Maximum',
-  };
+  });
 
   /**
    * Asks before an action with `confirm`. Null asks by the application: a popover at the button of the action

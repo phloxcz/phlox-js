@@ -26,6 +26,28 @@ export interface DropdownProps {
   children?: Child;
 }
 
+export interface DropdownItemProps {
+  /** A link to go to; without it the item is a button. */
+  href?: string;
+  onClick?: (event: MouseEvent) => void;
+  /** The current choice, e.g. the active view. */
+  active?: Reactive<boolean>;
+  disabled?: Reactive<boolean>;
+  class?: string;
+  children?: Child;
+}
+
+/** An item of a Dropdown menu, with the theme slot `dropdown.item`: a link with `href`, otherwise a button. */
+export function DropdownItem(props: DropdownItemProps): Child {
+  const theme = currentTheme();
+  const read = <T,>(value: Reactive<T> | undefined) => (typeof value === 'function' ? (value as () => T)() : value);
+  const css = () => classes(theme.class('dropdown.item'), read(props.active) && theme.class('dropdown.itemActive'), props.class);
+  const current = () => (read(props.active) ? 'true' : null);
+  return props.href !== undefined
+    ? <a href={props.href} class={css} aria-current={current} onClick={event => props.onClick?.(event)}>{props.children}</a>
+    : <button type="button" class={css} aria-pressed={current} disabled={() => Boolean(read(props.disabled))} onClick={event => props.onClick?.(event)}>{props.children}</button>;
+}
+
 /**
  * The panel opens by a click on the button. A click on a link or a button inside it, a click outside it
  * and Escape close it; then the focus goes back to the button. The content is created anew on every opening.

@@ -13,6 +13,7 @@ import { THEME, classes, currentTheme } from './theme';
 import type { Theme } from './theme';
 import { allowsMotion } from './motion';
 import type { Flash, FlashMessages } from '../application/application';
+import { texts } from './texts';
 
 export type Placement = 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
 export type MessageKind = 'alert' | 'confirm' | 'prompt';
@@ -40,11 +41,11 @@ export interface LoadingHandle {
   close(): void;
 }
 
-export const messageTexts = {
+export const messageTexts = texts('messages', {
   ok: 'OK', cancel: 'Cancel', close: 'Close', loading: 'Loading…',
   /** The question before leaving unsaved changes and its button. */
   unsaved: 'Leave without saving the changes?', leave: 'Leave',
-};
+});
 
 interface BoxProps {
   kind: MessageKind;

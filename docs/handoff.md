@@ -140,6 +140,8 @@ Z toho plyne:
   - Pro backend (mock teď, `phlox-rpc-api` později): metody pro založení požadavku zvenku (bez přihlášení operátora, s ochranou proti spamu) a pro převod požadavku na úkoly.
 - **Mock RPC v prohlížeči pro statické sestavení** (cesta 1; zatím není potřeba, autor spouští sestavení přes `vite preview`, kde mock běží; udělat, až budou ukázky potřeba vystavit na statický hosting): `npm run build:examples` dá `dist`, které jde pustit z libovolného statického serveru (`php -S`, GitHub Pages). Helpdesk ve statickém sestavení použije `createRpcMock(...).fetch` místo sítě; v mocku nahradit Node `Buffer` prohlížečovou variantou a data ukládat do `localStorage`, aby přežila obnovení stránky. Dev server a `vite preview` dál s mockem ve Vite.
 
+**Vydání frameworku (rozhodl autor 14. 11.):** phlox-js se vydá, až bude konzistentní a bude mít web s ukázkami pro jednotlivé funkce (bod 7c). Co vydání brání, je v bodě 9 níže.
+
 **TODO frameworku (z helpdesku, sepsáno 12. 11. 2026, v navrženém pořadí):**
 1. ~~Chyby asynchronních obsluh událostí~~ **hotovo 13. 11.:** chyby obsluh jdou do `app.onError`.
 2. ~~Sdílená data mezi obrazovkami~~ **hotovo 13. 11.:** štítky zdrojů, `app.invalidate()`, `app.resource()`; čeká na review, viz design.md.
@@ -154,7 +156,7 @@ Z toho plyne:
    - **Stav připojení jako `state`:** `online()`, aby aplikace ukázala „jste offline“ a chyby sítě nešly do toastů.
    - **Instalovatelnost a cache aplikace** v helpdesku přes `vite-plugin-pwa` (Workbox), v konfiguraci aplikace, ne v jádru.
    - **Push notifikace** až s Web Push na straně Nette. Práce offline s daty nakonec vznikla, viz 7b.
-7c. **Web s ukázkami jako dokumentace** (nápad autora 13. 11.): jedna aplikace na frameworku, vlevo menu podle částí frameworku (Reaktivita, Šablony, Komponenty, Presentery a routy, Dialogy, Formuláře a prvky, Grid, Strom, RPC, Offline, Kendo…), u každé části ukázky od jednoduché po složitou, jako dema Kendo UI: popis, živá ukázka a záložka s kódem.
+7c. ~~Web s ukázkami jako dokumentace~~ **hotovo 14. 11., čeká na review:** `examples/docs` na `/`, 47 stránek, 53 ukázek, test `tests/docs.test.tsx`; co ukázky v API našly a co čeká na rozhodnutí, je v design.md v oddílu „Web s ukázkami jako příručka“. Původní zadání: (nápad autora 13. 11.): jedna aplikace na frameworku, vlevo menu podle částí frameworku (Reaktivita, Šablony, Komponenty, Presentery a routy, Dialogy, Formuláře a prvky, Grid, Strom, RPC, Offline, Kendo…), u každé části ukázky od jednoduché po složitou, jako dema Kendo UI: popis, živá ukázka a záložka s kódem.
    - **Kód na webu je kód, který běží:** soubor ukázky se načte i jako text (`?raw` ve Vite), zobrazený kód se nerozejde se skutečným.
    - **Každá ukázka je zároveň test:** Vitest je všechny vykreslí, nefunkční ukázka se pozná při `npm test`.
    - **Dosavadní ukázky** se rozpustí do sekcí (strom kategorií ke Stromu, objednávky ke Gridu, Kendo ke Kendu), helpdesk zůstane jako celá aplikace.
@@ -163,14 +165,30 @@ Z toho plyne:
    - **`guide.md` zůstane jen rozcestník** (co kde je, jak spustit, odkaz na web ukázek); žádný text na dvou místech. **CLAUDE.md se upraví:** příručka jsou `examples/docs/**/*.md`, s každou změnou API se upraví stránka i její ukázka; důvody návrhu dál v `design.md`.
    - **Test:** Vitest projde všechny značky `demo`, ověří, že ukázka existuje a vykreslí se.
    - **Postup:** kostra webu a sekce, které už ukázky mají (Strom, Grid, Formuláře, Kendo), pak ostatní; rozdělení stávající příručky je hlavně přesun textu.
+7d. **Mezery proti jiným frameworkům** (sepsáno 14. 11. po editoru, pořadí podle toho, jak by vadily v ostrém projektu):
+   - **Skutečný backend:** přihlášení, typy z OpenRPC, offline fronta i nahrávání po částech běží zatím jen proti mocku. Vyzkoušet helpdesk proti `phlox-rpc-api` (povýšeno z bodu 8, je to největší neznámá).
+   - **Firefox a Safari:** kontroly v prohlížeči běží jen v Edge. Pustit je i ve Firefoxu a WebKitu (Playwright). Riziko je u `<dialog>`, `:has()`, container queries, Web Locks, `execCommand` a IndexedDB v Safari.
+   - **Kontroly v prohlížeči do repozitáře:** skripty pro Playwright (průchody helpdeskem, offline, PWA, editor, grid, strom…) jsou zatím mimo repozitář. Patří do `tests/browser/` se skriptem v `package.json`, aby je mohl pustit každý a nerozešly se s kódem.
+   - **Zapomenutá šipka v šabloně:** `{task().title}` místo `{() => task().title}` se vykreslí jednou a dál se tiše nemění. Varování v dev režimu nebo kontrola v pluginu Vite.
+   - **Data tlačená ze serveru (WebSocket, SSE):** zpráva „změnily se tasks“ zavolá `app.invalidate('tasks')`. Pro upozornění, kanban a souběžnou práci víc lidí v helpdesku.
+   - **Hranice chyb:** spadlé vykreslení jedné části (widget na nástěnce) ukáže náhradní obsah jen v ní, zbytek stránky běží.
+   - **HMR presenterů a komponent:** změna souboru teď načte celou stránku a ztratí stav (otevřený dialog, rozepsaný formulář).
+   - **Menší:** asynchronní pravidla formuláře (login už existuje), obnova posunu stránky při zpět a vpřed, obecný portál (vykreslení jinam, např. do `<body>`), tmavý režim v ukázce, kontrola přístupnosti v testech (axe), pomocník pro vazbu oběma směry místo `Object.assign` v prvcích, měření výkonu (js-framework-benchmark).
 8. **Drobnosti:**
-   - jeden balíček českých textů frameworku místo nastavování v každé aplikaci (`messageTexts`, `DropDownList.texts`, `Grid.texts`, `Form.messages`…),
+   - ~~jeden balíček českých textů frameworku~~ hotovo 14. 11.: `setTexts(cs)` s `phlox-js/locales/cs`,
    - události předané do `<Input>` (`onBlur`, `onInput`) přepíše vlastní obsluha prvku, `ref` už je vyřešený,
    - ukládání rozložení gridu převést na `Preferences`,
    - `form.autosave` místo ručního `effect` (rychlé akce helpdesku),
    - pomocník pro odložené hledání (debounce) u `resource`,
-   - helpdesk vyzkoušet proti skutečnému `phlox-rpc-api` s přihlášením a typy vygenerovanými z OpenRPC.
-4. **Adaptér pro Kendo:** obalit Kendo Grid, jeden formulářový prvek a okno, včetně vazby na `state` a úklidu. Bez toho framework pro CMS nestačí. **Hotovo 13. 11., čeká na review:** `phlox-js/adapters/kendo` (`KendoWidget`, `KendoGrid`, `KendoDialogs`, `KendoControl`), ukázka `examples/kendo` se skutečným Kendo UI 2026.4; co zbývá ověřit, je v design.md.
+9. **Co brání vydání** (sepsáno 14. 11.):
+   - **Review autora:** devět oddílů `design.md` je „implementováno, čeká na review“ (formuláře, grid, strom, RPC, aplikace a router, helpdesk, editor, offline, reaktivní jádro). Po vydání se API mění hůř, review patří před první verzi.
+   - ~~Web s ukázkami~~ hotovo (bod 7c), nálezy z něj vyřešené 14. 11. (viz design.md). Oprava lišty vydaná v phlox-editoru v0.2.1, phlox-js na ní závisí.
+   - **Balíček:** `package.json` s `exports` pro všechny vstupy (`phlox-js`, `/forms`, `/net`, `/security`, `/localization`, `/components`, `/testing`, `/vite`, `/adapters/kendo`, `/jsx-runtime`, `/jsx-dev-runtime`, CSS v `styles/`), sestavení do JS s typy (`.d.ts`). Ze zdrojáků v TS to nepůjde: Node nespustí TypeScript z `node_modules`, takže aspoň plugin `phlox-js/vite` musí být JS. Vite (`peerDependency`), jméno balíčku (`phlox-js`, nebo `@phloxcz/…`) rozhodne autor.
+   - **README a LICENSE:** v repozitáři nejsou. README s instalací a odkazem na web ukázek, licence jako u ostatních knihoven ekosystému (MIT).
+   - **CHANGELOG, tagy a CI:** stejné vydávání jako u phlox-editoru, testy a kontrola typů při každém pushi (GitHub Actions).
+   - **Ověření v jiném projektu:** nainstalovat vydaný balíček do čistého projektu (Vite + TS), aby se ukázalo, co funguje jen díky `paths` v tomhle repozitáři.
+   - **Body 7d nahoře** nejsou podmínkou vydání, kromě skutečného backendu a Firefoxu se Safari.
+4. **Adaptér pro Kendo:** obalit Kendo Grid, jeden formulářový prvek a okno, včetně vazby na `state` a úklidu. Bez toho framework pro CMS nestačí. **Hotovo 13. 11., čeká na review:** `phlox-js/adapters/kendo` (`KendoWidget`, `KendoGrid`, `KendoDialogs`, `KendoControl`), ověřeno se skutečným Kendo UI 2026.4; ukázka i vývojové závislosti na Kendu odstraněné 14. 11. (licenci má jen firma, pro kterou vznikne CMS), dál ho ověří CMS.
 5. **Rozhodnutí před převodem CMS:**
    - Zátěžový test s velkým seznamem, třeba 10 000 řádků.
    - Vyhodnotit, jestli se Kendo adaptér osvědčil na reálné obrazovce.

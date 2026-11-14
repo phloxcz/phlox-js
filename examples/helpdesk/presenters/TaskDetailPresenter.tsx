@@ -1,4 +1,4 @@
-import { Button, Dropdown, Else, ElseIf, For, Html, If, Presenter, batch, effect, state } from 'phlox-js';
+import { Button, Dropdown, DropdownItem, Else, ElseIf, For, Html, If, Presenter, batch, effect, state } from 'phlox-js';
 import type { Child } from 'phlox-js';
 import { Form, FormTag, Input, InputError, Label } from 'phlox-js/forms';
 import type { EditorControl } from 'phlox-js/forms';
@@ -171,7 +171,8 @@ export class TaskDetailPresenter extends Presenter<{ taskId: number }> {
 
   private writeComment(): void {
     this.tab.set('comments');
-    queueMicrotask(() => this.commentText.element?.focus());
+    // The composer is drawn again with the tab, focus() waits for its editor
+    queueMicrotask(() => this.commentText.focus());
   }
 
   private insertEmoji(emoji: string): void {
@@ -209,10 +210,9 @@ export class TaskDetailPresenter extends Presenter<{ taskId: number }> {
           label={<>{() => <StatusLabel status={status.value() as Status} />}<Icon name="chevronDown" size={15} /></>}>
           <For each={() => STATUSES}>
             {value => (
-              <button type="button" class={() => `dropdown-item hd-menu-item ${status.value() === value ? 'active' : ''}`}
-                aria-pressed={() => String(status.value() === value)} onClick={() => status.setValue(value)}>
+              <DropdownItem class="hd-menu-item" active={() => status.value() === value} onClick={() => status.setValue(value)}>
                 <StatusLabel status={value} />
-              </button>
+              </DropdownItem>
             )}
           </For>
         </Dropdown>

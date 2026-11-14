@@ -2,25 +2,21 @@
 import 'phlox-js/styles/base.css';
 // Bootstrap is imported at the top of helpdesk.css: in the build the order of separate imports is not kept
 import './helpdesk.css';
-import { Application, messageTexts } from 'phlox-js';
-import { DropDownList, Form, UploadControl } from 'phlox-js/forms';
+import { Application, setTexts } from 'phlox-js';
+import cs from 'phlox-js/locales/cs';
+import { Form } from 'phlox-js/forms';
 import { RpcError, RpcErrorCode } from 'phlox-js/net';
 import { registerSW } from 'virtual:pwa-register';
-import { showExampleMenu } from '../shared/menu';
 import { createServices } from './services';
 import { AppPresenter } from './presenters/AppPresenter';
 
-Object.assign(messageTexts, {
-  ok: 'OK', cancel: 'Zrušit', close: 'Zavřít', loading: 'Načítám…', unsaved: 'Odejít bez uložení změn?', leave: 'Odejít',
-});
-DropDownList.texts.filterPlaceholder = 'Hledat…';
-DropDownList.texts.noResults = 'Nic nenalezeno';
-UploadControl.texts.heading = 'Přetáhněte soubory sem';
+// Texts of the framework in Czech; single ones can still be changed
+setTexts(cs);
 Form.messages.set(Form.Filled, 'Vyplňte pole %label.');
 
 const app = new Application(createServices());
-// All examples run as one site, this one under its own path, see examples/shared/menu.ts
-app.basePath = showExampleMenu();
+// The site of examples runs the helpdesk under its own path, next to the documentation at /
+app.basePath = '/helpdesk';
 
 app.onError = error => {
   // The token is not valid any more, e.g. the mock server has started again

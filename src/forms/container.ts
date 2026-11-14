@@ -331,7 +331,7 @@ export class Container<V extends object = Record<string, any>> implements Owner 
     for (const member of this.members.values()) {
       if (member instanceof FormControl) {
         if (member.hasErrors()) {
-          member.element?.focus();
+          member.focus();
           return true;
         }
       } else if (member.focusFirstError()) {

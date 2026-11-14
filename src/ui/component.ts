@@ -157,6 +157,11 @@ export abstract class Component<P extends object = {}, R = void> {
   }
 
   /** A message with OK, see Application.alert(). With `anchor` a popover at an element. */
+  /** Like flashMessage() in Nette, in a component as in a presenter. It disappears by itself, see FlashMessages.duration. */
+  flashMessage(text: string, type = 'info', options: Parameters<Application['flashes']['add']>[2] = {}): void {
+    this.app.flashes.add(text, type, options);
+  }
+
   alert(message: Child, options: Parameters<Application['alert']>[1] = {}): Promise<void> {
     return this.app.alert(message, options, this);
   }
@@ -171,9 +176,12 @@ export abstract class Component<P extends object = {}, R = void> {
     return this.app.prompt(message, options, this);
   }
 
-  /** A dialog while something runs: const loading = this.loading('Saving…'); … loading.close(). */
-  loading(message?: Child): ReturnType<Application['loading']> {
-    return this.app.loading(message, this);
+  /**
+   * A dialog while something runs: const loading = this.showLoading('Saving…'); … loading.close().
+   * Not loading(): that is a usual name of an own field, like loading = state(false).
+   */
+  showLoading(message?: Child): ReturnType<Application['showLoading']> {
+    return this.app.showLoading(message, this);
   }
 
   /** Closes the dialog the component is shown in and hands the result to whoever opened it. It does not ask. */

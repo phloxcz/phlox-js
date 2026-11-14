@@ -121,6 +121,11 @@ export abstract class FormControl<T = unknown> {
     this.errors.set([]);
   }
 
+  /** Puts the focus into the control, e.g. after a failed validation or from a button "Write a comment". */
+  focus(): void {
+    this.element?.focus();
+  }
+
   /** As if the user had not worked with the control yet: no errors, leaving it checks nothing. Used by reset(). */
   pristine(): void {
     this.touched = false;

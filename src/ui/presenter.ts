@@ -4,7 +4,6 @@ import { getScope, state } from '../reactive/reactive';
 import type { Child } from './dom';
 import { COMPONENT, Component, IS_PRESENTER, renderComponent } from './component';
 import type { Class } from '../di/container';
-import type { FlashOptions } from '../application/application';
 import type { DialogOptions } from './dialog';
 
 export type Params = Record<string, string>;
@@ -129,11 +128,6 @@ export abstract class Presenter<P extends object = {}, R = void> extends Compone
   /** Ends the action with an error, like $this->error() in Nette. */
   error(code = 404, message?: string): never {
     throw new BadRequestError(code, message);
-  }
-
-  /** Like flashMessage() in Nette. The message disappears by itself, see FlashMessages.duration. */
-  flashMessage(text: string, type = 'info', options: FlashOptions = {}): void {
-    this.app.flashes.add(text, type, options);
   }
 
   /**

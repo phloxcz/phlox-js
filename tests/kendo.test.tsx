@@ -1,6 +1,6 @@
 /**
  * The Kendo adapter against a fake Kendo with the same shape (constructors in kendo.ui, value(), bind()…).
- * The real Kendo UI is checked in the browser, examples/kendo.
+ * phlox-js does not depend on Kendo UI (a paid library); the real one is checked by the application that uses it.
  */
 import { describe, expect, test } from 'vitest';
 import { Component, Container, If, Presenter, state } from '../src/index';

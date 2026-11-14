@@ -11,15 +11,16 @@ import { classes, currentTheme } from '../ui/theme';
 import type { ExtraAttributes } from './controls';
 import { ListControl, itemContent } from './listbox';
 import type { ListOptions } from './listbox';
+import { texts } from '../ui/texts';
 
 export type DropDownListOptions<T, O = never> = ListOptions<T, O>;
 
 export class DropDownList<T = string> extends ListControl<T> {
   /** Texts of the list. Replace them for the language of the application: DropDownList.texts.noResults = '...'. */
-  static texts = {
+  static texts = texts('dropdownlist', {
     noResults: 'No results',
     filterPlaceholder: 'Search…',
-  };
+  });
 
   constructor(label = '', options: DropDownListOptions<T, any> = {}) {
     super(label, options, 'dropdownlist');

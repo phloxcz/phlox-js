@@ -1,4 +1,4 @@
-import { Component, Dropdown } from 'phlox-js';
+import { Component, Dropdown, DropdownItem } from 'phlox-js';
 import { Store } from '../model/Store';
 import { Icon } from './Icon';
 import { Avatar } from './ui';
@@ -23,8 +23,8 @@ export class UserMenu extends Component {
           {() => <Avatar user={me()} size="large" />}
           <span><strong>{() => me()?.name}</strong><small>{() => me()?.email}</small></span>
         </div>
-        <a href={this.link('/settings')} class="hd-menu-item"><Icon name="user" size={17} /> Profil a nastavení</a>
-        <button type="button" class="hd-menu-item" onClick={() => this.handleSignOut()}><Icon name="logOut" size={17} /> Odhlásit se</button>
+        <DropdownItem href={this.link('/settings')} class="hd-menu-item"><Icon name="user" size={17} /> Profil a nastavení</DropdownItem>
+        <DropdownItem class="hd-menu-item" onClick={() => this.handleSignOut()}><Icon name="logOut" size={17} /> Odhlásit se</DropdownItem>
       </Dropdown>
     );
   }

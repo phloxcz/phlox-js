@@ -105,11 +105,6 @@
     linear-gradient(180deg, #eef8fb, #f5fafd);
 }
 
-.hd-page-body .examples-menu {
-  margin: 0;
-  padding: .4rem 1.25rem;
-}
-
 #app {
   flex: 1;
   min-height: 0;

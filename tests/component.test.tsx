@@ -17,6 +17,19 @@ function host(view: () => Child) {
 }
 
 describe('Component', () => {
+  test('flashMessage() in a component, as in a presenter', async () => {
+    class Saver extends Component {
+      override startup() {
+        this.flashMessage('Uloženo.', 'success', { title: 'Hotovo' });
+      }
+      render() {
+        return <p>ok</p>;
+      }
+    }
+    const { app } = await boot(host(() => <Saver />));
+    expect(app.flashes.messages().map(flash => [flash.text, flash.type, flash.title])).toEqual([['Uloženo.', 'success', 'Hotovo']]);
+  });
+
   test('life cycle: startup, render, afterRender, shutdown', async () => {
     const log: string[] = [];
     const show = state(true);

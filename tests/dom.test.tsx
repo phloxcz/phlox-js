@@ -56,6 +56,12 @@ describe('attributes (regressions from TraceJS)', () => {
     expect(div.style.color).toBe('blue');
   });
 
+  test('numbers in a style object are written without a unit', () => {
+    const { root } = mount(() => <div style={{ opacity: 0.5, flexGrow: 1, margin: 0 }} />);
+    const div = root.querySelector('div')!;
+    expect([div.style.opacity, div.style.flexGrow, div.style.margin]).toEqual(['0.5', '1', '0px']);
+  });
+
   test('value and checked are properties', () => {
     const value = state('a');
     const checked = state(false);

@@ -7,6 +7,7 @@ import type { Plugin } from 'vite';
 import { phlox } from '../src/vite.ts';
 import { VitePWA } from 'vite-plugin-pwa';
 import { helpdeskServer } from './helpdesk/server/plugin.ts';
+import { docsMarkdown } from './docs/markdown.ts';
 
 const root = fileURLToPath(new URL('.', import.meta.url));
 const examples = readdirSync(root).filter(name => name !== 'dist' && existsSync(`${root}/${name}/index.html`));
@@ -31,7 +32,7 @@ export default defineConfig({
   root,
   // The mock backend of the helpdesk goes first, its URLs must not become pages
   plugins: [
-    phlox({ exclude: /\/phlox-js\/src\// }), helpdeskServer(), examplePages(),
+    phlox({ exclude: /\/phlox-js\/src\// }), helpdeskServer(), examplePages(), docsMarkdown(fileURLToPath(new URL('./docs', import.meta.url))),
     // The helpdesk as an installable PWA: its pages and assets are kept by a service worker and open offline.
     // Only in the build (npm run build:examples, then vite preview), the dev server serves modules one by one.
     VitePWA({
@@ -50,8 +51,7 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
-        // The site has other examples too; Kendo UI (10 MB) belongs to the Kendo example, not to the helpdesk
-        globIgnores: ['**/kendo*.js', '**/node_modules/**'],
+        globIgnores: ['**/node_modules/**'],
         // Any address of the helpdesk opens its page offline; the API and files are not pages
         navigateFallback: '/helpdesk/index.html',
         navigateFallbackAllowlist: [/^\/helpdesk(\/|$)/],
@@ -61,6 +61,8 @@ export default defineConfig({
   ],
   // `phlox-js` and the JSX runtime resolve to src/ through `paths` in tsconfig.json
   resolve: { tsconfigPaths: true },
+  // The scan of dependencies at the start does not read jsxImportSource from tsconfig.json: TSX of phlox-js, not React
+  optimizeDeps: { rolldownOptions: { transform: { jsx: { runtime: 'automatic', importSource: 'phlox-js' } } } },
   build: {
     rollupOptions: {
       input: { index: `${root}/index.html`, ...Object.fromEntries(examples.map(name => [name, `${root}/${name}/index.html`])) },

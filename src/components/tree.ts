@@ -5,6 +5,7 @@
 
 import { batch, state, untrack } from '../reactive/reactive';
 import type { State } from '../reactive/reactive';
+import { texts } from '../ui/texts';
 
 export type TreeKey = string | number;
 
@@ -89,7 +90,7 @@ export class TreeItem<N extends TreeNode<any>> {
 }
 
 export class Tree<N extends TreeNode<any> = TreeNode> {
-  static texts = { expand: 'Expand', collapse: 'Collapse', loading: 'Loading…' };
+  static texts = texts('tree', { expand: 'Expand', collapse: 'Collapse', loading: 'Loading…' });
 
   readonly roots = state<TreeItem<N>[]>([]);
   /** The selected node, e.g. the one the page shows. */

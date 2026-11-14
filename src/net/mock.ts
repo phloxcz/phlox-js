@@ -6,7 +6,8 @@
  *   const api = new RpcApi('/rpc', { fetch: server.fetch });
  */
 
-import type { RpcMethod } from './rpc';
+// With the extension: the mock server of the helpdesk loads this file in the config of Vite, by Node
+import type { RpcMethod } from './rpc.ts';
 
 /** An error the mock sends back, like ApiException or invalid parameters (code -32602 with `fields`) in phlox-api-core. */
 export class RpcMockError extends Error {
