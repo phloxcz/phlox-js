@@ -1,6 +1,6 @@
 {
   "name": "@phloxcz/phlox-js",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Frontendový framework, který přenáší způsob práce z Nette do prohlížeče.",
   "license": "MIT",
   "homepage": "https://github.com/phloxcz/phlox-js",

@@ -11,7 +11,7 @@ Celou aplikaci proti serveru (přihlášení, RPC, vnořené presentery, `resour
 ## Instalace
 
 ```bash
-npm install github:phloxcz/phlox-js#v0.2.0
+npm install github:phloxcz/phlox-js#v0.2.1
 ```
 
 Balíček zatím není na npm, instaluje se z GitHubu podle tagu. Projekt potřebuje Vite (od verze 7) s pluginem `phlox()` a v `tsconfig.json` `"jsx": "react-jsx"`, `"jsxImportSource": "@phloxcz/phlox-js"` a `"moduleResolution": "Bundler"` (viz Aplikace a bootstrap). Styly: `import '@phloxcz/phlox-js/styles/base.css'` a k nim `@phloxcz/phlox-js/styles/default.css`, nebo Bootstrap.

@@ -49,7 +49,7 @@ class TasksPresenter extends Presenter {
 - **Parametry jsou pojmenované,** jako v PHP metodě. Když jsou všechny nepovinné, dají se vynechat: `this.api.call('stats.tasks')`.
 - **Data a časy přijdou jako text,** JSON jiný typ nezná. U pole s formátem `date` nebo `date-time` to říká komentář ve vygenerovaném souboru.
 - **Dávky jsou automatické:** volání ve stejném okamžiku, třeba přes `Promise.all`, odejdou na server jedním požadavkem. Vypíná se volbou `batch: false`.
-- **`notify()`** zavolá metodu bez čekání na výsledek. Server neodpoví nic, ani chybu.
+- **`notify()`** zavolá metodu bez výsledku. Server neodpoví nic, ani chybu, prázdnou odpovědí se stavem 204 nebo 200. Vrácený promise se splní po odeslání, takže `await this.api.notify('user.logout')` počká, než volání odejde (třeba s tokenem, který se pak smaže).
 - **Session místo tokenu:** `new RpcApi('/rpc', { credentials: 'include' })`, prohlížeč pak posílá cookies i na jiný původ.
 - **Bez typů** jde použít přímo `new RpcClient('/rpc')`, `call()` pak bere libovolnou metodu a vrací `any`.
 - **Názvy metod v URL:** požadavek jde na `/rpc?task.read,comment.list`, takže je v záložce Síť v prohlížeči vidět, co volá (u dávky každá metoda jednou). Server query ignoruje. Vypíná se volbou `methodsInUrl: false`.

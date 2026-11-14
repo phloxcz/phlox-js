@@ -2,6 +2,11 @@
 
 Všechny podstatné změny projektu. Formát podle [Keep a Changelog](https://keepachangelog.com/cs/1.1.0/), verze podle [Semantic Versioning](https://semver.org/lang/cs/).
 
+## [0.2.1] – 2026-11-14
+
+### Opraveno
+- **Notifikace s prázdnou odpovědí:** `RpcClient` bral odpověď 200 s prázdným tělem (tak na notifikaci odpovídají i starší servery JSON-RPC) jako chybu sítě. Prázdné tělo je teď stejné jako stav 204: žádná odpověď.
+
 ## [0.2.0] – 2026-11-14
 
 ### Změněno
@@ -19,5 +24,6 @@ První vydání.
 - **Server** (`@phloxcz/phlox-js/net`): JSON-RPC klient pro `phlox-rpc-api` s typy z OpenRPC (`phlox-rpc-types`), dávky, soubory po částech, mock server, práce offline s frontou změn.
 - **Další:** uživatel a oprávnění (`@phloxcz/phlox-js/security`), překlady (`@phloxcz/phlox-js/localization`), texty frameworku česky (`setTexts`, `@phloxcz/phlox-js/locales/cs`), HTML od uživatelů (`<Html>`, `sanitizeHtml`), témata (výchozí, Bootstrap), adaptéry pro Kendo UI a capify, pomocníci pro testy (`@phloxcz/phlox-js/testing`).
 
+[0.2.1]: https://github.com/phloxcz/phlox-js/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/phloxcz/phlox-js/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/phloxcz/phlox-js/releases/tag/v0.1.0

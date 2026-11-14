@@ -130,7 +130,9 @@ export class RpcClient<M extends { [K in keyof M]: RpcMethod } = Record<string, 
         ...(this.options.credentials ? { credentials: this.options.credentials } : {}),
       });
       if (!response.ok) return failAll(new RpcError(response.status, `HTTP ${response.status} ${response.statusText}`.trim()));
-      body = response.status === 204 ? null : await response.json();
+      // Notifications get no answer: 204, or 200 with an empty body (both are usual on servers)
+      const text = response.status === 204 ? '' : await response.text();
+      body = text.trim() ? JSON.parse(text) : null;
     } catch (error) {
       return failAll(new RpcError(RpcErrorCode.Network, `Network error: ${error instanceof Error ? error.message : String(error)}`));
     }

@@ -99,6 +99,11 @@ describe('RpcClient', () => {
     expect('id' in (sent[0]!.body as Request)).toBe(false);
   });
 
+  test('a notification answered by 200 with an empty body, as older servers do', async () => {
+    const rpc = new RpcClient('/rpc', { fetch: (async () => new Response('', { status: 200 })) as typeof fetch });
+    await expect(rpc.notify('user.logout')).resolves.toBeUndefined();
+  });
+
   test('headers are read for every request, credentials are passed on', async () => {
     let token = 'first';
     const { fetch, sent } = server(() => 1);
