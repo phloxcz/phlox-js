@@ -2,6 +2,11 @@
 
 Všechny podstatné změny projektu. Formát podle [Keep a Changelog](https://keepachangelog.com/cs/1.1.0/), verze podle [Semantic Versioning](https://semver.org/lang/cs/).
 
+## [0.2.2] – 2026-11-16
+
+### Opraveno
+- **Menu akcí v řádku gridu** ukazovalo akce podle dat řádku z jeho prvního vykreslení. Po novém načtení (třeba po aktivaci) zůstalo „Aktivovat“, i když už měla být vidět „Deaktivovat“. Panely gridu (menu akcí, sloupce, filtr s více hodnotami) se teď tvoří při každém otevření. Odhalil to modul štítků v CMS.
+
 ## [0.2.1] – 2026-11-14
 
 ### Opraveno
@@ -24,6 +29,7 @@ První vydání.
 - **Server** (`@phloxcz/phlox-js/net`): JSON-RPC klient pro `phlox-rpc-api` s typy z OpenRPC (`phlox-rpc-types`), dávky, soubory po částech, mock server, práce offline s frontou změn.
 - **Další:** uživatel a oprávnění (`@phloxcz/phlox-js/security`), překlady (`@phloxcz/phlox-js/localization`), texty frameworku česky (`setTexts`, `@phloxcz/phlox-js/locales/cs`), HTML od uživatelů (`<Html>`, `sanitizeHtml`), témata (výchozí, Bootstrap), adaptéry pro Kendo UI a capify, pomocníci pro testy (`@phloxcz/phlox-js/testing`).
 
+[0.2.2]: https://github.com/phloxcz/phlox-js/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/phloxcz/phlox-js/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/phloxcz/phlox-js/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/phloxcz/phlox-js/releases/tag/v0.1.0

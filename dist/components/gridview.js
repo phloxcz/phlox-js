@@ -104,7 +104,7 @@ function Popup(props) {
 					placePopup(wrapper.querySelector(":scope > button"), panel);
 					queueMicrotask(() => panel.querySelector("input, select, button, a")?.focus());
 				},
-				children: props.panel(close)
+				children: () => untrack(() => props.panel(close))
 			})
 		})]
 	});

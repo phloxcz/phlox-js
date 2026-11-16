@@ -140,7 +140,7 @@ Z toho plyne:
   - Pro backend (mock teď, `phlox-rpc-api` později): metody pro založení požadavku zvenku (bez přihlášení operátora, s ochranou proti spamu) a pro převod požadavku na úkoly.
 - **Mock RPC v prohlížeči pro statické sestavení** (cesta 1; zatím není potřeba, autor spouští sestavení přes `vite preview`, kde mock běží; udělat, až budou ukázky potřeba vystavit na statický hosting): `npm run build:examples` dá `dist`, které jde pustit z libovolného statického serveru (`php -S`, GitHub Pages). Helpdesk ve statickém sestavení použije `createRpcMock(...).fetch` místo sítě; v mocku nahradit Node `Buffer` prohlížečovou variantou a data ukládat do `localStorage`, aby přežila obnovení stránky. Dev server a `vite preview` dál s mockem ve Vite.
 
-**Vydání frameworku:** vydáno jako `v0.1.0` 14. 11. 2026 (autor: review oddílů „čeká na review“ zatím přeskočit, framework průběžně testoval), téhož dne přejmenováno na `@phloxcz/phlox-js` a vydáno jako `v0.2.0`. Instalace `npm install github:phloxcz/phlox-js#v0.2.0`. Další krok: CMS (přepis ze starého Knockoutu) na vydané verzi. Jak se vydává další verze, je v design.md v oddílu „Balíček a vydávání“.
+**Vydání frameworku:** vydáno jako `v0.1.0` 14. 11. 2026 (autor: review oddílů „čeká na review“ zatím přeskočit, framework průběžně testoval), téhož dne přejmenováno na `@phloxcz/phlox-js` a vydáno jako `v0.2.0`. Instalace `npm install github:phloxcz/phlox-js#v0.2.0`. Další krok: CMS (přepis ze starého Knockoutu) na vydané verzi. **CMS, pracovně PHLOX Publisher** (14. 11.): kostra s přihlášením v `d:\Projekty\phlox\_ap3cms` na `v0.2.1`, bez Kenda, proti stávajícímu JSON-RPC serveru (rozhraní zůstane i po převodu backendu). Zdroj je starý klient `d:\Projekty\webapps-farm\hochtief.cz-workspace\hochtief.cz.25\client\www` (Knockout, ~35 agend, Kendo Window a Grid). Git zatím ne: drží se lokálně, commitne se najednou s PHP částí. Kostra odhalila chybu frameworku (prázdná odpověď na notifikaci), opraveno ve `v0.2.1`. Jak se vydává další verze, je v design.md v oddílu „Balíček a vydávání“.
 
 **TODO frameworku (z helpdesku, sepsáno 12. 11. 2026, v navrženém pořadí):**
 1. ~~Chyby asynchronních obsluh událostí~~ **hotovo 13. 11.:** chyby obsluh jdou do `app.onError`.
@@ -173,6 +173,7 @@ Z toho plyne:
    - **Data tlačená ze serveru (WebSocket, SSE):** zpráva „změnily se tasks“ zavolá `app.invalidate('tasks')`. Pro upozornění, kanban a souběžnou práci víc lidí v helpdesku.
    - **Hranice chyb:** spadlé vykreslení jedné části (widget na nástěnce) ukáže náhradní obsah jen v ní, zbytek stránky běží.
    - **HMR presenterů a komponent:** změna souboru teď načte celou stránku a ztratí stav (otevřený dialog, rozepsaný formulář).
+   - **Z CMS (16. 11.):** výchozí řazení gridu (`new Grid({ sort: { field: 'createdStamp', dir: 'desc' } })`), starý seznam štítků řadil od nejnovějších a grid to teď neumí.
    - **Menší:** asynchronní pravidla formuláře (login už existuje), obnova posunu stránky při zpět a vpřed, obecný portál (vykreslení jinam, např. do `<body>`), tmavý režim v ukázce, kontrola přístupnosti v testech (axe), pomocník pro vazbu oběma směry místo `Object.assign` v prvcích, měření výkonu (js-framework-benchmark).
 8. **Drobnosti:**
    - ~~jeden balíček českých textů frameworku~~ hotovo 14. 11.: `setTexts(cs)` s `@phloxcz/phlox-js/locales/cs`,

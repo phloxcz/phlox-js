@@ -120,7 +120,8 @@ function Popup(props: {
             queueMicrotask(() => panel.querySelector<HTMLElement>('input, select, button, a')?.focus());
           }}
         >
-          {props.panel(close)}
+          {/* Made at every opening: the actions of a row follow its current data (a reloaded row keeps its element) */}
+          {() => untrack(() => props.panel(close))}
         </div>
       </If>
     </div>

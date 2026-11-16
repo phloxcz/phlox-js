@@ -249,6 +249,29 @@ describe('the view', () => {
     }
   });
 
+  test('the menu of a row follows its data after a reload, the row keeps its element', async () => {
+    // Like the server: every answer has new objects
+    let paid = false;
+    const grid = new Grid<Order>({ load: async () => ({ data: [{ ...ORDERS[1]!, paid }], total: 1 }) });
+    grid.addTextColumn('customer', 'Zákazník');
+    grid.addAction('Zaplatit', { onClick: () => { paid = true; }, visible: order => !order.paid });
+    grid.addAction('Vrátit', { onClick: () => { paid = false; }, visible: order => order.paid });
+    const root = mount(() => <GridView grid={grid} />);
+    await tick();
+    const row = root.querySelector('tbody tr')!;
+    const menu = () => [...document.querySelectorAll('[role=menu] button')].map(button => button.textContent);
+    const toggle = () => root.querySelector<HTMLButtonElement>('tbody tr .phx-grid-action-toggle')!.click();
+
+    toggle();
+    expect(menu()).toEqual(['Zaplatit']);
+    [...document.querySelectorAll<HTMLButtonElement>('[role=menu] button')][0]!.click();
+    await tick();
+    await tick();
+    expect(root.querySelector('tbody tr')).toBe(row);
+    toggle();
+    expect(menu()).toEqual(['Vrátit']);
+  });
+
   test('columns: hidden, moved and their widths, remembered in the browser', async () => {
     const grid = ordersGrid({ rows: ORDERS, remember: 'orders' });
     grid.toggleColumn('category', false);
