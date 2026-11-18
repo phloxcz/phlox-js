@@ -4,6 +4,7 @@ import { For } from '../ui/flow';
 import { state, untrack } from '../reactive/reactive';
 import type { State } from '../reactive/reactive';
 import type { Child } from '../ui/dom';
+import { reveal } from '../ui/reveal';
 import { classes, currentTheme } from '../ui/theme';
 import { Rules } from './rules';
 import type { Validator } from './rules';
@@ -134,6 +135,8 @@ export abstract class FormControl<T = unknown> {
 
   /** Puts the focus into the control, e.g. after a failed validation or from a button "Write a comment". */
   public focus(): void {
+    // A control in a hidden tab: the tab is chosen first, a focus into a hidden element would be lost
+    reveal(this.element);
     this.element?.focus();
   }
 

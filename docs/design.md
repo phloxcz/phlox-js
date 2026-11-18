@@ -928,3 +928,11 @@ Tabulka je z verze, kde `h()` tvořilo uzly hned. Po přechodu na šablony vyšl
 - **Modifikátory viditelnosti u všech členů tříd, i `public`,** jako v Nette. Autor: trápí ho nejvíc. Programátor z PHP hned vidí, co je veřejné API. Hlídá to Biome (`npm run lint`, pravidlo `useConsistentMemberAccessibility`), protože `typescript-eslint` potřebuje JS API TypeScriptu, které TypeScript 7 nemá.
 - **Dvě mezery a závorka na konci řádku zůstávají** podle zvyku TypeScriptu, tabulátory ani závorky na novém řádku podle Nette ne. Kód má vypadat jako příklady, ze kterých se programátor učí jinde, a u `return` by závorka na novém řádku vrátila `undefined`.
 - **Formátovač Biome je vypnutý,** lint hlídá jen tohle pravidlo. Další pravidla jen po dohodě s autorem.
+
+## Záložky (0.5.0, autor 18. 11.: „takhle záložky implementuj“, se skrytím do „Další“)
+
+- **`<Tab>` jako značka, ne komponenta.** `<Tabs>` přečte své děti přes `templateOf()` (tag, props a nově i děti šablony) a vykreslí záložky i panely sám, stejně jako `<If>` čte `<Else>`. Zápis v JSX je tak čitelný jako v Latte a nic se nevytváří dvakrát. Daní je, že `<Tab>` musí být přímým dítětem, ne uvnitř `<If>`.
+- **Panely se skrývají, nezahazují.** Formulář v záložkách je hlavní použití a prvky musí zůstat v DOM, aby držely rozepsané hodnoty, kontrolovaly se a šlo do nich dát fokus.
+- **Fokus do skryté záložky přes událost `reveal`.** Formulář o záložkách neví. `focus()` prvku pošle bublající událost `phloxreveal` a panel, který ji zachytí, zvolí svou záložku dřív, než fokus přijde. Stejně se později může ukázat rozbalovací oddíl nebo akordeon. `reveal` je ve vlastním malém modulu, aby formuláře nenačítaly záložky.
+- **Značka chyby z `aria-invalid`.** Prvky ho už nastavují, panel ho sleduje přes MutationObserver. Záložky tak nepotřebují vědět, které prvky formuláře v nich jsou, a fungují i s vlastními prvky.
+- **Přetečení měřením, ne zalamováním.** Při změně šířky se změří všechny záložky (krátce ukázané), výpočet je čistá funkce `fitTabs()` testovaná bez prohlížeče. Zvolená záložka je vždy vidět, místo poslední, která se vejde. Bez `ResizeObserver` (jsdom) jsou vidět všechny.

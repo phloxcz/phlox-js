@@ -2,7 +2,14 @@
 
 Všechny podstatné změny projektu. Formát podle [Keep a Changelog](https://keepachangelog.com/cs/1.1.0/), verze podle [Semantic Versioning](https://semver.org/lang/cs/).
 
-## [0.4.0] – 2026-11-18
+## [0.5.0] – 2026-11-18
+
+### Přidáno
+- **Záložky `<Tabs>` a `<Tab>`:** skryté panely zůstávají ve stránce, takže prvky formuláře v nich drží hodnoty a kontrolují se. Neúspěšná kontrola otevře záložku s první chybou a záložka s chybou má značku. Záložky, které se nevejdou, jsou pod „Další“. Ovládání šipkami podle WAI-ARIA, zvolená záložka jako `state`.
+- **`reveal(element)`:** prvek požádá kontejnery kolem sebe, aby ho ukázaly. `focus()` prvků formuláře ji volá samo, takže fokus po kontrole dojde i do skryté záložky.
+- **`templateOf()` vrací i děti šablony** (`children`), komponenta tak může číst své vnořené značky jako `<Tabs>` své `<Tab>`.
+
+ – 2026-11-18
 
 ### Přidáno
 - **Výchozí řazení gridu:** `new Grid({ sort: { field: 'createdStamp', dir: 'desc' } })`. Platí, dokud uživatel nevybere jiné, třetí klik na sloupec ho vrátí. V URL není.

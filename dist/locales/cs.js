@@ -43,6 +43,10 @@ var cs = {
 		min: "Nejméně",
 		max: "Nejvíc"
 	},
+	tabs: {
+		more: "Další",
+		hasErrors: "obsahuje chybu"
+	},
 	tree: {
 		expand: "Rozbalit",
 		collapse: "Sbalit",

@@ -1317,3 +1317,54 @@ th.phx-grid-drag-over-right {
 .phlox-editor-readonly .phx-editor-toolbar {
   display: none;
 }
+
+/* Tabs: one row that never wraps, the tabs that do not fit are behind "More" */
+.phlox-tabs-nav,
+.nav-tabs:has(> .phlox-tablist) {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: flex-end;
+  min-width: 0;
+}
+
+.phlox-tablist {
+  display: flex;
+  flex: 1 1 auto;
+  flex-wrap: nowrap;
+  min-width: 0;
+}
+
+.phlox-tablist > [role="tab"] {
+  flex: none;
+  white-space: nowrap;
+}
+
+.phlox-tabs-more {
+  flex: none;
+  margin-left: auto;
+}
+
+.phlox-tablist > [hidden],
+.phlox-tabs-more[hidden] {
+  display: none !important;
+}
+
+/* A tab with an error in its panel */
+.phlox-tab-error {
+  display: inline-block;
+  width: .5rem;
+  height: .5rem;
+  margin-left: .375rem;
+  vertical-align: middle;
+  background: var(--bs-danger, #d32f2f);
+  border-radius: 50%;
+}
+
+.phlox-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

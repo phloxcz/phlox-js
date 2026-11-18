@@ -56,7 +56,8 @@ function h(tag, props, ...children) {
 	};
 	const info = {
 		tag,
-		props
+		props,
+		children: children.length === 0 ? void 0 : children.length === 1 ? children[0] : children
 	};
 	return Object.assign(create, { [TEMPLATE]: info });
 }

@@ -17,6 +17,8 @@ export declare function withNamespaceOf<T>(parent: Node, fn: () => T): T;
 interface TemplateInfo {
     tag: string | Component;
     props: Record<string, unknown> | null;
+    /** What was written between the tags, as a component gets it in props.children */
+    children: Child | undefined;
 }
 /**
  * Creates a template. Nothing is built and no component runs until the template is inserted,

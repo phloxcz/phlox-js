@@ -9,6 +9,7 @@ import { effect, state, untrack } from '../reactive/reactive';
 import type { State } from '../reactive/reactive';
 import type { Child, Reactive } from '../ui/dom';
 import { Component } from '../ui/component';
+import { reveal } from '../ui/reveal';
 import { currentTheme } from '../ui/theme';
 import { FormControl } from './controls';
 import type { ExtraAttributes } from './controls';
@@ -134,8 +135,12 @@ export class EditorControl extends FormControl<string> {
 
   /** The editor is loaded lazily: focus() before that puts the focus in as soon as it is made. */
   public override focus(): void {
-    if (this.element?.isConnected) this.element.focus();
-    else this.focusWhenReady = true;
+    if (this.element?.isConnected) {
+      reveal(this.element);
+      this.element.focus();
+    } else {
+      this.focusWhenReady = true;
+    }
   }
 
   /** Text, or an image, a table… An empty editor gives '', but HTML from elsewhere can be just <p></p>. */
@@ -180,6 +185,7 @@ export class EditorControl extends FormControl<string> {
             if (pane) pane.id = this.htmlId;
             if (this.focusWhenReady) {
               this.focusWhenReady = false;
+              reveal(pane);
               pane?.focus();
             }
           }}

@@ -1,5 +1,6 @@
 import { For } from "../ui/flow.js";
 import { state, untrack } from "../reactive/reactive.js";
+import { reveal } from "../ui/reveal.js";
 import { classes, currentTheme } from "../ui/theme.js";
 import { Rules } from "./rules.js";
 import { jsx } from "../jsx-runtime.js";
@@ -96,6 +97,7 @@ var FormControl = class {
 	}
 	/** Puts the focus into the control, e.g. after a failed validation or from a button "Write a comment". */
 	focus() {
+		reveal(this.element);
 		this.element?.focus();
 	}
 	/** As if the user had not worked with the control yet: no errors, leaving it checks nothing. Used by reset(). */

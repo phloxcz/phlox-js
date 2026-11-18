@@ -24,6 +24,7 @@ const cs: FrameworkTexts = {
     actions: 'Akce', sortBy: 'Řadit podle %s', resize: 'Změnit šířku sloupce %s',
     sum: 'Celkem', avg: 'Průměr', count: 'Počet', min: 'Nejméně', max: 'Nejvíc',
   },
+  tabs: { more: 'Další', hasErrors: 'obsahuje chybu' },
   tree: { expand: 'Rozbalit', collapse: 'Sbalit', loading: 'Načítám…' },
   dropdownlist: { noResults: 'Nic nenalezeno', filterPlaceholder: 'Hledat…' },
   combobox: { noResults: 'Nic nenalezeno' },

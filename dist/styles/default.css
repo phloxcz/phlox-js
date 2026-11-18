@@ -874,3 +874,40 @@
   background: var(--phlox-error);
   border-color: var(--phlox-error);
 }
+
+.phlox-tabs-nav {
+  gap: .25rem;
+  border-bottom: 1px solid ButtonBorder;
+}
+
+.phlox-tab {
+  margin-bottom: -1px;
+  padding: .5rem 1rem;
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 1px solid transparent;
+  border-bottom: 0;
+  border-radius: 8px 8px 0 0;
+  cursor: pointer;
+}
+
+.phlox-tab:hover {
+  background: color-mix(in srgb, CanvasText 6%, transparent);
+}
+
+.phlox-tab.phlox-active {
+  font-weight: 600;
+  background: Canvas;
+  border-color: ButtonBorder;
+  box-shadow: 0 1px 0 Canvas;
+}
+
+.phlox-tabs-more .phlox-tab::after {
+  content: "▾";
+  margin-left: .35rem;
+}
+
+.phlox-tab-panel {
+  padding-top: 1rem;
+}

@@ -12,10 +12,12 @@ import type { Multiplier } from '../forms/multiplier';
 import type { TagInput } from '../forms/taginput';
 import type { UploadControl } from '../forms/upload';
 import type { messageTexts } from './messages';
+import type { tabsTexts } from './tabs';
 type Texts = Record<string, string>;
 /** All texts of the framework by the names their parts register under, see setTexts(). */
 export interface FrameworkTexts {
     messages: typeof messageTexts;
+    tabs: typeof tabsTexts;
     grid: typeof Grid.texts;
     tree: typeof Tree.texts;
     dropdownlist: typeof DropDownList.texts;

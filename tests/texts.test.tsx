@@ -1,5 +1,6 @@
 /** Texts of the framework in another language: setTexts() and the Czech texts in @phloxcz/phlox-js/locales/cs. */
 import { describe, expect, test } from 'vitest';
+import { tabsTexts } from '../src/ui/tabs';
 import { messageTexts, setTexts } from '../src/index';
 import type { FrameworkTexts } from '../src/index';
 import { texts } from '../src/ui/texts';
@@ -22,6 +23,7 @@ describe('texts', () => {
     const holders: Record<Exclude<keyof FrameworkTexts, 'rules'>, object> = {
       messages: messageTexts, grid: Grid.texts, tree: Tree.texts, dropdownlist: DropDownList.texts, combobox: ComboBox.texts,
       dropdowntree: DropDownTreeSelect.texts, multiplier: Multiplier.texts, taginput: TagInput.texts, upload: UploadControl.texts,
+      tabs: tabsTexts,
     };
     for (const [name, holder] of Object.entries(holders)) expect(Object.keys(cs[name as keyof FrameworkTexts]).sort(), name).toEqual(Object.keys(holder).sort());
 

@@ -26,6 +26,7 @@ export const CONTENTS: Section[] = [
     { path: 'components', title: 'Komponenty' },
     { path: 'resource', title: 'Načítaná data' },
     { path: 'preferences', title: 'Nastavení a šířka sloupců' },
+    { path: 'tabs', title: 'Záložky' },
   ] },
   { title: 'Presentery a routy', path: 'presenters', pages: [
     { path: 'presenters', title: 'Presentery a routy' },

@@ -1,5 +1,6 @@
 import { effect, state, untrack } from "../reactive/reactive.js";
 import { Component } from "../ui/component.js";
+import { reveal } from "../ui/reveal.js";
 import { currentTheme } from "../ui/theme.js";
 import { FormControl } from "./controls.js";
 import { jsx } from "../jsx-runtime.js";
@@ -95,8 +96,10 @@ var EditorControl = class extends FormControl {
 	}
 	/** The editor is loaded lazily: focus() before that puts the focus in as soon as it is made. */
 	focus() {
-		if (this.element?.isConnected) this.element.focus();
-		else this.focusWhenReady = true;
+		if (this.element?.isConnected) {
+			reveal(this.element);
+			this.element.focus();
+		} else this.focusWhenReady = true;
 	}
 	/** Text, or an image, a table… An empty editor gives '', but HTML from elsewhere can be just <p></p>. */
 	isFilled() {
@@ -137,6 +140,7 @@ var EditorControl = class extends FormControl {
 					if (pane) pane.id = this.htmlId;
 					if (this.focusWhenReady) {
 						this.focusWhenReady = false;
+						reveal(pane);
 						pane?.focus();
 					}
 				}

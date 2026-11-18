@@ -47,6 +47,8 @@ export function withNamespaceOf<T>(parent: Node, fn: () => T): T {
 interface TemplateInfo {
   tag: string | Component;
   props: Record<string, unknown> | null;
+  /** What was written between the tags, as a component gets it in props.children */
+  children: Child | undefined;
 }
 
 /**
@@ -71,7 +73,7 @@ export function h(tag: string | Component, props: Record<string, unknown> | null
     (props?.ref as ((element: HTMLElement) => void) | undefined)?.(element);
     return element;
   };
-  const info: TemplateInfo = { tag, props };
+  const info: TemplateInfo = { tag, props, children: children.length === 0 ? undefined : children.length === 1 ? children[0] : children };
   return Object.assign(create, { [TEMPLATE]: info });
 }
 
