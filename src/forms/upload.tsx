@@ -31,8 +31,10 @@ const sameFile = (a: File, b: File): boolean => a.name === b.name && a.size === 
 /** One file (File | null) or several (File[]). */
 export class UploadControl<T extends File | null | File[]> extends FormControl<T> {
   public static texts = texts('upload', {
-    dropzone: 'Upload area – click or drop files here',
-    heading: 'Drop files here',
+    dropzoneMultiple: 'Upload area – click or drop files here',
+    dropzoneSingle: 'Upload area – click or drop a file here',
+    headingMultiple: 'Drop files here',
+    headingSingle: 'Drop a file here',
     or: 'or',
     browseMultiple: 'Choose files',
     browseSingle: 'Choose a file',
@@ -121,7 +123,7 @@ export class UploadControl<T extends File | null | File[]> extends FormControl<T
           )}
           role="button"
           tabIndex={0}
-          aria-label={texts.dropzone}
+          aria-label={this.multiple ? texts.dropzoneMultiple : texts.dropzoneSingle}
           aria-disabled={() => (this.disabled() ? 'true' : null)}
           aria-readonly={() => (this.readOnly() ? 'true' : null)}
           ref={ref as (element: HTMLElement) => void}
@@ -146,7 +148,7 @@ export class UploadControl<T extends File | null | File[]> extends FormControl<T
         >
           <div class="pu-dropzone-icon" aria-hidden="true" ref={element => { element.innerHTML = UPLOAD_ICON; }} />
           <p class="pu-dropzone-hint">
-            <strong>{texts.heading}</strong>
+            <strong>{this.multiple ? texts.headingMultiple : texts.headingSingle}</strong>
             <br />
             <span>{texts.or}</span>
           </p>

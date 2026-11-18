@@ -35,7 +35,9 @@ const cs: FrameworkTexts = {
   },
   taginput: { createNew: 'Vytvořit: ', remove: 'Odebrat' },
   upload: {
-    dropzone: 'Oblast pro nahrání – klikněte nebo sem přetáhněte soubory', heading: 'Přetáhněte soubory sem', or: 'nebo',
+    dropzoneMultiple: 'Oblast pro nahrání – klikněte nebo sem přetáhněte soubory',
+    dropzoneSingle: 'Oblast pro nahrání – klikněte nebo sem přetáhněte soubor',
+    headingMultiple: 'Přetáhněte soubory sem', headingSingle: 'Přetáhněte soubor sem', or: 'nebo',
     browseMultiple: 'Vybrat soubory', browseSingle: 'Vybrat soubor', remove: 'Odebrat %s',
   },
   rules: {

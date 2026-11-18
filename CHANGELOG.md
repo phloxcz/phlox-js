@@ -2,6 +2,11 @@
 
 Všechny podstatné změny projektu. Formát podle [Keep a Changelog](https://keepachangelog.com/cs/1.1.0/), verze podle [Semantic Versioning](https://semver.org/lang/cs/).
 
+## [0.5.1] – 2026-11-18
+
+### Změněno
+- **Texty nahrávání podle počtu souborů:** `addUpload` píše „Přetáhněte soubor sem“, `addMultiUpload` „Přetáhněte soubory sem“, stejně popis zóny pro čtečky. Klíče `upload.heading` a `upload.dropzone` se rozdělily na `headingSingle`/`headingMultiple` a `dropzoneSingle`/`dropzoneMultiple`; kdo je přepisoval v `setTexts()`, musí je přejmenovat.
+
 ## [0.5.0] – 2026-11-18
 
 ### Přidáno
@@ -9,7 +14,7 @@ Všechny podstatné změny projektu. Formát podle [Keep a Changelog](https://ke
 - **`reveal(element)`:** prvek požádá kontejnery kolem sebe, aby ho ukázaly. `focus()` prvků formuláře ji volá samo, takže fokus po kontrole dojde i do skryté záložky.
 - **`templateOf()` vrací i děti šablony** (`children`), komponenta tak může číst své vnořené značky jako `<Tabs>` své `<Tab>`.
 
- – 2026-11-18
+## [0.4.0] – 2026-11-18
 
 ### Přidáno
 - **Výchozí řazení gridu:** `new Grid({ sort: { field: 'createdStamp', dir: 'desc' } })`. Platí, dokud uživatel nevybere jiné, třetí klik na sloupec ho vrátí. V URL není.
@@ -50,6 +55,10 @@ První vydání.
 - **Server** (`@phloxcz/phlox-js/net`): JSON-RPC klient pro `phlox-rpc-api` s typy z OpenRPC (`phlox-rpc-types`), dávky, soubory po částech, mock server, práce offline s frontou změn.
 - **Další:** uživatel a oprávnění (`@phloxcz/phlox-js/security`), překlady (`@phloxcz/phlox-js/localization`), texty frameworku česky (`setTexts`, `@phloxcz/phlox-js/locales/cs`), HTML od uživatelů (`<Html>`, `sanitizeHtml`), témata (výchozí, Bootstrap), adaptéry pro Kendo UI a capify, pomocníci pro testy (`@phloxcz/phlox-js/testing`).
 
+[0.5.1]: https://github.com/phloxcz/phlox-js/compare/v0.5.0...v0.5.1
+[0.5.0]: https://github.com/phloxcz/phlox-js/compare/v0.4.0...v0.5.0
+[0.4.0]: https://github.com/phloxcz/phlox-js/compare/v0.3.0...v0.4.0
+[0.3.0]: https://github.com/phloxcz/phlox-js/compare/v0.2.2...v0.3.0
 [0.2.2]: https://github.com/phloxcz/phlox-js/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/phloxcz/phlox-js/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/phloxcz/phlox-js/compare/v0.1.0...v0.2.0

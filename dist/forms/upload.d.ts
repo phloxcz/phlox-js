@@ -12,8 +12,10 @@ export declare function formatFileSize(bytes: number): string;
 export declare class UploadControl<T extends File | null | File[]> extends FormControl<T> {
     readonly multiple: boolean;
     static texts: {
-        dropzone: string;
-        heading: string;
+        dropzoneMultiple: string;
+        dropzoneSingle: string;
+        headingMultiple: string;
+        headingSingle: string;
         or: string;
         browseMultiple: string;
         browseSingle: string;

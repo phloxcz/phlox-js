@@ -154,6 +154,18 @@ describe('rules', () => {
 });
 
 describe('the drop zone', () => {
+  test('the texts speak of one file or of files', () => {
+    const form = new Form<Message>();
+    form.addUpload('photo');
+    form.addMultiUpload('attachments');
+    const root = mount(() => <FormView form={form} />);
+    const [single, multiple] = [...root.querySelectorAll<HTMLElement>('.pu-dropzone')];
+    expect(single!.querySelector('strong')!.textContent).toBe('Drop a file here');
+    expect(single!.getAttribute('aria-label')).toBe('Upload area – click or drop a file here');
+    expect(multiple!.querySelector('strong')!.textContent).toBe('Drop files here');
+    expect(multiple!.getAttribute('aria-label')).toBe('Upload area – click or drop files here');
+  });
+
   test('a click or Enter opens the dialog of the browser, a chosen file appears in the table', () => {
     const form = new Form<Message>();
     form.addMultiUpload('attachments');

@@ -26,8 +26,10 @@ var sameFile = (a, b) => a.name === b.name && a.size === b.size && a.lastModifie
 var UploadControl = class UploadControl extends FormControl {
 	multiple;
 	static texts = texts("upload", {
-		dropzone: "Upload area – click or drop files here",
-		heading: "Drop files here",
+		dropzoneMultiple: "Upload area – click or drop files here",
+		dropzoneSingle: "Upload area – click or drop a file here",
+		headingMultiple: "Drop files here",
+		headingSingle: "Drop a file here",
 		or: "or",
 		browseMultiple: "Choose files",
 		browseSingle: "Choose a file",
@@ -98,7 +100,7 @@ var UploadControl = class UploadControl extends FormControl {
 				class: () => classes("pu-dropzone", slot("dropzone"), dragging() ? slot("dropzoneActive") : slot("dropzoneIdle"), this.hasErrors() && theme.class("invalid")),
 				role: "button",
 				tabIndex: 0,
-				"aria-label": texts.dropzone,
+				"aria-label": this.multiple ? texts.dropzoneMultiple : texts.dropzoneSingle,
 				"aria-disabled": () => this.disabled() ? "true" : null,
 				"aria-readonly": () => this.readOnly() ? "true" : null,
 				ref,
@@ -131,7 +133,7 @@ var UploadControl = class UploadControl extends FormControl {
 					/* @__PURE__ */ jsx("p", {
 						class: "pu-dropzone-hint",
 						children: [
-							/* @__PURE__ */ jsx("strong", { children: texts.heading }),
+							/* @__PURE__ */ jsx("strong", { children: this.multiple ? texts.headingMultiple : texts.headingSingle }),
 							/* @__PURE__ */ jsx("br", {}),
 							/* @__PURE__ */ jsx("span", { children: texts.or })
 						]
