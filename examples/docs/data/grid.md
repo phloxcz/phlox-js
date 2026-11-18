@@ -15,6 +15,7 @@ class OrdersPresenter extends Presenter {
     load: query => this.api.call('order.query', { query }),   // { page, pageSize, sort, search, filter } → { data, total }
     pageSize: 20,
     pageSizes: [10, 20, 50],
+    sort: { field: 'created', dir: 'desc' },                 // výchozí řazení: nejnovější nahoře
     remember: 'orders',
   });
 
@@ -74,6 +75,7 @@ class OrdersPresenter extends Presenter {
 Názvy sloupců hlídá kompilátor podle typu řádku. Nastavení se řetězí:
 
 - **`.sortable()`:** klik na záhlaví řadí vzestupně, sestupně a pak vůbec, jako v PHP. Záhlaví má `aria-sort`.
+- **Výchozí řazení** `sort: { field, dir }` platí, dokud uživatel nevybere jiné. Třetí klik na sloupec vrátí výchozí řazení místo „vůbec“ a sloupec výchozího řazení jen přepíná směr. V URL výchozí řazení není, adresa bez `sort` znamená výchozí.
 - **`.filterable()`:** filtr podle druhu sloupce. Text hledá podřetězec (`contains`), číslo a datum mají rozsah od–do (`gte`, `lte`), ano a ne výběr. **`.filterSelect(items)`** pevné možnosti (`eq`), **`.filterSelect(items, true)`** několik naráz (`in`). **`.filterDropDown({ search, label })`** možnosti ze serveru přes DropDownList s hledáním.
 - **`.searchable()`:** sloupec prohledává pole hledání nad tabulkou, když jsou data v prohlížeči. Na serveru o tom rozhoduje API.
 - **`.format(value => text)`** text hodnoty, třeba měna. **`.render(row => …)`** celý obsah buňky. **`.align('end')`**, **`.width('12rem')`**, **`.class('…')`**.

@@ -2,6 +2,11 @@
 
 Všechny podstatné změny projektu. Formát podle [Keep a Changelog](https://keepachangelog.com/cs/1.1.0/), verze podle [Semantic Versioning](https://semver.org/lang/cs/).
 
+## [0.4.0] – 2026-11-18
+
+### Přidáno
+- **Výchozí řazení gridu:** `new Grid({ sort: { field: 'createdStamp', dir: 'desc' } })`. Platí, dokud uživatel nevybere jiné, třetí klik na sloupec ho vrátí. V URL není.
+
 ## [0.3.0] – 2026-11-18
 
 ### Přidáno

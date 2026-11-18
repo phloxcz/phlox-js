@@ -11,6 +11,7 @@ import { texts } from "../ui/texts.js";
 * or from `rows` in the browser, which are searched, filtered, sorted and paged here the same way.
 */
 var RANGE = "..";
+var sameSort = (a, b) => a?.field === b?.field && a?.dir === b?.dir;
 /** A column; the methods set it up and return it, like the rules of a form control. */
 var GridColumn = class {
 	key;
@@ -244,7 +245,7 @@ var Grid = class Grid {
 	bulkActions = [];
 	page = state(1);
 	pageSize;
-	sort = state(null);
+	sort;
 	search = state("");
 	filters = state({});
 	rows = state([]);
@@ -268,6 +269,7 @@ var Grid = class Grid {
 	constructor(options = {}) {
 		this.options = options;
 		this.pageSize = state(options.pageSize ?? 20);
+		this.sort = state(options.sort ?? null);
 		this.restoreLayout();
 	}
 	addColumn(key, label, render) {
@@ -358,13 +360,18 @@ var Grid = class Grid {
 	}
 	sortBy(key) {
 		const sort = untrack(this.sort);
-		const next = sort?.field !== key ? {
+		const fallback = this.options.sort ?? null;
+		let next = sort?.field !== key ? {
 			field: key,
 			dir: "asc"
 		} : sort.dir === "asc" ? {
 			field: key,
 			dir: "desc"
-		} : null;
+		} : fallback;
+		if (next && sameSort(next, sort)) next = {
+			field: key,
+			dir: "asc"
+		};
 		return this.change({
 			sort: next,
 			page: 1
@@ -464,7 +471,7 @@ var Grid = class Grid {
 		const params = {
 			[`${p}page`]: state.page > 1 ? state.page : null,
 			[`${p}size`]: state.pageSize !== (this.options.pageSize ?? 20) ? state.pageSize : null,
-			[`${p}sort`]: state.sort ? `${state.sort.dir === "desc" ? "-" : ""}${state.sort.field}` : null,
+			[`${p}sort`]: state.sort && !sameSort(state.sort, this.options.sort ?? null) ? `${state.sort.dir === "desc" ? "-" : ""}${state.sort.field}` : null,
 			[`${p}q`]: state.search || null
 		};
 		for (const column of this.columns) params[`${p}f.${column.key}`] = null;
@@ -485,7 +492,7 @@ var Grid = class Grid {
 			this.sort.set(sort ? {
 				field: sort.replace(/^-/, ""),
 				dir: sort.startsWith("-") ? "desc" : "asc"
-			} : null);
+			} : this.options.sort ?? null);
 			this.search.set(params[`${p}q`] ?? "");
 			this.filters.set(filters);
 		});

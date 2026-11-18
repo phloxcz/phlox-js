@@ -67,6 +67,7 @@ export default class OrdersPresenter extends Presenter {
     load: query => this.store.list(query),
     pageSize: 10,
     pageSizes: [10, 20, 50],
+    sort: { field: 'id', dir: 'desc' },   // výchozí řazení: nejnovější nahoře
     remember: 'docs-orders',
   });
 

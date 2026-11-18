@@ -134,6 +134,44 @@ describe('the query', () => {
   });
 });
 
+describe('the default sorting', () => {
+  test('rows come sorted by it, a column goes ascending, descending and back to it', async () => {
+    const grid = ordersGrid({ rows: ORDERS, pageSize: 2, sort: { field: 'id', dir: 'desc' } });
+    await grid.load();
+    expect(ids(grid)).toEqual([5, 4]);
+    await grid.sortBy('price');
+    await grid.sortBy('price');
+    await grid.sortBy('price');
+    expect(grid.sort()).toEqual({ field: 'id', dir: 'desc' });
+    // Its own column only between the two directions, never unsorted
+    await grid.sortBy('id');
+    expect(grid.sort()).toEqual({ field: 'id', dir: 'asc' });
+    await grid.sortBy('id');
+    expect(grid.sort()).toEqual({ field: 'id', dir: 'desc' });
+  });
+
+  test('is not in the URL, a URL without sort means it', async () => {
+    const grid = ordersGrid({ rows: ORDERS, pageSize: 2, sort: { field: 'id', dir: 'desc' } });
+    class Orders extends Presenter {
+      public override routes: Route[] = [{ name: 'default', pattern: '/' }];
+      public constructor() {
+        super();
+        grid.bind(this);
+      }
+      public render() { return <GridView grid={grid} />; }
+    }
+    await boot(Orders, '/?sort=price');
+    await tick();
+    expect(ids(grid)).toEqual([2, 3]);
+    await grid.sortBy('price');
+    await grid.sortBy('price');
+    await tick();
+    expect(location.search).toBe('');
+    expect(grid.sort()).toEqual({ field: 'id', dir: 'desc' });
+    expect(ids(grid)).toEqual([5, 4]);
+  });
+});
+
 describe('the URL', () => {
   const grid = ordersGrid({ rows: ORDERS, pageSize: 2 });
 

@@ -54,6 +54,11 @@ export interface GridOptions<R> {
     /** The field that tells rows apart, for selection. 'id' by default. */
     key?: keyof R & string;
     pageSize?: number;
+    /**
+     * Sorting before the user picks another, e.g. the newest first: { field: 'createdStamp', dir: 'desc' }.
+     * It is not in the URL, and clicking a column goes ascending, descending and back to it.
+     */
+    sort?: GridSort;
     /** Choices of the number of rows on a page. */
     pageSizes?: number[];
     /** Remembers the width, order and visibility of columns in the browser under this key. */

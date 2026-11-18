@@ -61,6 +61,11 @@ export interface GridOptions<R> {
   /** The field that tells rows apart, for selection. 'id' by default. */
   key?: keyof R & string;
   pageSize?: number;
+  /**
+   * Sorting before the user picks another, e.g. the newest first: { field: 'createdStamp', dir: 'desc' }.
+   * It is not in the URL, and clicking a column goes ascending, descending and back to it.
+   */
+  sort?: GridSort;
   /** Choices of the number of rows on a page. */
   pageSizes?: number[];
   /** Remembers the width, order and visibility of columns in the browser under this key. */
@@ -89,6 +94,8 @@ export interface BulkAction<R> {
 }
 
 const RANGE = '..';
+
+const sameSort = (a: GridSort | null, b: GridSort | null) => a?.field === b?.field && a?.dir === b?.dir;
 
 /** A column; the methods set it up and return it, like the rules of a form control. */
 export class GridColumn<R> {
@@ -306,7 +313,7 @@ export class Grid<R extends object> {
   // What the user is looking at, also in the URL when the grid is bound to a presenter
   public readonly page = state(1);
   public readonly pageSize: State<number>;
-  public readonly sort = state<GridSort | null>(null);
+  public readonly sort: State<GridSort | null>;
   public readonly search = state('');
   public readonly filters = state<Record<string, FilterValue>>({});
 
@@ -337,6 +344,7 @@ export class Grid<R extends object> {
 
   public constructor(public readonly options: GridOptions<R> = {}) {
     this.pageSize = state(options.pageSize ?? 20);
+    this.sort = state(options.sort ?? null);
     this.restoreLayout();
   }
 
@@ -431,9 +439,12 @@ export class Grid<R extends object> {
   // Changes by the user. When bound to a presenter, they go through the URL, so Back returns them.
 
   public sortBy(key: string): Promise<void> {
-    // Three states as in phloxcz/components-grid: ascending, descending, none
+    // Three states as in phloxcz/components-grid: ascending, descending, none (or the default sorting).
+    // The column of the default sorting goes only between the two directions.
     const sort = untrack(this.sort);
-    const next = sort?.field !== key ? { field: key, dir: 'asc' as const } : sort.dir === 'asc' ? { field: key, dir: 'desc' as const } : null;
+    const fallback = this.options.sort ?? null;
+    let next = sort?.field !== key ? { field: key, dir: 'asc' as const } : sort.dir === 'asc' ? { field: key, dir: 'desc' as const } : fallback;
+    if (next && sameSort(next, sort)) next = { field: key, dir: 'asc' };
     return this.change({ sort: next, page: 1 });
   }
 
@@ -516,7 +527,7 @@ export class Grid<R extends object> {
     const params: LinkParams = {
       [`${p}page`]: state.page > 1 ? state.page : null,
       [`${p}size`]: state.pageSize !== (this.options.pageSize ?? 20) ? state.pageSize : null,
-      [`${p}sort`]: state.sort ? `${state.sort.dir === 'desc' ? '-' : ''}${state.sort.field}` : null,
+      [`${p}sort`]: state.sort && !sameSort(state.sort, this.options.sort ?? null) ? `${state.sort.dir === 'desc' ? '-' : ''}${state.sort.field}` : null,
       [`${p}q`]: state.search || null,
     };
     // Filters not set now are removed from the URL
@@ -536,7 +547,7 @@ export class Grid<R extends object> {
     batch(() => {
       this.page.set(Math.max(1, Number(params[`${p}page`]) || 1));
       this.pageSize.set(Number(params[`${p}size`]) || (this.options.pageSize ?? 20));
-      this.sort.set(sort ? { field: sort.replace(/^-/, ''), dir: sort.startsWith('-') ? 'desc' : 'asc' } : null);
+      this.sort.set(sort ? { field: sort.replace(/^-/, ''), dir: sort.startsWith('-') ? 'desc' : 'asc' } : (this.options.sort ?? null));
       this.search.set(params[`${p}q`] ?? '');
       this.filters.set(filters);
     });

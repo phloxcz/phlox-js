@@ -7,7 +7,7 @@ Ve frameworku jsou i grid, strom, dialogy, WYSIWYG editor, JSON-RPC klient pro [
 ## Instalace
 
 ```bash
-npm install github:phloxcz/phlox-js#v0.3.0
+npm install github:phloxcz/phlox-js#v0.4.0
 ```
 
 Balíček zatím není na npm, instaluje se z GitHubu podle tagu. Potřebuje Vite (od verze 7) a TypeScript s `"moduleResolution": "Bundler"`. Typy z OpenRPC dokumentu `phlox-rpc-api` vygeneruje `npx phlox-rpc-types <url> src/api/rpc.ts`.
