@@ -132,6 +132,14 @@ describe('editor', () => {
     text.setDisabled(false);
     expect(pane.closest<HTMLElement>('.phx-editor-wrapper')!.inert).toBe(false);
 
+    text.setReadOnly();
+    expect(pane.contentEditable).toBe('false');
+    expect(pane.getAttribute('aria-readonly')).toBe('true');
+    expect(element.querySelector('.phlox-editor-readonly')).not.toBeNull();
+    expect(form.getValues()).toEqual({ text: '<p>Uloženo</p>' });
+    text.setReadOnly(false);
+    expect(pane.contentEditable).toBe('true');
+
     text.setValue('<p><img src="/a.png"></p>');
     expect(text.isFilled()).toBe(true);
     text.setValue('<p>&nbsp;</p>');

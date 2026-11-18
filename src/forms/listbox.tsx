@@ -18,6 +18,8 @@ export interface PlainItems<T> {
   search?: (query: string) => Promise<Items<T>> | Items<T>;
   /** Label of a value set from code, when it is not among the items, e.g. after setDefaults(). */
   label?: (value: T) => Promise<string | null> | string | null;
+  /** Items shown but not to be chosen, e.g. value => value === 'archived'. */
+  itemDisabled?: (value: T) => boolean;
   itemValue?: never;
   itemLabel?: never;
   template?: never;
@@ -38,6 +40,8 @@ export interface ObjectItems<T, O> {
   itemLabel?: (item: O) => string;
   /** How an item looks in the list (and as the chosen value or a tag), instead of its text. */
   template?: (item: O) => Child;
+  /** Items shown but not to be chosen, e.g. user => !user.active. */
+  itemDisabled?: (item: O) => boolean;
 }
 
 /** Items as plain values, or as objects with `itemValue`. */
@@ -49,7 +53,7 @@ export type ListOptions<T, O = never> = ItemOptions<T, O> & {
 };
 
 /** What the controls keep of the options, the type of item objects is known only where they are given. */
-type Known<T> = { itemValue?: (item: any) => T; itemLabel?: (item: any) => string; template?: (item: any) => Child };
+type Known<T> = { itemValue?: (item: any) => T; itemLabel?: (item: any) => string; template?: (item: any) => Child; itemDisabled?: (item: any) => boolean };
 
 /** How long typing has to pause before `search` is called. */
 const DEBOUNCE_MS = 250;
@@ -82,6 +86,24 @@ export function labelOf<T>(value: T, given: unknown, options: Known<T>, objects:
   if (typeof given === 'string' || !options.itemValue) return String(given);
   objects.set(value, given);
   return options.itemLabel?.(given) ?? String(value);
+}
+
+/** Is the item of this value disabled by `itemDisabled`? For objects, the object must be known (loaded or given). */
+export function isDisabledItem<T>(value: T, options: Known<T>, objects: Map<T, unknown>): boolean {
+  if (!options.itemDisabled) return false;
+  if (!options.itemValue) return options.itemDisabled(value);
+  return objects.has(value) && options.itemDisabled(objects.get(value));
+}
+
+/** The index next to `from` in the direction, skipping disabled items; `from` when there is none. `wrap` goes round. */
+export function nextIndex(count: number, from: number, step: 1 | -1, disabled: (index: number) => boolean, wrap = false): number {
+  for (let i = 1; i <= count; i++) {
+    let index = from + step * i;
+    if (wrap) index = ((index % count) + count) % count;
+    else if (index < 0 || index >= count) return from;
+    if (!disabled(index)) return index;
+  }
+  return from;
 }
 
 /** The template of a known item object, otherwise the text. */
@@ -162,8 +184,19 @@ export abstract class ListControl<T> extends FormControl<T | null> {
     this.active.set(-1);
   }
 
-  /** Selects an item from the list and closes it. */
+  /** Is the item disabled by the option `itemDisabled`? It is shown in the list but cannot be picked. */
+  isItemDisabled(value: T): boolean {
+    return isDisabledItem(value, this.options, this.objects);
+  }
+
+  /** Can the user change the value now: not disabled, not read-only. */
+  protected changeable(): boolean {
+    return !untrack(this.disabled) && !untrack(this.readOnly);
+  }
+
+  /** Selects an item from the list and closes it. A disabled item is not picked. */
   pick(value: T, label: string): void {
+    if (this.isItemDisabled(value)) return;
     this.selected.set(value);
     this.selectedLabel.set(label);
     this.close();
@@ -206,13 +239,19 @@ export abstract class ListControl<T> extends FormControl<T | null> {
     this.active.set(-1);
   }
 
-  /** Arrow keys move the highlight. Returns whether the key was one of them. */
+  /** Arrow keys move the highlight, over disabled items. Returns whether the key was one of them. */
   protected moveActive(event: KeyboardEvent, stopAtFirst = false): boolean {
-    const last = untrack(this.items).length - 1;
+    const items = untrack(this.items);
     const active = untrack(this.active);
-    if (event.key === 'ArrowDown') this.active.set(Math.min(active + 1, last));
-    else if (event.key === 'ArrowUp') this.active.set(Math.max(active - 1, stopAtFirst ? 0 : -1));
-    else return false;
+    const disabled = (index: number) => this.isItemDisabled(items[index]![0]);
+    if (event.key === 'ArrowDown') {
+      this.active.set(nextIndex(items.length, active, 1, disabled));
+    } else if (event.key === 'ArrowUp') {
+      const up = nextIndex(items.length, active, -1, disabled);
+      this.active.set(up !== active || stopAtFirst ? up : -1);
+    } else {
+      return false;
+    }
     event.preventDefault();
     return true;
   }
@@ -232,6 +271,7 @@ export abstract class ListControl<T> extends FormControl<T | null> {
               role="option"
               id={() => `${this.listId}-${index()}`}
               aria-selected={() => String(Object.is(this.selected(), value))}
+              aria-disabled={this.isItemDisabled(value) ? 'true' : null}
               data-value={String(value)}
               class={() => classes(
                 slot('item'),

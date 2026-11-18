@@ -59,7 +59,7 @@ var DropDownTreeSelect = class DropDownTreeSelect extends FormControl {
 		return this.picked() !== null;
 	}
 	open() {
-		if (untrack(this.opened) || untrack(this.disabled)) return;
+		if (untrack(this.opened) || untrack(this.disabled) || untrack(this.readOnly)) return;
 		this.edited = true;
 		this.opened.set(true);
 	}
@@ -118,7 +118,7 @@ var DropDownTreeSelect = class DropDownTreeSelect extends FormControl {
 							event.preventDefault();
 							event.stopPropagation();
 							this.close();
-						} else if ((event.key === "Delete" || event.key === "Backspace") && !this.isRequired()) {
+						} else if ((event.key === "Delete" || event.key === "Backspace") && !this.isRequired() && !untrack(this.readOnly)) {
 							event.preventDefault();
 							this.clear();
 						}
@@ -132,7 +132,7 @@ var DropDownTreeSelect = class DropDownTreeSelect extends FormControl {
 					})]
 				}),
 				/* @__PURE__ */ jsx(If, {
-					when: () => !this.isRequired() && this.picked() !== null && !this.disabled(),
+					when: () => !this.isRequired() && this.picked() !== null && !this.disabled() && !this.readOnly(),
 					children: /* @__PURE__ */ jsx("button", {
 						type: "button",
 						class: "phlox-dropdowntree-clear",

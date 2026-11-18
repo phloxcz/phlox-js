@@ -23,6 +23,8 @@ export declare abstract class FormControl<T = unknown> {
     name: string;
     readonly errors: State<string[]>;
     readonly disabled: State<boolean>;
+    /** Shown as usual but the user cannot change it; unlike disabled it stays in the values, see setReadOnly(). */
+    readonly readOnly: State<boolean>;
     readonly rules: Rules;
     /** Left out of getValues(). Buttons are omitted, other controls can be by setOmitted(). */
     omitted: boolean;
@@ -55,6 +57,11 @@ export declare abstract class FormControl<T = unknown> {
     addCondition(validator: Validator, arg?: unknown): Rules;
     addConditionOn(control: FormControl<any>, validator: Validator, arg?: unknown): Rules;
     setDisabled(disabled?: boolean): this;
+    /**
+     * Read-only, like readonly in HTML: the value is shown as usual (not greyed out), the user cannot change it,
+     * and unlike setDisabled() it stays in the values of the form and is checked by the rules.
+     */
+    setReadOnly(readOnly?: boolean): this;
     setOmitted(omitted?: boolean): this;
     addError(message: string): void;
     hasErrors(): boolean;
@@ -109,9 +116,14 @@ export declare class Checkbox extends FormControl<boolean> {
 /** Common part of controls with choices. */
 declare abstract class ChoiceControl<T, V> extends FormControl<V> {
     readonly items: State<[T, string][]>;
+    /** Items that are shown but cannot be chosen, see setDisabled(). */
+    readonly disabledItems: State<T[]>;
     constructor(label?: string, items?: Items<T>);
     /** Choices can be set later, e.g. when they come from the server. */
     setItems(items: Items<T>): this;
+    /** true or false for the whole control, or the values of items that cannot be chosen: setDisabled(['b']), as in Nette. */
+    setDisabled(disabled?: boolean | T[]): this;
+    isItemDisabled(value: T): boolean;
     protected indexOf(value: T): number;
 }
 export declare class SelectBox<T = string> extends ChoiceControl<T, T | null> {

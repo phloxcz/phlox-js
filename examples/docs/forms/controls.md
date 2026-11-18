@@ -27,4 +27,18 @@
 
 **Položky** výběrů se zadávají jako dvojice `[[1, 'Nízká'], [2, 'Vysoká']]`, jako objekt `{ 1: 'Nízká' }`, ve kterém se celočíselné klíče převedou na čísla jako v PHP, nebo jako seznam hodnot, které jsou zároveň popisky: `['Albert', 'Billa']`. Přijít mohou i později, třeba ze serveru: `control.setItems(...)`.
 
-Další metody prvku: `setDisabled()` (nekontroluje se a chybí v hodnotách), `setOmitted()`, `getValue()`, `setValue()`, `errors()`, `addError()`, `focus()` (fokus do prvku, třeba z tlačítka „Napsat komentář“; po neúspěšné kontrole ho formulář volá sám).
+Další metody prvku: `setDisabled()` a `setReadOnly()` (viz dál), `setOmitted()`, `getValue()`, `setValue()`, `errors()`, `addError()`, `focus()` (fokus do prvku, třeba z tlačítka „Napsat komentář“; po neúspěšné kontrole ho formulář volá sám).
+
+## Zakázané a jen pro čtení
+
+| | Vzhled | Hodnota v `getValues()` | Kontrola pravidel |
+|---|---|---|---|
+| `setDisabled()` | zašedlé | chybí | ne |
+| `setReadOnly()` | normální, nejde měnit | je | ano |
+
+<!-- demo: controls-locked -->
+
+- **`setReadOnly()`** je pro údaje, které uživatel vidí a server je dostane, ale měnit je nemá: kód záznamu, hodnota vyplněná systémem. Text jde označit a zkopírovat. `setReadOnly(false)` a `setDisabled(false)` stav vrátí.
+- **Platí pro všechny prvky:** zaškrtávací pole a přepínače nejdou přepnout, select ani DropDownList se neotevřou, ComboBox a TagInput nenabízejí, u štítků a souborů zmizí křížky a tlačítko Vybrat, editor WYSIWYG skryje lištu, strom nejde zaškrtnout.
+- **Zakázané položky** výběrů jako v Nette: `addSelect(...).setDisabled(['M'])`. Funguje u `addSelect`, `addMultiSelect`, `addRadioList` a `addCheckboxList`, prvek sám zakázaný není.
+- **U DropDownList, ComboBox a TagInput** se zakázané položky určí funkcí v `itemDisabled`, viz [Položky a data výběrů](items.md). Jsou vidět, ale vybrat nejdou a šipky je přeskočí.

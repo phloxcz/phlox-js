@@ -325,9 +325,10 @@ function TreeView(props) {
 						name: props.name ? pick === "multiple" ? `${props.name}[]` : props.name : null,
 						value: String(node.id),
 						checked,
-						disabled: node.disabled ?? false,
+						disabled: () => Boolean(node.disabled) || tree.locked() === "disabled",
 						tabIndex: -1,
 						"aria-hidden": "true",
+						onClick: (event) => untrack(tree.locked) && event.preventDefault(),
 						onChange: (event) => tree.check(item, event.currentTarget.checked)
 					}) : null,
 					props.icon ? /* @__PURE__ */ jsx("span", {

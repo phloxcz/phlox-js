@@ -79,8 +79,9 @@ var UploadControl = class UploadControl extends FormControl {
 		const dragging = state(false);
 		let wrapper;
 		let input;
+		const locked = () => this.disabled() || this.readOnly();
 		const open = () => {
-			if (!this.disabled()) input.click();
+			if (!locked()) input.click();
 		};
 		return /* @__PURE__ */ jsx("div", {
 			class: classes("pu-wrapper", slot("wrapper"), attributes.class),
@@ -99,6 +100,7 @@ var UploadControl = class UploadControl extends FormControl {
 				tabIndex: 0,
 				"aria-label": texts.dropzone,
 				"aria-disabled": () => this.disabled() ? "true" : null,
+				"aria-readonly": () => this.readOnly() ? "true" : null,
 				ref,
 				onClick: open,
 				onKeydown: (event) => {
@@ -108,7 +110,7 @@ var UploadControl = class UploadControl extends FormControl {
 				},
 				onDragover: (event) => {
 					event.preventDefault();
-					if (!this.disabled()) dragging.set(true);
+					if (!locked()) dragging.set(true);
 				},
 				onDragleave: (event) => {
 					if (!event.currentTarget.contains(event.relatedTarget)) dragging.set(false);
@@ -116,7 +118,7 @@ var UploadControl = class UploadControl extends FormControl {
 				onDrop: (event) => {
 					event.preventDefault();
 					dragging.set(false);
-					if (!this.disabled()) this.addFiles(event.dataTransfer?.files ?? []);
+					if (!locked()) this.addFiles(event.dataTransfer?.files ?? []);
 				},
 				children: [
 					/* @__PURE__ */ jsx("div", {
@@ -139,6 +141,7 @@ var UploadControl = class UploadControl extends FormControl {
 						class: classes("pu-browse-btn", slot("button")),
 						tabIndex: -1,
 						disabled: this.disabled,
+						hidden: this.readOnly,
 						children: this.multiple ? texts.browseMultiple : texts.browseSingle
 					}),
 					/* @__PURE__ */ jsx("input", {
@@ -188,6 +191,7 @@ var UploadControl = class UploadControl extends FormControl {
 										"aria-label": texts.remove.replace("%s", file.name),
 										title: texts.remove.replace("%s", file.name),
 										disabled: this.disabled,
+										hidden: this.readOnly,
 										ref: (element) => {
 											element.innerHTML = REMOVE_ICON;
 										},

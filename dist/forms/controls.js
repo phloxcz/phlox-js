@@ -19,6 +19,8 @@ var FormControl = class {
 	name = "";
 	errors = state([]);
 	disabled = state(false);
+	/** Shown as usual but the user cannot change it; unlike disabled it stays in the values, see setReadOnly(). */
+	readOnly = state(false);
 	rules;
 	/** Left out of getValues(). Buttons are omitted, other controls can be by setOmitted(). */
 	omitted = false;
@@ -71,6 +73,14 @@ var FormControl = class {
 		this.disabled.set(disabled);
 		return this;
 	}
+	/**
+	* Read-only, like readonly in HTML: the value is shown as usual (not greyed out), the user cannot change it,
+	* and unlike setDisabled() it stays in the values of the form and is checked by the rules.
+	*/
+	setReadOnly(readOnly = true) {
+		this.readOnly.set(readOnly);
+		return this;
+	}
 	setOmitted(omitted = true) {
 		this.omitted = omitted;
 		return this;
@@ -107,6 +117,7 @@ var FormControl = class {
 			name: this.htmlName,
 			required: this.isRequired(),
 			disabled: this.disabled,
+			"aria-readonly": () => this.readOnly() ? "true" : null,
 			"aria-invalid": () => this.hasErrors() ? "true" : null,
 			"aria-describedby": () => this.hasErrors() ? `${this.htmlId}-error` : null,
 			ref: (element) => {
@@ -176,6 +187,7 @@ var TextInput = class extends FormControl {
 	attrs() {
 		return {
 			...super.attrs(),
+			readOnly: this.readOnly,
 			value: this.raw,
 			onInput: (event) => {
 				this.raw.set(event.currentTarget.value);
@@ -217,6 +229,7 @@ var Checkbox = class extends FormControl {
 		return {
 			...super.attrs(),
 			checked: this.checked,
+			onClick: (event) => blockWhenReadOnly(this, event),
 			onChange: (event) => {
 				this.checked.set(event.currentTarget.checked);
 				this.changed();
@@ -240,9 +253,24 @@ var Checkbox = class extends FormControl {
 		});
 	}
 };
+/** A read-only checkbox or radio button keeps its state: the click that would change it is cancelled. */
+function blockWhenReadOnly(control, event) {
+	if (untrack(control.readOnly)) event.preventDefault();
+}
+/** A read-only select does not open and does not change by the keyboard; Tab still moves on. */
+function selectReadOnly(control) {
+	return {
+		onMousedown: (event) => blockWhenReadOnly(control, event),
+		onKeydown: (event) => {
+			if (event.key !== "Tab") blockWhenReadOnly(control, event);
+		}
+	};
+}
 /** Common part of controls with choices. */
 var ChoiceControl = class extends FormControl {
 	items = state([]);
+	/** Items that are shown but cannot be chosen, see setDisabled(). */
+	disabledItems = state([]);
 	constructor(label = "", items = []) {
 		super(label);
 		this.setItems(items);
@@ -251,6 +279,15 @@ var ChoiceControl = class extends FormControl {
 	setItems(items) {
 		this.items.set(toPairs(items));
 		return this;
+	}
+	/** true or false for the whole control, or the values of items that cannot be chosen: setDisabled(['b']), as in Nette. */
+	setDisabled(disabled = true) {
+		if (!Array.isArray(disabled)) return super.setDisabled(disabled);
+		this.disabledItems.set([...disabled]);
+		return this;
+	}
+	isItemDisabled(value) {
+		return this.disabledItems().some((item) => Object.is(item, value));
 	}
 	indexOf(value) {
 		return this.items().findIndex(([item]) => Object.is(item, value));
@@ -278,6 +315,7 @@ var SelectBox = class extends ChoiceControl {
 			...attributes,
 			...this.attrs(),
 			class: this.classFor(attributes, "select"),
+			...selectReadOnly(this),
 			value: () => {
 				const index = this.selected() === null ? -1 : this.indexOf(this.selected());
 				return index < 0 ? "" : String(index);
@@ -292,8 +330,9 @@ var SelectBox = class extends ChoiceControl {
 				children: this.prompt
 			}), /* @__PURE__ */ jsx(For, {
 				each: this.items,
-				children: ([, label], index) => /* @__PURE__ */ jsx("option", {
+				children: ([value, label], index) => /* @__PURE__ */ jsx("option", {
 					value: () => String(index()),
+					disabled: () => this.isItemDisabled(value),
 					children: label
 				})
 			})]
@@ -317,6 +356,7 @@ var MultiSelectBox = class extends ChoiceControl {
 			...attributes,
 			...this.attrs(),
 			class: this.classFor(attributes, "select"),
+			...selectReadOnly(this),
 			onChange: (event) => {
 				const chosen = [...event.currentTarget.selectedOptions].map((option) => this.items()[Number(option.value)][0]);
 				this.selected.set(chosen);
@@ -327,6 +367,7 @@ var MultiSelectBox = class extends ChoiceControl {
 				children: ([value, label], index) => /* @__PURE__ */ jsx("option", {
 					value: () => String(index()),
 					selected: () => this.selected().includes(value),
+					disabled: () => this.isItemDisabled(value),
 					children: label
 				})
 			})
@@ -364,6 +405,8 @@ var RadioList = class extends ChoiceControl {
 							class: inputClass,
 							id: () => `${this.htmlId}-${index()}`,
 							checked: () => Object.is(this.selected(), value),
+							disabled: () => this.disabled() || this.isItemDisabled(value),
+							onClick: (event) => blockWhenReadOnly(this, event),
 							onChange: () => {
 								this.selected.set(value);
 								this.changed();
@@ -407,6 +450,8 @@ var CheckboxList = class extends ChoiceControl {
 							class: inputClass,
 							id: () => `${this.htmlId}-${index()}`,
 							checked: () => this.selected().includes(value),
+							disabled: () => this.disabled() || this.isItemDisabled(value),
+							onClick: (event) => blockWhenReadOnly(this, event),
 							onChange: (event) => {
 								const on = event.currentTarget.checked;
 								this.selected.set(this.items().map(([item]) => item).filter((item) => Object.is(item, value) ? on : this.selected().includes(item)));

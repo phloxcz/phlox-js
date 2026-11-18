@@ -13,6 +13,8 @@ export interface PlainItems<T> {
     search?: (query: string) => Promise<Items<T>> | Items<T>;
     /** Label of a value set from code, when it is not among the items, e.g. after setDefaults(). */
     label?: (value: T) => Promise<string | null> | string | null;
+    /** Items shown but not to be chosen, e.g. value => value === 'archived'. */
+    itemDisabled?: (value: T) => boolean;
     itemValue?: never;
     itemLabel?: never;
     template?: never;
@@ -32,6 +34,8 @@ export interface ObjectItems<T, O> {
     itemLabel?: (item: O) => string;
     /** How an item looks in the list (and as the chosen value or a tag), instead of its text. */
     template?: (item: O) => Child;
+    /** Items shown but not to be chosen, e.g. user => !user.active. */
+    itemDisabled?: (item: O) => boolean;
 }
 /** Items as plain values, or as objects with `itemValue`. */
 export type ItemOptions<T, O = never> = PlainItems<T> | ObjectItems<T, O>;
@@ -44,6 +48,7 @@ type Known<T> = {
     itemValue?: (item: any) => T;
     itemLabel?: (item: any) => string;
     template?: (item: any) => Child;
+    itemDisabled?: (item: any) => boolean;
 };
 /**
  * Text for searching: lower case and without diacritics, so 'nap' finds 'Nápoje'.
@@ -55,6 +60,10 @@ export { toPairs };
 export declare function itemPairs<T>(items: Items<T> | readonly unknown[], options: Known<T>, objects: Map<T, unknown>): [T, string][];
 /** The label of a value given by a text or by an item object, which is remembered for the template. */
 export declare function labelOf<T>(value: T, given: unknown, options: Known<T>, objects: Map<T, unknown>): string;
+/** Is the item of this value disabled by `itemDisabled`? For objects, the object must be known (loaded or given). */
+export declare function isDisabledItem<T>(value: T, options: Known<T>, objects: Map<T, unknown>): boolean;
+/** The index next to `from` in the direction, skipping disabled items; `from` when there is none. `wrap` goes round. */
+export declare function nextIndex(count: number, from: number, step: 1 | -1, disabled: (index: number) => boolean, wrap?: boolean): number;
 /** The template of a known item object, otherwise the text. */
 export declare function itemContent<T>(value: T, text: Child, options: Known<T>, objects: Map<T, unknown>): Child;
 export declare abstract class ListControl<T> extends FormControl<T | null> {
@@ -86,14 +95,18 @@ export declare abstract class ListControl<T> extends FormControl<T | null> {
     setValue(value: T | null, label?: unknown): void;
     isFilled(): boolean;
     close(): void;
-    /** Selects an item from the list and closes it. */
+    /** Is the item disabled by the option `itemDisabled`? It is shown in the list but cannot be picked. */
+    isItemDisabled(value: T): boolean;
+    /** Can the user change the value now: not disabled, not read-only. */
+    protected changeable(): boolean;
+    /** Selects an item from the list and closes it. A disabled item is not picked. */
     pick(value: T, label: string): void;
     protected findItem(value: T): [T, string] | undefined;
     /** Searches for the text: fixed items at once, `search` after a pause in typing. */
     protected searchFor(text: string): void;
     /** Fixed items are filtered here, otherwise `search` is asked. An older answer never overwrites a newer one. */
     protected load(query: string): Promise<void>;
-    /** Arrow keys move the highlight. Returns whether the key was one of them. */
+    /** Arrow keys move the highlight, over disabled items. Returns whether the key was one of them. */
     protected moveActive(event: KeyboardEvent, stopAtFirst?: boolean): boolean;
     /** The highlighted item, if any. */
     protected activeItem(): [T, string] | undefined;

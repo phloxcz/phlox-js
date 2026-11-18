@@ -35,6 +35,8 @@ export interface EditorProps {
   value?: State<string>;
   options?: EditorOptions;
   enabled?: Reactive<boolean>;
+  /** The content can be read and copied, not changed; the toolbar is hidden. */
+  readOnly?: Reactive<boolean>;
   name?: string | null;
   class?: Reactive<string | null | undefined>;
   /** A name for screen readers, when no <label> is next to it. */
@@ -66,7 +68,7 @@ export class Editor extends Component<EditorProps> {
   }
 
   private create(library: Library): void {
-    const { value, enabled, options, name, label } = this.props;
+    const { value, enabled, readOnly, options, name, label } = this.props;
     const editor = this.editor = new library.PhloxEditor(this.host, {
       theme: this.theme,
       ...Editor.defaults,
@@ -95,6 +97,12 @@ export class Editor extends Component<EditorProps> {
         const on = Boolean(typeof enabled === 'function' ? enabled() : enabled);
         this.host.inert = !on;
         this.host.classList.toggle('phlox-editor-disabled', !on);
+      });
+      if (readOnly !== undefined && pane) effect(() => {
+        const read = Boolean(typeof readOnly === 'function' ? readOnly() : readOnly);
+        pane.contentEditable = read ? 'false' : 'true';
+        pane.setAttribute('aria-readonly', String(read));
+        this.host.classList.toggle('phlox-editor-readonly', read);
       });
     });
     this.props.onCreate?.(editor, pane);
@@ -164,6 +172,7 @@ export class EditorControl extends FormControl<string> {
           name={name as string}
           label={this.label}
           enabled={() => !this.disabled()}
+          readOnly={this.readOnly}
           class={this.classFor(attributes, 'editor')}
           onCreate={(editor, pane) => {
             this.editor = editor;

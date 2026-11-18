@@ -2,6 +2,15 @@
 
 Všechny podstatné změny projektu. Formát podle [Keep a Changelog](https://keepachangelog.com/cs/1.1.0/), verze podle [Semantic Versioning](https://semver.org/lang/cs/).
 
+## [0.3.0] – 2026-11-18
+
+### Přidáno
+- **`setReadOnly()` u všech prvků formuláře:** prvek vypadá normálně, ale nejde měnit, hodnota zůstává v `getValues()` a kontroluje se. Pro texty atribut `readonly`, u zaškrtávacích polí, přepínačů, selectů, DropDownList, ComboBox, TagInput, stromů, souborů a editoru WYSIWYG zablokované ovládání.
+- **Zakázané položky:** `setDisabled(['M'])` u `addSelect`, `addMultiSelect`, `addRadioList` a `addCheckboxList` jako v Nette, volba `itemDisabled` u DropDownList, ComboBox a TagInput. Položky jsou vidět, vybrat nejdou, šipky je přeskočí.
+
+### Opraveno
+- **`addTreeSelect()` / `addTreeMultiSelect()` s `setDisabled()`** šly dál zaškrtávat.
+
 ## [0.2.2] – 2026-11-16
 
 ### Opraveno

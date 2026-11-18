@@ -74,6 +74,8 @@ export declare class Tree<N extends TreeNode<any> = TreeNode> {
     readonly selected: State<N["id"] | null>;
     /** Picked nodes with `pick`. */
     readonly checked: State<N["id"][]>;
+    /** Picking is off: 'disabled' greys the boxes out, 'readonly' only keeps them as they are (a control of a form). */
+    readonly locked: State<"disabled" | "readonly" | false>;
     /** Called when the user selects a node, not when select() is called from code. */
     onSelect: ((node: N) => void) | null;
     private loaded;

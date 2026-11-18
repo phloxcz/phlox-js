@@ -20,7 +20,7 @@ var DropDownList = class DropDownList extends ListControl {
 		super(label, options, "dropdownlist");
 	}
 	open() {
-		if (untrack(this.opened) || untrack(this.disabled)) return;
+		if (untrack(this.opened) || !this.changeable()) return;
 		this.query.set("");
 		this.active.set(-1);
 		this.edited = true;

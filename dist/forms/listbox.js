@@ -34,6 +34,22 @@ function labelOf(value, given, options, objects) {
 	objects.set(value, given);
 	return options.itemLabel?.(given) ?? String(value);
 }
+/** Is the item of this value disabled by `itemDisabled`? For objects, the object must be known (loaded or given). */
+function isDisabledItem(value, options, objects) {
+	if (!options.itemDisabled) return false;
+	if (!options.itemValue) return options.itemDisabled(value);
+	return objects.has(value) && options.itemDisabled(objects.get(value));
+}
+/** The index next to `from` in the direction, skipping disabled items; `from` when there is none. `wrap` goes round. */
+function nextIndex(count, from, step, disabled, wrap = false) {
+	for (let i = 1; i <= count; i++) {
+		let index = from + step * i;
+		if (wrap) index = (index % count + count) % count;
+		else if (index < 0 || index >= count) return from;
+		if (!disabled(index)) return index;
+	}
+	return from;
+}
 /** The template of a known item object, otherwise the text. */
 function itemContent(value, text, options, objects) {
 	return options.template && objects.has(value) ? options.template(objects.get(value)) : text;
@@ -105,8 +121,17 @@ var ListControl = class extends FormControl {
 		this.opened.set(false);
 		this.active.set(-1);
 	}
-	/** Selects an item from the list and closes it. */
+	/** Is the item disabled by the option `itemDisabled`? It is shown in the list but cannot be picked. */
+	isItemDisabled(value) {
+		return isDisabledItem(value, this.options, this.objects);
+	}
+	/** Can the user change the value now: not disabled, not read-only. */
+	changeable() {
+		return !untrack(this.disabled) && !untrack(this.readOnly);
+	}
+	/** Selects an item from the list and closes it. A disabled item is not picked. */
 	pick(value, label) {
+		if (this.isItemDisabled(value)) return;
 		this.selected.set(value);
 		this.selectedLabel.set(label);
 		this.close();
@@ -140,13 +165,16 @@ var ListControl = class extends FormControl {
 		this.items.set(items);
 		this.active.set(-1);
 	}
-	/** Arrow keys move the highlight. Returns whether the key was one of them. */
+	/** Arrow keys move the highlight, over disabled items. Returns whether the key was one of them. */
 	moveActive(event, stopAtFirst = false) {
-		const last = untrack(this.items).length - 1;
+		const items = untrack(this.items);
 		const active = untrack(this.active);
-		if (event.key === "ArrowDown") this.active.set(Math.min(active + 1, last));
-		else if (event.key === "ArrowUp") this.active.set(Math.max(active - 1, stopAtFirst ? 0 : -1));
-		else return false;
+		const disabled = (index) => this.isItemDisabled(items[index][0]);
+		if (event.key === "ArrowDown") this.active.set(nextIndex(items.length, active, 1, disabled));
+		else if (event.key === "ArrowUp") {
+			const up = nextIndex(items.length, active, -1, disabled);
+			this.active.set(up !== active || stopAtFirst ? up : -1);
+		} else return false;
 		event.preventDefault();
 		return true;
 	}
@@ -165,6 +193,7 @@ var ListControl = class extends FormControl {
 						role: "option",
 						id: () => `${this.listId}-${index()}`,
 						"aria-selected": () => String(Object.is(this.selected(), value)),
+						"aria-disabled": this.isItemDisabled(value) ? "true" : null,
 						"data-value": String(value),
 						class: () => classes(slot("item"), this.active() === index() && slot("itemActive"), Object.is(this.selected(), value) && slot("itemSelected")) || null,
 						ref: (item) => this.scrollWhenActive(item, index),
@@ -263,4 +292,4 @@ function highlight(label, query, markClass) {
 		label.slice(at + query.length)
 	];
 }
-export { ListControl, foldText, highlight, itemContent, itemPairs, labelOf, placePanel, toPairs };
+export { ListControl, foldText, highlight, isDisabledItem, itemContent, itemPairs, labelOf, nextIndex, placePanel, toPairs };

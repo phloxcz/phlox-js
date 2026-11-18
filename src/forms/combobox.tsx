@@ -53,7 +53,7 @@ export class ComboBox<T = string> extends ListControl<T> {
 
   /** The field gets the focus: the list opens with the first items, the current value is remembered for Escape. */
   open(): void {
-    if (untrack(this.opened) || untrack(this.disabled)) return;
+    if (untrack(this.opened) || !this.changeable()) return;
     this.remember();
     this.opened.set(true);
     void this.load(untrack(this.editing) ? untrack(this.query) : '');
@@ -163,6 +163,7 @@ export class ComboBox<T = string> extends ListControl<T> {
           id={id as string}
           ref={ref as (element: HTMLElement) => void}
           class={this.classFor({}, 'combobox.input')}
+          readOnly={this.readOnly}
           autocomplete="off"
           role="combobox"
           aria-autocomplete="list"

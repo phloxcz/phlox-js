@@ -2,7 +2,7 @@ import { For, If } from "../ui/flow.js";
 import { computed, onCleanup, state, untrack } from "../reactive/reactive.js";
 import { classes, currentTheme } from "../ui/theme.js";
 import { FormControl } from "./controls.js";
-import { foldText, highlight, itemContent, itemPairs, labelOf, placePanel } from "./listbox.js";
+import { foldText, highlight, isDisabledItem, itemContent, itemPairs, labelOf, nextIndex, placePanel } from "./listbox.js";
 import { texts } from "../ui/texts.js";
 import { jsx } from "../jsx-runtime.js";
 // src/forms/taginput.tsx
@@ -92,9 +92,13 @@ var TagInput = class TagInput extends FormControl {
 		const max = this.options.maxTags ?? 0;
 		return max > 0 && this.tags().length >= max;
 	}
-	/** Adds a tag unless it is there already (texts regardless of case) or the limit is reached. */
+	/** Is the item disabled by the option `itemDisabled`? It is suggested but cannot be added. */
+	isItemDisabled(value) {
+		return isDisabledItem(value, this.options, this.objects);
+	}
+	/** Adds a tag unless it is there already (texts regardless of case), disabled, or the limit is reached. */
 	add(value, label, isNew = false) {
-		if (this.has(value) || untrack(() => this.full())) return false;
+		if (this.has(value) || untrack(() => this.full()) || !isNew && this.isItemDisabled(value)) return false;
 		this.tags.update((list) => [...list, {
 			value,
 			label,
@@ -106,6 +110,7 @@ var TagInput = class TagInput extends FormControl {
 		return true;
 	}
 	remove(tag) {
+		if (untrack(this.disabled) || untrack(this.readOnly)) return;
 		this.tags.update((list) => list.filter((other) => other !== tag));
 		this.changed();
 	}
@@ -152,7 +157,8 @@ var TagInput = class TagInput extends FormControl {
 		const suggestions = found.filter(([value]) => !this.has(value)).map(([value, label]) => ({
 			value,
 			label,
-			isNew: false
+			isNew: false,
+			disabled: this.isItemDisabled(value)
 		}));
 		const exact = found.some(([, label]) => foldText(label) === foldText(query));
 		if (this.options.allowNew && !exact && !this.has(query)) suggestions.push({
@@ -163,11 +169,17 @@ var TagInput = class TagInput extends FormControl {
 		this.suggestions.set(suggestions);
 		this.active.set(-1);
 	}
+	/** The highlighted suggestion, or the first one that can be picked. */
+	chosen() {
+		const suggestions = untrack(this.suggestions);
+		const active = untrack(this.active);
+		return suggestions[active >= 0 ? active : nextIndex(suggestions.length, -1, 1, (index) => Boolean(suggestions[index].disabled))];
+	}
 	onInput(value) {
 		const comma = value.indexOf(",");
 		if (comma >= 0) {
 			const before = value.slice(0, comma);
-			const suggestion = untrack(this.opened) ? untrack(this.suggestions)[Math.max(untrack(this.active), 0)] : void 0;
+			const suggestion = untrack(this.opened) ? this.chosen() : void 0;
 			if (suggestion) this.add(suggestion.value, suggestion.label, suggestion.isNew);
 			else if (!this.commitText(before)) this.text.set(before.trim());
 			return;
@@ -181,12 +193,13 @@ var TagInput = class TagInput extends FormControl {
 		const opened = untrack(this.opened);
 		const suggestions = untrack(this.suggestions);
 		const active = untrack(this.active);
+		const disabled = (index) => Boolean(suggestions[index].disabled);
 		switch (event.key) {
 			case "Enter":
 				event.preventDefault();
 				if (opened) {
-					const suggestion = suggestions[Math.max(active, 0)];
-					this.add(suggestion.value, suggestion.label, suggestion.isNew);
+					const suggestion = this.chosen();
+					if (suggestion) this.add(suggestion.value, suggestion.label, suggestion.isNew);
 				} else this.commitText(untrack(this.text));
 				break;
 			case "Backspace":
@@ -197,12 +210,12 @@ var TagInput = class TagInput extends FormControl {
 				break;
 			case "ArrowDown":
 				event.preventDefault();
-				if (opened) this.active.set((active + 1) % suggestions.length);
+				if (opened) this.active.set(nextIndex(suggestions.length, active, 1, disabled, true));
 				else this.suggest(untrack(this.text));
 				break;
 			case "ArrowUp":
 				event.preventDefault();
-				if (opened) this.active.set((active - 1 + suggestions.length) % suggestions.length);
+				if (opened) this.active.set(nextIndex(suggestions.length, active, -1, disabled, true));
 				break;
 			case "Tab":
 				if (opened && active >= 0) {
@@ -269,6 +282,7 @@ var TagInput = class TagInput extends FormControl {
 							"data-phlox-taginput-remove": true,
 							"aria-label": `${TagInput.texts.remove} ${tag.label}`,
 							disabled: this.disabled,
+							hidden: this.readOnly,
 							onClick: (event) => {
 								event.stopPropagation();
 								this.remove(tag);
@@ -287,6 +301,7 @@ var TagInput = class TagInput extends FormControl {
 						ref(element);
 					},
 					class: slot("input"),
+					readOnly: this.readOnly,
 					autocomplete: "off",
 					spellcheck: false,
 					role: "combobox",
@@ -318,6 +333,7 @@ var TagInput = class TagInput extends FormControl {
 							role: "option",
 							id: () => `${this.listId}-${index()}`,
 							"aria-selected": () => String(this.active() === index()),
+							"aria-disabled": suggestion.disabled ? "true" : null,
 							class: () => classes(suggestion.isNew ? slot("optionNew") : slot("option"), this.active() === index() && slot("optionActive")),
 							onMousedown: (event) => {
 								event.preventDefault();

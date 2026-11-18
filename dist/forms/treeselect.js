@@ -39,6 +39,7 @@ var TreeSelect = class extends FormControl {
 		const { id, name, ref, onBlur, required: _required, disabled: _disabled, ...common } = this.attrs();
 		const theme = currentTheme();
 		let wrapper;
+		effect(() => this.tree.locked.set(this.disabled() ? "disabled" : this.readOnly() ? "readonly" : false));
 		let first = true;
 		effect(() => {
 			this.tree.checked();

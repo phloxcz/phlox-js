@@ -27,7 +27,7 @@ export class DropDownList<T = string> extends ListControl<T> {
   }
 
   open(): void {
-    if (untrack(this.opened) || untrack(this.disabled)) return;
+    if (untrack(this.opened) || !this.changeable()) return;
     this.query.set('');
     this.active.set(-1);
     // Closing the list without a choice shows an error, the user has worked with the control

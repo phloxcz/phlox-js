@@ -10,7 +10,7 @@ import type { Child } from '../ui/dom';
 import { classes, currentTheme } from '../ui/theme';
 import { FormControl } from './controls';
 import type { ExtraAttributes, Items } from './controls';
-import { foldText, highlight, itemContent, itemPairs, labelOf, placePanel } from './listbox';
+import { foldText, highlight, isDisabledItem, itemContent, itemPairs, labelOf, nextIndex, placePanel } from './listbox';
 import type { ItemOptions } from './listbox';
 import { texts } from '../ui/texts';
 
@@ -28,6 +28,8 @@ export interface Tag<T> {
   label: string;
   /** Made of typed text, not picked from the suggestions. */
   isNew: boolean;
+  /** A suggestion that cannot be picked, see the option itemDisabled. */
+  disabled?: boolean;
 }
 
 /** How long typing has to pause before `search` is called. */
@@ -114,9 +116,14 @@ export class TagInput<T = string> extends FormControl<T[]> {
     return max > 0 && this.tags().length >= max;
   }
 
-  /** Adds a tag unless it is there already (texts regardless of case) or the limit is reached. */
+  /** Is the item disabled by the option `itemDisabled`? It is suggested but cannot be added. */
+  isItemDisabled(value: T): boolean {
+    return isDisabledItem(value, this.options, this.objects);
+  }
+
+  /** Adds a tag unless it is there already (texts regardless of case), disabled, or the limit is reached. */
   add(value: T, label: string, isNew = false): boolean {
-    if (this.has(value) || untrack(() => this.full())) return false;
+    if (this.has(value) || untrack(() => this.full()) || (!isNew && this.isItemDisabled(value))) return false;
     this.tags.update(list => [...list, { value, label, isNew }]);
     this.text.set('');
     this.suggestions.set([]);
@@ -125,6 +132,7 @@ export class TagInput<T = string> extends FormControl<T[]> {
   }
 
   remove(tag: Tag<T>): void {
+    if (untrack(this.disabled) || untrack(this.readOnly)) return;
     this.tags.update(list => list.filter(other => other !== tag));
     this.changed();
   }
@@ -175,11 +183,19 @@ export class TagInput<T = string> extends FormControl<T[]> {
       found = this.all.filter(([, label]) => foldText(label).includes(folded));
     }
     if (request !== this.request) return;
-    const suggestions: Tag<T>[] = found.filter(([value]) => !this.has(value)).map(([value, label]) => ({ value, label, isNew: false }));
+    const suggestions: Tag<T>[] = found.filter(([value]) => !this.has(value))
+      .map(([value, label]) => ({ value, label, isNew: false, disabled: this.isItemDisabled(value) }));
     const exact = found.some(([, label]) => foldText(label) === foldText(query));
     if (this.options.allowNew && !exact && !this.has(query as T)) suggestions.push({ value: query as T, label: query, isNew: true });
     this.suggestions.set(suggestions);
     this.active.set(-1);
+  }
+
+  /** The highlighted suggestion, or the first one that can be picked. */
+  private chosen(): Tag<T> | undefined {
+    const suggestions = untrack(this.suggestions);
+    const active = untrack(this.active);
+    return suggestions[active >= 0 ? active : nextIndex(suggestions.length, -1, 1, index => Boolean(suggestions[index]!.disabled))];
   }
 
   private onInput(value: string): void {
@@ -187,7 +203,7 @@ export class TagInput<T = string> extends FormControl<T[]> {
     const comma = value.indexOf(',');
     if (comma >= 0) {
       const before = value.slice(0, comma);
-      const suggestion = untrack(this.opened) ? untrack(this.suggestions)[Math.max(untrack(this.active), 0)] : undefined;
+      const suggestion = untrack(this.opened) ? this.chosen() : undefined;
       if (suggestion) this.add(suggestion.value, suggestion.label, suggestion.isNew);
       else if (!this.commitText(before)) this.text.set(before.trim());
       return;
@@ -202,13 +218,14 @@ export class TagInput<T = string> extends FormControl<T[]> {
     const opened = untrack(this.opened);
     const suggestions = untrack(this.suggestions);
     const active = untrack(this.active);
+    const disabled = (index: number) => Boolean(suggestions[index]!.disabled);
     switch (event.key) {
       case 'Enter':
         // Enter adds a tag and never sends the form, as in the PHP version
         event.preventDefault();
         if (opened) {
-          const suggestion = suggestions[Math.max(active, 0)]!;
-          this.add(suggestion.value, suggestion.label, suggestion.isNew);
+          const suggestion = this.chosen();
+          if (suggestion) this.add(suggestion.value, suggestion.label, suggestion.isNew);
         } else {
           this.commitText(untrack(this.text));
         }
@@ -221,12 +238,12 @@ export class TagInput<T = string> extends FormControl<T[]> {
         break;
       case 'ArrowDown':
         event.preventDefault();
-        if (opened) this.active.set((active + 1) % suggestions.length);
+        if (opened) this.active.set(nextIndex(suggestions.length, active, 1, disabled, true));
         else void this.suggest(untrack(this.text));
         break;
       case 'ArrowUp':
         event.preventDefault();
-        if (opened) this.active.set((active - 1 + suggestions.length) % suggestions.length);
+        if (opened) this.active.set(nextIndex(suggestions.length, active, -1, disabled, true));
         break;
       case 'Tab':
         if (opened && active >= 0) {
@@ -297,6 +314,7 @@ export class TagInput<T = string> extends FormControl<T[]> {
                   data-phlox-taginput-remove
                   aria-label={`${TagInput.texts.remove} ${tag.label}`}
                   disabled={this.disabled}
+                  hidden={this.readOnly}
                   onClick={event => {
                     event.stopPropagation();
                     this.remove(tag);
@@ -318,6 +336,7 @@ export class TagInput<T = string> extends FormControl<T[]> {
               (ref as (element: HTMLElement) => void)(element);
             }}
             class={slot('input')}
+            readOnly={this.readOnly}
             autocomplete="off"
             spellcheck={false}
             role="combobox"
@@ -352,6 +371,7 @@ export class TagInput<T = string> extends FormControl<T[]> {
                   role="option"
                   id={() => `${this.listId}-${index()}`}
                   aria-selected={() => String(this.active() === index())}
+                  aria-disabled={suggestion.disabled ? 'true' : null}
                   class={() => classes(suggestion.isNew ? slot('optionNew') : slot('option'), this.active() === index() && slot('optionActive'))}
                   onMousedown={event => {
                     event.preventDefault();

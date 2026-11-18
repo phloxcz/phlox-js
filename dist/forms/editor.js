@@ -34,7 +34,7 @@ var Editor = class Editor extends Component {
 		loadEditor().then((library) => this.scope.disposed || this.create(library), (error) => this.app.onError(error));
 	}
 	create(library) {
-		const { value, enabled, options, name, label } = this.props;
+		const { value, enabled, readOnly, options, name, label } = this.props;
 		const editor = this.editor = new library.PhloxEditor(this.host, {
 			theme: this.theme,
 			...Editor.defaults,
@@ -61,6 +61,12 @@ var Editor = class Editor extends Component {
 				const on = Boolean(typeof enabled === "function" ? enabled() : enabled);
 				this.host.inert = !on;
 				this.host.classList.toggle("phlox-editor-disabled", !on);
+			});
+			if (readOnly !== void 0 && pane) effect(() => {
+				const read = Boolean(typeof readOnly === "function" ? readOnly() : readOnly);
+				pane.contentEditable = read ? "false" : "true";
+				pane.setAttribute("aria-readonly", String(read));
+				this.host.classList.toggle("phlox-editor-readonly", read);
 			});
 		});
 		this.props.onCreate?.(editor, pane);
@@ -123,6 +129,7 @@ var EditorControl = class extends FormControl {
 				name,
 				label: this.label,
 				enabled: () => !this.disabled(),
+				readOnly: this.readOnly,
 				class: this.classFor(attributes, "editor"),
 				onCreate: (editor, pane) => {
 					this.editor = editor;

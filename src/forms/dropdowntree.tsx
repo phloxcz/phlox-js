@@ -77,7 +77,7 @@ export class DropDownTreeSelect<K extends TreeKey> extends FormControl<K | null>
   }
 
   open(): void {
-    if (untrack(this.opened) || untrack(this.disabled)) return;
+    if (untrack(this.opened) || untrack(this.disabled) || untrack(this.readOnly)) return;
     // Closing the panel without a choice shows an error, as with DropDownList
     this.edited = true;
     this.opened.set(true);
@@ -144,7 +144,7 @@ export class DropDownTreeSelect<K extends TreeKey> extends FormControl<K | null>
               event.preventDefault();
               event.stopPropagation();
               this.close();
-            } else if ((event.key === 'Delete' || event.key === 'Backspace') && !this.isRequired()) {
+            } else if ((event.key === 'Delete' || event.key === 'Backspace') && !this.isRequired() && !untrack(this.readOnly)) {
               event.preventDefault();
               this.clear();
             }
@@ -155,7 +155,7 @@ export class DropDownTreeSelect<K extends TreeKey> extends FormControl<K | null>
           </span>
           <span class="dropdownlist-trigger-arrow" aria-hidden="true" />
         </button>
-        <If when={() => !this.isRequired() && this.picked() !== null && !this.disabled()}>
+        <If when={() => !this.isRequired() && this.picked() !== null && !this.disabled() && !this.readOnly()}>
           <button
             type="button"
             class="phlox-dropdowntree-clear"

@@ -20,6 +20,8 @@ export interface Tag<T> {
     label: string;
     /** Made of typed text, not picked from the suggestions. */
     isNew: boolean;
+    /** A suggestion that cannot be picked, see the option itemDisabled. */
+    disabled?: boolean;
 }
 export declare class TagInput<T = string> extends FormControl<T[]> {
     private options;
@@ -60,7 +62,9 @@ export declare class TagInput<T = string> extends FormControl<T[]> {
     isFilled(): boolean;
     /** Whether the limit of tags is reached. */
     full(): boolean;
-    /** Adds a tag unless it is there already (texts regardless of case) or the limit is reached. */
+    /** Is the item disabled by the option `itemDisabled`? It is suggested but cannot be added. */
+    isItemDisabled(value: T): boolean;
+    /** Adds a tag unless it is there already (texts regardless of case), disabled, or the limit is reached. */
     add(value: T, label: string, isNew?: boolean): boolean;
     remove(tag: Tag<T>): void;
     /**
@@ -77,6 +81,8 @@ export declare class TagInput<T = string> extends FormControl<T[]> {
     private has;
     /** Suggestions for the text: matching items not yet added, then a new tag when allowed and not an exact item. */
     private suggest;
+    /** The highlighted suggestion, or the first one that can be picked. */
+    private chosen;
     private onInput;
     private onKey;
     render(attributes: ExtraAttributes): Child;

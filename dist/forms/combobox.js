@@ -43,7 +43,7 @@ var ComboBox = class ComboBox extends ListControl {
 	}
 	/** The field gets the focus: the list opens with the first items, the current value is remembered for Escape. */
 	open() {
-		if (untrack(this.opened) || untrack(this.disabled)) return;
+		if (untrack(this.opened) || !this.changeable()) return;
 		this.remember();
 		this.opened.set(true);
 		this.load(untrack(this.editing) ? untrack(this.query) : "");
@@ -143,6 +143,7 @@ var ComboBox = class ComboBox extends ListControl {
 				id,
 				ref,
 				class: this.classFor({}, "combobox.input"),
+				readOnly: this.readOnly,
 				autocomplete: "off",
 				role: "combobox",
 				"aria-autocomplete": "list",

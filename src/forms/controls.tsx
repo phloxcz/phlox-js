@@ -35,6 +35,8 @@ export abstract class FormControl<T = unknown> {
   name = '';
   readonly errors = state<string[]>([]);
   readonly disabled = state(false);
+  /** Shown as usual but the user cannot change it; unlike disabled it stays in the values, see setReadOnly(). */
+  readonly readOnly = state(false);
   readonly rules: Rules;
   /** Left out of getValues(). Buttons are omitted, other controls can be by setOmitted(). */
   omitted = false;
@@ -104,6 +106,15 @@ export abstract class FormControl<T = unknown> {
     return this;
   }
 
+  /**
+   * Read-only, like readonly in HTML: the value is shown as usual (not greyed out), the user cannot change it,
+   * and unlike setDisabled() it stays in the values of the form and is checked by the rules.
+   */
+  setReadOnly(readOnly = true): this {
+    this.readOnly.set(readOnly);
+    return this;
+  }
+
   setOmitted(omitted = true): this {
     this.omitted = omitted;
     return this;
@@ -147,6 +158,7 @@ export abstract class FormControl<T = unknown> {
       name: this.htmlName,
       required: this.isRequired(),
       disabled: this.disabled,
+      'aria-readonly': () => (this.readOnly() ? 'true' : null),
       'aria-invalid': () => (this.hasErrors() ? 'true' : null),
       'aria-describedby': () => (this.hasErrors() ? `${this.htmlId}-error` : null),
       ref: (element: HTMLElement) => {
@@ -234,6 +246,7 @@ export class TextInput<T = string> extends FormControl<T> {
   override attrs(): Record<string, unknown> {
     return {
       ...super.attrs(),
+      readOnly: this.readOnly,
       value: this.raw,
       onInput: (event: Event) => {
         this.raw.set((event.currentTarget as HTMLInputElement).value);
@@ -273,6 +286,7 @@ export class Checkbox extends FormControl<boolean> {
     return {
       ...super.attrs(),
       checked: this.checked,
+      onClick: (event: Event) => blockWhenReadOnly(this, event),
       onChange: (event: Event) => {
         this.checked.set((event.currentTarget as HTMLInputElement).checked);
         this.changed();
@@ -290,9 +304,26 @@ export class Checkbox extends FormControl<boolean> {
   }
 }
 
+/** A read-only checkbox or radio button keeps its state: the click that would change it is cancelled. */
+function blockWhenReadOnly(control: FormControl<any>, event: Event): void {
+  if (untrack(control.readOnly)) event.preventDefault();
+}
+
+/** A read-only select does not open and does not change by the keyboard; Tab still moves on. */
+function selectReadOnly(control: FormControl<any>): Record<string, unknown> {
+  return {
+    onMousedown: (event: Event) => blockWhenReadOnly(control, event),
+    onKeydown: (event: KeyboardEvent) => {
+      if (event.key !== 'Tab') blockWhenReadOnly(control, event);
+    },
+  };
+}
+
 /** Common part of controls with choices. */
 abstract class ChoiceControl<T, V> extends FormControl<V> {
   readonly items = state<[T, string][]>([]);
+  /** Items that are shown but cannot be chosen, see setDisabled(). */
+  readonly disabledItems = state<T[]>([]);
 
   constructor(label = '', items: Items<T> = []) {
     super(label);
@@ -303,6 +334,17 @@ abstract class ChoiceControl<T, V> extends FormControl<V> {
   setItems(items: Items<T>): this {
     this.items.set(toPairs(items));
     return this;
+  }
+
+  /** true or false for the whole control, or the values of items that cannot be chosen: setDisabled(['b']), as in Nette. */
+  override setDisabled(disabled: boolean | T[] = true): this {
+    if (!Array.isArray(disabled)) return super.setDisabled(disabled);
+    this.disabledItems.set([...disabled]);
+    return this;
+  }
+
+  isItemDisabled(value: T): boolean {
+    return this.disabledItems().some(item => Object.is(item, value));
   }
 
   protected indexOf(value: T): number {
@@ -338,6 +380,7 @@ export class SelectBox<T = string> extends ChoiceControl<T, T | null> {
         {...attributes}
         {...this.attrs()}
         class={this.classFor(attributes, 'select')}
+        {...selectReadOnly(this)}
         value={() => {
           const index = this.selected() === null ? -1 : this.indexOf(this.selected() as T);
           return index < 0 ? '' : String(index);
@@ -349,7 +392,9 @@ export class SelectBox<T = string> extends ChoiceControl<T, T | null> {
         }}
       >
         {this.prompt === null ? null : <option value="">{this.prompt}</option>}
-        <For each={this.items}>{([, label], index) => <option value={() => String(index())}>{label}</option>}</For>
+        <For each={this.items}>
+          {([value, label], index) => <option value={() => String(index())} disabled={() => this.isItemDisabled(value)}>{label}</option>}
+        </For>
       </select>
     );
   }
@@ -377,6 +422,7 @@ export class MultiSelectBox<T = string> extends ChoiceControl<T, T[]> {
         {...attributes}
         {...this.attrs()}
         class={this.classFor(attributes, 'select')}
+        {...selectReadOnly(this)}
         onChange={event => {
           const chosen = [...event.currentTarget.selectedOptions].map(option => this.items()[Number(option.value)]![0]);
           this.selected.set(chosen);
@@ -385,7 +431,7 @@ export class MultiSelectBox<T = string> extends ChoiceControl<T, T[]> {
       >
         <For each={this.items}>
           {([value, label], index) => (
-            <option value={() => String(index())} selected={() => this.selected().includes(value)}>{label}</option>
+            <option value={() => String(index())} selected={() => this.selected().includes(value)} disabled={() => this.isItemDisabled(value)}>{label}</option>
           )}
         </For>
       </select>
@@ -423,6 +469,8 @@ export class RadioList<T = string> extends ChoiceControl<T, T | null> {
                 class={inputClass}
                 id={() => `${this.htmlId}-${index()}`}
                 checked={() => Object.is(this.selected(), value)}
+                disabled={() => this.disabled() || this.isItemDisabled(value)}
+                onClick={event => blockWhenReadOnly(this, event)}
                 onChange={() => {
                   this.selected.set(value);
                   this.changed();
@@ -466,6 +514,8 @@ export class CheckboxList<T = string> extends ChoiceControl<T, T[]> {
                 class={inputClass}
                 id={() => `${this.htmlId}-${index()}`}
                 checked={() => this.selected().includes(value)}
+                disabled={() => this.disabled() || this.isItemDisabled(value)}
+                onClick={event => blockWhenReadOnly(this, event)}
                 onChange={event => {
                   const on = event.currentTarget.checked;
                   // Kept in the order of the items

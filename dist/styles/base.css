@@ -1305,3 +1305,15 @@ th.phx-grid-drag-over-right {
 @keyframes phlox-spin {
   to { transform: rotate(360deg); }
 }
+
+/* Items of lists that cannot be chosen (itemDisabled of DropDownList, ComboBox, TagInput) */
+[role="option"][aria-disabled="true"][data-value],
+[data-phlox-taginput-dropdown] [role="option"][aria-disabled="true"] {
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+/* A read-only WYSIWYG editor: the content without its toolbar */
+.phlox-editor-readonly .phx-editor-toolbar {
+  display: none;
+}

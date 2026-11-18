@@ -46,6 +46,8 @@ export class TreeSelect<K extends TreeKey, T extends K | null | K[]> extends For
     const { id, name, ref, onBlur, required: _required, disabled: _disabled, ...common } = this.attrs();
     const theme = currentTheme();
     let wrapper: HTMLElement;
+    // A disabled or read-only control locks picking in its tree
+    effect(() => this.tree.locked.set(this.disabled() ? 'disabled' : this.readOnly() ? 'readonly' : false));
     // Picking is a change: after the first error or after leaving the tree, it is checked live
     let first = true;
     effect(() => {

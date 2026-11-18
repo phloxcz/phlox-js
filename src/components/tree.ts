@@ -97,6 +97,8 @@ export class Tree<N extends TreeNode<any> = TreeNode> {
   readonly selected = state<N['id'] | null>(null);
   /** Picked nodes with `pick`. */
   readonly checked = state<N['id'][]>([]);
+  /** Picking is off: 'disabled' greys the boxes out, 'readonly' only keeps them as they are (a control of a form). */
+  readonly locked = state<false | 'disabled' | 'readonly'>(false);
   /** Called when the user selects a node, not when select() is called from code. */
   onSelect: ((node: N) => void) | null = null;
   private loaded: Promise<void> | null = null;
@@ -202,7 +204,7 @@ export class Tree<N extends TreeNode<any> = TreeNode> {
 
   /** Picks or unpicks a node, with `pick`. */
   check(item: TreeItem<N>, on = !untrack(this.checked).includes(item.id)): void {
-    if (item.node.disabled) return;
+    if (item.node.disabled || untrack(this.locked)) return;
     if (this.options.pick === 'single') this.checked.set(on ? [item.id] : []);
     else this.checked.update(ids => (on ? [...ids.filter(id => id !== item.id), item.id] : ids.filter(id => id !== item.id)));
   }

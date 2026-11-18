@@ -17,6 +17,8 @@ export interface EditorProps {
     value?: State<string>;
     options?: EditorOptions;
     enabled?: Reactive<boolean>;
+    /** The content can be read and copied, not changed; the toolbar is hidden. */
+    readOnly?: Reactive<boolean>;
     name?: string | null;
     class?: Reactive<string | null | undefined>;
     /** A name for screen readers, when no <label> is next to it. */

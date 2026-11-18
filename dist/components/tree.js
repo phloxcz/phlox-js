@@ -49,6 +49,8 @@ var Tree = class {
 	selected = state(null);
 	/** Picked nodes with `pick`. */
 	checked = state([]);
+	/** Picking is off: 'disabled' greys the boxes out, 'readonly' only keeps them as they are (a control of a form). */
+	locked = state(false);
 	/** Called when the user selects a node, not when select() is called from code. */
 	onSelect = null;
 	loaded = null;
@@ -141,7 +143,7 @@ var Tree = class {
 	}
 	/** Picks or unpicks a node, with `pick`. */
 	check(item, on = !untrack(this.checked).includes(item.id)) {
-		if (item.node.disabled) return;
+		if (item.node.disabled || untrack(this.locked)) return;
 		if (this.options.pick === "single") this.checked.set(on ? [item.id] : []);
 		else this.checked.update((ids) => on ? [...ids.filter((id) => id !== item.id), item.id] : ids.filter((id) => id !== item.id));
 	}

@@ -96,8 +96,10 @@ export class UploadControl<T extends File | null | File[]> extends FormControl<T
     const dragging = state(false);
     let wrapper: HTMLElement;
     let input: HTMLInputElement;
+    // Disabled or read-only: no choosing, dropping or removing files
+    const locked = () => this.disabled() || this.readOnly();
     const open = () => {
-      if (!this.disabled()) input.click();
+      if (!locked()) input.click();
     };
 
     return (
@@ -121,6 +123,7 @@ export class UploadControl<T extends File | null | File[]> extends FormControl<T
           tabIndex={0}
           aria-label={texts.dropzone}
           aria-disabled={() => (this.disabled() ? 'true' : null)}
+          aria-readonly={() => (this.readOnly() ? 'true' : null)}
           ref={ref as (element: HTMLElement) => void}
           onClick={open}
           onKeydown={event => {
@@ -130,7 +133,7 @@ export class UploadControl<T extends File | null | File[]> extends FormControl<T
           }}
           onDragover={event => {
             event.preventDefault();
-            if (!this.disabled()) dragging.set(true);
+            if (!locked()) dragging.set(true);
           }}
           onDragleave={event => {
             if (!(event.currentTarget as HTMLElement).contains(event.relatedTarget as Node | null)) dragging.set(false);
@@ -138,7 +141,7 @@ export class UploadControl<T extends File | null | File[]> extends FormControl<T
           onDrop={event => {
             event.preventDefault();
             dragging.set(false);
-            if (!this.disabled()) this.addFiles(event.dataTransfer?.files ?? []);
+            if (!locked()) this.addFiles(event.dataTransfer?.files ?? []);
           }}
         >
           <div class="pu-dropzone-icon" aria-hidden="true" ref={element => { element.innerHTML = UPLOAD_ICON; }} />
@@ -148,7 +151,7 @@ export class UploadControl<T extends File | null | File[]> extends FormControl<T
             <span>{texts.or}</span>
           </p>
           {/* The zone is the button for the keyboard, this one is for the mouse; a click on it goes up to the zone */}
-          <button type="button" class={classes('pu-browse-btn', slot('button'))} tabIndex={-1} disabled={this.disabled}>
+          <button type="button" class={classes('pu-browse-btn', slot('button'))} tabIndex={-1} disabled={this.disabled} hidden={this.readOnly}>
             {this.multiple ? texts.browseMultiple : texts.browseSingle}
           </button>
           <input
@@ -189,6 +192,7 @@ export class UploadControl<T extends File | null | File[]> extends FormControl<T
                         aria-label={texts.remove.replace('%s', file.name)}
                         title={texts.remove.replace('%s', file.name)}
                         disabled={this.disabled}
+                        hidden={this.readOnly}
                         ref={element => { element.innerHTML = REMOVE_ICON; }}
                         onClick={() => this.removeFile(file)}
                       />

@@ -367,9 +367,11 @@ export function TreeView<N extends TreeNode<any>>(props: TreeViewProps<N>): Chil
               name={props.name ? (pick === 'multiple' ? `${props.name}[]` : props.name) : null}
               value={String(node.id)}
               checked={checked}
-              disabled={node.disabled ?? false}
+              disabled={() => Boolean(node.disabled) || tree.locked() === 'disabled'}
               tabIndex={-1}
               aria-hidden="true"
+              // A locked tree keeps the box as it is, the click would change it before check() refuses
+              onClick={event => untrack(tree.locked) && event.preventDefault()}
               onChange={event => tree.check(item, (event.currentTarget as HTMLInputElement).checked)}
             />
           ) : null}

@@ -915,3 +915,10 @@ Bez virtuálního DOMu: `h()` vrací jen šablonu (předpis). Skutečné uzly se
 Většinu času u velkých změn zabere vykreslení v prohlížeči, ne JS.
 
 Tabulka je z verze, kde `h()` tvořilo uzly hned. Po přechodu na šablony vyšla dvě měření v rámci rozptylu (vytvoření 183 a 198 ms JS, 806 a 830 ms s vykreslením), měřitelné zpomalení se neukázalo.
+
+## Zakázané a jen pro čtení (0.3.0, autor 18. 11.: „souhlasím, udělej“)
+
+- **Dva stavy jako v Nette.** `setDisabled()` prvek vyřadí: zašedlý, chybí v hodnotách, nekontroluje se. `setReadOnly()` ho jen zamkne: vypadá normálně, hodnota se posílá i kontroluje. Atribut `readonly` v HTML mají jen textová pole, ostatní prvky ho dostávají napodobený (zablokované kliknutí a klávesy, skryté křížky a tlačítka, `aria-readonly`).
+- **Zakázané položky dvojím zápisem.** Prosté výběry (`addSelect`, `addRadioList`…) berou `setDisabled([hodnoty])` jako Nette, protože položky jsou pevný seznam. DropDownList, ComboBox a TagInput mají volbu `itemDisabled`, funkci nad položkou, protože položky chodí i ze serveru a o zákazu rozhoduje vlastnost objektu (`user => !user.active`), ne známý seznam hodnot.
+- **Strom** se zamyká stavem `tree.locked` (`'disabled'` / `'readonly'`), aby TreeView o formuláři nevěděl. Dřív `addTreeSelect().setDisabled()` strom vůbec nezamkl.
+- **Zjištěno:** u položek bez `itemValue` kompilátor nedá parametru `itemDisabled` typ (unie dvou tvarů voleb s generickým `O`). Přetížení metod `add*` to nevyřešilo a znepřehlednilo API, proto se typ parametru píše ručně. Vrátit se k tomu, kdyby to v aplikacích vadilo.

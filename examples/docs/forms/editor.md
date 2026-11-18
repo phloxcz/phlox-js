@@ -15,7 +15,7 @@ this.form.addEditor('text', 'Komentář', {
 <!-- demo: editor-basic -->
 
 - **Hodnota** je HTML. V každém prohlížeči vyjde stejně: `<strong>`, `<em>`, `<s>`, barvy jako styly, bez prázdných `span`. Prázdný editor dá `''`, takže `setRequired()` funguje. Prázdné HTML odjinud (`<p>&nbsp;</p>`) se také počítá jako nevyplněné. Zobrazí se přes `<Html>` (viz HTML od uživatelů).
-- **Chová se jako ostatní prvky:** chyby u pole i ze serveru, `setDefaults()`, `reset()`, `isChanged()`, `setDisabled()`. Kontrola proběhne po opuštění celého editoru, ne už při přechodu do jeho lišty.
+- **Chová se jako ostatní prvky:** chyby u pole i ze serveru, `setDefaults()`, `reset()`, `isChanged()`, `setDisabled()`, `setReadOnly()` (skryje lištu). Kontrola proběhne po opuštění celého editoru, ne už při přechodu do jeho lišty.
 - **Vzhled podle tématu:** s `BootstrapTheme` editor dostane podobu pro Bootstrap, jinak výchozí. Volba `theme` to přepíše.
 - **Skupiny lišty:** `styles`, `format`, `script`, `fontsize`, `color`, `bgcolor`, `align`, `case`, `blocks`, `lists`, `link`, `image`, `table`, `emoji`, `specialchar`, `hr`, `clearfmt`, `grid`, `source`, `fullscreen`, a s volbami `variables` a `widgets` i stejnojmenné skupiny. Bez `toolbar` jsou v liště všechny.
 - **Volby pro celou aplikaci:** `Editor.defaults = { colorScheme: 'auto' }` (z `@phloxcz/phlox-js/forms`). Vlastní volby editoru jdou přes ně.
