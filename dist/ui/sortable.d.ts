@@ -22,6 +22,12 @@ export interface SortOptions {
     /** The item moves only along the layout, not freely. Not for a grid. */
     lockAxis?: boolean;
     /**
+     * What decides the position: the middle of the dragged item (default), or the pointer. The pointer suits
+     * items of very different sizes, e.g. a wide column before a narrow one: its middle would have to travel half
+     * the row.
+     */
+    anchor?: 'middle' | 'pointer';
+    /**
      * Other lists the item can be dropped into. A list inside the dragged item is left out, so an item
      * cannot go into itself. Needs `list`, the element of the item's own list.
      */

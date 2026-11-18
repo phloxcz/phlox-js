@@ -110,7 +110,7 @@ public render() {
 - **Tažená položka jede volně za ukazatelem** (posun přes `transform`), ostatní jí plynule uhýbají a po puštění položka dosedne na místo. Během tažení má třídu `phlox-dragging`.
 - **`layout`** říká, jak položky leží, a podle toho se volí pořadí: `'vertical'` (výchozí, pod sebou, podle svislé polohy), `'horizontal'` (vedle sebe, podle vodorovné) a `'grid'` (v řádcích, které se zalamují, v pořadí čtení: řádek po řádku, zleva doprava). Položky mřížky by měly mít stejnou výšku.
 - **`lockAxis: true`** nechá položku jezdit jen po ose seznamu, u `'vertical'` jen nahoru a dolů. U mřížky nemá smysl.
-- **Pozice** se volí podle středu tažené položky proti středům ostatních.
+- **Pozice** se volí podle středu tažené položky proti středům ostatních. S `anchor: 'pointer'` rozhoduje poloha ukazatele, což se hodí pro položky hodně různé velikosti: široký sloupec by jinak musel ujet půl řádku, než by jeho střed přešel před úzký.
 - **Úchyt může být celá položka:** `onPointerdown` dej přímo na ni.
 - **Escape** tažení ukončí. Položka zůstane tam, kam už dojela, protože se v datech přesouvá průběžně.
 - **U okraje se posouvá:** když ukazatel dojede k okraji, posouvá se nejbližší posuvný prvek kolem seznamu (třeba dialog nebo box s `overflow: auto`), jinak stránka. Čím blíž okraji, tím rychleji. Funguje svisle i vodorovně a zastaví se na konci obsahu.

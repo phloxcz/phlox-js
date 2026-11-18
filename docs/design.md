@@ -946,3 +946,4 @@ Potřeba vzešla z konfigurátoru rozvržení v CMS: uzel se má dát přetáhno
 - **Seznam pod ukazatelem přes `document.elementsFromPoint`:** první prvek seznamu v zásobníku je ten nejvnitřnější, prvky uvnitř tažené položky se přeskočí. Vnořené seznamy tak fungují bez další konfigurace a položka nejde pustit sama do sebe.
 - **Který seznam co přijme, řeší aplikace** tím, co vrátí z `lists()` (volá se při každém pohybu). Framework pravidla stromu nezná.
 - **Vlastní seznam se pozná podle `list`,** aby se položka po návratu nad něj začala zase řadit průběžně.
+- **`anchor: 'pointer'` (0.6.1):** ověření v CMS ukázalo, že sloupec 9/12 nejde přetáhnout před sloupec 3/12, protože jeho střed by musel ujet půl řádku, i za okraj okna. Pro položky hodně různé velikosti proto rozhoduje ukazatel. Výchozí zůstal střed položky, u stejně velkých položek působí přirozeněji a nemění chování stávajících seznamů.

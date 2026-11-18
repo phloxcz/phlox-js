@@ -27,6 +27,12 @@ export interface SortOptions {
   /** The item moves only along the layout, not freely. Not for a grid. */
   lockAxis?: boolean;
   /**
+   * What decides the position: the middle of the dragged item (default), or the pointer. The pointer suits
+   * items of very different sizes, e.g. a wide column before a narrow one: its middle would have to travel half
+   * the row.
+   */
+  anchor?: 'middle' | 'pointer';
+  /**
    * Other lists the item can be dropped into. A list inside the dragged item is left out, so an item
    * cannot go into itself. Needs `list`, the element of the item's own list.
    */
@@ -81,7 +87,7 @@ function positionAmong(items: HTMLElement[], layout: SortOptions['layout'], at: 
 export function dragToSort(event: PointerEvent, item: HTMLElement, options: SortOptions): void {
   if (event.button !== 0) return;
   event.preventDefault();
-  const { layout = 'vertical', lockAxis = false } = options;
+  const { layout = 'vertical', lockAxis = false, anchor = 'middle' } = options;
   const start = item.getBoundingClientRect();
   // Where the item was grabbed, so it does not jump under the pointer
   const grab = { x: event.clientX - start.left, y: event.clientY - start.top };
@@ -100,6 +106,9 @@ export function dragToSort(event: PointerEvent, item: HTMLElement, options: Sort
     shift.y = lockAxis && layout === 'horizontal' ? 0 : last.y - grab.y - place.y;
     item.style.transform = `translate(${shift.x}px, ${shift.y}px)`;
   };
+
+  /** The point compared with the middles of the other items. */
+  const at = (): Point => (anchor === 'pointer' ? last : middle(item.getBoundingClientRect()));
 
   /** The innermost list under the pointer: its own ('home'), another one, or null when over none. */
   const listUnder = (pointer: Point): SortList | 'home' | null => {
@@ -143,14 +152,14 @@ export function dragToSort(event: PointerEvent, item: HTMLElement, options: Sort
     const target = options.lists ? listUnder(pointer) : 'home';
     if (target && target !== 'home') {
       const items = target.items().filter(element => element !== item);
-      return mark({ list: target, to: positionAmong(items, target.layout, middle(item.getBoundingClientRect())) });
+      return mark({ list: target, to: positionAmong(items, target.layout, at()) });
     }
     if (target === 'home') mark(null);
     if (other) return;
 
     const items = options.items();
     const others = items.filter(element => element !== item);
-    const before = positionAmong(others, layout, middle(item.getBoundingClientRect()));
+    const before = positionAmong(others, layout, at());
     if (before === items.indexOf(item)) return;
 
     // The others slide from their old places to the new ones (FLIP)

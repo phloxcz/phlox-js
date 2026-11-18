@@ -220,3 +220,13 @@ test('lists: over another list the item stays in its data, the list is marked, l
   document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
   expect(drop).toHaveBeenCalledOnce();
 });
+
+test('anchor pointer: the pointer decides, not the middle of the item, for items of different sizes', () => {
+  // Side by side: A 20 px, B 20 px, C 20 px; C is grabbed at its left edge
+  const { cards, handle, pointer } = sortable(['A', 'B', 'C'], index => ({ left: index * 20, top: 0 }), { layout: 'horizontal', anchor: 'pointer' });
+  pointer(handle(2), 'pointerdown', 41, 10);
+  // The pointer left of the middle of A: C goes first, though the middle of C would still be right of it
+  pointer(document.body, 'pointermove', 8, 10);
+  expect(cards()).toEqual(['C', 'A', 'B']);
+  pointer(document.body, 'pointerup', 8, 10);
+});

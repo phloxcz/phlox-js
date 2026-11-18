@@ -42,7 +42,7 @@ function positionAmong(items, layout, at) {
 function dragToSort(event, item, options) {
 	if (event.button !== 0) return;
 	event.preventDefault();
-	const { layout = "vertical", lockAxis = false } = options;
+	const { layout = "vertical", lockAxis = false, anchor = "middle" } = options;
 	const start = item.getBoundingClientRect();
 	const grab = {
 		x: event.clientX - start.left,
@@ -71,6 +71,8 @@ function dragToSort(event, item, options) {
 		shift.y = lockAxis && layout === "horizontal" ? 0 : last.y - grab.y - place.y;
 		item.style.transform = `translate(${shift.x}px, ${shift.y}px)`;
 	};
+	/** The point compared with the middles of the other items. */
+	const at = () => anchor === "pointer" ? last : middle(item.getBoundingClientRect());
 	/** The innermost list under the pointer: its own ('home'), another one, or null when over none. */
 	const listUnder = (pointer) => {
 		const lists = (options.lists?.() ?? []).filter((list) => !item.contains(list.element));
@@ -119,14 +121,14 @@ function dragToSort(event, item, options) {
 			const items = target.items().filter((element) => element !== item);
 			return mark({
 				list: target,
-				to: positionAmong(items, target.layout, middle(item.getBoundingClientRect()))
+				to: positionAmong(items, target.layout, at())
 			});
 		}
 		if (target === "home") mark(null);
 		if (other) return;
 		const items = options.items();
 		const others = items.filter((element) => element !== item);
-		const before = positionAmong(others, layout, middle(item.getBoundingClientRect()));
+		const before = positionAmong(others, layout, at());
 		if (before === items.indexOf(item)) return;
 		const old = new Map(others.map((element) => [element, element.getBoundingClientRect()]));
 		options.move(before);
