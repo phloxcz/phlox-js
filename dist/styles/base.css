@@ -331,6 +331,21 @@ form [hidden] {
   cursor: grabbing;
 }
 
+/* dragToSort with `lists`: another list under the dragged item, and the line where it would go.
+   The colour is the highlight of the system unless a theme sets --phlox-drop-color. */
+.phlox-drop-target {
+  outline: 2px dashed var(--phlox-drop-color, Highlight);
+  outline-offset: 2px;
+}
+
+.phlox-drop-marker {
+  position: fixed;
+  z-index: 2147483000;
+  border-radius: 2px;
+  background: var(--phlox-drop-color, Highlight);
+  pointer-events: none;
+}
+
 /* Fields of a row side by side, as many as fit, in every theme */
 .phlox-multiplier-fields {
   display: flex;

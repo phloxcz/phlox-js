@@ -936,3 +936,13 @@ Tabulka je z verze, kde `h()` tvořilo uzly hned. Po přechodu na šablony vyšl
 - **Fokus do skryté záložky přes událost `reveal`.** Formulář o záložkách neví. `focus()` prvku pošle bublající událost `phloxreveal` a panel, který ji zachytí, zvolí svou záložku dřív, než fokus přijde. Stejně se později může ukázat rozbalovací oddíl nebo akordeon. `reveal` je ve vlastním malém modulu, aby formuláře nenačítaly záložky.
 - **Značka chyby z `aria-invalid`.** Prvky ho už nastavují, panel ho sleduje přes MutationObserver. Záložky tak nepotřebují vědět, které prvky formuláře v nich jsou, a fungují i s vlastními prvky.
 - **Přetečení měřením, ne zalamováním.** Při změně šířky se změří všechny záložky (krátce ukázané), výpočet je čistá funkce `fitTabs()` testovaná bez prohlížeče. Zvolená záložka je vždy vidět, místo poslední, která se vejde. Bez `ResizeObserver` (jsdom) jsou vidět všechny.
+
+## Tažení mezi seznamy (0.6.0, autor 18. 11.: „rozšířit dragToSort“)
+
+Potřeba vzešla z konfigurátoru rozvržení v CMS: uzel se má dát přetáhnout i do jiného řádku nebo elementu, jako ve starém CMS. Autor zvolil rozšíření `dragToSort` místo vlastního HTML5 drag & drop v CMS, aby tažení vypadalo i fungovalo všude stejně, i prstem.
+
+- **Ve vlastním seznamu beze změny,** položka se dál přesouvá v datech průběžně.
+- **Nad jiným seznamem se v datech nepřesouvá.** Šablona jiného seznamu (jiný `<For>`) by pro ni vytvořila nový prvek a tažený prvek by z DOM zmizel i s celým tažením. Položka proto jede dál za ukazatelem, cílový seznam dostane třídu a čára (pevně umístěný prvek v `body`, mimo DOM, který spravují šablony) ukáže místo. Do dat ji přesune až `drop(to)` cílového seznamu po puštění. Je to stejný model jako u stromu, kde se uzel přesune až po puštění.
+- **Seznam pod ukazatelem přes `document.elementsFromPoint`:** první prvek seznamu v zásobníku je ten nejvnitřnější, prvky uvnitř tažené položky se přeskočí. Vnořené seznamy tak fungují bez další konfigurace a položka nejde pustit sama do sebe.
+- **Který seznam co přijme, řeší aplikace** tím, co vrátí z `lists()` (volá se při každém pohybu). Framework pravidla stromu nezná.
+- **Vlastní seznam se pozná podle `list`,** aby se položka po návratu nad něj začala zase řadit průběžně.

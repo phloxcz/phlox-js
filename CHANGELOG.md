@@ -2,6 +2,11 @@
 
 Všechny podstatné změny projektu. Formát podle [Keep a Changelog](https://keepachangelog.com/cs/1.1.0/), verze podle [Semantic Versioning](https://semver.org/lang/cs/).
 
+## [0.6.0] – 2026-11-18
+
+### Přidáno
+- **`dragToSort` mezi seznamy:** volba `lists` nabídne další seznamy (`SortList`: prvek, položky, rozložení a `drop(to)`), do kterých jde položku přetáhnout, a `list` označí prvek vlastního seznamu. Nad jiným seznamem se položka v datech nehýbe, seznam dostane třídu `phlox-drop-target` a čára `phlox-drop-marker` ukáže místo; po puštění se zavolá `drop(to)` cílového seznamu. Rozhoduje nejvnitřnější seznam pod ukazatelem, seznam uvnitř tažené položky se nenabízí. Barvu mění `--phlox-drop-color`. Export `DROP_TARGET` a typ `SortList`.
+
 ## [0.5.1] – 2026-11-18
 
 ### Změněno
@@ -55,6 +60,7 @@ První vydání.
 - **Server** (`@phloxcz/phlox-js/net`): JSON-RPC klient pro `phlox-rpc-api` s typy z OpenRPC (`phlox-rpc-types`), dávky, soubory po částech, mock server, práce offline s frontou změn.
 - **Další:** uživatel a oprávnění (`@phloxcz/phlox-js/security`), překlady (`@phloxcz/phlox-js/localization`), texty frameworku česky (`setTexts`, `@phloxcz/phlox-js/locales/cs`), HTML od uživatelů (`<Html>`, `sanitizeHtml`), témata (výchozí, Bootstrap), adaptéry pro Kendo UI a capify, pomocníci pro testy (`@phloxcz/phlox-js/testing`).
 
+[0.6.0]: https://github.com/phloxcz/phlox-js/compare/v0.5.1...v0.6.0
 [0.5.1]: https://github.com/phloxcz/phlox-js/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/phloxcz/phlox-js/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/phloxcz/phlox-js/compare/v0.3.0...v0.4.0

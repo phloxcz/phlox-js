@@ -145,3 +145,78 @@ test('near an edge the nearest scrolling element scrolls, and the item keeps its
     vi.useRealTimers();
   }
 });
+
+/** Two lists side by side, 0–100 and 100–200 px; items 20 px high one under another. jsdom has no elementsFromPoint. */
+function twoLists() {
+  const make = (left: number, names: string[]) => {
+    const list = document.createElement('ul');
+    list.getBoundingClientRect = () => new DOMRect(left, 0, 100, 200);
+    for (const [index, name] of names.entries()) {
+      const element = document.createElement('li');
+      element.textContent = name;
+      element.getBoundingClientRect = () => {
+        const [x = 0, y = 0] = (/translate\((-?[\d.]+)px, (-?[\d.]+)px\)/.exec(element.style.transform) ?? []).slice(1).map(Number);
+        return new DOMRect(left + x, index * 20 + y, 100, 20);
+      };
+      list.append(element);
+    }
+    document.body.append(list);
+    return list;
+  };
+  const home = make(0, ['A', 'B']);
+  const other = make(100, ['X', 'Y', 'Z']);
+  // A list inside the dragged item A: the item cannot go into itself
+  const inner = document.createElement('ul');
+  home.children[0]!.append(inner);
+  document.elementsFromPoint = (x: number) => (x < 100 ? [inner, home, document.body] : [other, document.body]);
+  const pointer = (type: string, x: number, y: number) =>
+    document.body.dispatchEvent(new MouseEvent(type, { bubbles: true, cancelable: true, clientX: x, clientY: y, button: 0 }));
+  return { home, other, inner, pointer };
+}
+
+test('lists: over another list the item stays in its data, the list is marked, letting go drops it at the place', () => {
+  const { home, other, inner, pointer } = twoLists();
+  const move = vi.fn();
+  const drop = vi.fn();
+  const innerDrop = vi.fn();
+  const item = home.children[0] as HTMLElement;
+  const start = (x: number, y: number) => item.dispatchEvent(new MouseEvent('pointerdown', { bubbles: true, cancelable: true, clientX: x, clientY: y, button: 0 }));
+  const options: SortOptions = {
+    items: () => [...home.children] as HTMLElement[],
+    move,
+    list: home,
+    lists: () => [
+      { element: other, items: () => [...other.children] as HTMLElement[], drop },
+      { element: inner, items: () => [], drop: innerDrop },
+    ],
+  };
+  item.addEventListener('pointerdown', event => dragToSort(event, item, options));
+
+  start(10, 10);
+  // Over the other list between X and Y: grabbed 10 px from the top, so the middle of the item is at 35
+  pointer('pointermove', 150, 25);
+  expect(move).not.toHaveBeenCalled();
+  expect(other.classList.contains('phlox-drop-target')).toBe(true);
+  const marker = document.querySelector<HTMLElement>('.phlox-drop-marker')!;
+  expect(marker.style.top).toBe('18px');
+  expect(marker.style.width).toBe('100px');
+  // Back over its own list below B: the mark and the line go, ordering works as before
+  pointer('pointermove', 10, 45);
+  expect(other.classList.contains('phlox-drop-target')).toBe(false);
+  expect(document.querySelector('.phlox-drop-marker')).toBeNull();
+  expect(move).toHaveBeenCalledWith(1);
+  // Over the other list again, below its last item, and let go
+  pointer('pointermove', 150, 90);
+  pointer('pointerup', 150, 90);
+  expect(drop).toHaveBeenCalledWith(3);
+  expect(innerDrop).not.toHaveBeenCalled();
+  expect(other.classList.contains('phlox-drop-target')).toBe(false);
+  expect(document.querySelector('.phlox-drop-marker')).toBeNull();
+  expect(item.style.transform).toBe('');
+
+  // Escape over another list drops nothing
+  start(10, 10);
+  pointer('pointermove', 150, 25);
+  document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+  expect(drop).toHaveBeenCalledOnce();
+});

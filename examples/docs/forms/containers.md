@@ -115,3 +115,29 @@ public render() {
 - **Escape** tažení ukončí. Položka zůstane tam, kam už dojela, protože se v datech přesouvá průběžně.
 - **U okraje se posouvá:** když ukazatel dojede k okraji, posouvá se nejbližší posuvný prvek kolem seznamu (třeba dialog nebo box s `overflow: auto`), jinak stránka. Čím blíž okraji, tím rychleji. Funguje svisle i vodorovně a zastaví se na konci obsahu.
 - **Úchyt potřebuje CSS `touch-action: none`,** jinak prstem posouvá stránku.
+
+### Mezi seznamy
+
+S volbou `lists` jde položku přetáhnout i do jiného seznamu, třeba kartu do jiného sloupce nebo uzel do jiné úrovně stromu boxů:
+
+```tsx
+dragToSort(event, element, {
+  items: () => [...column.children] as HTMLElement[],
+  move: to => { /* pořadí ve vlastním seznamu, jako dřív */ },
+  list: column,                                   // prvek vlastního seznamu
+  lists: () => others.map(other => ({
+    element: other.element,
+    items: () => [...other.element.children] as HTMLElement[],
+    drop: to => { /* vyjmout ze svého seznamu, vložit do tohoto na pozici to */ },
+  })),
+});
+```
+
+<!-- demo: drag-lists -->
+
+- **Ve vlastním seznamu** se řadí jako dřív, průběžně přes `move`.
+- **Nad jiným seznamem** se položka v datech nehýbe, protože by ji šablona toho seznamu vytvořila jako nový prvek a tažení by se ztratilo. Jede dál za ukazatelem, seznam dostane třídu `phlox-drop-target` (čárkovaný obrys) a čára `phlox-drop-marker` ukáže, kam položka půjde. Barvu obojího mění proměnná `--phlox-drop-color`, výchozí je zvýraznění systému.
+- **Po puštění nad jiným seznamem** se zavolá jeho `drop(to)`, kde `to` je pozice mezi jeho položkami. Položku v datech přesune aplikace sama: vyjme ji ze svého seznamu a vloží do cílového.
+- **Rozhoduje nejvnitřnější seznam pod ukazatelem,** takže vnořené seznamy fungují. Seznam uvnitř tažené položky se nenabízí: položka nejde pustit sama do sebe.
+- **`lists` se volá při každém pohybu,** takže může nabídnout jen seznamy, kam položka smí (třeba sloupec jen do svého řádku).
+- **Escape** nad jiným seznamem tažení zruší a položka zůstane, kde byla.
