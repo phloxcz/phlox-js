@@ -5,44 +5,44 @@ const ALL = Array.from({ length: 12 }, (_, i) => ({ id: i + 1, name: `Dokument $
 let documents = [...ALL];
 
 class DocumentPresenter extends Presenter<{ id: number }> {
-  override startup() {
+  public override startup() {
     // An unknown id: error(404) ends the action with BadRequestError, app.onError shows it
     if (!documents.some(item => item.id === this.props.id)) this.error(404);
   }
 
-  render() {
+  public render() {
     return <p>Detail: <strong>Dokument {this.props.id}</strong> <a href={this.link('/documents')}>zavřít</a></p>;
   }
 }
 
 /** Query parameters, link('this') with a changed page, a redirect after deleting. */
 export default class DocumentsPresenter extends Presenter {
-  readonly page = state(1);
-  readonly items = state(documents);
+  public readonly page = state(1);
+  public readonly items = state(documents);
 
-  override routes: Route[] = [
+  public override routes: Route[] = [
     { name: 'default', pattern: '/' },
     { name: 'detail', pattern: '/<id:int>', presenter: DocumentPresenter, props: ({ id }) => ({ id: Number(id) }) },
     { name: 'list', pattern: '/documents' },
   ];
 
   // Runs whenever the route or its parameters change, also ?page
-  actionDefault({ page = '1' }: Params) {
+  public actionDefault({ page = '1' }: Params) {
     this.page.set(Number(page));
     this.items.set(documents.slice((this.page() - 1) * 4, this.page() * 4));
   }
 
-  actionList(params: Params) {
+  public actionList(params: Params) {
     this.actionDefault(params);
   }
 
-  handleDelete(id: number) {
+  public handleDelete(id: number) {
     documents = documents.filter(item => item.id !== id);
     this.flashMessage(`Dokument ${id} smazán.`);
     this.redirect('this');   // the action runs again though the URL is the same
   }
 
-  render() {
+  public render() {
     const pages = () => Math.max(1, Math.ceil(documents.length / 4));
     return (
       <div>

@@ -51,25 +51,25 @@ const api = new RpcClient<Methods>('/rpc', {
 
 /** Without a network the change waits in the queue; a record changed on the server meanwhile asks first. */
 export default class OfflineDemo extends Component {
-  readonly note = state<Note | null>(null);
-  readonly draft = state('');
+  public readonly note = state<Note | null>(null);
+  public readonly draft = state('');
 
-  override async startup() {
+  public override async startup() {
     await this.load();
     this.scope.onCleanup(offline.onSynced(() => void this.load()));
   }
 
-  async load() {
+  public async load() {
     const note = await api.call('note.read', { id: 1 });
     this.note.set(note);
     this.draft.set(note.text);
   }
 
-  async save() {
+  public async save() {
     this.note.set(await api.call('note.update', { id: 1, text: this.draft() }));
   }
 
-  render() {
+  public render() {
     return (
       <div>
         <p style={{ display: 'flex', flexWrap: 'wrap', gap: '.5rem', alignItems: 'center' }}>

@@ -47,20 +47,20 @@ export interface EditorProps {
 /** <Editor value={text} options={{ toolbar: 'format,lists' }} />: HTML bound to state both ways. */
 export class Editor extends Component<EditorProps> {
   /** Options of every editor of the application, e.g. { upload } or { colorScheme: 'auto' }. Its own options go over them. */
-  static defaults: EditorOptions = {};
+  public static defaults: EditorOptions = {};
 
   /** The editor, null until it is loaded and the element is in the page. */
-  editor: EditorInstance | null = null;
+  public editor: EditorInstance | null = null;
   private host!: HTMLElement;
   private theme: 'default' | 'bootstrap' = 'default';
 
-  render() {
+  public render() {
     this.theme = currentTheme().editorTheme;
     // The editor adds its own classes to its element, so the reactive class is on the one around it
     return <div class={this.props.class}><div ref={element => { this.host = element; }} /></div>;
   }
 
-  override afterRender() {
+  public override afterRender() {
     loadEditor().then(
       library => this.scope.disposed || this.create(library),
       error => this.app.onError(error),
@@ -116,35 +116,35 @@ export class Editor extends Component<EditorProps> {
 export class EditorControl extends FormControl<string> {
   private readonly current = state('');
   /** The editor while it is shown, e.g. for insertText(). */
-  editor: EditorInstance | null = null;
+  public editor: EditorInstance | null = null;
   /** focus() came before the editor was loaded: it gets the focus once it is there. */
   private focusWhenReady = false;
 
-  constructor(label = '', private options: EditorOptions = {}) {
+  public constructor(label = '', private options: EditorOptions = {}) {
     super(label);
   }
 
-  getValue(): string {
+  public getValue(): string {
     return this.current();
   }
 
-  setValue(value: string): void {
+  public setValue(value: string): void {
     this.current.set(value ?? '');
   }
 
   /** The editor is loaded lazily: focus() before that puts the focus in as soon as it is made. */
-  override focus(): void {
+  public override focus(): void {
     if (this.element?.isConnected) this.element.focus();
     else this.focusWhenReady = true;
   }
 
   /** Text, or an image, a table… An empty editor gives '', but HTML from elsewhere can be just <p></p>. */
-  isFilled(): boolean {
+  public isFilled(): boolean {
     const html = this.current();
     return /<(img|hr|table|iframe|video)\b/i.test(html) || html.replace(/<[^>]*>|&nbsp;/g, '').trim() !== '';
   }
 
-  render(attributes: ExtraAttributes): Child {
+  public render(attributes: ExtraAttributes): Child {
     const { name, onBlur } = this.attrs();
     // A change in the editor is a change by the user: the rules are checked as with other controls
     const value: State<string> = Object.assign(() => this.current(), {

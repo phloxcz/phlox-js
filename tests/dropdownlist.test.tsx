@@ -267,7 +267,7 @@ describe('DropDownList', () => {
     const form = new Form<Task>();
     form.addDropDownList('city', 'Město:', { items: cities });
     class Page extends Presenter {
-      render() { return <FormView form={form} />; }
+      public render() { return <FormView form={form} />; }
     }
     const { element } = await boot(Page, '/', new Container().add(new BootstrapTheme()));
     const trigger = element.querySelector<HTMLButtonElement>('button[role=combobox]')!;

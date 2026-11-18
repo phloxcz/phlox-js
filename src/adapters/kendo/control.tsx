@@ -20,24 +20,24 @@ export class KendoControl<T> extends FormControl<T | null> {
    * @param widget the name in kendo.ui, a widget with value(): 'DatePicker', 'DropDownList', 'NumericTextBox'…
    * @param options options of the widget, as in Kendo documentation
    */
-  constructor(private widget: string, label = '', private options: object = {}) {
+  public constructor(private widget: string, label = '', private options: object = {}) {
     super(label);
   }
 
-  getValue(): T | null {
+  public getValue(): T | null {
     return this.current();
   }
 
-  setValue(value: T | null): void {
+  public setValue(value: T | null): void {
     this.current.set(value ?? null);
   }
 
-  isFilled(): boolean {
+  public isFilled(): boolean {
     const value = this.current();
     return value !== null && value !== undefined && value !== '' && !(Array.isArray(value) && value.length === 0);
   }
 
-  render(attributes: ExtraAttributes): Child {
+  public render(attributes: ExtraAttributes): Child {
     const { id, name, onBlur } = this.attrs();
     // A change in the widget is a change by the user: the rules are checked as with other controls
     const value: State<T | null> = Object.assign(() => this.current(), {

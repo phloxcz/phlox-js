@@ -79,11 +79,11 @@ export function createOffline(me: () => number): HelpdeskOffline {
 /** Preparing tasks for working offline, and which lists are prepared. */
 export class OfflineWork {
   /** Prepared lists by their keys: a project by its id, 'mine' for my tasks. Remembered in the browser. */
-  readonly prepared: State<string[]>;
+  public readonly prepared: State<string[]>;
   /** The key of the list being prepared now. */
-  readonly preparing = state<string | null>(null);
+  public readonly preparing = state<string | null>(null);
 
-  constructor(readonly offline: HelpdeskOffline, private api: HelpdeskApi, preferences: Preferences) {
+  public constructor(public readonly offline: HelpdeskOffline, private api: HelpdeskApi, preferences: Preferences) {
     this.prepared = preferences.state<string[]>('helpdesk.offline.prepared', []);
   }
 
@@ -91,7 +91,7 @@ export class OfflineWork {
    * Downloads everything for working offline with the tasks of the query: the common data, the list
    * and the detail, comments, attachments and history of each task. Returns how many tasks.
    */
-  async prepare(key: string, query: TaskQuery): Promise<number> {
+  public async prepare(key: string, query: TaskQuery): Promise<number> {
     this.preparing.set(key);
     try {
       const page = await this.api.call('task.list', { query });

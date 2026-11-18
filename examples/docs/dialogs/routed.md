@@ -3,7 +3,7 @@
 Deklaruje se u routy. Na `/users/15` zůstane vidět seznam a nad ním se otevře dialog. Dá se na něj odkázat a tlačítko Zpět ho zavře.
 
 ```ts
-override routes: Route[] = [
+public override routes: Route[] = [
   { name: 'default', pattern: '/' },
   {
     name: 'edit',
@@ -35,13 +35,13 @@ Dialog, který je `Presenter`, má vlastní routy, a ty mohou otevřít další 
 { name: 'edit', pattern: '/<id \\d+>', dialog: ({ id }) => [ItemEdit, { id: Number(id) }] }
 
 // ItemEdit extends Presenter<{ id: number }, boolean>: /5/history otevře historii nad ní
-override routes: Route[] = [
+public override routes: Route[] = [
   { name: 'default', pattern: '/' },
   { name: 'history', pattern: '/history', dialog: () => [ItemHistory, { id: this.props.id }], closed: () => void this.loadName() },
 ];
 
 // ItemHistory extends Presenter<{ id: number }>: /5/history/1 otevře detail změny
-override routes: Route[] = [
+public override routes: Route[] = [
   { name: 'default', pattern: '/' },
   { name: 'change', pattern: '/<index \\d+>', dialog: ({ index }) => [ChangeDetail, { id: this.props.id, index: Number(index) }] },
 ];

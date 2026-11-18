@@ -56,54 +56,54 @@ export interface TreeOptions<N extends TreeNode<any>> {
 /** One node in the tree, with its state. */
 export class TreeItem<N extends TreeNode<any>> {
   /** Null until the children are loaded. */
-  readonly children = state<TreeItem<N>[] | null>(null);
-  readonly expanded = state(false);
-  readonly loading = state(false);
-  readonly parent: State<TreeItem<N> | null>;
+  public readonly children = state<TreeItem<N>[] | null>(null);
+  public readonly expanded = state(false);
+  public readonly loading = state(false);
+  public readonly parent: State<TreeItem<N> | null>;
   /** The element of the node while it is shown, for the focus. */
-  element: HTMLElement | null = null;
+  public element: HTMLElement | null = null;
 
-  constructor(readonly node: N, parent: TreeItem<N> | null) {
+  public constructor(public readonly node: N, parent: TreeItem<N> | null) {
     this.parent = state(parent);
   }
 
-  get id(): N['id'] {
+  public get id(): N['id'] {
     return this.node.id;
   }
 
-  hasChildren(): boolean {
+  public hasChildren(): boolean {
     const children = this.children();
     return children ? children.length > 0 : Boolean(this.node.hasChildren || this.node.children?.length);
   }
 
   /** Parents from the top level down to the direct one. */
-  ancestors(): TreeItem<N>[] {
+  public ancestors(): TreeItem<N>[] {
     const ancestors: TreeItem<N>[] = [];
     for (let parent = this.parent(); parent; parent = parent.parent()) ancestors.unshift(parent);
     return ancestors;
   }
 
   /** Whether this node is inside the other one, at any depth. */
-  isInside(other: TreeItem<N>): boolean {
+  public isInside(other: TreeItem<N>): boolean {
     return this.ancestors().includes(other);
   }
 }
 
 export class Tree<N extends TreeNode<any> = TreeNode> {
-  static texts = texts('tree', { expand: 'Expand', collapse: 'Collapse', loading: 'Loading…' });
+  public static texts = texts('tree', { expand: 'Expand', collapse: 'Collapse', loading: 'Loading…' });
 
-  readonly roots = state<TreeItem<N>[]>([]);
+  public readonly roots = state<TreeItem<N>[]>([]);
   /** The selected node, e.g. the one the page shows. */
-  readonly selected = state<N['id'] | null>(null);
+  public readonly selected = state<N['id'] | null>(null);
   /** Picked nodes with `pick`. */
-  readonly checked = state<N['id'][]>([]);
+  public readonly checked = state<N['id'][]>([]);
   /** Picking is off: 'disabled' greys the boxes out, 'readonly' only keeps them as they are (a control of a form). */
-  readonly locked = state<false | 'disabled' | 'readonly'>(false);
+  public readonly locked = state<false | 'disabled' | 'readonly'>(false);
   /** Called when the user selects a node, not when select() is called from code. */
-  onSelect: ((node: N) => void) | null = null;
+  public onSelect: ((node: N) => void) | null = null;
   private loaded: Promise<void> | null = null;
 
-  constructor(readonly options: TreeOptions<N> = {}) {
+  public constructor(public readonly options: TreeOptions<N> = {}) {
     if (options.nodes) {
       this.roots.set(this.build(options.nodes, null));
       this.loaded = this.restore(untrack(this.roots));
@@ -111,13 +111,13 @@ export class Tree<N extends TreeNode<any> = TreeNode> {
   }
 
   /** Loads the top level, once. Await it in startup() when the tree must be ready, e.g. for select(). */
-  load(): Promise<void> {
+  public load(): Promise<void> {
     this.loaded ??= this.reload();
     return this.loaded;
   }
 
   /** Loads the tree again, e.g. after a change on the server. Remembered nodes are expanded again. */
-  async reload(): Promise<void> {
+  public async reload(): Promise<void> {
     const nodes = this.options.load ? await this.options.load(null) : (this.options.nodes ?? []);
     const roots = this.build(nodes, null);
     this.roots.set(roots);
@@ -125,7 +125,7 @@ export class Tree<N extends TreeNode<any> = TreeNode> {
   }
 
   /** A loaded node by its id. */
-  find(id: N['id']): TreeItem<N> | undefined {
+  public find(id: N['id']): TreeItem<N> | undefined {
     const search = (items: TreeItem<N>[]): TreeItem<N> | undefined => {
       for (const item of items) {
         if (item.id === id) return item;
@@ -138,7 +138,7 @@ export class Tree<N extends TreeNode<any> = TreeNode> {
   }
 
   /** Nodes the user can see, from the top down: expanded nodes show their children. */
-  visible(): TreeItem<N>[] {
+  public visible(): TreeItem<N>[] {
     const list: TreeItem<N>[] = [];
     const walk = (items: TreeItem<N>[]): void => {
       for (const item of items) {
@@ -150,7 +150,7 @@ export class Tree<N extends TreeNode<any> = TreeNode> {
     return list;
   }
 
-  async expand(item: TreeItem<N>): Promise<void> {
+  public async expand(item: TreeItem<N>): Promise<void> {
     if (!item.hasChildren()) return;
     const fresh = !untrack(item.children);
     await this.loadChildren(item);
@@ -160,12 +160,12 @@ export class Tree<N extends TreeNode<any> = TreeNode> {
     this.save();
   }
 
-  collapse(item: TreeItem<N>): void {
+  public collapse(item: TreeItem<N>): void {
     item.expanded.set(false);
     this.save();
   }
 
-  toggle(item: TreeItem<N>): Promise<void> {
+  public toggle(item: TreeItem<N>): Promise<void> {
     if (untrack(item.expanded)) {
       this.collapse(item);
       return Promise.resolve();
@@ -174,7 +174,7 @@ export class Tree<N extends TreeNode<any> = TreeNode> {
   }
 
   /** Expands the ancestors of a node, loading them with `path` when needed. Returns the node, or null. */
-  async reveal(id: N['id']): Promise<TreeItem<N> | null> {
+  public async reveal(id: N['id']): Promise<TreeItem<N> | null> {
     await this.load();
     let item = this.find(id);
     if (!item && this.options.path) {
@@ -190,33 +190,33 @@ export class Tree<N extends TreeNode<any> = TreeNode> {
   }
 
   /** Selects a node from code, e.g. by the id from the URL, and shows it. Null clears the selection. */
-  async select(id: N['id'] | null): Promise<void> {
+  public async select(id: N['id'] | null): Promise<void> {
     this.selected.set(id);
     if (id !== null) await this.reveal(id);
   }
 
   /** The user selected a node. */
-  choose(item: TreeItem<N>): void {
+  public choose(item: TreeItem<N>): void {
     if (item.node.disabled) return;
     this.selected.set(item.id);
     this.onSelect?.(item.node);
   }
 
   /** Picks or unpicks a node, with `pick`. */
-  check(item: TreeItem<N>, on = !untrack(this.checked).includes(item.id)): void {
+  public check(item: TreeItem<N>, on = !untrack(this.checked).includes(item.id)): void {
     if (item.node.disabled || untrack(this.locked)) return;
     if (this.options.pick === 'single') this.checked.set(on ? [item.id] : []);
     else this.checked.update(ids => (on ? [...ids.filter(id => id !== item.id), item.id] : ids.filter(id => id !== item.id)));
   }
 
-  canDrag(item: TreeItem<N>): boolean {
+  public canDrag(item: TreeItem<N>): boolean {
     const { draggable } = this.options;
     if (item.node.disabled || !draggable) return false;
     return draggable === true || draggable(item.node);
   }
 
   /** Whether a node can go there: not onto itself, not into its own subtree, not into its own parent again. */
-  canDrop(item: TreeItem<N>, target: TreeItem<N>, position: TreePosition): boolean {
+  public canDrop(item: TreeItem<N>, target: TreeItem<N>, position: TreePosition): boolean {
     if (target === item || target.isInside(item)) return false;
     if (position === 'child') return !target.node.disabled && target !== untrack(item.parent);
     return true;
@@ -226,7 +226,7 @@ export class Tree<N extends TreeNode<any> = TreeNode> {
    * Moves a node, as dragging does. Calls the `move` option; when it fails, the node goes back and the error
    * is thrown on. Returns false when the node did not move (the same place, or not allowed).
    */
-  async move(item: TreeItem<N>, target: TreeItem<N>, position: TreePosition): Promise<boolean> {
+  public async move(item: TreeItem<N>, target: TreeItem<N>, position: TreePosition): Promise<boolean> {
     if (!this.canDrop(item, target, position)) return false;
     const from = { parent: untrack(item.parent), index: this.siblings(untrack(item.parent)).indexOf(item) };
     const parent = position === 'child' ? target : untrack(target.parent);

@@ -92,101 +92,101 @@ const RANGE = '..';
 
 /** A column; the methods set it up and return it, like the rules of a form control. */
 export class GridColumn<R> {
-  canSort = false;
-  canSearch = false;
-  canHide = true;
-  filterKind: FilterKind | null = null;
-  filterItems: [unknown, string][] = [];
-  dropDown: { search: (query: string) => Promise<Items<unknown>> | Items<unknown>; label?: (value: any) => Promise<string | null> | string | null } | null = null;
-  initialWidth: string | null = null;
-  alignment: 'start' | 'end' | 'center' | null;
-  aggregateFn: Aggregate | null = null;
-  cellClass = '';
-  renderer: ((row: R) => Child) | null = null;
-  formatter: ((value: any) => string) | null = null;
+  public canSort = false;
+  public canSearch = false;
+  public canHide = true;
+  public filterKind: FilterKind | null = null;
+  public filterItems: [unknown, string][] = [];
+  public dropDown: { search: (query: string) => Promise<Items<unknown>> | Items<unknown>; label?: (value: any) => Promise<string | null> | string | null } | null = null;
+  public initialWidth: string | null = null;
+  public alignment: 'start' | 'end' | 'center' | null;
+  public aggregateFn: Aggregate | null = null;
+  public cellClass = '';
+  public renderer: ((row: R) => Child) | null = null;
+  public formatter: ((value: any) => string) | null = null;
 
-  constructor(readonly key: string, readonly label: string, readonly type: ColumnType) {
+  public constructor(public readonly key: string, public readonly label: string, public readonly type: ColumnType) {
     this.alignment = type === 'number' ? 'end' : type === 'bool' ? 'center' : null;
   }
 
-  sortable(on = true): this {
+  public sortable(on = true): this {
     this.canSort = on;
     return this;
   }
 
   /** Searched by the search field of the grid, with `rows`. On the server the API decides what is searched. */
-  searchable(on = true): this {
+  public searchable(on = true): this {
     this.canSearch = on;
     return this;
   }
 
   /** A filter fitting the column: text, a range for numbers and dates, yes and no for a bool. */
-  filterable(kind: FilterKind = this.type === 'number' || this.type === 'date' ? 'range' : this.type === 'bool' ? 'bool' : 'text'): this {
+  public filterable(kind: FilterKind = this.type === 'number' || this.type === 'date' ? 'range' : this.type === 'bool' ? 'bool' : 'text'): this {
     this.filterKind = kind;
     return this;
   }
 
   /** A filter with fixed choices. */
-  filterSelect(items: Items<unknown>, multiple = false): this {
+  public filterSelect(items: Items<unknown>, multiple = false): this {
     this.filterKind = multiple ? 'multiSelect' : 'select';
     this.filterItems = toPairs(items);
     return this;
   }
 
   /** A filter with choices from the server, a DropDownList with search. `label` gives the label of a value from the URL. */
-  filterDropDown(options: NonNullable<GridColumn<R>['dropDown']>): this {
+  public filterDropDown(options: NonNullable<GridColumn<R>['dropDown']>): this {
     this.filterKind = 'dropDown';
     this.dropDown = options;
     return this;
   }
 
   /** The starting width, e.g. '12rem'. The user can change it when the grid allows it. */
-  width(width: string): this {
+  public width(width: string): this {
     this.initialWidth = width;
     return this;
   }
 
-  align(alignment: 'start' | 'end' | 'center'): this {
+  public align(alignment: 'start' | 'end' | 'center'): this {
     this.alignment = alignment;
     return this;
   }
 
   /** The column cannot be hidden. */
-  alwaysVisible(): this {
+  public alwaysVisible(): this {
     this.canHide = false;
     return this;
   }
 
   /** A total in the footer. */
-  aggregate(fn: Aggregate): this {
+  public aggregate(fn: Aggregate): this {
     this.aggregateFn = fn;
     return this;
   }
 
   /** The text of a value: a number with its unit, a date in a format... */
-  format(fn: (value: any) => string): this {
+  public format(fn: (value: any) => string): this {
     this.formatter = fn;
     return this;
   }
 
   /** The content of a cell, any template: a link, a badge... */
-  render(fn: (row: R) => Child): this {
+  public render(fn: (row: R) => Child): this {
     this.renderer = fn;
     return this;
   }
 
-  class(className: string): this {
+  public class(className: string): this {
     this.cellClass = className;
     return this;
   }
 
   /** The value of the column in a row. */
-  value(row: R): unknown {
+  public value(row: R): unknown {
     return (row as Record<string, unknown>)[this.key];
   }
 
   /** A value as text, for a cell and for the footer. */
-  text(value: unknown): string {
+  public text(value: unknown): string {
     if (this.formatter) return this.formatter(value);
     if (value === null || value === undefined || value === '') return '';
     if (this.type === 'number' && typeof value === 'number') return value.toLocaleString();
@@ -198,7 +198,7 @@ export class GridColumn<R> {
   }
 
   /** A value from the URL as the type of the column: a number for a number, true or false for a bool. */
-  typed(text: string): unknown {
+  public typed(text: string): unknown {
     const item = this.filterItems.find(([value]) => String(value) === text);
     if (item) return item[0];
     if (this.type === 'number') return Number(text);
@@ -207,7 +207,7 @@ export class GridColumn<R> {
   }
 
   /** Conditions of the query for a filter as the user set it. */
-  conditions(value: FilterValue): GridCondition[] {
+  public conditions(value: FilterValue): GridCondition[] {
     const field = this.key;
     if (Array.isArray(value)) return value.length ? [{ field, operator: 'in', value: value.map(text => this.typed(text)) }] : [];
     if (value === '') return [];
@@ -280,7 +280,7 @@ interface Layout {
 }
 
 export class Grid<R extends object> {
-  static texts = texts('grid', {
+  public static texts = texts('grid', {
     search: 'Search…', reset: 'Reset', filter: 'Filter', all: 'All', yes: 'Yes', no: 'No', apply: 'Apply',
     from: 'From', to: 'To', clearFilter: 'Clear the filter', noData: 'No records', loading: 'Loading…',
     shown: '%d–%d of %d', perPage: 'Rows on a page', first: 'First page', previous: 'Previous page',
@@ -294,98 +294,98 @@ export class Grid<R extends object> {
    * Asks before an action with `confirm`. Null asks by the application: a popover at the button of the action
    * (see Application.confirm), or window.confirm() outside an application. An own question: Grid.confirm = (question, anchor) => ...
    */
-  static confirm: ((question: string, anchor?: HTMLElement, danger?: boolean) => boolean | Promise<boolean>) | null = null;
+  public static confirm: ((question: string, anchor?: HTMLElement, danger?: boolean) => boolean | Promise<boolean>) | null = null;
 
   /** How <GridView> asks when Grid.confirm is null; set by the view to the confirm() of the application. */
-  ask: (question: string, anchor?: HTMLElement, danger?: boolean) => boolean | Promise<boolean> = question => window.confirm(question);
+  public ask: (question: string, anchor?: HTMLElement, danger?: boolean) => boolean | Promise<boolean> = question => window.confirm(question);
 
-  readonly columns: GridColumn<R>[] = [];
-  readonly actions: GridAction<R>[] = [];
-  readonly bulkActions: BulkAction<R>[] = [];
+  public readonly columns: GridColumn<R>[] = [];
+  public readonly actions: GridAction<R>[] = [];
+  public readonly bulkActions: BulkAction<R>[] = [];
 
   // What the user is looking at, also in the URL when the grid is bound to a presenter
-  readonly page = state(1);
-  readonly pageSize: State<number>;
-  readonly sort = state<GridSort | null>(null);
-  readonly search = state('');
-  readonly filters = state<Record<string, FilterValue>>({});
+  public readonly page = state(1);
+  public readonly pageSize: State<number>;
+  public readonly sort = state<GridSort | null>(null);
+  public readonly search = state('');
+  public readonly filters = state<Record<string, FilterValue>>({});
 
   // What came
-  readonly rows = state<R[]>([]);
-  readonly total = state(0);
-  readonly aggregates = state<NonNullable<GridResult<R>['aggregates']>>({});
-  readonly loading = state(false);
-  readonly selected = state<unknown[]>([]);
+  public readonly rows = state<R[]>([]);
+  public readonly total = state(0);
+  public readonly aggregates = state<NonNullable<GridResult<R>['aggregates']>>({});
+  public readonly loading = state(false);
+  public readonly selected = state<unknown[]>([]);
 
   // How the user likes the columns, remembered with `remember`
-  readonly widths = state<Record<string, string>>({});
-  readonly order = state<string[]>([]);
-  readonly hidden = state<string[]>([]);
+  public readonly widths = state<Record<string, string>>({});
+  public readonly order = state<string[]>([]);
+  public readonly hidden = state<string[]>([]);
 
   /** Columns in the order and visibility the user chose. */
-  readonly visibleColumns = computed(() => {
+  public readonly visibleColumns = computed(() => {
     const order = this.order();
     const position = (column: GridColumn<R>) => (order.includes(column.key) ? order.indexOf(column.key) : order.length + this.columns.indexOf(column));
     return [...this.columns].sort((a, b) => position(a) - position(b)).filter(column => !this.hidden().includes(column.key));
   });
 
-  readonly pages = computed(() => Math.max(1, Math.ceil(this.total() / this.pageSize())));
+  public readonly pages = computed(() => Math.max(1, Math.ceil(this.total() / this.pageSize())));
 
   private loads = 0;
   private bound: { presenter: Presenter<any, any>; prefix: string } | null = null;
   private loaded = false;
 
-  constructor(readonly options: GridOptions<R> = {}) {
+  public constructor(public readonly options: GridOptions<R> = {}) {
     this.pageSize = state(options.pageSize ?? 20);
     this.restoreLayout();
   }
 
-  addColumn(key: keyof R & string, label: string, render?: (row: R) => Child): GridColumn<R> {
+  public addColumn(key: keyof R & string, label: string, render?: (row: R) => Child): GridColumn<R> {
     const column = new GridColumn<R>(key, label, render ? 'custom' : 'text');
     if (render) column.render(render);
     this.columns.push(column);
     return column;
   }
 
-  addTextColumn(key: keyof R & string, label: string): GridColumn<R> {
+  public addTextColumn(key: keyof R & string, label: string): GridColumn<R> {
     return this.push(new GridColumn<R>(key, label, 'text'));
   }
 
-  addNumberColumn(key: keyof R & string, label: string): GridColumn<R> {
+  public addNumberColumn(key: keyof R & string, label: string): GridColumn<R> {
     return this.push(new GridColumn<R>(key, label, 'number'));
   }
 
   /** A date as text YYYY-MM-DD or a date and time in ISO 8601, as an API sends them. */
-  addDateColumn(key: keyof R & string, label: string): GridColumn<R> {
+  public addDateColumn(key: keyof R & string, label: string): GridColumn<R> {
     return this.push(new GridColumn<R>(key, label, 'date'));
   }
 
-  addBoolColumn(key: keyof R & string, label: string): GridColumn<R> {
+  public addBoolColumn(key: keyof R & string, label: string): GridColumn<R> {
     return this.push(new GridColumn<R>(key, label, 'bool'));
   }
 
   /** An action on a row: a link (`href`) or a function (`onClick`). Primary ones are buttons, the others are in a menu. */
-  addAction(label: string, action: Omit<GridAction<R>, 'label'>): this {
+  public addAction(label: string, action: Omit<GridAction<R>, 'label'>): this {
     this.actions.push({ label, ...action });
     return this;
   }
 
   /** An action on the selected rows. Rows get checkboxes, the selection is kept across pages. */
-  addBulkAction(label: string, run: BulkAction<R>['run'], options: Omit<BulkAction<R>, 'label' | 'run'> = {}): this {
+  public addBulkAction(label: string, run: BulkAction<R>['run'], options: Omit<BulkAction<R>, 'label' | 'run'> = {}): this {
     this.bulkActions.push({ label, run, ...options });
     return this;
   }
 
-  column(key: string): GridColumn<R> | undefined {
+  public column(key: string): GridColumn<R> | undefined {
     return this.columns.find(column => column.key === key);
   }
 
-  keyOf(row: R): unknown {
+  public keyOf(row: R): unknown {
     return (row as Record<string, unknown>)[this.options.key ?? 'id'];
   }
 
   /** The query for the current state. */
-  query(): GridQuery {
+  public query(): GridQuery {
     const sort = this.sort();
     const conditions = Object.entries(this.filters()).flatMap(([key, value]) => this.column(key)?.conditions(value) ?? []);
     const aggregate = this.columns.filter(column => column.aggregateFn).map(column => ({ field: column.key, aggregate: column.aggregateFn! }));
@@ -400,7 +400,7 @@ export class Grid<R extends object> {
   }
 
   /** Loads the rows for the current state. An older answer never overwrites a newer one. */
-  async load(): Promise<void> {
+  public async load(): Promise<void> {
     this.loaded = true;
     const query = untrack(() => this.query());
     const ticket = ++this.loads;
@@ -424,33 +424,33 @@ export class Grid<R extends object> {
   }
 
   /** Loads once, for the first drawing. */
-  loadOnce(): Promise<void> {
+  public loadOnce(): Promise<void> {
     return this.loaded ? Promise.resolve() : this.load();
   }
 
   // Changes by the user. When bound to a presenter, they go through the URL, so Back returns them.
 
-  sortBy(key: string): Promise<void> {
+  public sortBy(key: string): Promise<void> {
     // Three states as in phloxcz/components-grid: ascending, descending, none
     const sort = untrack(this.sort);
     const next = sort?.field !== key ? { field: key, dir: 'asc' as const } : sort.dir === 'asc' ? { field: key, dir: 'desc' as const } : null;
     return this.change({ sort: next, page: 1 });
   }
 
-  goTo(page: number): Promise<void> {
+  public goTo(page: number): Promise<void> {
     return this.change({ page: Math.min(Math.max(1, page), untrack(this.pages)) });
   }
 
-  setPageSize(size: number): Promise<void> {
+  public setPageSize(size: number): Promise<void> {
     return this.change({ pageSize: size, page: 1 });
   }
 
-  setSearch(text: string): Promise<void> {
+  public setSearch(text: string): Promise<void> {
     return this.change({ search: text.trim(), page: 1 });
   }
 
   /** Sets the filter of a column; an empty value removes it. */
-  setFilter(key: string, value: FilterValue | null): Promise<void> {
+  public setFilter(key: string, value: FilterValue | null): Promise<void> {
     const filters = { ...untrack(this.filters) };
     if (value === null || value === '' || (Array.isArray(value) && !value.length) || value === RANGE) delete filters[key];
     else filters[key] = value;
@@ -458,7 +458,7 @@ export class Grid<R extends object> {
   }
 
   /** Clears the search and all filters. */
-  reset(): Promise<void> {
+  public reset(): Promise<void> {
     return this.change({ search: '', filters: {}, page: 1 });
   }
 
@@ -485,7 +485,7 @@ export class Grid<R extends object> {
    * return it, a link shows the same. The parameters become persistent, so links of the presenter keep them.
    * Two grids on one page need a prefix: bind(this, 'orders-').
    */
-  bind(presenter: Presenter<any, any>, prefix = ''): this {
+  public bind(presenter: Presenter<any, any>, prefix = ''): this {
     this.bound = { presenter, prefix };
     presenter.persistent.push(`${prefix}page`, `${prefix}size`, `${prefix}sort`, `${prefix}q`, `${prefix}f.*`);
     return this;
@@ -495,7 +495,7 @@ export class Grid<R extends object> {
    * Follows the URL of the bound presenter: called while drawing (by <GridView>), it reloads
    * whenever the parameters change.
    */
-  follow(): void {
+  public follow(): void {
     if (!this.bound) return;
     const { presenter } = this.bound;
     let last = '';
@@ -544,23 +544,23 @@ export class Grid<R extends object> {
 
   // Selection
 
-  isSelected(row: R): boolean {
+  public isSelected(row: R): boolean {
     return this.selected().includes(this.keyOf(row));
   }
 
-  toggleRow(row: R, on = !untrack(() => this.isSelected(row))): void {
+  public toggleRow(row: R, on = !untrack(() => this.isSelected(row))): void {
     const key = this.keyOf(row);
     this.selected.update(keys => (on ? [...keys.filter(other => other !== key), key] : keys.filter(other => other !== key)));
   }
 
   /** Selects or unselects all rows on the page. */
-  togglePage(on: boolean): void {
+  public togglePage(on: boolean): void {
     const keys = untrack(this.rows).map(row => this.keyOf(row));
     this.selected.update(selected => (on ? [...selected.filter(key => !keys.includes(key)), ...keys] : selected.filter(key => !keys.includes(key))));
   }
 
   /** Runs an action on the selected rows, after a confirmation, then clears the selection and loads again. */
-  async runBulk(action: BulkAction<R>, anchor?: HTMLElement): Promise<void> {
+  public async runBulk(action: BulkAction<R>, anchor?: HTMLElement): Promise<void> {
     const keys = untrack(this.selected);
     if (!keys.length || (action.confirm && !(await this.question(action.confirm, anchor, action.danger)))) return;
     const rows = untrack(this.rows).filter(row => keys.includes(this.keyOf(row)));
@@ -570,7 +570,7 @@ export class Grid<R extends object> {
   }
 
   /** Runs an action on a row, after a confirmation. */
-  async runAction(action: GridAction<R>, row: R, anchor?: HTMLElement): Promise<boolean> {
+  public async runAction(action: GridAction<R>, row: R, anchor?: HTMLElement): Promise<boolean> {
     const question = typeof action.confirm === 'function' ? action.confirm(row) : action.confirm;
     if (question && !(await this.question(question, anchor, action.danger))) return false;
     await action.onClick?.(row);
@@ -583,13 +583,13 @@ export class Grid<R extends object> {
 
   // Columns
 
-  setWidth(key: string, width: string): void {
+  public setWidth(key: string, width: string): void {
     this.widths.update(widths => ({ ...widths, [key]: width }));
     this.saveLayout();
   }
 
   /** Moves a column before another one, or to the end with null. */
-  moveColumn(key: string, before: string | null): void {
+  public moveColumn(key: string, before: string | null): void {
     const keys = untrack(this.visibleColumns).map(column => column.key);
     const all = [...keys, ...this.columns.map(column => column.key).filter(other => !keys.includes(other))].filter(other => other !== key);
     all.splice(before === null ? keys.length - 1 : all.indexOf(before), 0, key);
@@ -598,20 +598,20 @@ export class Grid<R extends object> {
   }
 
   /** Moves a column by one place, for the keyboard. */
-  shiftColumn(key: string, by: -1 | 1): void {
+  public shiftColumn(key: string, by: -1 | 1): void {
     const keys = untrack(this.visibleColumns).map(column => column.key);
     const at = keys.indexOf(key) + by;
     if (at < 0 || at >= keys.length) return;
     this.moveColumn(key, by < 0 ? keys[at]! : (keys[at + 1] ?? null));
   }
 
-  toggleColumn(key: string, show: boolean): void {
+  public toggleColumn(key: string, show: boolean): void {
     this.hidden.update(hidden => (show ? hidden.filter(other => other !== key) : [...hidden.filter(other => other !== key), key]));
     this.saveLayout();
   }
 
   /** Forgets the remembered columns. */
-  resetColumns(): void {
+  public resetColumns(): void {
     batch(() => {
       this.widths.set({});
       this.order.set([]);

@@ -3,9 +3,9 @@ import type { Route } from '@phloxcz/phlox-js';
 import { Form, FormView } from '@phloxcz/phlox-js/forms';
 
 class EditPresenter extends Presenter {
-  readonly form = new Form<{ title: string }>();
+  public readonly form = new Form<{ title: string }>();
 
-  constructor() {
+  public constructor() {
     super();
     this.form.addText('title', 'Název').setRequired('Vyplňte název.');
     this.form.addSubmit('save', 'Uložit');
@@ -17,29 +17,29 @@ class EditPresenter extends Presenter {
   }
 
   // Leaving with changes asks first: another link, Back, closing the tab
-  override hasUnsavedChanges() {
+  public override hasUnsavedChanges() {
     return this.form.isChanged();
   }
 
-  render() {
+  public render() {
     return <FormView form={this.form} />;
   }
 }
 
 class OtherPresenter extends Presenter {
-  render() {
+  public render() {
     return <p>Jiná stránka.</p>;
   }
 }
 
 /** Change the name and click the other link without saving. */
 export default class AppPresenter extends Presenter {
-  override routes: Route[] = [
+  public override routes: Route[] = [
     { name: 'other', pattern: '/other', presenter: OtherPresenter },
     { name: 'edit', pattern: '', presenter: EditPresenter },
   ];
 
-  render() {
+  public render() {
     return (
       <div>
         <nav>

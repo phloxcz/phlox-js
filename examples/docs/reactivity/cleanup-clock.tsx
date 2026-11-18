@@ -9,9 +9,9 @@ function Clock() {
 }
 
 export default class Cleanup extends Component {
-  readonly shown = state(true);
+  public readonly shown = state(true);
 
-  render() {
+  public render() {
     return (
       <p>
         <Button onClick={() => this.shown.update(shown => !shown)}>{() => (this.shown() ? 'Skrýt' : 'Ukázat')}</Button>{' '}

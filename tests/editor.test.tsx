@@ -39,7 +39,7 @@ describe('sanitizeHtml', () => {
   test('<Html> shows the cleaned HTML and follows its state', async () => {
     const html = state('<p>a<script>x</script></p>');
     class Page extends Presenter {
-      render() {
+      public render() {
         return <Html html={html} class="text" />;
       }
     }
@@ -73,7 +73,7 @@ describe('editor', () => {
     const shown = state(true);
     let made: { destroy(): void } | null = null;
     class Page extends Presenter {
-      render() {
+      public render() {
         return <If when={shown}><Editor value={html} options={{ toolbar: 'format' }} onCreate={editor => { made = editor; }} /></If>;
       }
     }
@@ -104,7 +104,7 @@ describe('editor', () => {
     const form = new Form<{ text: string }>();
     const text = form.addEditor('text', 'Komentář', { toolbar: 'format' }).setRequired('Napište text komentáře.');
     class Page extends Presenter {
-      render() {
+      public render() {
         return <FormView form={form} />;
       }
     }
@@ -151,7 +151,7 @@ describe('editor', () => {
     const text = form.addEditor('text', 'Komentář');
     const shown = state(false);
     class Page extends Presenter {
-      render() {
+      public render() {
         return <If when={shown}><FormView form={form} /></If>;
       }
     }
@@ -170,7 +170,7 @@ describe('editor', () => {
       return `/files/7/${file.name}`;
     };
     class Page extends Presenter {
-      render() {
+      public render() {
         return <Editor value={html} options={{ upload, inlineImages: false }} />;
       }
     }

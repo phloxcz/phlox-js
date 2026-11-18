@@ -5,7 +5,7 @@ import type { Container } from '@phloxcz/phlox-js';
 class Greeter {
   private count = 0;
 
-  greet(name: string): string {
+  public greet(name: string): string {
     this.count++;
     return `Ahoj, ${name}! (pozdrav číslo ${this.count})`;
   }
@@ -18,13 +18,13 @@ export function services(container: Container) {
 
 /** The component writes what it needs into its constructor, the Vite plugin wires it. */
 export default class Greeting extends Component {
-  readonly text = state('');
+  public readonly text = state('');
 
-  constructor(private greeter: Greeter) {
+  public constructor(private greeter: Greeter) {
     super();
   }
 
-  render() {
+  public render() {
     return (
       <p>
         <Button onClick={() => this.text.set(this.greeter.greet('Jano'))}>Pozdravit</Button>{' '}

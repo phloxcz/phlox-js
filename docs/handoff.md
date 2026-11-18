@@ -74,15 +74,15 @@ Je to náčrt, ne hotový návrh:
 
 ```tsx
 class ShoppingListPresenter extends Presenter {
-  items = state<Item[]>([]);
+  public items = state<Item[]>([]);
 
-  constructor(private api: ShoppingApi) { super(); }
+  public constructor(private api: ShoppingApi) { super(); }
 
-  async startup() {
+  public async startup() {
     this.items.set(await this.api.list());
   }
 
-  render = () => (
+  public render = () => (
     <ul>
       <For each={this.items}>
         {item => <li class={() => item.done() ? 'done' : ''}>{item.name}</li>}

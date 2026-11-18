@@ -11,11 +11,11 @@ import { Icon } from './Icon';
  * or waiting for a decision because their record changed meanwhile.
  */
 export class OfflineStatus extends Component {
-  constructor(private work: OfflineWork) {
+  public constructor(private work: OfflineWork) {
     super();
   }
 
-  render() {
+  public render() {
     const offline = this.work.offline;
     const waiting = () => offline.pending().length + offline.conflicts().length + offline.failed().length;
     const list = (title: string, changes: () => OfflineChange[], actions?: (change: OfflineChange) => Child) => (

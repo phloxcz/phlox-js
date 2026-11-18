@@ -11,10 +11,10 @@ export function services(container: Container) {
 
 /** A tree in the form: one node, several nodes, and one node in a drop-down panel; all loaded by levels. */
 export default class TreeSelects extends Component {
-  readonly form = new Form<Values>();
-  readonly values = computed(() => JSON.stringify(this.form.getValues()));
+  public readonly form = new Form<Values>();
+  public readonly values = computed(() => JSON.stringify(this.form.getValues()));
 
-  constructor(private categories: CategoryStore) {
+  public constructor(private categories: CategoryStore) {
     super();
     const nodes = {
       load: (parent: { id: number } | null) => this.categories.children(parent?.id ?? null),
@@ -27,7 +27,7 @@ export default class TreeSelects extends Component {
     this.form.setDefaults({ parentId: 11, moveTo: 6 });
   }
 
-  render() {
+  public render() {
     return <div><FormView form={this.form} /><p><code>{this.values}</code></p></div>;
   }
 }

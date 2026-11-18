@@ -53,32 +53,32 @@ export type Member = FormControl<any> | Container<any> | Multiplier<any>;
 
 export class Container<V extends object = Record<string, any>> implements Owner {
   /** Controls, containers and multipliers in the order they were added. */
-  readonly members = new Map<string, Member>();
+  public readonly members = new Map<string, Member>();
   /** Shown as the legend of the group by <FormView>. */
-  label = '';
+  public label = '';
 
-  constructor(private owner: Owner | null = null, private segment = '') {}
+  public constructor(private owner: Owner | null = null, private segment = '') {}
 
-  get form(): Form<any> {
+  public get form(): Form<any> {
     return this.owner!.form;
   }
 
-  get idPrefix(): string {
+  public get idPrefix(): string {
     return `${this.owner!.idPrefix}-${this.segment}`;
   }
 
-  htmlName(name: string): string {
+  public htmlName(name: string): string {
     return `${this.owner!.htmlName(this.segment)}[${name}]`;
   }
 
   /** Controls directly in this container, without buttons. */
-  get controls(): FormControl<any>[] {
+  public get controls(): FormControl<any>[] {
     return [...this.members.values()].filter((member): member is FormControl<any> =>
       member instanceof FormControl && !(member instanceof SubmitButton));
   }
 
   /** Adds an own control, the way the add*() methods do. */
-  addControl<C extends FormControl<any>>(name: string, control: C): C {
+  public addControl<C extends FormControl<any>>(name: string, control: C): C {
     this.checkName(name);
     control.form = this.form;
     control.container = this;
@@ -89,7 +89,7 @@ export class Container<V extends object = Record<string, any>> implements Owner 
   }
 
   /** A nested group of controls for an object of the DTO, like $form->addContainer() in Nette. */
-  addContainer<K extends ObjectKeys<V>>(name: K, label = ''): Container<NonNullable<V[K]>> {
+  public addContainer<K extends ObjectKeys<V>>(name: K, label = ''): Container<NonNullable<V[K]>> {
     this.checkName(name);
     const container = new Container<NonNullable<V[K]>>(this, name);
     container.label = label;
@@ -101,7 +101,7 @@ export class Container<V extends object = Record<string, any>> implements Owner 
    * Rows that the user adds, removes and orders, for a list of objects of the DTO.
    * `factory` adds the controls of one row, like addMultiplier() of contributte/forms-multiplier.
    */
-  addMultiplier<K extends RowListKeys<V>>(
+  public addMultiplier<K extends RowListKeys<V>>(
     name: K,
     factory: (row: Container<ItemOf<V[K]> & object>) => void,
     options: MultiplierOptions = {},
@@ -112,66 +112,66 @@ export class Container<V extends object = Record<string, any>> implements Owner 
     return multiplier;
   }
 
-  addText(name: KeysFor<V, string>, label = '', maxLength?: number): TextInput<string> {
+  public addText(name: KeysFor<V, string>, label = '', maxLength?: number): TextInput<string> {
     const control = this.addControl(name, new TextInput<string>(label));
     if (maxLength !== undefined) control.addRule(validators.MaxLength, null, maxLength);
     return control;
   }
 
-  addPassword(name: KeysFor<V, string>, label = ''): TextInput<string> {
+  public addPassword(name: KeysFor<V, string>, label = ''): TextInput<string> {
     return this.addControl(name, new TextInput<string>(label)).setHtmlType('password');
   }
 
-  addEmail(name: KeysFor<V, string>, label = ''): TextInput<string> {
+  public addEmail(name: KeysFor<V, string>, label = ''): TextInput<string> {
     return this.addControl(name, new TextInput<string>(label)).setHtmlType('email').addRule(validators.Email);
   }
 
-  addTextArea(name: KeysFor<V, string>, label = ''): TextArea {
+  public addTextArea(name: KeysFor<V, string>, label = ''): TextArea {
     return this.addControl(name, new TextArea(label));
   }
 
   /** WYSIWYG editor, the value is HTML. Options of phlox-editor: toolbar, upload, placeholder… */
-  addEditor(name: KeysFor<V, string>, label = '', options: EditorOptions = {}): EditorControl {
+  public addEditor(name: KeysFor<V, string>, label = '', options: EditorOptions = {}): EditorControl {
     return this.addControl(name, new EditorControl(label, options));
   }
 
   /** A whole number, null when empty. */
-  addInteger(name: KeysFor<V, number | null>, label = ''): TextInput<number | null> {
+  public addInteger(name: KeysFor<V, number | null>, label = ''): TextInput<number | null> {
     return this.addControl(name, new TextInput<number | null>(label, 'integer')).addRule(validators.Integer);
   }
 
   /** A number, also with a decimal comma, null when empty. */
-  addFloat(name: KeysFor<V, number | null>, label = ''): TextInput<number | null> {
+  public addFloat(name: KeysFor<V, number | null>, label = ''): TextInput<number | null> {
     return this.addControl(name, new TextInput<number | null>(label, 'float')).addRule(validators.Float);
   }
 
   /** A date as text YYYY-MM-DD, the way a DTO receives it, null when empty. */
-  addDate(name: KeysFor<V, string | null>, label = ''): TextInput<string | null> {
+  public addDate(name: KeysFor<V, string | null>, label = ''): TextInput<string | null> {
     return this.addControl(name, new TextInput<string | null>(label, 'date'));
   }
 
-  addCheckbox(name: KeysFor<V, boolean>, caption = ''): Checkbox {
+  public addCheckbox(name: KeysFor<V, boolean>, caption = ''): Checkbox {
     return this.addControl(name, new Checkbox(caption));
   }
 
-  addSelect<K extends keyof V & string>(name: K, label = '', items: Items<NonNullable<V[K]>> = []): SelectBox<NonNullable<V[K]>> {
+  public addSelect<K extends keyof V & string>(name: K, label = '', items: Items<NonNullable<V[K]>> = []): SelectBox<NonNullable<V[K]>> {
     return this.addControl(name, new SelectBox<NonNullable<V[K]>>(label, items));
   }
 
-  addMultiSelect<K extends ListKeys<V>>(name: K, label = '', items: Items<ItemOf<V[K]>> = []): MultiSelectBox<ItemOf<V[K]>> {
+  public addMultiSelect<K extends ListKeys<V>>(name: K, label = '', items: Items<ItemOf<V[K]>> = []): MultiSelectBox<ItemOf<V[K]>> {
     return this.addControl(name, new MultiSelectBox<ItemOf<V[K]>>(label, items));
   }
 
-  addRadioList<K extends keyof V & string>(name: K, label = '', items: Items<NonNullable<V[K]>> = []): RadioList<NonNullable<V[K]>> {
+  public addRadioList<K extends keyof V & string>(name: K, label = '', items: Items<NonNullable<V[K]>> = []): RadioList<NonNullable<V[K]>> {
     return this.addControl(name, new RadioList<NonNullable<V[K]>>(label, items));
   }
 
-  addCheckboxList<K extends ListKeys<V>>(name: K, label = '', items: Items<ItemOf<V[K]>> = []): CheckboxList<ItemOf<V[K]>> {
+  public addCheckboxList<K extends ListKeys<V>>(name: K, label = '', items: Items<ItemOf<V[K]>> = []): CheckboxList<ItemOf<V[K]>> {
     return this.addControl(name, new CheckboxList<ItemOf<V[K]>>(label, items));
   }
 
   /** A select with a search field, see DropDownList. Items are fixed, or come from `search`. */
-  addDropDownList<K extends keyof V & string, O = never>(
+  public addDropDownList<K extends keyof V & string, O = never>(
     name: K, label = '', options: DropDownListOptions<NonNullable<V[K]>, O> = {},
   ): DropDownList<NonNullable<V[K]>> {
     return this.addControl(name, new DropDownList<NonNullable<V[K]>>(label, options));
@@ -181,7 +181,7 @@ export class Container<V extends object = Record<string, any>> implements Owner 
    * A text field with suggestions, see ComboBox. The value is a picked item. `allowCustom` lets a typed text
    * be the value too, so it is allowed only for fields that can hold a text.
    */
-  addComboBox<K extends keyof V & string, O = never>(
+  public addComboBox<K extends keyof V & string, O = never>(
     name: K, label = '',
     options: ComboBoxOptions<NonNullable<V[K]>, O> & { allowCustom?: string extends V[K] ? boolean : false } = {},
   ): ComboBox<NonNullable<V[K]>> {
@@ -192,7 +192,7 @@ export class Container<V extends object = Record<string, any>> implements Owner 
    * Several values as tags, see TagInput. The field must be a list. `allowNew` makes tags of typed text,
    * so it is allowed only for lists that can hold texts.
    */
-  addTagInput<K extends ListKeys<V>, O = never>(
+  public addTagInput<K extends ListKeys<V>, O = never>(
     name: K, label = '',
     options: TagInputOptions<ItemOf<V[K]>, O> & { allowNew?: string extends ItemOf<V[K]> ? boolean : false } = {},
   ): TagInput<ItemOf<V[K]>> {
@@ -200,17 +200,17 @@ export class Container<V extends object = Record<string, any>> implements Owner 
   }
 
   /** One file, File or null. Nothing is uploaded: onSuccess gets the File and sends it the way it needs. */
-  addUpload(name: KeysFor<V, File | null>, label = ''): UploadControl<File | null> {
+  public addUpload(name: KeysFor<V, File | null>, label = ''): UploadControl<File | null> {
     return this.addControl(name, new UploadControl<File | null>(label));
   }
 
   /** Several files, File[]. The number of them is checked by Form.MinLength and Form.MaxLength, as in Nette. */
-  addMultiUpload(name: KeysFor<V, File[]>, label = ''): UploadControl<File[]> {
+  public addMultiUpload(name: KeysFor<V, File[]>, label = ''): UploadControl<File[]> {
     return this.addControl(name, new UploadControl<File[]>(label, true));
   }
 
   /** One node of a tree, its id or null. Nodes come at once (`nodes`) or level by level (`load`). */
-  addTreeSelect<K extends keyof V & string>(
+  public addTreeSelect<K extends keyof V & string>(
     name: K, label = '', options: TreeSelectOptions<NonNullable<V[K]> & TreeKey> = {},
   ): TreeSelect<NonNullable<V[K]> & TreeKey, (NonNullable<V[K]> & TreeKey) | null> {
     return this.addControl(name, new TreeSelect<NonNullable<V[K]> & TreeKey, (NonNullable<V[K]> & TreeKey) | null>(label, options));
@@ -220,50 +220,50 @@ export class Container<V extends object = Record<string, any>> implements Owner 
    * One node of a tree in a drop-down: closed it shows the way to the picked node, open the tree.
    * A lazy tree needs `path`, so the way to a node set from code can be loaded.
    */
-  addDropDownTreeSelect<K extends keyof V & string>(
+  public addDropDownTreeSelect<K extends keyof V & string>(
     name: K, label = '', options: DropDownTreeSelectOptions<NonNullable<V[K]> & TreeKey> = {},
   ): DropDownTreeSelect<NonNullable<V[K]> & TreeKey> {
     return this.addControl(name, new DropDownTreeSelect<NonNullable<V[K]> & TreeKey>(label, options));
   }
 
   /** Several nodes of a tree, a list of ids. */
-  addTreeMultiSelect<K extends ListKeys<V>>(
+  public addTreeMultiSelect<K extends ListKeys<V>>(
     name: K, label = '', options: TreeSelectOptions<ItemOf<V[K]> & TreeKey> = {},
   ): TreeSelect<ItemOf<V[K]> & TreeKey, (ItemOf<V[K]> & TreeKey)[]> {
     return this.addControl(name, new TreeSelect<ItemOf<V[K]> & TreeKey, (ItemOf<V[K]> & TreeKey)[]>(label, options, true));
   }
 
-  addHidden(name: KeysFor<V, string>, value = ''): HiddenField {
+  public addHidden(name: KeysFor<V, string>, value = ''): HiddenField {
     const control = this.addControl(name, new HiddenField());
     control.setValue(value);
     return control;
   }
 
   /** A button is not among the values. Several buttons can be told apart by isSubmittedBy(). */
-  addSubmit(name: string, caption = ''): SubmitButton {
+  public addSubmit(name: string, caption = ''): SubmitButton {
     return this.addControl(name, new SubmitButton(caption));
   }
 
-  get<K extends keyof V & string>(name: K): FormControl<V[K]> {
+  public get<K extends keyof V & string>(name: K): FormControl<V[K]> {
     const member = this.members.get(name);
     if (!(member instanceof FormControl)) throw new Error(`The form has no control '${name}'.`);
     return member;
   }
 
-  getContainer<K extends ObjectKeys<V>>(name: K): Container<NonNullable<V[K]>> {
+  public getContainer<K extends ObjectKeys<V>>(name: K): Container<NonNullable<V[K]>> {
     const member = this.members.get(name);
     if (!(member instanceof Container)) throw new Error(`The form has no container '${name}'.`);
     return member;
   }
 
-  getMultiplier<K extends RowListKeys<V>>(name: K): Multiplier<ItemOf<V[K]> & object> {
+  public getMultiplier<K extends RowListKeys<V>>(name: K): Multiplier<ItemOf<V[K]> & object> {
     const member = this.members.get(name);
     if (!(member instanceof Multiplier)) throw new Error(`The form has no multiplier '${name}'.`);
     return member;
   }
 
   /** Values of the container, without disabled and omitted controls. Reads state, so a template follows it. */
-  getValues(): V {
+  public getValues(): V {
     const values: Record<string, unknown> = {};
     for (const [name, member] of this.members) {
       if (member instanceof FormControl) {
@@ -276,7 +276,7 @@ export class Container<V extends object = Record<string, any>> implements Owner 
   }
 
   /** Fills the controls, also nested containers and rows, typically with data loaded from the server. */
-  setValues(values: DeepPartial<V>): this {
+  public setValues(values: DeepPartial<V>): this {
     batch(() => {
       for (const [name, value] of Object.entries(values)) {
         const member = this.members.get(name);
@@ -289,7 +289,7 @@ export class Container<V extends object = Record<string, any>> implements Owner 
   }
 
   /** Checks all controls inside, also nested. Returns whether they are valid. */
-  validateAll(): boolean {
+  public validateAll(): boolean {
     let valid = true;
     batch(() => {
       for (const member of this.members.values()) {
@@ -299,12 +299,12 @@ export class Container<V extends object = Record<string, any>> implements Owner 
     return valid;
   }
 
-  hasErrors(): boolean {
+  public hasErrors(): boolean {
     return [...this.members.values()].some(member => member.hasErrors());
   }
 
   /** Empties all controls inside and their errors. */
-  reset(): void {
+  public reset(): void {
     batch(() => {
       for (const member of this.members.values()) {
         if (member instanceof FormControl) {
@@ -318,7 +318,7 @@ export class Container<V extends object = Record<string, any>> implements Owner 
   }
 
   /** Finds what a path from the server leads to, e.g. ['customer', 'city'] or ['lines', '2', 'quantity']. */
-  resolve(path: string[]): Member | null {
+  public resolve(path: string[]): Member | null {
     const [first, ...rest] = path;
     const member = first === undefined ? undefined : this.members.get(first);
     if (!member) return null;
@@ -327,7 +327,7 @@ export class Container<V extends object = Record<string, any>> implements Owner 
   }
 
   /** Focuses the first control with an error. Returns whether there was one. */
-  focusFirstError(): boolean {
+  public focusFirstError(): boolean {
     for (const member of this.members.values()) {
       if (member instanceof FormControl) {
         if (member.hasErrors()) {
@@ -342,7 +342,7 @@ export class Container<V extends object = Record<string, any>> implements Owner 
   }
 
   /** Visibility of elements switched by toggle() in rules of the controls inside. */
-  collectToggles(into: Map<string, boolean>): void {
+  public collectToggles(into: Map<string, boolean>): void {
     for (const member of this.members.values()) {
       if (member instanceof FormControl) member.rules.collectToggles(into);
       else member.collectToggles(into);

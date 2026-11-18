@@ -5,21 +5,21 @@ interface Item { name: string; done: State<boolean> }
 
 /** Without key: rows belong to the objects, what changes in a row is a state inside the item. */
 export default class Items extends Component {
-  readonly draft = state('');
-  readonly items = state<Item[]>([
+  public readonly draft = state('');
+  public readonly items = state<Item[]>([
     { name: 'Mléko', done: state(false) },
     { name: 'Chléb', done: state(true) },
   ]);
-  readonly remaining = computed(() => this.items().filter(item => !item.done()).length);
+  public readonly remaining = computed(() => this.items().filter(item => !item.done()).length);
 
-  add() {
+  public add() {
     const name = this.draft().trim();
     if (!name) return;
     this.items.update(items => [...items, { name, done: state(false) }]);
     this.draft.set('');
   }
 
-  render() {
+  public render() {
     return (
       <div>
         <form onSubmit={event => { event.preventDefault(); this.add(); }}>

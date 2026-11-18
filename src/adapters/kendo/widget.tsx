@@ -37,22 +37,22 @@ export interface KendoWidgetProps<W extends KendoWidgetInstance = KendoWidgetIns
 }
 
 export class KendoWidget<W extends KendoWidgetInstance = KendoWidgetInstance> extends Component<KendoWidgetProps<W>> {
-  static $inject = () => [Kendo];
+  public static $inject = () => [Kendo];
 
   /** The widget, null until the element is in the page. */
-  widget: W | null = null;
+  public widget: W | null = null;
   private host!: HTMLElement;
 
-  constructor(private kendo: Kendo) {
+  public constructor(private kendo: Kendo) {
     super();
   }
 
-  render() {
+  public render() {
     // Kendo wraps its element in its own elements; ours is only the host, so nothing of Kendo is left behind
     return <span class={() => ['phlox-kendo', read(this.props.class)].filter(Boolean).join(' ')} ref={element => { this.host = element; }} />;
   }
 
-  override afterRender() {
+  public override afterRender() {
     const { props } = this;
     const element = document.createElement(props.tag ?? (INPUTS.has(props.widget) ? 'input' : 'div'));
     if (props.id) element.id = props.id;

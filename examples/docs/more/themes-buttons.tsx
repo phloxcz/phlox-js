@@ -3,9 +3,9 @@ import type { Motion } from '@phloxcz/phlox-js';
 
 /** Buttons with the classes of the theme, and the one switch of animations. Switch the look in the header. */
 export default class Looks extends Component {
-  readonly open = state(false);
+  public readonly open = state(false);
 
-  render() {
+  public render() {
     return (
       <div>
         <p style={{ display: 'flex', flexWrap: 'wrap', gap: '.5rem' }}>

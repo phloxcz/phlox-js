@@ -4,11 +4,11 @@
 import { route } from '@phloxcz/phlox-js';
 
 class TasksPresenter extends Presenter {
-  readonly detail = route('detail', '/<task:int>', { presenter: TaskDetailPresenter, props: ({ task }) => ({ taskId: task }) });
+  public readonly detail = route('detail', '/<task:int>', { presenter: TaskDetailPresenter, props: ({ task }) => ({ taskId: task }) });
 
-  override routes: Route[] = [{ name: 'default', pattern: '/' }, this.detail];
+  public override routes: Route[] = [{ name: 'default', pattern: '/' }, this.detail];
 
-  render() {
+  public render() {
     return <a href={this.link(this.detail, { task: 5 })}>Úkol 5</a>;   // task chybí nebo je text: chyba kompilace
   }
 }

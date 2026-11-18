@@ -9,9 +9,9 @@ const MOTIONS: [Motion, string][] = [['system', 'Podle systému'], ['on', 'Zapnu
 
 /** The profile of the user and the animations at /settings. Leaving with an unsaved profile asks first. */
 export default class SettingsPresenter extends Presenter {
-  form = new Form<ProfileInput>();
+  public form = new Form<ProfileInput>();
 
-  constructor(private api: HelpdeskApi, private store: Store) {
+  public constructor(private api: HelpdeskApi, private store: Store) {
     super();
     this.form.addText('name', 'Jméno').setRequired('Vyplňte jméno.');
     this.form.addText('title', 'Pozice');
@@ -23,20 +23,20 @@ export default class SettingsPresenter extends Presenter {
     };
   }
 
-  override pageTitle() {
+  public override pageTitle() {
     return 'Nastavení';
   }
 
-  override startup() {
+  public override startup() {
     const me = this.store.user(Number(this.user.getId()));
     if (me) this.form.setDefaults({ name: me.name, title: me.title });
   }
 
-  override hasUnsavedChanges() {
+  public override hasUnsavedChanges() {
     return this.form.isChanged();
   }
 
-  render() {
+  public render() {
     return (
       <section class="hd-column hd-page" aria-labelledby="hd-settings-title">
         <h1 id="hd-settings-title">Nastavení</h1>

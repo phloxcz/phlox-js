@@ -2,9 +2,9 @@ import { Component, state } from '@phloxcz/phlox-js';
 
 /** Events, a live attribute, the element through ref, and SVG right in the template. */
 export default class Events extends Component {
-  readonly draft = state('');
+  public readonly draft = state('');
 
-  render() {
+  public render() {
     return (
       <div>
         <input value={this.draft} placeholder="Pište…" onInput={event => this.draft.set(event.currentTarget.value)} />

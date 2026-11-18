@@ -6,10 +6,10 @@ interface ArticleInput { title: string; cover: File | null; attachments: File[] 
 
 /** Nothing is uploaded: the value is File objects and onSuccess decides what to do with them. */
 export default class Uploads extends Component {
-  readonly form = new Form<ArticleInput>();
-  readonly sent = state<ArticleInput | null>(null);
+  public readonly form = new Form<ArticleInput>();
+  public readonly sent = state<ArticleInput | null>(null);
 
-  constructor() {
+  public constructor() {
     super();
     this.form.addText('title', 'Název').setRequired('Vyplňte název.');
     this.form.addUpload('cover', 'Obrázek')
@@ -22,7 +22,7 @@ export default class Uploads extends Component {
     this.form.onSuccess = values => this.sent.set(values);
   }
 
-  render() {
+  public render() {
     return (
       <div>
         <FormView form={this.form} />

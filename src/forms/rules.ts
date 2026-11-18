@@ -158,20 +158,20 @@ export class Rules {
   /** The condition this set of rules belongs to, for elseCondition(). */
   private owner: Condition | null = null;
 
-  constructor(private control: FormControl<any>, private parent: Rules | null = null) {}
+  public constructor(private control: FormControl<any>, private parent: Rules | null = null) {}
 
-  addRule(validator: Validator, message: string | null = null, arg?: unknown): this {
+  public addRule(validator: Validator, message: string | null = null, arg?: unknown): this {
     this.items.push({ validator, arg, message });
     return this;
   }
 
   /** Rules added after this apply only when the condition holds, until endCondition(). */
-  addCondition(validator: Validator, arg?: unknown): Rules {
+  public addCondition(validator: Validator, arg?: unknown): Rules {
     return this.addConditionOn(this.control, validator, arg);
   }
 
   /** The same as addCondition(), but the condition checks another control. */
-  addConditionOn(control: FormControl<any>, validator: Validator, arg?: unknown): Rules {
+  public addConditionOn(control: FormControl<any>, validator: Validator, arg?: unknown): Rules {
     const branch = new Rules(this.control, this);
     const condition: Condition = { control, validator, arg, branch, otherwise: null };
     branch.owner = condition;
@@ -180,36 +180,36 @@ export class Rules {
   }
 
   /** Rules for when the condition does not hold. */
-  elseCondition(): Rules {
+  public elseCondition(): Rules {
     if (!this.owner || !this.parent) throw new Error('elseCondition() must follow addCondition().');
     this.owner.otherwise ??= new Rules(this.control, this.parent);
     return this.owner.otherwise;
   }
 
-  endCondition(): Rules {
+  public endCondition(): Rules {
     if (!this.parent) throw new Error('endCondition() must follow addCondition().');
     return this.parent;
   }
 
   /** Shows the element with the id while the condition holds, hides it otherwise. With false the other way round. */
-  toggle(id: string, show = true): this {
+  public toggle(id: string, show = true): this {
     this.toggles.set(id, show);
     return this;
   }
 
   /** Makes the control required, or not. In a condition it is required only while the condition holds. */
-  setRequired(message: string | boolean = true): this {
+  public setRequired(message: string | boolean = true): this {
     this.items = this.items.filter(item => !('message' in item) || item.validator !== validators.Filled);
     if (message !== false) this.items.unshift({ validator: validators.Filled, arg: undefined, message: message === true ? null : message });
     return this;
   }
 
-  isRequired(): boolean {
+  public isRequired(): boolean {
     return this.items.some(item => 'message' in item && item.validator === validators.Filled);
   }
 
   /** Rules that apply now: the own ones and those of conditions that hold. */
-  active(): { validator: Validator; arg: unknown }[] {
+  public active(): { validator: Validator; arg: unknown }[] {
     return this.items.flatMap(item => {
       if (!('branch' in item)) return [item];
       return (item.validator(item.control, item.arg) ? item.branch : item.otherwise)?.active() ?? [];
@@ -217,7 +217,7 @@ export class Rules {
   }
 
   /** Returns the first error, as Nette stops at the first rule that fails. */
-  validate(): string | null {
+  public validate(): string | null {
     for (const item of this.items) {
       if ('branch' in item) {
         const holds = item.validator(item.control, item.arg);
@@ -234,7 +234,7 @@ export class Rules {
   }
 
   /** Visibility of toggled elements: shown when any rule says so. */
-  collectToggles(into: Map<string, boolean>, active = true): void {
+  public collectToggles(into: Map<string, boolean>, active = true): void {
     for (const [id, show] of this.toggles) into.set(id, (into.get(id) ?? false) || (active ? show : !show));
     for (const item of this.items) {
       if (!('branch' in item)) continue;

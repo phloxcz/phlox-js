@@ -17,7 +17,7 @@ Vlastní adaptér pro jinou knihovnu toastů:
 
 ```ts
 class ToastifyFlashMessages extends FlashMessages {
-  override add(text: string, type = 'info', options: FlashOptions = {}): Flash {
+  public override add(text: string, type = 'info', options: FlashOptions = {}): Flash {
     const duration = options.duration ?? this.duration;
     Toastify({ text, className: type, duration }).showToast();
     return { text, type, duration };

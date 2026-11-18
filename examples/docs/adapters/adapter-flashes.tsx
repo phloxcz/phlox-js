@@ -3,9 +3,9 @@ import type { Container, Flash, FlashOptions } from '@phloxcz/phlox-js';
 
 /** An adapter: another service for flash messages, here a log line instead of toasts. */
 class LogFlashMessages extends FlashMessages {
-  readonly log = state<string[]>([]);
+  public readonly log = state<string[]>([]);
 
-  override add(text: string, type = 'info', options: FlashOptions = {}): Flash {
+  public override add(text: string, type = 'info', options: FlashOptions = {}): Flash {
     const time = new Date().toLocaleTimeString('cs');
     this.log.update(log => [`${time} [${type}] ${options.title ? `${options.title}: ` : ''}${text}`, ...log].slice(0, 5));
     return { text, type, duration: 0 };
@@ -18,7 +18,7 @@ export function services(container: Container) {
 }
 
 export default class AdapterDemo extends Presenter {
-  render() {
+  public render() {
     const flashes = this.app.flashes as LogFlashMessages;
     return (
       <div>

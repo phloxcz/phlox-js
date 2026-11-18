@@ -15,9 +15,9 @@ const load = (): Task[] => {
 
 /** With key: rows with the same id stay when new objects come, so does text typed into them. */
 export default class Keyed extends Component {
-  readonly tasks = state<Task[]>(load());
+  public readonly tasks = state<Task[]>(load());
 
-  render() {
+  public render() {
     return (
       <div>
         <Button onClick={() => this.tasks.set(load())}>Načíst znovu</Button>

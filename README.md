@@ -18,9 +18,9 @@ Balíček zatím není na npm, instaluje se z GitHubu podle tagu. Potřebuje Vit
 import { Application, Container, Presenter, state } from '@phloxcz/phlox-js';
 
 class HomePresenter extends Presenter {
-  readonly count = state(0);
+  public readonly count = state(0);
 
-  render() {
+  public render() {
     return <button onClick={() => this.count.update(n => n + 1)}>Kliknuto: {this.count}</button>;
   }
 }

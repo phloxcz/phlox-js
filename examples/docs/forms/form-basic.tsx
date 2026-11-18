@@ -10,10 +10,10 @@ interface CreateTask {
 
 /** A form like Nette\Forms: controls, rules, onSuccess with typed values, setDefaults and isChanged. */
 export default class TaskForm extends Component {
-  readonly form = new Form<CreateTask>();
-  readonly saved = state<CreateTask | null>(null);
+  public readonly form = new Form<CreateTask>();
+  public readonly saved = state<CreateTask | null>(null);
 
-  constructor() {
+  public constructor() {
     super();
     this.form.addText('name', 'Název')
       .setRequired('Vyplňte název.')
@@ -28,7 +28,7 @@ export default class TaskForm extends Component {
     };
   }
 
-  render() {
+  public render() {
     return (
       <div>
         <FormView form={this.form} />

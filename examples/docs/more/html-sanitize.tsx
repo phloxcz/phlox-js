@@ -5,10 +5,10 @@ const SAMPLE = '<p onclick="steal()">Ahoj <strong>světe</strong>, <a href="java
 
 /** HTML written by a user, cleaned: what stays and what is dropped. */
 export default class Sanitize extends Component {
-  readonly html = state(SAMPLE);
-  readonly clean = computed(() => sanitizeHtml(this.html()));
+  public readonly html = state(SAMPLE);
+  public readonly clean = computed(() => sanitizeHtml(this.html()));
 
-  render() {
+  public render() {
     return (
       <div style={{ display: 'grid', gap: '.75rem' }}>
         <label>

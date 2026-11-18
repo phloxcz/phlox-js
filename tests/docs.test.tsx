@@ -37,7 +37,7 @@ describe('documentation', () => {
       module.services?.(services);
       const View = module.default;
       const root = isPresenter(View) ? View : class extends Presenter {
-        render() {
+        public render() {
           return h(View as never, {});
         }
       };

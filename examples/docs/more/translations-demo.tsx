@@ -18,16 +18,16 @@ const { t } = translator;
 
 /** Keys checked by the compiler, plurals by the rules of the language, numbers in its format. */
 export default class Translations extends Component {
-  readonly count = state(1);
-  readonly locale = state('cs');
+  public readonly count = state(1);
+  public readonly locale = state('cs');
 
-  switchTo(locale: 'cs' | 'en') {
+  public switchTo(locale: 'cs' | 'en') {
     translator.setLocale(locale, locale === 'cs' ? cs : en);
     // In an application: app.restart() builds the screens again; here only this demo reads the locale
     this.locale.set(locale);
   }
 
-  render() {
+  public render() {
     return (
       <div>
         <p>

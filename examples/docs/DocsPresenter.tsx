@@ -6,23 +6,23 @@ import { PagePresenter } from './PagePresenter';
 
 /** The layout of the documentation: the menu of sections on the left, the page on the right. */
 export class DocsPresenter extends Presenter {
-  override routes: Route[] = [
+  public override routes: Route[] = [
     { name: 'home', pattern: '/' },
     { name: 'page', pattern: '/<section>/<page>', presenter: PagePresenter, props: ({ section, page }) => ({ route: `/${section}/${page}` }) },
   ];
 
   /** The menu on a phone, opened by the button in the header. */
-  readonly menuOpen = state(false);
+  public readonly menuOpen = state(false);
 
-  actionHome() {
+  public actionHome() {
     this.redirect('/start/introduction');
   }
 
-  override pageTitle() {
+  public override pageTitle() {
     return null;
   }
 
-  render() {
+  public render() {
     const current = () => `/${this.params().section}/${this.params().page}`;
     return (
       <div class={() => `docs ${this.menuOpen() ? 'docs-menu-open' : ''}`}>

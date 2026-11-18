@@ -6,10 +6,10 @@ DTO s vnořeným objektem a se seznamem objektů, třeba faktura s odběratelem 
 interface Line { name: string; quantity: number | null; price: number | null }
 interface Invoice { number: string; customer: { name: string; city: string }; lines: Line[] }
 
-form = new Form<Invoice>();
-lines: Multiplier<Line>;
+public readonly form = new Form<Invoice>();
+public readonly lines: Multiplier<Line>;
 
-constructor() {
+public constructor() {
   super();
   this.form.addText('number', 'Číslo:');
 
@@ -27,7 +27,7 @@ constructor() {
 }
 
 // Součet sleduje psaní v každém řádku i přidání, odebrání a přesun
-total = computed(() => this.lines.getValues().reduce((sum, line) => sum + (line.quantity ?? 0) * (line.price ?? 0), 0));
+public readonly total = computed(() => this.lines.getValues().reduce((sum, line) => sum + (line.quantity ?? 0) * (line.price ?? 0), 0));
 ```
 
 <!-- demo: containers-invoice -->
@@ -74,7 +74,7 @@ Ručně, třeba jako tabulku bez popisků v každém řádku:
 Tažení řádků stojí na funkci `dragToSort` z `@phloxcz/phlox-js`, kterou jde použít pro jakýkoli seznam:
 
 ```tsx
-render() {
+public render() {
   let list: HTMLElement;
   return (
     <ul ref={el => { list = el; }}>

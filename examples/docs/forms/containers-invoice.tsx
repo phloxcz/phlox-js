@@ -7,11 +7,11 @@ interface Invoice { number: string; customer: { name: string; city: string }; li
 
 /** A nested object (a container) and rows the user adds, removes and sorts (a multiplier), a live total. */
 export default class InvoiceForm extends Component {
-  readonly form = new Form<Invoice>();
-  readonly lines: Multiplier<Line>;
-  readonly total = computed(() => this.lines.getValues().reduce((sum, line) => sum + (line.quantity ?? 0) * (line.price ?? 0), 0));
+  public readonly form = new Form<Invoice>();
+  public readonly lines: Multiplier<Line>;
+  public readonly total = computed(() => this.lines.getValues().reduce((sum, line) => sum + (line.quantity ?? 0) * (line.price ?? 0), 0));
 
-  constructor() {
+  public constructor() {
     super();
     this.form.addText('number', 'Číslo faktury').setRequired('Vyplňte číslo.');
     const customer = this.form.addContainer('customer', 'Odběratel');
@@ -27,7 +27,7 @@ export default class InvoiceForm extends Component {
     this.form.onSuccess = values => this.alert(<pre>{JSON.stringify(values, null, 1)}</pre>, { title: 'Hodnoty' });
   }
 
-  render() {
+  public render() {
     return (
       <div>
         <FormView form={this.form} />

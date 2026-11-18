@@ -41,11 +41,11 @@ function fitToContent(frame: HTMLIFrameElement): void {
 }
 
 export class DemoBox extends Component<{ name: string; demo: Demo }> {
-  readonly tab = state<'demo' | 'code'>('demo');
-  readonly view = state<DemoModule['default'] | null>(null);
-  readonly framed = state(false);
+  public readonly tab = state<'demo' | 'code'>('demo');
+  public readonly view = state<DemoModule['default'] | null>(null);
+  public readonly framed = state(false);
 
-  override async startup() {
+  public override async startup() {
     const module = await this.props.demo.load();
     if (isPresenter(module.default)) {
       this.framed.set(true);
@@ -58,7 +58,7 @@ export class DemoBox extends Component<{ name: string; demo: Demo }> {
     this.view.set(module.default);
   }
 
-  render() {
+  public render() {
     const { demo } = this.props;
     const frame = `/frame/${demo.file.replace(/\.tsx$/, '')}/`;
     const tab = (name: 'demo' | 'code', text: string) => (

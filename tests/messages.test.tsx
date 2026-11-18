@@ -4,7 +4,7 @@ import { Grid, GridView } from '../src/components/index';
 import { boot, tick } from './helpers';
 
 class Page extends Presenter {
-  render() { return <button id="anchor">Smazat</button>; }
+  public render() { return <button id="anchor">Smazat</button>; }
 }
 
 const toasts = () => [...document.querySelectorAll<HTMLElement>('.cap-notify')];
@@ -183,7 +183,7 @@ test('the grid asks by a popover at the button of the action', async () => {
   grid.addTextColumn('name', 'Název');
   grid.addAction('Smazat', { onClick: row => void rows.splice(rows.indexOf(row), 1), confirm: row => `Smazat ${row.name}?`, primary: true, danger: true });
   class Orders extends Presenter {
-    render() { return <GridView grid={grid} />; }
+    public render() { return <GridView grid={grid} />; }
   }
   const { element } = await boot(Orders);
   await tick();

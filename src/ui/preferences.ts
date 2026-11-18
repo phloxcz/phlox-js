@@ -8,12 +8,12 @@ import type { State } from '../reactive/reactive';
 
 export abstract class Preferences {
   /** The remembered value, undefined when there is none. */
-  abstract get<T>(key: string): T | undefined;
+  public abstract get<T>(key: string): T | undefined;
   /** Remembers the value. */
-  abstract set(key: string, value: unknown): void;
+  public abstract set(key: string, value: unknown): void;
 
   /** A state that starts with the remembered value (or `initial`) and remembers every change. */
-  state<T>(key: string, initial: T): State<T> {
+  public state<T>(key: string, initial: T): State<T> {
     const value = state<T>(this.get<T>(key) ?? initial);
     const set = value.set;
     value.set = next => {
@@ -27,11 +27,11 @@ export abstract class Preferences {
 
 /** Keeps the settings in localStorage as JSON, each under `prefix` + key. A blocked storage only forgets them. */
 export class BrowserPreferences extends Preferences {
-  constructor(private prefix = 'phlox.', private storage: () => Storage | null = () => globalThis.localStorage ?? null) {
+  public constructor(private prefix = 'phlox.', private storage: () => Storage | null = () => globalThis.localStorage ?? null) {
     super();
   }
 
-  get<T>(key: string): T | undefined {
+  public get<T>(key: string): T | undefined {
     try {
       const saved = this.storage()?.getItem(this.prefix + key);
       return saved === null || saved === undefined ? undefined : (JSON.parse(saved) as T);
@@ -40,7 +40,7 @@ export class BrowserPreferences extends Preferences {
     }
   }
 
-  set(key: string, value: unknown): void {
+  public set(key: string, value: unknown): void {
     try {
       this.storage()?.setItem(this.prefix + key, JSON.stringify(value));
     } catch {

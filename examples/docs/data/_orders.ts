@@ -59,30 +59,30 @@ export class OrderStore {
   private orders: Order[] = generate();
 
   /** What a POST /orders/query of phloxcz/api-query would do, here with applyQuery() of the framework. */
-  async list(query: GridQuery): Promise<GridResult<Order>> {
+  public async list(query: GridQuery): Promise<GridResult<Order>> {
     await delay(250);
     return applyQuery(this.orders, query, ['customer', 'product', 'owner']);
   }
 
-  async get(id: number): Promise<Order | null> {
+  public async get(id: number): Promise<Order | null> {
     await delay(100);
     const order = this.orders.find(other => other.id === id);
     return order ? { ...order } : null;
   }
 
   /** Owners for the filter with search, like an endpoint for a DropDownList. */
-  async owners(text: string): Promise<string[]> {
+  public async owners(text: string): Promise<string[]> {
     await delay(150);
     const words = text.toLocaleLowerCase('cs');
     return OWNERS.filter(owner => owner.toLocaleLowerCase('cs').includes(words));
   }
 
-  async setPaid(ids: number[], paid: boolean): Promise<void> {
+  public async setPaid(ids: number[], paid: boolean): Promise<void> {
     await delay(200);
     for (const order of this.orders) if (ids.includes(order.id)) order.paid = paid;
   }
 
-  async remove(ids: number[]): Promise<void> {
+  public async remove(ids: number[]): Promise<void> {
     await delay(200);
     this.orders = this.orders.filter(order => !ids.includes(order.id));
   }

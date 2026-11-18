@@ -23,7 +23,7 @@ export abstract class Dialogs {
    * The user's request to close the window (Escape, ×, a click beside it) must go through component.cancel().
    * Returns a function that removes the window.
    */
-  abstract show(dialog: Component<any, any>, options?: DialogOptions): () => void;
+  public abstract show(dialog: Component<any, any>, options?: DialogOptions): () => void;
 }
 
 /**
@@ -31,7 +31,7 @@ export abstract class Dialogs {
  * of opening and closing (and of the backdrop) are in styles/base.css and follow setMotion().
  */
 export class NativeDialogs extends Dialogs {
-  show(dialog: Component<any, any>, options: DialogOptions = {}): () => void {
+  public show(dialog: Component<any, any>, options: DialogOptions = {}): () => void {
     const element = document.createElement('dialog');
     // Escape must close the dialog through the component: it may ask about unsaved changes, the opener gets its result
     element.addEventListener('cancel', event => {

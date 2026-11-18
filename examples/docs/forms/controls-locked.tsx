@@ -14,12 +14,12 @@ interface Values {
 
 /** Read-only and disabled controls, disabled items; the buttons switch the state of the first three fields. */
 export default class LockedControls extends Component {
-  readonly form = new Form<Values>();
-  readonly lock = state<Lock>('none');
+  public readonly form = new Form<Values>();
+  public readonly lock = state<Lock>('none');
   private readonly locked: FormControl[];
-  readonly values = computed(() => JSON.stringify(this.form.getValues(), null, 1));
+  public readonly values = computed(() => JSON.stringify(this.form.getValues(), null, 1));
 
-  constructor() {
+  public constructor() {
     super();
     const f = this.form;
     this.locked = [
@@ -36,7 +36,7 @@ export default class LockedControls extends Component {
     this.setLock('readonly');
   }
 
-  setLock(lock: Lock) {
+  public setLock(lock: Lock) {
     this.lock.set(lock);
     for (const control of this.locked) {
       control.setReadOnly(lock === 'readonly');
@@ -44,7 +44,7 @@ export default class LockedControls extends Component {
     }
   }
 
-  render() {
+  public render() {
     const choice = (value: Lock, caption: string) => (
       <button type="button" class={() => `btn btn-sm ${this.lock() === value ? 'btn-primary' : 'btn-outline-primary'}`}
         onClick={() => this.setLock(value)}>{caption}</button>

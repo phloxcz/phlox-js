@@ -6,15 +6,15 @@ Seznam, který závisí na stavu (záložka, filtr, vybraný projekt), si řekne
 import type { Resource } from '@phloxcz/phlox-js';
 
 class TasksPresenter extends Presenter<{ projectId: number }> {
-  readonly status = computed(() => this.params().status ?? null);
-  tasks!: Resource<TaskPage>;
+  public readonly status = computed(() => this.params().status ?? null);
+  public tasks!: Resource<TaskPage>;
 
-  override async startup() {
+  public override async startup() {
     this.tasks = this.resource(() => this.api.call('task.list', { projectId: this.props.projectId, status: this.status() }));
     await this.tasks.ready();   // obrazovka se ukáže až s daty
   }
 
-  render() {
+  public render() {
     return <For each={() => this.tasks()?.data ?? []} key={task => task.id}>{task => <li>{() => task().title}</li>}</For>;
   }
 }

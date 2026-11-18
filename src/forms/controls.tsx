@@ -29,21 +29,21 @@ export function toPairs<T>(items: Items<T>): [T, string][] {
 
 export abstract class FormControl<T = unknown> {
   /** Set by the form when the control is added. */
-  form!: Form<any>;
+  public form!: Form<any>;
   /** The form or a nested container the control is in. */
-  container!: Container<any>;
-  name = '';
-  readonly errors = state<string[]>([]);
-  readonly disabled = state(false);
+  public container!: Container<any>;
+  public name = '';
+  public readonly errors = state<string[]>([]);
+  public readonly disabled = state(false);
   /** Shown as usual but the user cannot change it; unlike disabled it stays in the values, see setReadOnly(). */
-  readonly readOnly = state(false);
-  readonly rules: Rules;
+  public readonly readOnly = state(false);
+  public readonly rules: Rules;
   /** Left out of getValues(). Buttons are omitted, other controls can be by setOmitted(). */
-  omitted = false;
+  public omitted = false;
   /** The element the user works with, for focus after a failed validation. */
-  element: HTMLElement | null = null;
+  public element: HTMLElement | null = null;
   /** The label is part of the input itself, e.g. a checkbox. */
-  readonly labelInInput: boolean = false;
+  public readonly labelInInput: boolean = false;
   /** The user has left the field after changing it: from now on the rules are checked while typing. */
   private touched = false;
   /** The user has changed the value, or opened its list. Leaving a field nobody has worked with checks nothing. */
@@ -54,54 +54,54 @@ export abstract class FormControl<T = unknown> {
    * typing: <h2>{control.value}</h2>. control.value() reads it, control.value.set(x) writes it to the field,
    * the same as getValue() and setValue().
    */
-  readonly value: State<T> = Object.assign(() => this.getValue(), {
+  public readonly value: State<T> = Object.assign(() => this.getValue(), {
     set: (value: T) => this.setValue(value),
     update: (change: (value: T) => T) => this.setValue(change(untrack(() => this.getValue()))),
   });
 
-  constructor(public label = '') {
+  public constructor(public label = '') {
     this.rules = new Rules(this);
   }
 
-  get htmlId(): string {
+  public get htmlId(): string {
     return `${this.container.idPrefix}-${this.name}`;
   }
 
   /** The name attribute, like customer[city] in Nette for a control in a container. */
-  get htmlName(): string {
+  public get htmlName(): string {
     return this.container.htmlName(this.name);
   }
 
-  abstract getValue(): T;
-  abstract setValue(value: T): void;
-  abstract isFilled(): boolean;
+  public abstract getValue(): T;
+  public abstract setValue(value: T): void;
+  public abstract isFilled(): boolean;
 
   /** Renders the control, used by <Input>. */
-  abstract render(attributes: ExtraAttributes): Child;
+  public abstract render(attributes: ExtraAttributes): Child;
 
-  setRequired(message: string | boolean = true): this {
+  public setRequired(message: string | boolean = true): this {
     this.rules.setRequired(message);
     return this;
   }
 
-  isRequired(): boolean {
+  public isRequired(): boolean {
     return this.rules.isRequired();
   }
 
-  addRule(validator: Validator, message: string | null = null, arg?: unknown): this {
+  public addRule(validator: Validator, message: string | null = null, arg?: unknown): this {
     this.rules.addRule(validator, message, arg);
     return this;
   }
 
-  addCondition(validator: Validator, arg?: unknown): Rules {
+  public addCondition(validator: Validator, arg?: unknown): Rules {
     return this.rules.addCondition(validator, arg);
   }
 
-  addConditionOn(control: FormControl<any>, validator: Validator, arg?: unknown): Rules {
+  public addConditionOn(control: FormControl<any>, validator: Validator, arg?: unknown): Rules {
     return this.rules.addConditionOn(control, validator, arg);
   }
 
-  setDisabled(disabled = true): this {
+  public setDisabled(disabled = true): this {
     this.disabled.set(disabled);
     return this;
   }
@@ -110,49 +110,49 @@ export abstract class FormControl<T = unknown> {
    * Read-only, like readonly in HTML: the value is shown as usual (not greyed out), the user cannot change it,
    * and unlike setDisabled() it stays in the values of the form and is checked by the rules.
    */
-  setReadOnly(readOnly = true): this {
+  public setReadOnly(readOnly = true): this {
     this.readOnly.set(readOnly);
     return this;
   }
 
-  setOmitted(omitted = true): this {
+  public setOmitted(omitted = true): this {
     this.omitted = omitted;
     return this;
   }
 
-  addError(message: string): void {
+  public addError(message: string): void {
     this.errors.update(errors => [...errors, message]);
   }
 
-  hasErrors(): boolean {
+  public hasErrors(): boolean {
     return this.errors().length > 0;
   }
 
-  cleanErrors(): void {
+  public cleanErrors(): void {
     this.errors.set([]);
   }
 
   /** Puts the focus into the control, e.g. after a failed validation or from a button "Write a comment". */
-  focus(): void {
+  public focus(): void {
     this.element?.focus();
   }
 
   /** As if the user had not worked with the control yet: no errors, leaving it checks nothing. Used by reset(). */
-  pristine(): void {
+  public pristine(): void {
     this.touched = false;
     this.edited = false;
     this.errors.set([]);
   }
 
   /** Checks the rules. A disabled control is not checked, as in Nette. */
-  validate(): boolean {
+  public validate(): boolean {
     const error = this.disabled() ? null : this.rules.validate();
     this.errors.set(error ? [error] : []);
     return !error;
   }
 
   /** Attributes for an own element, like n:name in Latte: <input {...control.attrs()} class="x" />. */
-  attrs(): Record<string, unknown> {
+  public attrs(): Record<string, unknown> {
     return {
       id: this.htmlId,
       name: this.htmlName,
@@ -201,32 +201,32 @@ type TextKind = 'text' | 'integer' | 'float' | 'date';
 
 /** Text field. With addInteger() and addFloat() its value is a number, with addDate() a text YYYY-MM-DD. */
 export class TextInput<T = string> extends FormControl<T> {
-  readonly raw = state('');
+  public readonly raw = state('');
   private nullable = false;
-  htmlType = 'text';
+  public htmlType = 'text';
 
-  constructor(label = '', private kind: TextKind = 'text') {
+  public constructor(label = '', private kind: TextKind = 'text') {
     super(label);
     if (kind === 'integer' || kind === 'float') this.htmlType = 'number';
     if (kind === 'date') this.htmlType = 'date';
   }
 
   /** An empty field gives null instead of ''. Number and date fields are nullable always. */
-  setNullable(nullable = true): this {
+  public setNullable(nullable = true): this {
     this.nullable = nullable;
     return this;
   }
 
-  setHtmlType(type: string): this {
+  public setHtmlType(type: string): this {
     this.htmlType = type;
     return this;
   }
 
-  getRawValue(): string {
+  public getRawValue(): string {
     return this.raw();
   }
 
-  getValue(): T {
+  public getValue(): T {
     const raw = this.raw().trim();
     if (this.kind === 'text') return (raw === '' && this.nullable ? null : this.raw()) as T;
     if (raw === '') return null as T;
@@ -235,15 +235,15 @@ export class TextInput<T = string> extends FormControl<T> {
     return (Number.isNaN(number) ? null : number) as T;
   }
 
-  setValue(value: T): void {
+  public setValue(value: T): void {
     this.raw.set(value === null || value === undefined ? '' : String(value));
   }
 
-  isFilled(): boolean {
+  public isFilled(): boolean {
     return this.raw().trim() !== '';
   }
 
-  override attrs(): Record<string, unknown> {
+  public override attrs(): Record<string, unknown> {
     return {
       ...super.attrs(),
       readOnly: this.readOnly,
@@ -255,34 +255,34 @@ export class TextInput<T = string> extends FormControl<T> {
     };
   }
 
-  render(attributes: ExtraAttributes): Child {
+  public render(attributes: ExtraAttributes): Child {
     return <input type={this.htmlType} {...attributes} {...this.attrs()} class={this.classFor(attributes, 'input')} />;
   }
 }
 
 export class TextArea extends TextInput<string> {
-  override render(attributes: ExtraAttributes): Child {
+  public override render(attributes: ExtraAttributes): Child {
     return <textarea {...attributes} {...this.attrs()} class={this.classFor(attributes, 'textarea')} />;
   }
 }
 
 export class Checkbox extends FormControl<boolean> {
-  readonly checked = state(false);
-  override readonly labelInInput = true;
+  public readonly checked = state(false);
+  public override readonly labelInInput = true;
 
-  getValue(): boolean {
+  public getValue(): boolean {
     return this.checked();
   }
 
-  setValue(value: boolean): void {
+  public setValue(value: boolean): void {
     this.checked.set(Boolean(value));
   }
 
-  isFilled(): boolean {
+  public isFilled(): boolean {
     return this.checked();
   }
 
-  override attrs(): Record<string, unknown> {
+  public override attrs(): Record<string, unknown> {
     return {
       ...super.attrs(),
       checked: this.checked,
@@ -295,7 +295,7 @@ export class Checkbox extends FormControl<boolean> {
   }
 
   /** The checkbox inside its label, as in Nette. */
-  render(attributes: ExtraAttributes): Child {
+  public render(attributes: ExtraAttributes): Child {
     return (
       <label class={currentTheme().class('checkbox')}>
         <input type="checkbox" {...attributes} {...this.attrs()} class={this.classFor(attributes, 'checkboxInput')} /> {this.label}
@@ -321,29 +321,29 @@ function selectReadOnly(control: FormControl<any>): Record<string, unknown> {
 
 /** Common part of controls with choices. */
 abstract class ChoiceControl<T, V> extends FormControl<V> {
-  readonly items = state<[T, string][]>([]);
+  public readonly items = state<[T, string][]>([]);
   /** Items that are shown but cannot be chosen, see setDisabled(). */
-  readonly disabledItems = state<T[]>([]);
+  public readonly disabledItems = state<T[]>([]);
 
-  constructor(label = '', items: Items<T> = []) {
+  public constructor(label = '', items: Items<T> = []) {
     super(label);
     this.setItems(items);
   }
 
   /** Choices can be set later, e.g. when they come from the server. */
-  setItems(items: Items<T>): this {
+  public setItems(items: Items<T>): this {
     this.items.set(toPairs(items));
     return this;
   }
 
   /** true or false for the whole control, or the values of items that cannot be chosen: setDisabled(['b']), as in Nette. */
-  override setDisabled(disabled: boolean | T[] = true): this {
+  public override setDisabled(disabled: boolean | T[] = true): this {
     if (!Array.isArray(disabled)) return super.setDisabled(disabled);
     this.disabledItems.set([...disabled]);
     return this;
   }
 
-  isItemDisabled(value: T): boolean {
+  public isItemDisabled(value: T): boolean {
     return this.disabledItems().some(item => Object.is(item, value));
   }
 
@@ -353,28 +353,28 @@ abstract class ChoiceControl<T, V> extends FormControl<V> {
 }
 
 export class SelectBox<T = string> extends ChoiceControl<T, T | null> {
-  readonly selected = state<T | null>(null);
+  public readonly selected = state<T | null>(null);
   private prompt: string | null = null;
 
   /** The first option without a value, like setPrompt() in Nette. */
-  setPrompt(prompt: string | null): this {
+  public setPrompt(prompt: string | null): this {
     this.prompt = prompt;
     return this;
   }
 
-  getValue(): T | null {
+  public getValue(): T | null {
     return this.selected();
   }
 
-  setValue(value: T | null): void {
+  public setValue(value: T | null): void {
     this.selected.set(value);
   }
 
-  isFilled(): boolean {
+  public isFilled(): boolean {
     return this.selected() !== null;
   }
 
-  render(attributes: ExtraAttributes): Child {
+  public render(attributes: ExtraAttributes): Child {
     return (
       <select
         {...attributes}
@@ -401,21 +401,21 @@ export class SelectBox<T = string> extends ChoiceControl<T, T | null> {
 }
 
 export class MultiSelectBox<T = string> extends ChoiceControl<T, T[]> {
-  readonly selected = state<T[]>([]);
+  public readonly selected = state<T[]>([]);
 
-  getValue(): T[] {
+  public getValue(): T[] {
     return this.selected();
   }
 
-  setValue(value: T[]): void {
+  public setValue(value: T[]): void {
     this.selected.set([...(value ?? [])]);
   }
 
-  isFilled(): boolean {
+  public isFilled(): boolean {
     return this.selected().length > 0;
   }
 
-  render(attributes: ExtraAttributes): Child {
+  public render(attributes: ExtraAttributes): Child {
     return (
       <select
         multiple
@@ -440,21 +440,21 @@ export class MultiSelectBox<T = string> extends ChoiceControl<T, T[]> {
 }
 
 export class RadioList<T = string> extends ChoiceControl<T, T | null> {
-  readonly selected = state<T | null>(null);
+  public readonly selected = state<T | null>(null);
 
-  getValue(): T | null {
+  public getValue(): T | null {
     return this.selected();
   }
 
-  setValue(value: T | null): void {
+  public setValue(value: T | null): void {
     this.selected.set(value);
   }
 
-  isFilled(): boolean {
+  public isFilled(): boolean {
     return this.selected() !== null;
   }
 
-  render(attributes: ExtraAttributes): Child {
+  public render(attributes: ExtraAttributes): Child {
     const { id, ...common } = this.attrs();
     const theme = currentTheme();
     const inputClass = this.classFor({}, 'choiceInput');
@@ -485,21 +485,21 @@ export class RadioList<T = string> extends ChoiceControl<T, T | null> {
 }
 
 export class CheckboxList<T = string> extends ChoiceControl<T, T[]> {
-  readonly selected = state<T[]>([]);
+  public readonly selected = state<T[]>([]);
 
-  getValue(): T[] {
+  public getValue(): T[] {
     return this.selected();
   }
 
-  setValue(value: T[]): void {
+  public setValue(value: T[]): void {
     this.selected.set([...(value ?? [])]);
   }
 
-  isFilled(): boolean {
+  public isFilled(): boolean {
     return this.selected().length > 0;
   }
 
-  render(attributes: ExtraAttributes): Child {
+  public render(attributes: ExtraAttributes): Child {
     const { id, required: _required, ...common } = this.attrs();
     const theme = currentTheme();
     const inputClass = this.classFor({}, 'choiceInput');
@@ -533,52 +533,52 @@ export class CheckboxList<T = string> extends ChoiceControl<T, T[]> {
 }
 
 export class HiddenField extends FormControl<string> {
-  readonly raw = state('');
+  public readonly raw = state('');
 
-  getValue(): string {
+  public getValue(): string {
     return this.raw();
   }
 
-  setValue(value: string): void {
+  public setValue(value: string): void {
     this.raw.set(value === null || value === undefined ? '' : String(value));
   }
 
-  isFilled(): boolean {
+  public isFilled(): boolean {
     return this.raw() !== '';
   }
 
-  render(attributes: ExtraAttributes): Child {
+  public render(attributes: ExtraAttributes): Child {
     return <input type="hidden" {...attributes} id={this.htmlId} name={this.htmlName} value={this.raw} />;
   }
 }
 
 export class SubmitButton extends FormControl<void> {
   /** Controls validated when the form is sent by this button. An empty list validates nothing, e.g. for Cancel. */
-  validationScope: FormControl<any>[] | null = null;
+  public validationScope: FormControl<any>[] | null = null;
 
-  constructor(public caption = '') {
+  public constructor(public caption = '') {
     super('');
     this.omitted = true;
   }
 
-  setValidationScope(controls: FormControl<any>[] | null): this {
+  public setValidationScope(controls: FormControl<any>[] | null): this {
     this.validationScope = controls;
     return this;
   }
 
   /** Whether the form is being sent by this button, for the handler of onSuccess. */
-  isSubmittedBy(): boolean {
+  public isSubmittedBy(): boolean {
     return this.form.submittedBy === this;
   }
 
-  getValue(): void {}
-  setValue(): void {}
-  isFilled(): boolean {
+  public getValue(): void {}
+  public setValue(): void {}
+  public isFilled(): boolean {
     return false;
   }
 
   /** A class passed to <Input> replaces the one of the theme, e.g. class="btn btn-secondary" for Cancel. */
-  render(attributes: ExtraAttributes): Child {
+  public render(attributes: ExtraAttributes): Child {
     return (
       <button
         type="submit"

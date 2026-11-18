@@ -12,7 +12,7 @@ const TASKS: Task[] = [
 
 /** A stand-in for the server: filters, and answers after a while. */
 class TaskApi {
-  async list(status: string | null): Promise<Task[]> {
+  public async list(status: string | null): Promise<Task[]> {
     await new Promise(resolve => setTimeout(resolve, 400));
     return TASKS.filter(task => !status || task.status === status);
   }
@@ -24,18 +24,18 @@ export function services(container: Container) {
 
 /** A resource loads again whenever the state read in it changes; the last value stays while it loads. */
 export default class FilteredTasks extends Component {
-  readonly status = state<string | null>(null);
-  tasks!: Resource<Task[]>;
+  public readonly status = state<string | null>(null);
+  public tasks!: Resource<Task[]>;
 
-  constructor(private api: TaskApi) {
+  public constructor(private api: TaskApi) {
     super();
   }
 
-  override startup() {
+  public override startup() {
     this.tasks = this.resource(() => this.api.list(this.status()));
   }
 
-  render() {
+  public render() {
     return (
       <div>
         <select onChange={event => this.status.set(event.currentTarget.value || null)}>

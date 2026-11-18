@@ -112,16 +112,16 @@ export function itemContent<T>(value: T, text: Child, options: Known<T>, objects
 }
 
 export abstract class ListControl<T> extends FormControl<T | null> {
-  readonly selected = state<T | null>(null);
+  public readonly selected = state<T | null>(null);
   /** Label of the selected value. */
-  readonly selectedLabel = state('');
-  readonly opened = state(false);
-  readonly items = state<[T, string][]>([]);
+  public readonly selectedLabel = state('');
+  public readonly opened = state(false);
+  public readonly items = state<[T, string][]>([]);
   /** Index of the item highlighted by the keyboard, -1 for none. */
-  readonly active = state(-1);
+  public readonly active = state(-1);
   /** The text the items are searched by. */
-  readonly query = state('');
-  placeholder: string;
+  public readonly query = state('');
+  public placeholder: string;
   protected readonly listId: string;
   /** Item objects by their values, see ItemOptions. */
   protected readonly objects = new Map<T, unknown>();
@@ -129,24 +129,24 @@ export abstract class ListControl<T> extends FormControl<T | null> {
   private request = 0;
   private timer: ReturnType<typeof setTimeout> | undefined;
 
-  constructor(label: string, protected options: ListOptions<T, any>, idPrefix: string) {
+  public constructor(label: string, protected options: ListOptions<T, any>, idPrefix: string) {
     super(label);
     this.listId = `${idPrefix}${++lastList}`;
     this.placeholder = options.placeholder ?? '';
     if (options.items) this.setItems(options.items);
   }
 
-  setItems(items: Items<T> | readonly unknown[]): this {
+  public setItems(items: Items<T> | readonly unknown[]): this {
     this.all = itemPairs(items, this.options, this.objects);
     return this;
   }
 
-  setPlaceholder(placeholder: string): this {
+  public setPlaceholder(placeholder: string): this {
     this.placeholder = placeholder;
     return this;
   }
 
-  getValue(): T | null {
+  public getValue(): T | null {
     return this.selected();
   }
 
@@ -154,7 +154,7 @@ export abstract class ListControl<T> extends FormControl<T | null> {
    * Sets the value. The label (or the item object) can be given, e.g. when the data from the server have it
    * already, otherwise it comes from the items, or from the `label` option.
    */
-  setValue(value: T | null, label?: unknown): void {
+  public setValue(value: T | null, label?: unknown): void {
     this.selected.set(value ?? null);
     if (value === null || value === undefined) {
       this.selectedLabel.set('');
@@ -175,17 +175,17 @@ export abstract class ListControl<T> extends FormControl<T | null> {
     });
   }
 
-  isFilled(): boolean {
+  public isFilled(): boolean {
     return this.selected() !== null;
   }
 
-  close(): void {
+  public close(): void {
     this.opened.set(false);
     this.active.set(-1);
   }
 
   /** Is the item disabled by the option `itemDisabled`? It is shown in the list but cannot be picked. */
-  isItemDisabled(value: T): boolean {
+  public isItemDisabled(value: T): boolean {
     return isDisabledItem(value, this.options, this.objects);
   }
 
@@ -195,7 +195,7 @@ export abstract class ListControl<T> extends FormControl<T | null> {
   }
 
   /** Selects an item from the list and closes it. A disabled item is not picked. */
-  pick(value: T, label: string): void {
+  public pick(value: T, label: string): void {
     if (this.isItemDisabled(value)) return;
     this.selected.set(value);
     this.selectedLabel.set(label);

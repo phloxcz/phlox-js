@@ -12,35 +12,35 @@ export function services(container: Container) {
 
 /** An order at /1001, a routed dialog over the grid; true when it changed the order. */
 class OrderDetail extends Component<{ id: number }, boolean> {
-  readonly order = state<Order | null>(null);
+  public readonly order = state<Order | null>(null);
 
-  constructor(private store: OrderStore) {
+  public constructor(private store: OrderStore) {
     super();
   }
 
-  override async startup() {
+  public override async startup() {
     const order = await this.store.get(this.props.id);
     if (!order) throw new BadRequestError(404, `Objednávka ${this.props.id} neexistuje.`);
     this.order.set(order);
   }
 
-  override title() {
+  public override title() {
     return `Objednávka ${this.props.id}`;
   }
 
-  override actions() {
+  public override actions() {
     return <>
       <Button onClick={() => this.close(false)}>Zavřít</Button>
       <Button primary disabled={() => this.order()?.paid ?? true} onClick={() => this.handlePaid()}>Označit zaplacenou</Button>
     </>;
   }
 
-  async handlePaid() {
+  public async handlePaid() {
     await this.store.setPaid([this.props.id], true);
     this.close(true);
   }
 
-  render() {
+  public render() {
     const order = this.order()!;
     return <p>{order.customer}: {order.product} ({order.category}), {money.format(order.price)}, {order.paid ? 'zaplaceno' : 'nezaplaceno'}</p>;
   }
@@ -51,7 +51,7 @@ class OrderDetail extends Component<{ id: number }, boolean> {
  * that keeps the state, actions in rows, bulk actions, columns resized, moved and hidden.
  */
 export default class OrdersPresenter extends Presenter {
-  override routes: Route[] = [
+  public override routes: Route[] = [
     { name: 'default', pattern: '/' },
     {
       name: 'detail',
@@ -63,14 +63,14 @@ export default class OrdersPresenter extends Presenter {
     },
   ];
 
-  readonly grid = new Grid<Order>({
+  public readonly grid = new Grid<Order>({
     load: query => this.store.list(query),
     pageSize: 10,
     pageSizes: [10, 20, 50],
     remember: 'docs-orders',
   });
 
-  constructor(private store: OrderStore) {
+  public constructor(private store: OrderStore) {
     super();
     const grid = this.grid;
     grid.addNumberColumn('id', 'Číslo').sortable().width('6rem').alwaysVisible().format(id => String(id));
@@ -91,7 +91,7 @@ export default class OrdersPresenter extends Presenter {
     grid.bind(this);
   }
 
-  render() {
+  public render() {
     return <GridView grid={this.grid} search resizable reorderable columnToggle aria-label="Objednávky" />;
   }
 }

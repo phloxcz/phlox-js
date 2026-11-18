@@ -26,18 +26,18 @@ export interface DropDownTreeSelectOptions<K extends TreeKey> extends TreeSelect
 }
 
 export class DropDownTreeSelect<K extends TreeKey> extends FormControl<K | null> {
-  static texts = texts('dropdowntree', { clear: 'Clear' });
+  public static texts = texts('dropdowntree', { clear: 'Clear' });
 
-  readonly tree: Tree<TreeNode<K>>;
+  public readonly tree: Tree<TreeNode<K>>;
   /** The picked id, the value of the control. */
   private readonly picked = state<K | null>(null);
-  readonly opened = state(false);
+  public readonly opened = state(false);
   /** True while the way to a node set from code is being loaded. */
-  readonly loading = state(false);
+  public readonly loading = state(false);
   private readonly panelId = `phlox-dropdowntree-${++lastId}`;
 
   /** Nodes from the top down to the picked one, as far as they are loaded. Follows the tree, also a reload. */
-  readonly path = computed((): TreeItem<TreeNode<K>>[] => {
+  public readonly path = computed((): TreeItem<TreeNode<K>>[] => {
     const id = this.picked();
     if (id === null) return [];
     const search = (items: TreeItem<TreeNode<K>>[]): TreeItem<TreeNode<K>>[] | null => {
@@ -51,7 +51,7 @@ export class DropDownTreeSelect<K extends TreeKey> extends FormControl<K | null>
     return search(this.tree.roots()) ?? [];
   });
 
-  constructor(label = '', readonly options: DropDownTreeSelectOptions<K> = {}) {
+  public constructor(label = '', public readonly options: DropDownTreeSelectOptions<K> = {}) {
     super(label);
     this.tree = new Tree<TreeNode<K>>({ ...options });
     // Picking a node closes the panel and returns to the button
@@ -63,27 +63,27 @@ export class DropDownTreeSelect<K extends TreeKey> extends FormControl<K | null>
     };
   }
 
-  getValue(): K | null {
+  public getValue(): K | null {
     return this.picked();
   }
 
-  setValue(value: K | null): void {
+  public setValue(value: K | null): void {
     this.picked.set(value ?? null);
     this.tree.selected.set(value ?? null);
   }
 
-  isFilled(): boolean {
+  public isFilled(): boolean {
     return this.picked() !== null;
   }
 
-  open(): void {
+  public open(): void {
     if (untrack(this.opened) || untrack(this.disabled) || untrack(this.readOnly)) return;
     // Closing the panel without a choice shows an error, as with DropDownList
     this.edited = true;
     this.opened.set(true);
   }
 
-  close(): void {
+  public close(): void {
     this.opened.set(false);
   }
 
@@ -95,7 +95,7 @@ export class DropDownTreeSelect<K extends TreeKey> extends FormControl<K | null>
     return id === null ? '' : this.loading() ? '…' : String(id);
   }
 
-  render(attributes: ExtraAttributes): Child {
+  public render(attributes: ExtraAttributes): Child {
     const theme = currentTheme();
     const slot = (name: string) => theme.class(`dropdownlist.${name}`);
     const { id, ref, onBlur, required: _required, ...common } = this.attrs();

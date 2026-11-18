@@ -9,9 +9,9 @@ describe('preferences', () => {
     localStorage.setItem('phlox.tasks.width', '500');
     let page!: Page;
     class Page extends Presenter {
-      width = this.preference('tasks.width', 416);
-      collapsed = this.preference('nav.collapsed', false);
-      render() { return <main />; }
+      public width = this.preference('tasks.width', 416);
+      public collapsed = this.preference('nav.collapsed', false);
+      public render() { return <main />; }
     }
     const { app } = await boot(Page);
     page = app.presenter as Page;
@@ -26,12 +26,12 @@ describe('preferences', () => {
   test('another storage by registering the service, a broken value is forgotten', async () => {
     const saved = new Map<string, unknown>();
     class ServerPreferences extends Preferences {
-      get<T>(key: string) { return saved.get(key) as T | undefined; }
-      set(key: string, value: unknown) { saved.set(key, value); }
+      public get<T>(key: string) { return saved.get(key) as T | undefined; }
+      public set(key: string, value: unknown) { saved.set(key, value); }
     }
     class Page extends Presenter {
-      width = this.preference('w', 1);
-      render() { return <main />; }
+      public width = this.preference('w', 1);
+      public render() { return <main />; }
     }
     const { app } = await boot(Page, '/', new Container().add(new ServerPreferences()));
     (app.presenter as Page).width.set(7);
@@ -44,8 +44,8 @@ describe('preferences', () => {
 
 describe('ResizeHandle', () => {
   class Page extends Presenter {
-    width = this.preference('col', 300);
-    render() {
+    public width = this.preference('col', 300);
+    public render() {
       return (
         <section id="col" style={() => ({ width: `${this.width()}px` })}>
           <ResizeHandle size={this.width} min={200} max={500} initial={300} label="Šířka" />

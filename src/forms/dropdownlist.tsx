@@ -17,16 +17,16 @@ export type DropDownListOptions<T, O = never> = ListOptions<T, O>;
 
 export class DropDownList<T = string> extends ListControl<T> {
   /** Texts of the list. Replace them for the language of the application: DropDownList.texts.noResults = '...'. */
-  static texts = texts('dropdownlist', {
+  public static texts = texts('dropdownlist', {
     noResults: 'No results',
     filterPlaceholder: 'Search…',
   });
 
-  constructor(label = '', options: DropDownListOptions<T, any> = {}) {
+  public constructor(label = '', options: DropDownListOptions<T, any> = {}) {
     super(label, options, 'dropdownlist');
   }
 
-  open(): void {
+  public open(): void {
     if (untrack(this.opened) || !this.changeable()) return;
     this.query.set('');
     this.active.set(-1);
@@ -37,7 +37,7 @@ export class DropDownList<T = string> extends ListControl<T> {
   }
 
   /** After a pick the focus returns to the button, so the user can go on by Tab. */
-  override pick(value: T, label: string): void {
+  public override pick(value: T, label: string): void {
     super.pick(value, label);
     this.element?.focus();
   }
@@ -64,7 +64,7 @@ export class DropDownList<T = string> extends ListControl<T> {
     }
   }
 
-  render(attributes: ExtraAttributes): Child {
+  public render(attributes: ExtraAttributes): Child {
     const theme = currentTheme();
     const slot = (name: string) => theme.class(`dropdownlist.${name}`);
     // Validation on blur belongs to the whole widget, not to the button: opening the list moves the focus away from it

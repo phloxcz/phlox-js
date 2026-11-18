@@ -4,21 +4,21 @@ V dialogu se dá otevřít jakákoli komponenta. Sama určuje titulek a tlačít
 
 ```tsx
 class UserEdit extends Component<{ userId: number }, boolean> {
-  name = state('');
+  public name = state('');
 
-  constructor(private api: UserApi) {
+  public constructor(private api: UserApi) {
     super();
   }
 
-  override async startup() {
+  public override async startup() {
     this.name.set((await this.api.get(this.props.userId)).name);
   }
 
-  override title() {
+  public override title() {
     return 'Úprava uživatele';
   }
 
-  override actions() {
+  public override actions() {
     return (
       <>
         <button onClick={() => this.close(false)}>Zrušit</button>
@@ -27,12 +27,12 @@ class UserEdit extends Component<{ userId: number }, boolean> {
     );
   }
 
-  async handleSave() {
+  public async handleSave() {
     await this.api.save(this.props.userId, this.name());
     this.close(true);
   }
 
-  render() {
+  public render() {
     return <input value={this.name} onInput={event => this.name.set(event.currentTarget.value)} />;
   }
 }

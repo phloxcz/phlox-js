@@ -39,19 +39,19 @@ let lastTagInput = 0;
 
 export class TagInput<T = string> extends FormControl<T[]> {
   /** Texts of the control. Replace them for the language of the application. */
-  static texts = texts('taginput', {
+  public static texts = texts('taginput', {
     createNew: 'Create: ',
     remove: 'Remove',
   });
 
-  readonly tags = state<Tag<T>[]>([]);
-  readonly text = state('');
+  public readonly tags = state<Tag<T>[]>([]);
+  public readonly text = state('');
   /** Suggestions for the typed text, without tags already added. The last one may be a new tag. */
-  readonly suggestions = state<Tag<T>[]>([]);
-  readonly active = state(-1);
-  readonly focused = state(false);
-  readonly opened = computed(() => this.suggestions().length > 0 && this.text().trim() !== '' && !this.full());
-  placeholder: string;
+  public readonly suggestions = state<Tag<T>[]>([]);
+  public readonly active = state(-1);
+  public readonly focused = state(false);
+  public readonly opened = computed(() => this.suggestions().length > 0 && this.text().trim() !== '' && !this.full());
+  public placeholder: string;
   private all: [T, string][] = [];
   /** Item objects by their values, see ItemOptions. */
   private readonly objects = new Map<T, unknown>();
@@ -61,23 +61,23 @@ export class TagInput<T = string> extends FormControl<T[]> {
   /** Leaving the field validates, but does not turn the typed text into a tag. */
   private leaving = false;
 
-  constructor(label = '', private options: TagInputOptions<T, any> = {}) {
+  public constructor(label = '', private options: TagInputOptions<T, any> = {}) {
     super(label);
     this.placeholder = options.placeholder ?? '';
     if (options.items) this.setItems(options.items);
   }
 
-  setItems(items: Items<T> | readonly unknown[]): this {
+  public setItems(items: Items<T> | readonly unknown[]): this {
     this.all = itemPairs(items, this.options, this.objects);
     return this;
   }
 
-  getValue(): T[] {
+  public getValue(): T[] {
     return this.tags().map(tag => tag.value);
   }
 
   /** Values picked from the suggestions and texts of new tags apart, like getSplitValue() in PHP. */
-  getSplitValue(): { picked: T[]; created: string[] } {
+  public getSplitValue(): { picked: T[]; created: string[] } {
     const tags = this.tags();
     return {
       picked: tags.filter(tag => !tag.isNew).map(tag => tag.value),
@@ -89,7 +89,7 @@ export class TagInput<T = string> extends FormControl<T[]> {
    * Sets the tags. Labels (or item objects) can be given, e.g. when the data from the server have them,
    * otherwise they come from the items, or from the `label` option.
    */
-  setValue(values: T[], labels?: unknown[]): void {
+  public setValue(values: T[], labels?: unknown[]): void {
     const tags = (values ?? []).map((value, index): Tag<T> => {
       const given = labels?.[index];
       const label = given !== undefined ? labelOf(value, given, this.options, this.objects) : this.all.find(([item]) => Object.is(item, value))?.[1];
@@ -106,23 +106,23 @@ export class TagInput<T = string> extends FormControl<T[]> {
     }
   }
 
-  isFilled(): boolean {
+  public isFilled(): boolean {
     return this.tags().length > 0;
   }
 
   /** Whether the limit of tags is reached. */
-  full(): boolean {
+  public full(): boolean {
     const max = this.options.maxTags ?? 0;
     return max > 0 && this.tags().length >= max;
   }
 
   /** Is the item disabled by the option `itemDisabled`? It is suggested but cannot be added. */
-  isItemDisabled(value: T): boolean {
+  public isItemDisabled(value: T): boolean {
     return isDisabledItem(value, this.options, this.objects);
   }
 
   /** Adds a tag unless it is there already (texts regardless of case), disabled, or the limit is reached. */
-  add(value: T, label: string, isNew = false): boolean {
+  public add(value: T, label: string, isNew = false): boolean {
     if (this.has(value) || untrack(() => this.full()) || (!isNew && this.isItemDisabled(value))) return false;
     this.tags.update(list => [...list, { value, label, isNew }]);
     this.text.set('');
@@ -131,7 +131,7 @@ export class TagInput<T = string> extends FormControl<T[]> {
     return true;
   }
 
-  remove(tag: Tag<T>): void {
+  public remove(tag: Tag<T>): void {
     if (untrack(this.disabled) || untrack(this.readOnly)) return;
     this.tags.update(list => list.filter(other => other !== tag));
     this.changed();
@@ -141,7 +141,7 @@ export class TagInput<T = string> extends FormControl<T[]> {
    * Turns typed text into a tag: a suggestion with exactly this label, or a new tag with allowNew.
    * Returns whether a tag was added.
    */
-  commitText(text: string): boolean {
+  public commitText(text: string): boolean {
     const typed = text.trim();
     if (!typed) return false;
     const exact = [...this.all, ...untrack(this.suggestions).filter(tag => !tag.isNew).map(tag => [tag.value, tag.label] as [T, string])]
@@ -156,7 +156,7 @@ export class TagInput<T = string> extends FormControl<T[]> {
    * Not when the user only leaves the field: a new tag would make the form taller, and a click on a button
    * below it, e.g. Save, would end somewhere else.
    */
-  override validate(): boolean {
+  public override validate(): boolean {
     if (!this.leaving && this.commitText(untrack(this.text))) this.text.set('');
     return super.validate();
   }
@@ -263,7 +263,7 @@ export class TagInput<T = string> extends FormControl<T[]> {
     }
   }
 
-  render(attributes: ExtraAttributes): Child {
+  public render(attributes: ExtraAttributes): Child {
     const theme = currentTheme();
     const slot = (name: string) => theme.class(`taginput.${name}`);
     const { id, ref, onBlur, required: _required, ...common } = this.attrs();

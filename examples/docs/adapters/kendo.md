@@ -39,7 +39,7 @@ services.add(new Kendo(kendo), KendoDialogs);          // KendoDialogs: dialogy 
 ```tsx
 import { KendoWidget } from '@phloxcz/phlox-js/adapters/kendo';
 
-readonly status = state<string>('');
+public readonly status = state<string>('');
 
 <KendoWidget widget="DropDownList" value={this.status} enabled={() => !this.saving()}
   options={{ dataSource: statuses, dataTextField: 'text', dataValueField: 'value' }} />

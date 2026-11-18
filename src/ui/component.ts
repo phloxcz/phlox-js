@@ -62,15 +62,15 @@ export function hasUnsaved(app: Application, leaving: AnyComponent[] | null): bo
  * The constructor is for services, they are autowired. Props are ready in `this.props` from the start.
  */
 export abstract class Component<P extends object = {}, R = void> {
-  readonly props: P;
-  readonly parent: AnyComponent | null;
-  readonly app: Application;
+  public readonly props: P;
+  public readonly parent: AnyComponent | null;
+  public readonly app: Application;
   /** Owns everything the component creates. Disposing it removes the component. */
-  readonly scope: Scope;
+  public readonly scope: Scope;
   /** Set by whoever shows the component in a dialog. */
-  onClose: ((result: R | undefined) => void) | null = null;
+  public onClose: ((result: R | undefined) => void) | null = null;
 
-  constructor() {
+  public constructor() {
     if (!creation) {
       throw new Error(`${new.target.name} must be created by the framework: use it in TSX, in a route or in openDialog().`);
     }
@@ -82,7 +82,7 @@ export abstract class Component<P extends object = {}, R = void> {
   }
 
   /** The nearest presenter above the component (or the component itself), like getPresenter() in Nette. */
-  get presenter(): Presenter<any, any> {
+  public get presenter(): Presenter<any, any> {
     for (let owner: AnyComponent | null = this; owner; owner = owner.parent) {
       if (IS_PRESENTER in owner) return owner as unknown as Presenter<any, any>;
     }
@@ -96,36 +96,36 @@ export abstract class Component<P extends object = {}, R = void> {
    * - `link('/users')` is an absolute path,
    * - `link(this.detail, { id: 5 })` leads to a route made by route(), its parameters are checked by the compiler.
    */
-  link<P extends object>(destination: TypedRoute<P>, ...params: LinkArgs<P>): string;
-  link(destination: string, params?: LinkParams): string;
-  link(destination: string | Route, params?: LinkParams): string {
+  public link<P extends object>(destination: TypedRoute<P>, ...params: LinkArgs<P>): string;
+  public link(destination: string, params?: LinkParams): string;
+  public link(destination: string | Route, params?: LinkParams): string {
     return this.app.router.link(this.presenter, destination, params);
   }
 
   /** The logged-in user, like $this->user in Nette. */
-  get user() {
+  public get user() {
     return this.app.user;
   }
 
   /** Runs once after the component is created, before it is rendered. Load data here. */
-  startup(): void | Promise<void> {}
+  public startup(): void | Promise<void> {}
 
   /** Returns the view. It is called once, later changes are done by state. */
-  abstract render(): Child;
+  public abstract render(): Child;
 
   /** Runs once the view is in the page. The place for widgets that need real elements. */
-  afterRender(): void | Promise<void> {}
+  public afterRender(): void | Promise<void> {}
 
   /** Runs when the component is removed. State, effects and listeners are cleaned up without it. */
-  shutdown(): void {}
+  public shutdown(): void {}
 
   /** Title of the window when the component is shown in a dialog. */
-  title(): Child {
+  public title(): Child {
     return '';
   }
 
   /** Buttons of the window when the component is shown in a dialog. */
-  actions(): Child {
+  public actions(): Child {
     return null;
   }
 
@@ -133,7 +133,7 @@ export abstract class Component<P extends object = {}, R = void> {
    * True while the component holds changes the user would lose, typically `this.form.isChanged()`.
    * Before the component leaves (another URL, Escape in its dialog, closing the page) the user is asked.
    */
-  hasUnsavedChanges(): boolean {
+  public hasUnsavedChanges(): boolean {
     return false;
   }
 
@@ -143,7 +143,7 @@ export abstract class Component<P extends object = {}, R = void> {
    * With `{ tags: ['tasks'] }` also after app.invalidate('tasks').
    * Create it in the constructor or in startup(), it ends with the component. Errors go to app.onError.
    */
-  resource<T>(load: () => Promise<T>, options: ResourceOptions = {}): Resource<T> {
+  public resource<T>(load: () => Promise<T>, options: ResourceOptions = {}): Resource<T> {
     return this.app.createResource(this.scope, load, options);
   }
 
@@ -152,27 +152,27 @@ export abstract class Component<P extends object = {}, R = void> {
    * `width = this.preference('tasks.width', 416)`. It is a state, every change is saved by the Preferences
    * service (localStorage unless the application registers another).
    */
-  preference<T>(key: string, initial: T): State<T> {
+  public preference<T>(key: string, initial: T): State<T> {
     return this.app.container.get(Preferences).state(key, initial);
   }
 
   /** A message with OK, see Application.alert(). With `anchor` a popover at an element. */
   /** Like flashMessage() in Nette, in a component as in a presenter. It disappears by itself, see FlashMessages.duration. */
-  flashMessage(text: string, type = 'info', options: Parameters<Application['flashes']['add']>[2] = {}): void {
+  public flashMessage(text: string, type = 'info', options: Parameters<Application['flashes']['add']>[2] = {}): void {
     this.app.flashes.add(text, type, options);
   }
 
-  alert(message: Child, options: Parameters<Application['alert']>[1] = {}): Promise<void> {
+  public alert(message: Child, options: Parameters<Application['alert']>[1] = {}): Promise<void> {
     return this.app.alert(message, options, this);
   }
 
   /** A question with OK and Cancel, true for OK. With `anchor` a popover at an element. */
-  confirm(message: Child, options: Parameters<Application['confirm']>[1] = {}): Promise<boolean> {
+  public confirm(message: Child, options: Parameters<Application['confirm']>[1] = {}): Promise<boolean> {
     return this.app.confirm(message, options, this);
   }
 
   /** A question for a text, null for Cancel. With `anchor` a popover at an element. */
-  prompt(message: Child, options: Parameters<Application['prompt']>[1] = {}): Promise<string | null> {
+  public prompt(message: Child, options: Parameters<Application['prompt']>[1] = {}): Promise<string | null> {
     return this.app.prompt(message, options, this);
   }
 
@@ -180,18 +180,18 @@ export abstract class Component<P extends object = {}, R = void> {
    * A dialog while something runs: const loading = this.showLoading('Saving…'); … loading.close().
    * Not loading(): that is a usual name of an own field, like loading = state(false).
    */
-  showLoading(message?: Child): ReturnType<Application['showLoading']> {
+  public showLoading(message?: Child): ReturnType<Application['showLoading']> {
     return this.app.showLoading(message, this);
   }
 
   /** Closes the dialog the component is shown in and hands the result to whoever opened it. It does not ask. */
-  close(result?: R): void {
+  public close(result?: R): void {
     closing.add(this);
     this.onClose?.(result);
   }
 
   /** The user closes the dialog (Escape, ×): with unsaved changes it asks first, then close(). */
-  async cancel(): Promise<void> {
+  public async cancel(): Promise<void> {
     if (await this.app.mayLeave([this], this)) this.close();
   }
 
@@ -199,7 +199,7 @@ export abstract class Component<P extends object = {}, R = void> {
    * Opens a component in a dialog and waits until it is closed. `{ placement: 'end' }` slides it in from the right.
    * Returns what the dialog passed to close(), or undefined when it was closed another way.
    */
-  async openDialog<C extends AnyComponent>(cls: Class<C>, props: PropsOf<C>, options?: DialogOptions): Promise<ResultOf<C> | undefined> {
+  public async openDialog<C extends AnyComponent>(cls: Class<C>, props: PropsOf<C>, options?: DialogOptions): Promise<ResultOf<C> | undefined> {
     const dialog = createComponent(cls, props, this, this.app, this.scope);
     try {
       await startComponent(dialog);
@@ -222,7 +222,7 @@ export abstract class Component<P extends object = {}, R = void> {
   }
 
   /** Called by the renderer for <MyComponent /> in TSX. */
-  static [VIEW](this: Class<AnyComponent>, props: { ref?: (component: AnyComponent) => void }): Child {
+  public static [VIEW](this: Class<AnyComponent>, props: { ref?: (component: AnyComponent) => void }): Child {
     const scope = getScope();
     const app = scope?.find<Application>(APP);
     if (!app) throw new Error(`<${this.name} /> can be used only inside a running Application.`);

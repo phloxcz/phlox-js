@@ -6,19 +6,19 @@ Tabulka dat jako [phloxcz/components-grid](https://github.com/phloxcz/components
 import { Grid, GridView } from '@phloxcz/phlox-js/components';
 
 class OrdersPresenter extends Presenter {
-  override routes: Route[] = [
+  public override routes: Route[] = [
     { name: 'default', pattern: '/' },
     { name: 'detail', pattern: '/<id \\d+>', dialog: ({ id }) => [OrderDetail, { id: Number(id) }] },
   ];
 
-  grid = new Grid<Order>({
+  public grid = new Grid<Order>({
     load: query => this.api.call('order.query', { query }),   // { page, pageSize, sort, search, filter } → { data, total }
     pageSize: 20,
     pageSizes: [10, 20, 50],
     remember: 'orders',
   });
 
-  constructor(private api: RpcApi) {
+  public constructor(private api: RpcApi) {
     super();
     this.grid.addNumberColumn('id', 'Číslo').sortable();
     this.grid.addTextColumn('customer', 'Zákazník').sortable().filterable();
@@ -35,7 +35,7 @@ class OrdersPresenter extends Presenter {
     this.grid.bind(this);   // stav v URL
   }
 
-  render() {
+  public render() {
     return <GridView grid={this.grid} search resizable reorderable columnToggle aria-label="Objednávky" />;
   }
 }

@@ -134,7 +134,7 @@ function joinUrl(path: string, query: LinkParams): string {
 
 export class Router {
   /** Path and query of the page that is shown. */
-  readonly url = state('');
+  public readonly url = state('');
 
   private root: AnyPresenter | null = null;
   /** The position in history of the page that is shown, to return Back when the user stays. */
@@ -145,10 +145,10 @@ export class Router {
   private pending = new WeakSet<AnyPresenter>();
   private queued: { navigation: Navigation; done: () => void } | null = null;
 
-  constructor(private app: Application) {}
+  public constructor(private app: Application) {}
 
   /** Starts routing from the current URL of the browser. */
-  start(root: AnyPresenter): Promise<void> {
+  public start(root: AnyPresenter): Promise<void> {
     this.root = root;
     this.pending.add(root);
     this.index = history.state?.phlox ?? 0;
@@ -156,18 +156,18 @@ export class Router {
     return this.enqueue({ url: location.href, history: 'none', refresh: null });
   }
 
-  stop(): void {
+  public stop(): void {
     window.removeEventListener('popstate', this.onPopState);
     this.root = null;
   }
 
   /** Goes to the URL. The promise is fulfilled when the navigation ends, even if it fails or a newer one replaces it. */
-  navigate(url: string, options: { replace?: boolean; refresh?: AnyPresenter } = {}): Promise<void> {
+  public navigate(url: string, options: { replace?: boolean; refresh?: AnyPresenter } = {}): Promise<void> {
     return this.enqueue({ url, history: options.replace ? 'replace' : 'push', refresh: options.refresh ?? null });
   }
 
   /** Creates a URL, see Presenter.link(). */
-  link(presenter: AnyPresenter, destination: string | Route, params: LinkParams = {}): string {
+  public link(presenter: AnyPresenter, destination: string | Route, params: LinkParams = {}): string {
     if (destination === 'this') {
       const current = splitUrl(this.running ? this.running.url : this.url());
       return joinUrl(current.path, { ...current.query, ...params });
@@ -209,12 +209,12 @@ export class Router {
   }
 
   /** The base path of the application without the slash at the end, see Application.basePath. */
-  get base(): string {
+  public get base(): string {
     return this.app.basePath.replace(/\/+$/, '');
   }
 
   /** Whether the path belongs to the application, that is it lies under its base path. */
-  owns(path: string): boolean {
+  public owns(path: string): boolean {
     return !this.base || path === this.base || path.startsWith(`${this.base}/`);
   }
 

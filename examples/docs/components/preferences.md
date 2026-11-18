@@ -3,7 +3,7 @@
 Nastavení uživatele, které si aplikace pamatuje (šířka sloupce, sbalené menu, zvolený pohled), je `state`, který se při každé změně uloží:
 
 ```ts
-readonly collapsed = this.preference('nav.collapsed', false);
+public readonly collapsed = this.preference('nav.collapsed', false);
 
 this.collapsed.update(value => !value);   // uloží se
 ```
@@ -19,7 +19,7 @@ this.collapsed.update(value => !value);   // uloží se
 ```tsx
 import { ResizeHandle } from '@phloxcz/phlox-js';
 
-readonly width = this.preference('tasks.width', 416);
+public readonly width = this.preference('tasks.width', 416);
 
 <section style={() => ({ width: `${this.width()}px` })}>
   …

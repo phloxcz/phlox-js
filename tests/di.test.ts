@@ -6,49 +6,49 @@ import { Container } from '../src/di/container';
 interface Options { size: number }
 
 abstract class Authorizator {
-  abstract allowed(): boolean;
+  public abstract allowed(): boolean;
 }
 class AppAuthorizator extends Authorizator {
-  allowed() { return true; }
+  public allowed() { return true; }
 }
 class OtherAuthorizator extends Authorizator {
-  allowed() { return false; }
+  public allowed() { return false; }
 }
 
 class Http {
-  name = 'http';
+  public name = 'http';
 }
 class UserApi {
-  constructor(public http: Http) {}
+  public constructor(public http: Http) {}
 }
 class Screen {
-  constructor(public api: UserApi, public auth: Authorizator) {}
+  public constructor(public api: UserApi, public auth: Authorizator) {}
 }
 class InheritedConstructor extends Screen {}
 
 class Point {
-  constructor(public x: number, public y: number) {}
+  public constructor(public x: number, public y: number) {}
 }
 class WithScalar {
-  constructor(public http: Http, public size: number) {}
+  public constructor(public http: Http, public size: number) {}
 }
 class WithInterface {
-  constructor(public http: Http, public options: Options) {}
+  public constructor(public http: Http, public options: Options) {}
 }
 class WithGeneric {
-  constructor(public http: Http, public list: Array<Http>) {}
+  public constructor(public http: Http, public list: Array<Http>) {}
 }
 class WithDefault {
-  constructor(public http: Http = new Http()) {}
+  public constructor(public http: Http = new Http()) {}
 }
 class CycleA {
-  constructor(public b: CycleB) {}
+  public constructor(public b: CycleB) {}
 }
 class CycleB {
-  constructor(public a: CycleA) {}
+  public constructor(public a: CycleA) {}
 }
 class Config {
-  constructor(public url: string) {}
+  public constructor(public url: string) {}
 }
 
 describe('Container', () => {

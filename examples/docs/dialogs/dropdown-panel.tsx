@@ -2,11 +2,11 @@ import { Component, Dropdown, DropdownItem, For, state } from '@phloxcz/phlox-js
 
 /** A menu and a panel with a filter; the content is made at every opening, onOpen loads data. */
 export default class Dropdowns extends Component {
-  readonly picked = state('nic');
-  readonly opened = state(0);
-  readonly onlyMine = state(false);
+  public readonly picked = state('nic');
+  public readonly opened = state(0);
+  public readonly onlyMine = state(false);
 
-  render() {
+  public render() {
     return (
       <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
         <Dropdown label="Akce" title="Akce s položkou">

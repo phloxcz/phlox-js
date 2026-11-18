@@ -44,22 +44,22 @@ export interface KendoGridProps<T> {
 const INDEX = '__phloxRow';
 
 export class KendoGrid<T extends object> extends Component<KendoGridProps<T>> {
-  static $inject = () => [Kendo];
+  public static $inject = () => [Kendo];
 
-  grid: KendoGridInstance | null = null;
+  public grid: KendoGridInstance | null = null;
   private host!: HTMLElement;
   /** Scopes of cells made by `render`, cleaned up before every new drawing of the rows. */
   private cells: Scope[] = [];
 
-  constructor(private kendo: Kendo) {
+  public constructor(private kendo: Kendo) {
     super();
   }
 
-  render() {
+  public render() {
     return <div class={['phlox-kendo-grid', this.props.class].filter(Boolean).join(' ')} ref={element => { this.host = element; }} />;
   }
 
-  override afterRender() {
+  public override afterRender() {
     const { columns, data, options = {} } = this.props;
     const element = document.createElement('div');
     this.host.append(element);
@@ -97,7 +97,7 @@ export class KendoGrid<T extends object> extends Component<KendoGridProps<T>> {
   }
 
   /** The object from `data` behind a row of Kendo. */
-  original(item: Record<string, unknown> | undefined): T | null {
+  public original(item: Record<string, unknown> | undefined): T | null {
     const index = item?.[INDEX];
     return typeof index === 'number' ? untrack(this.props.data!)[index] ?? null : null;
   }

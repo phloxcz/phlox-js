@@ -63,7 +63,7 @@ Téma je mapa „místo → třídy“. Jiný CSS framework (Tailwind, Foundatio
 
 ```ts
 class FoundationTheme extends Theme {
-  constructor() {
+  public constructor() {
     super({ input: '', error: 'form-error is-visible', invalid: 'is-invalid-input', button: 'button' });
   }
 }

@@ -4,12 +4,12 @@ Presenter je komponenta, na kterou vede URL. Každý presenter si z URL vezme sv
 
 ```tsx
 class AppPresenter extends Presenter {
-  override routes: Route[] = [
+  public override routes: Route[] = [
     { name: 'about', pattern: '/about', presenter: () => import('./AboutPresenter') },
     { name: 'users', pattern: '/users', presenter: UsersPresenter },
   ];
 
-  render() {
+  public render() {
     return (
       <div>
         <nav>
@@ -22,22 +22,22 @@ class AppPresenter extends Presenter {
 }
 
 class UsersPresenter extends Presenter {
-  users = state<User[]>([]);
+  public users = state<User[]>([]);
 
-  override routes: Route[] = [
+  public override routes: Route[] = [
     { name: 'default', pattern: '/' },
     { name: 'detail', pattern: '/<id \\d+>', presenter: UserDetailPresenter },
   ];
 
-  constructor(private api: UserApi) {
+  public constructor(private api: UserApi) {
     super();
   }
 
-  async actionDefault({ page = '1' }: Params) {
+  public async actionDefault({ page = '1' }: Params) {
     this.users.set(await this.api.list(Number(page)));
   }
 
-  render() { /* seznam a <RouteFrame /> pro detail */ }
+  public render() { /* seznam a <RouteFrame /> pro detail */ }
 }
 ```
 

@@ -7,18 +7,18 @@ import { ago } from '../format';
  * Escape or × only puts the decision off, the change stays in the menu of waiting changes.
  */
 export class ConflictQuestion extends Component<{ change: OfflineChange }, 'send' | 'drop'> {
-  override title() {
+  public override title() {
     return 'Záznam se mezitím změnil';
   }
 
-  override actions() {
+  public override actions() {
     return <>
       <Button danger onClick={() => this.close('drop')}>Zahodit moji změnu</Button>
       <Button primary onClick={() => this.close('send')}>Uložit i tak</Button>
     </>;
   }
 
-  render() {
+  public render() {
     const { change } = this.props;
     return (
       <div>

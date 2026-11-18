@@ -11,7 +11,7 @@ import type { RpcMethod } from './rpc.js';
 
 /** An error the mock sends back, like ApiException or invalid parameters (code -32602 with `fields`) in phlox-api-core. */
 export class RpcMockError extends Error {
-  constructor(readonly code: number, message: string, readonly fields?: Record<string, string>) {
+  public constructor(public readonly code: number, message: string, public readonly fields?: Record<string, string>) {
     super(message);
     this.name = 'RpcMockError';
   }

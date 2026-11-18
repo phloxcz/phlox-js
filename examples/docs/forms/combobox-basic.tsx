@@ -8,12 +8,12 @@ const SHOPS = ['Albert', 'Billa', 'Globus', 'Kaufland', 'Lidl', 'Penny', 'Tesco'
 
 /** Typing right into the field: a value from suggestions, or with allowCustom the typed text. */
 export default class ComboBoxes extends Component {
-  readonly form = new Form<Values>();
-  readonly values = computed(() => JSON.stringify(this.form.getValues()));
+  public readonly form = new Form<Values>();
+  public readonly values = computed(() => JSON.stringify(this.form.getValues()));
   // addComboBox() gives the ComboBox itself, form.get() only a FormControl
-  readonly shop = this.form.addComboBox('shop', 'Obchod (allowCustom)', { items: SHOPS, allowCustom: true });
+  public readonly shop = this.form.addComboBox('shop', 'Obchod (allowCustom)', { items: SHOPS, allowCustom: true });
 
-  constructor() {
+  public constructor() {
     super();
     this.form.addComboBox('contact', 'Kontakt (search)', {
       search: async text => (await searchPeople(text)).map(person => [person.id, person.name] as const),
@@ -21,7 +21,7 @@ export default class ComboBoxes extends Component {
     });
   }
 
-  render() {
+  public render() {
     return (
       <div>
         <FormView form={this.form} />

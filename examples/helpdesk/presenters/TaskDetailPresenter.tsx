@@ -25,20 +25,20 @@ const EMOJIS =['👍', '🙂', '🎉', '🙏', '👀', '✅', '⚠️', '🔥'];
  * themselves on every change; a comment being written keeps the user from leaving without a question.
  */
 export class TaskDetailPresenter extends Presenter<{ taskId: number }> {
-  readonly task = state<TaskDetail | null>(null);
-  readonly comments = state<CommentResource[]>([]);
-  readonly attachments = state<AttachmentResource[]>([]);
-  readonly history = state<HistoryResource[]>([]);
-  readonly tab = state<Tab>('comments');
-  readonly uploading = state(false);
+  public readonly task = state<TaskDetail | null>(null);
+  public readonly comments = state<CommentResource[]>([]);
+  public readonly attachments = state<AttachmentResource[]>([]);
+  public readonly history = state<HistoryResource[]>([]);
+  public readonly tab = state<Tab>('comments');
+  public readonly uploading = state(false);
 
-  readonly settings = new Form<TaskSettings>();
-  readonly composer = new Form<{ text: string }>();
+  public readonly settings = new Form<TaskSettings>();
+  public readonly composer = new Form<{ text: string }>();
   private fileInput!: HTMLInputElement;
   /** The comment being written, HTML from the editor; its images are attachments of the task. */
   private readonly commentText: EditorControl;
 
-  constructor(private api: HelpdeskApi, private store: Store, private work: OfflineWork) {
+  public constructor(private api: HelpdeskApi, private store: Store, private work: OfflineWork) {
     super();
     // Items as objects with a template: a dot of the state, the avatar of the user, the icon of the priority
     this.settings.addDropDownList('status', 'Změnit stav', {
@@ -70,13 +70,13 @@ export class TaskDetailPresenter extends Presenter<{ taskId: number }> {
     this.composer.onSuccess = values => this.handleComment(values.text);
   }
 
-  override async startup() {
+  public override async startup() {
     await this.load();
     // Changes made offline were sent: the detail shows what the server has now
     this.scope.onCleanup(this.work.offline.onSynced(() => void this.load()));
   }
 
-  async load(): Promise<void> {
+  public async load(): Promise<void> {
     // Four calls at once, one request to the server
     const id = this.props.taskId;
     const [task, comments, attachments, history] = await Promise.all([
@@ -94,16 +94,16 @@ export class TaskDetailPresenter extends Presenter<{ taskId: number }> {
     this.settings.setDefaults({ status: task.status, priority: task.priority, assigneeId: task.assigneeId, due: task.due });
   }
 
-  override pageTitle() {
+  public override pageTitle() {
     return this.task()?.title ?? null;
   }
 
   /** A comment being written would be lost. */
-  override hasUnsavedChanges() {
+  public override hasUnsavedChanges() {
     return this.composer.isChanged();
   }
 
-  async handleSave(input: TaskSettings): Promise<void> {
+  public async handleSave(input: TaskSettings): Promise<void> {
     const task = await this.api.call('task.update', { id: this.props.taskId, input });
     this.task.set(task);
     this.history.set(await this.api.call('history.list', { taskId: task.id }));
@@ -111,18 +111,18 @@ export class TaskDetailPresenter extends Presenter<{ taskId: number }> {
     this.app.invalidate('tasks');
   }
 
-  async handleComment(text: string): Promise<void> {
+  public async handleComment(text: string): Promise<void> {
     const comment = await this.api.call('comment.create', { taskId: this.props.taskId, text });
     this.comments.update(comments => [comment, ...comments]);
     this.composer.reset();
   }
 
-  async handleLike(comment: CommentResource): Promise<void> {
+  public async handleLike(comment: CommentResource): Promise<void> {
     const liked = await this.api.call('comment.like', { id: comment.id });
     this.comments.update(comments => comments.map(other => (other.id === liked.id ? liked : other)));
   }
 
-  async handleUpload(files: File[]): Promise<void> {
+  public async handleUpload(files: File[]): Promise<void> {
     if (!files.length) return;
     this.uploading.set(true);
     try {
@@ -179,7 +179,7 @@ export class TaskDetailPresenter extends Presenter<{ taskId: number }> {
     this.commentText.editor?.insertText(emoji);
   }
 
-  render() {
+  public render() {
     return (
       <If when={this.task}>
         {task => <>

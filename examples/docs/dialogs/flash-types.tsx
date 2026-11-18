@@ -2,7 +2,7 @@ import { Button, Component } from '@phloxcz/phlox-js';
 
 /** Flash messages as toasts: four types, a title, an own duration. Errors stay until closed. */
 export default class Flashes extends Component {
-  render() {
+  public render() {
     const flash = this.app.flashes;
     return (
       <p style={{ display: 'flex', flexWrap: 'wrap', gap: '.5rem' }}>

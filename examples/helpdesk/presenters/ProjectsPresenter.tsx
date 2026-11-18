@@ -10,36 +10,36 @@ import { TasksPresenter } from './TasksPresenter';
 /** The column of projects at /projects; the tasks of the chosen one are at /projects/<id>. */
 export class ProjectsPresenter extends Presenter {
   /** A typed route: `project` is a number in props, link(this.project, …) is checked by the compiler. */
-  readonly project = route('project', '/<project:int>', { presenter: TasksPresenter, props: ({ project }) => ({ projectId: project }) });
+  public readonly project = route('project', '/<project:int>', { presenter: TasksPresenter, props: ({ project }) => ({ projectId: project }) });
 
-  override routes: Route[] = [
+  public override routes: Route[] = [
     { name: 'default', pattern: '/' },
     this.project,
   ];
 
-  readonly filter = state('');
+  public readonly filter = state('');
   /** The width of the column, set by the user and remembered in the browser. */
-  readonly width = this.preference('helpdesk.projects.width', 236);
-  readonly shown = computed(() => {
+  public readonly width = this.preference('helpdesk.projects.width', 236);
+  public readonly shown = computed(() => {
     const words = foldText(this.filter().trim());
     return this.store.projects().filter(project => foldText(project.name).includes(words));
   });
 
-  constructor(private store: Store, private work: OfflineWork) {
+  public constructor(private store: Store, private work: OfflineWork) {
     super();
   }
 
-  override pageTitle() {
+  public override pageTitle() {
     return 'Projekty';
   }
 
   /** Without a chosen project the first one opens. */
-  actionDefault() {
+  public actionDefault() {
     const first = this.store.projects()[0];
     if (first) return this.redirect(this.project, { project: first.id });
   }
 
-  async handleCreate(): Promise<void> {
+  public async handleCreate(): Promise<void> {
     // A form as a panel sliding in from the right, like offcanvas
     const project = await this.openDialog(ProjectEdit, {}, { placement: 'end' });
     if (!project) return;
@@ -48,7 +48,7 @@ export class ProjectsPresenter extends Presenter {
     void this.app.router.navigate(this.link(this.project, { project: project.id }));
   }
 
-  render() {
+  public render() {
     const current = () => Number(this.params().project);
     return (
       <>

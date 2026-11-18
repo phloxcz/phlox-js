@@ -11,10 +11,10 @@ import type { ProjectResource, UserResource } from '../api';
 export class Store {
   private loaded: { users: Resource<UserResource[]>; projects: Resource<ProjectResource[]>; mine: Resource<number> } | null = null;
 
-  constructor(private api: HelpdeskApi, private app: Application) {}
+  public constructor(private api: HelpdeskApi, private app: Application) {}
 
   /** Starts loading after sign-in (before it the server would refuse) and waits for the first data. */
-  async start(): Promise<void> {
+  public async start(): Promise<void> {
     // Three calls at once go to the server as one batch request
     this.loaded ??= {
       users: this.app.resource(() => this.api.call('user.list'), { tags: ['users'] }),
@@ -24,24 +24,24 @@ export class Store {
     await Promise.all([this.loaded.users.ready(), this.loaded.projects.ready(), this.loaded.mine.ready()]);
   }
 
-  users(): UserResource[] {
+  public users(): UserResource[] {
     return this.loaded?.users() ?? [];
   }
 
-  projects(): ProjectResource[] {
+  public projects(): ProjectResource[] {
     return this.loaded?.projects() ?? [];
   }
 
   /** Open tasks of the logged-in user, for the menu. */
-  mine(): number {
+  public mine(): number {
     return this.loaded?.mine() ?? 0;
   }
 
-  user(id: number | null): UserResource | undefined {
+  public user(id: number | null): UserResource | undefined {
     return this.users().find(user => user.id === id);
   }
 
-  project(id: number | undefined): ProjectResource | undefined {
+  public project(id: number | undefined): ProjectResource | undefined {
     return this.projects().find(project => project.id === id);
   }
 }

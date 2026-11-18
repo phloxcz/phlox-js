@@ -16,7 +16,7 @@ export class Container {
   private creating = new Set<Class>();
 
   /** Registers services: a class is created when first needed, an instance is used as it is. */
-  add(...services: (Class | object)[]): this {
+  public add(...services: (Class | object)[]): this {
     for (const service of services) {
       if (typeof service === 'function') this.services.set(service as Class, undefined);
       else this.services.set(service.constructor as Class, service);
@@ -25,17 +25,17 @@ export class Container {
   }
 
   /** Lets an extension register its services, like `extensions` in NEON. */
-  use(extension: (container: Container) => void): this {
+  public use(extension: (container: Container) => void): this {
     extension(this);
     return this;
   }
 
-  has(type: Type): boolean {
+  public has(type: Type): boolean {
     return this.find(type).length > 0;
   }
 
   /** Returns the only service of the given type: the class itself or a class that extends it. */
-  get<T>(type: Type<T>): T {
+  public get<T>(type: Type<T>): T {
     const found = this.find(type);
     if (found.length === 0) throw new Error(`Service of type ${type.name} not found. Did you add it to the container?`);
     if (found.length > 1) {
@@ -47,7 +47,7 @@ export class Container {
   }
 
   /** Creates an instance with autowired constructor. The instance is not registered as a service. */
-  create<T>(cls: Class<T>): T {
+  public create<T>(cls: Class<T>): T {
     if (this.creating.has(cls)) throw new Error(`Circular dependency while creating ${cls.name}.`);
     const inject = (cls as { $inject?: () => Dependency[] }).$inject;
     if (!inject && cls.length > 0) {

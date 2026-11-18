@@ -24,6 +24,45 @@ Balíček zatím není na npm, instaluje se z GitHubu podle tagu. Projekt potře
 | `npm run build:examples` | sestaví dokumentaci a helpdesk do `examples/dist`; `npx vite preview --config examples/vite.config.ts` je spustí i s mock serverem |
 | `npm test` | spustí testy |
 | `npm run typecheck` | zkontroluje typy |
+| `npm run lint` | zkontroluje styl kódu (Biome) |
+
+## Styl kódu
+
+Kód frameworku i ukázek se píše jako běžný TypeScript: dvě mezery, složená závorka na konci řádku. Jako v Nette ale mají **všechny členy tříd modifikátor viditelnosti**, i `public`:
+
+```ts
+export default class TagsPresenter extends Presenter {
+  public readonly grid = new Grid<TagRow>(...);
+
+  public constructor(private readonly api: CmsApi) {
+    super();
+  }
+
+  public render() {
+    return <GridView grid={this.grid} />;
+  }
+
+  private async toggleActive(tag: TagRow): Promise<void> {
+    await this.api.notify(tag.active ? 'tag.deactivate' : 'tag.activate', { id: tag.id });
+  }
+}
+```
+
+Hlídá to [Biome](https://biomejs.dev/) pravidlem `useConsistentMemberAccessibility`. Aplikace může vzít stejné nastavení: `npm install -D -E @biomejs/biome` a do `biome.json`:
+
+```json
+{
+  "formatter": { "enabled": false },
+  "linter": {
+    "rules": {
+      "preset": "none",
+      "style": { "useConsistentMemberAccessibility": { "level": "error", "options": { "accessibility": "explicit" } } }
+    }
+  }
+}
+```
+
+ESLint s `typescript-eslint` to umí taky (`explicit-member-accessibility`), zatím ale nepodporuje TypeScript 7.
 
 ## Jak se pojmy z Nette jmenují tady
 

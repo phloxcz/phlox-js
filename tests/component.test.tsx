@@ -4,13 +4,13 @@ import type { Child } from '../src/index';
 import { boot, deferred, tick } from './helpers';
 
 class Clock {
-  now = '12:00';
+  public now = '12:00';
 }
 
 /** Shows the given component inside a running application. */
 function host(view: () => Child) {
   return class Host extends Presenter {
-    render() {
+    public render() {
       return <div>{view()}</div>;
     }
   };
@@ -19,10 +19,10 @@ function host(view: () => Child) {
 describe('Component', () => {
   test('flashMessage() in a component, as in a presenter', async () => {
     class Saver extends Component {
-      override startup() {
+      public override startup() {
         this.flashMessage('Uloženo.', 'success', { title: 'Hotovo' });
       }
-      render() {
+      public render() {
         return <p>ok</p>;
       }
     }
@@ -34,10 +34,10 @@ describe('Component', () => {
     const log: string[] = [];
     const show = state(true);
     class Box extends Component {
-      override startup() { log.push('startup'); }
-      render() { log.push('render'); return <b>box</b>; }
-      override afterRender() { log.push(`afterRender ${document.body.contains(document.querySelector('b'))}`); }
-      override shutdown() { log.push('shutdown'); }
+      public override startup() { log.push('startup'); }
+      public render() { log.push('render'); return <b>box</b>; }
+      public override afterRender() { log.push(`afterRender ${document.body.contains(document.querySelector('b'))}`); }
+      public override shutdown() { log.push('shutdown'); }
     }
     const { element } = await boot(host(() => <If when={show}><Box /></If>));
     expect(element.textContent).toBe('box');
@@ -51,8 +51,8 @@ describe('Component', () => {
 
   test('props are checked, ready in field initializers and children are passed', async () => {
     class Greeting extends Component<{ name: string; children?: Child }> {
-      text = `Hello ${this.props.name}`;
-      render() { return <p>{this.text}{this.props.children}</p>; }
+      public text = `Hello ${this.props.name}`;
+      public render() { return <p>{this.text}{this.props.children}</p>; }
     }
     const { element } = await boot(host(() => <Greeting name="Ann"><i>!</i></Greeting>));
     expect(element.querySelector('p')!.textContent).toBe('Hello Ann!');
@@ -65,8 +65,8 @@ describe('Component', () => {
 
   test('services in the constructor are autowired', async () => {
     class Time extends Component {
-      constructor(private clock: Clock) { super(); }
-      render() { return <time>{this.clock.now}</time>; }
+      public constructor(private clock: Clock) { super(); }
+      public render() { return <time>{this.clock.now}</time>; }
     }
     const { element } = await boot(host(() => <Time />), '/', new Container().add(Clock));
     expect(element.textContent).toBe('12:00');
@@ -75,12 +75,12 @@ describe('Component', () => {
   test('the view of a component with async startup appears when the data is loaded', async () => {
     const loaded = deferred();
     class Slow extends Component {
-      text = state('');
-      override async startup() {
+      public text = state('');
+      public override async startup() {
         await loaded.promise;
         this.text.set('loaded');
       }
-      render() { return <b>{this.text}</b>; }
+      public render() { return <b>{this.text}</b>; }
     }
     const { element } = await boot(host(() => <Slow />));
     expect(element.querySelector('b')).toBeNull();
@@ -91,8 +91,8 @@ describe('Component', () => {
 
   test('a failing async startup is reported and shows nothing', async () => {
     class Broken extends Component {
-      override async startup() { throw new Error('no data'); }
-      render() { return <b>never</b>; }
+      public override async startup() { throw new Error('no data'); }
+      public render() { return <b>never</b>; }
     }
     const { element, errors } = await boot(host(() => <Broken />));
     await tick();
@@ -104,7 +104,7 @@ describe('Component', () => {
     const count = state(0);
     let renders = 0;
     class Counter extends Component {
-      render() { renders++; return <b>{count() > 100 ? 'big' : 'small'}{count}</b>; }
+      public render() { renders++; return <b>{count() > 100 ? 'big' : 'small'}{count}</b>; }
     }
     const { element } = await boot(host(() => <Counter />));
     count.set(1);
@@ -115,7 +115,7 @@ describe('Component', () => {
   test('ref gives the instance and parent points to the owner', async () => {
     let box: Box | undefined;
     class Box extends Component {
-      render() { return <b />; }
+      public render() { return <b />; }
     }
     const Host = host(() => <Box ref={component => { box = component; }} />);
     await boot(Host);
@@ -125,7 +125,7 @@ describe('Component', () => {
 
   test('a component cannot be created by hand or used without an application', () => {
     class Box extends Component {
-      render() { return <b />; }
+      public render() { return <b />; }
     }
     expect(() => new Box()).toThrow('must be created by the framework');
     expect(() => render(() => <Box />, document.body)).toThrow('only inside a running Application');
@@ -138,19 +138,19 @@ describe('effects of a component', () => {
     const source = state(0);
     const runs: string[] = [];
     class Watcher extends Component {
-      field = effect(() => void runs.push(`field ${source()}`));
-      constructor() {
+      public field = effect(() => void runs.push(`field ${source()}`));
+      public constructor() {
         super();
         effect(() => void runs.push(`constructor ${source()}`));
       }
-      override startup() {
+      public override startup() {
         effect(() => void runs.push(`startup ${source()}`));
       }
-      render() { return <i />; }
+      public render() { return <i />; }
     }
     const shown = state(true);
     class Page extends Presenter {
-      render() { return <If when={shown}><Watcher /></If>; }
+      public render() { return <If when={shown}><Watcher /></If>; }
     }
     await boot(Page);
     source.set(1);
@@ -164,11 +164,11 @@ describe('effects of a component', () => {
 describe('errors of event handlers', () => {
   test('a thrown error and a rejected promise of a handler go to app.onError', async () => {
     class Page extends Presenter {
-      async handleSave() {
+      public async handleSave() {
         await Promise.resolve();
         throw new Error('server is down');
       }
-      render() {
+      public render() {
         return <p>
           <button id="async" onClick={() => this.handleSave()}>Uložit</button>
           <button id="sync" onClick={() => { throw new Error('broken'); }}>Rozbité</button>

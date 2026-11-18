@@ -22,7 +22,7 @@ export class CategoryStore {
   private rows: Row[] = START.map(([id, name, parentId], position) => ({ id, name, parentId, position, locked: name === 'Výprodej' }));
 
   /** One level of the tree, for the `load` option. */
-  async children(parentId: number | null): Promise<CategoryNode[]> {
+  public async children(parentId: number | null): Promise<CategoryNode[]> {
     await delay(parentId === null ? 100 : 300);
     return this.childrenOf(parentId).map(row => ({
       id: row.id, label: row.name, hasChildren: this.childrenOf(row.id).length > 0, locked: Boolean(row.locked),
@@ -30,19 +30,19 @@ export class CategoryStore {
   }
 
   /** Ids of the ancestors from the top, for the `path` option. */
-  async path(id: number): Promise<number[]> {
+  public async path(id: number): Promise<number[]> {
     await delay(100);
     const path: number[] = [];
     for (let row = this.find(id); row?.parentId != null; row = this.find(row.parentId)) path.unshift(row.parentId);
     return path;
   }
 
-  name(id: number): string {
+  public name(id: number): string {
     return this.find(id)?.name ?? '';
   }
 
   /** Moves a category under a parent at a position among its children, as the tree reports it. */
-  async move(id: number, parentId: number | null, index: number): Promise<void> {
+  public async move(id: number, parentId: number | null, index: number): Promise<void> {
     await delay(300);
     const row = this.find(id)!;
     if (row.locked) throw new Error(`Kategorii „${row.name}“ server nedovolí přesunout.`);

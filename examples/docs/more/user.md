@@ -10,11 +10,11 @@ Jako `Nette\Security`: `User`, `Identity`, `Authenticator`, `Authorizator` a `Pe
 
 ```ts
 class ApiAuthenticator extends Authenticator {
-  constructor(private api: RpcApi) {
+  public constructor(private api: RpcApi) {
     super();
   }
 
-  async authenticate(username: string, password: string): Promise<Identity> {
+  public async authenticate(username: string, password: string): Promise<Identity> {
     const result = await this.api.call('sign.in', { username, password });
     return new Identity(result.id, result.roles, { name: result.name }, result.token);
   }
@@ -76,7 +76,7 @@ Jako v Nette se kontroluje ve `startup()`:
 
 ```ts
 class AdminPresenter extends Presenter {
-  override startup() {
+  public override startup() {
     if (!this.user.isLoggedIn()) return this.redirect('/sign/in');
     if (!this.user.isInRole('admin')) this.error(403);
   }

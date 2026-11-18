@@ -12,10 +12,10 @@ interface SignUp {
 
 /** Rules, a rule with an argument from another control, a condition with toggle(), an own rule. */
 export default class SignUpForm extends Component {
-  readonly form = new Form<SignUp>();
-  readonly result = state('');
+  public readonly form = new Form<SignUp>();
+  public readonly result = state('');
 
-  constructor() {
+  public constructor() {
     super();
     const f = this.form;
     f.addText('login', 'Přihlašovací jméno')
@@ -35,7 +35,7 @@ export default class SignUpForm extends Component {
     f.onSuccess = values => this.result.set(`Prošlo: ${values.login}`);
   }
 
-  render() {
+  public render() {
     return <div><FormView form={this.form} /><p>{this.result}</p></div>;
   }
 }

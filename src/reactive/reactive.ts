@@ -29,28 +29,28 @@ let batchDepth = 0;
 
 /** Owns effects, computed values and cleanups. Disposing it disposes everything inside. */
 export class Scope {
-  readonly depth: number;
-  disposed = false;
+  public readonly depth: number;
+  public disposed = false;
   private children = new Set<Scope>();
   private cleanups: (() => void)[] = [];
   private values: Map<unknown, unknown> | null = null;
 
-  constructor(private parent: Scope | null = currentScope) {
+  public constructor(private parent: Scope | null = currentScope) {
     this.depth = parent ? parent.depth + 1 : 0;
     parent?.children.add(this);
   }
 
   /** Makes a value available to everything created inside this scope. */
-  provide(key: unknown, value: unknown): void {
+  public provide(key: unknown, value: unknown): void {
     (this.values ??= new Map()).set(key, value);
   }
 
   /** Finds a value provided by this scope or by the nearest scope above it. */
-  find<T>(key: unknown): T | undefined {
+  public find<T>(key: unknown): T | undefined {
     return this.values?.has(key) ? (this.values.get(key) as T) : this.parent?.find<T>(key);
   }
 
-  run<T>(fn: () => T): T {
+  public run<T>(fn: () => T): T {
     if (this.disposed) throw new Error('Cannot run in a disposed scope.');
     const previous = currentScope;
     currentScope = this;
@@ -61,7 +61,7 @@ export class Scope {
     }
   }
 
-  onCleanup(fn: () => void): void {
+  public onCleanup(fn: () => void): void {
     this.cleanups.push(fn);
   }
 
@@ -77,7 +77,7 @@ export class Scope {
     }
   }
 
-  dispose(): void {
+  public dispose(): void {
     if (this.disposed) return;
     this.disposed = true;
     this.clear();
@@ -86,13 +86,13 @@ export class Scope {
 }
 
 abstract class Observer extends Scope {
-  status = DIRTY;
-  sources = new Set<Source>();
+  public status = DIRTY;
+  public sources = new Set<Source>();
 
   protected abstract recompute(): void;
   protected abstract notify(): void;
 
-  mark(status: number): void {
+  public mark(status: number): void {
     if (this.status >= status) return;
     const wasClean = this.status === CLEAN;
     this.status = status;
@@ -100,7 +100,7 @@ abstract class Observer extends Scope {
   }
 
   /** Brings this observer up to date, sources are read in the order they were tracked. */
-  refresh(): void {
+  public refresh(): void {
     if (this.status === CHECK) {
       for (const source of this.sources) {
         source.refresh?.();
@@ -130,25 +130,25 @@ abstract class Observer extends Scope {
     this.sources.clear();
   }
 
-  override dispose(): void {
+  public override dispose(): void {
     super.dispose();
     this.unlink();
   }
 }
 
 class Computed<T> extends Observer implements Source {
-  observers = new Set<Observer>();
+  public observers = new Set<Observer>();
   private value: T | undefined;
   private error: unknown;
   private failed = false;
   private computed = false;
   private running = false;
 
-  constructor(private fn: Accessor<T>) {
+  public constructor(private fn: Accessor<T>) {
     super();
   }
 
-  read(): T {
+  public read(): T {
     if (this.disposed) return untrack(this.fn);
     if (this.running) throw new Error('Circular dependency in computed.');
     this.refresh();
@@ -182,7 +182,7 @@ class Computed<T> extends Observer implements Source {
 }
 
 class Effect extends Observer {
-  constructor(private fn: () => void | (() => void)) {
+  public constructor(private fn: () => void | (() => void)) {
     super();
   }
 

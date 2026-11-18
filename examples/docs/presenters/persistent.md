@@ -4,7 +4,7 @@ Jako `#[Persistent]` v Nette: query parametry, které si odkazy presenteru nesou
 
 ```ts
 class OrdersPresenter extends Presenter {
-  override persistent = ['page', 'sort', 'filter.*'];
+  public override persistent = ['page', 'sort', 'filter.*'];
 }
 
 // na /orders?page=3&sort=-price&tab=x

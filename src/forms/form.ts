@@ -35,35 +35,35 @@ function copy<T>(value: T): T {
 }
 
 export class Form<V extends object = Record<string, any>> extends Container<V> {
-  static Filled = validators.Filled;
-  static Required = validators.Filled;
-  static Blank = validators.Blank;
-  static Equal = validators.Equal;
-  static NotEqual = validators.NotEqual;
-  static MinLength = validators.MinLength;
-  static MaxLength = validators.MaxLength;
-  static Length = validators.Length;
-  static Email = validators.Email;
-  static URL = validators.URL;
-  static Pattern = validators.Pattern;
-  static Integer = validators.Integer;
-  static Numeric = validators.Integer;
-  static Float = validators.Float;
-  static Min = validators.Min;
-  static Max = validators.Max;
-  static Range = validators.Range;
-  static IsIn = validators.IsIn;
-  static MaxFileSize = validators.MaxFileSize;
-  static MimeType = validators.MimeType;
-  static Image = validators.Image;
+  public static Filled = validators.Filled;
+  public static Required = validators.Filled;
+  public static Blank = validators.Blank;
+  public static Equal = validators.Equal;
+  public static NotEqual = validators.NotEqual;
+  public static MinLength = validators.MinLength;
+  public static MaxLength = validators.MaxLength;
+  public static Length = validators.Length;
+  public static Email = validators.Email;
+  public static URL = validators.URL;
+  public static Pattern = validators.Pattern;
+  public static Integer = validators.Integer;
+  public static Numeric = validators.Integer;
+  public static Float = validators.Float;
+  public static Min = validators.Min;
+  public static Max = validators.Max;
+  public static Range = validators.Range;
+  public static IsIn = validators.IsIn;
+  public static MaxFileSize = validators.MaxFileSize;
+  public static MimeType = validators.MimeType;
+  public static Image = validators.Image;
   /** Default messages of the rules, keyed by the validator: Form.messages.set(Form.Filled, 'Vyplňte.'). */
-  static messages = messages;
+  public static messages = messages;
 
-  readonly id = `frm${++lastId}`;
+  public readonly id = `frm${++lastId}`;
   /** Submit buttons of the whole form, also those added to containers. */
-  readonly buttons = new Map<string, SubmitButton>();
+  public readonly buttons = new Map<string, SubmitButton>();
   /** Errors of the whole form, not of one control. */
-  readonly errors = state<string[]>([]);
+  public readonly errors = state<string[]>([]);
   /** The values the form was filled with or last saved, see isChanged(). */
   private saved = state<V | null>(null);
 
@@ -71,51 +71,51 @@ export class Form<V extends object = Record<string, any>> extends Container<V> {
    * True when the values differ from the saved ones: those from setDefaults(), after a successful submit,
    * after reset(), or those the form had when it was first rendered. For Component.hasUnsavedChanges().
    */
-  readonly isChanged: Accessor<boolean> = computed(() => {
+  public readonly isChanged: Accessor<boolean> = computed(() => {
     const saved = this.saved();
     return saved !== null && !same(this.getValues(), saved);
   });
 
   /** True while onSuccess runs. Submit buttons are disabled meanwhile. */
-  readonly submitting = state(false);
+  public readonly submitting = state(false);
 
   /** Called with the values when the form is sent and valid. An RpcError with invalid fields is shown at the fields. */
-  onSuccess: ((values: V, form: this) => void | Promise<void>) | null = null;
+  public onSuccess: ((values: V, form: this) => void | Promise<void>) | null = null;
   /** Called when the form is sent but not valid. */
-  onError: ((form: this) => void) | null = null;
+  public onError: ((form: this) => void) | null = null;
 
-  submittedBy: SubmitButton | null = null;
+  public submittedBy: SubmitButton | null = null;
   /** The button the user clicked, set by the button. */
-  clickedButton: SubmitButton | null = null;
-  element: HTMLFormElement | null = null;
+  public clickedButton: SubmitButton | null = null;
+  public element: HTMLFormElement | null = null;
 
   /** Elements switched by toggle() in rules: id → visible. */
-  readonly toggles: Accessor<Map<string, boolean>> = computed(() => {
+  public readonly toggles: Accessor<Map<string, boolean>> = computed(() => {
     const result = new Map<string, boolean>();
     this.collectToggles(result);
     return result;
   });
 
-  override get form(): Form<any> {
+  public override get form(): Form<any> {
     return this;
   }
 
-  override get idPrefix(): string {
+  public override get idPrefix(): string {
     return this.id;
   }
 
-  override htmlName(name: string): string {
+  public override htmlName(name: string): string {
     return name;
   }
 
-  getButton(name: string): SubmitButton {
+  public getButton(name: string): SubmitButton {
     const button = this.buttons.get(name);
     if (!button) throw new Error(`The form has no button '${name}'.`);
     return button;
   }
 
   /** Fills the controls, typically with data loaded from the server. The same as setValues(). */
-  setDefaults(values: DeepPartial<V>): this {
+  public setDefaults(values: DeepPartial<V>): this {
     // One batch: an effect watching isChanged() (autosave) must never see the defaults as a change
     batch(() => {
       this.setValues(values);
@@ -125,17 +125,17 @@ export class Form<V extends object = Record<string, any>> extends Container<V> {
   }
 
   /** The current values are the saved ones, isChanged() is false. For saving outside onSuccess. */
-  markSaved(): void {
+  public markSaved(): void {
     this.saved.set(copy(untrack(() => this.getValues())));
   }
 
   /** @internal The first rendering remembers the values unless something has been saved before. */
-  markRendered(): void {
+  public markRendered(): void {
     if (untrack(this.saved) === null) this.markSaved();
   }
 
   /** Checks the given controls, or the whole form. Returns whether they are valid. */
-  validate(controls?: Iterable<FormControl<any>>): boolean {
+  public validate(controls?: Iterable<FormControl<any>>): boolean {
     this.errors.set([]);
     if (!controls) return this.validateAll();
     let valid = true;
@@ -145,11 +145,11 @@ export class Form<V extends object = Record<string, any>> extends Container<V> {
     return valid;
   }
 
-  override hasErrors(): boolean {
+  public override hasErrors(): boolean {
     return this.errors().length > 0 || super.hasErrors();
   }
 
-  addError(message: string): void {
+  public addError(message: string): void {
     this.errors.update(errors => [...errors, message]);
   }
 
@@ -158,7 +158,7 @@ export class Form<V extends object = Record<string, any>> extends Container<V> {
    * lead to the control `name`, `input.lines.2.quantity` to the quantity in the third row.
    * A path with no control becomes an error of the form. Returns whether the error had such fields.
    */
-  addServerErrors(error: unknown, prefix?: string): boolean {
+  public addServerErrors(error: unknown, prefix?: string): boolean {
     const source = error as { data?: { fields?: unknown }; fields?: unknown } | null;
     const fields = source?.data?.fields ?? source?.fields;
     if (!fields || typeof fields !== 'object') return false;
@@ -184,7 +184,7 @@ export class Form<V extends object = Record<string, any>> extends Container<V> {
    * Returns whether it went through. An error thrown by onSuccess is thrown on,
    * except invalid parameters from the server, which are shown at the controls.
    */
-  async submit(button: SubmitButton | null = null): Promise<boolean> {
+  public async submit(button: SubmitButton | null = null): Promise<boolean> {
     if (untrack(this.submitting)) return false;
     this.submittedBy = button;
     if (!this.validate(button?.validationScope ?? undefined)) {
@@ -207,7 +207,7 @@ export class Form<V extends object = Record<string, any>> extends Container<V> {
   }
 
   /** Empties all controls and errors. */
-  override reset(): void {
+  public override reset(): void {
     batch(() => {
       super.reset();
       this.errors.set([]);

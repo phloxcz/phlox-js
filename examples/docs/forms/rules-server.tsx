@@ -6,9 +6,9 @@ interface Customer { name: string; email: string }
 
 /** Errors from the server (invalid params of phlox-rpc-api) are shown at the fields, not thrown. */
 export default class ServerErrors extends Component {
-  readonly form = new Form<Customer>();
+  public readonly form = new Form<Customer>();
 
-  constructor() {
+  public constructor() {
     super();
     this.form.addText('name', 'Jméno').setRequired('Vyplňte jméno.');
     this.form.addEmail('email', 'E-mail');
@@ -22,7 +22,7 @@ export default class ServerErrors extends Component {
     };
   }
 
-  render() {
+  public render() {
     return <FormView form={this.form} />;
   }
 }

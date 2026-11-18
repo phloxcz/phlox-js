@@ -43,19 +43,19 @@ export type ToastPosition = 'top-left' | 'top-center' | 'top-right' | 'bottom-le
  * (`<For each={this.app.flashes.messages}>`) sets `toasts = false`; an adapter can show them by a library.
  */
 export class FlashMessages {
-  readonly messages = state<Flash[]>([]);
+  public readonly messages = state<Flash[]>([]);
   /** How long a message stays, in ms. 0 = until removed. */
-  duration = 5000;
+  public duration = 5000;
   /** Errors stay until the user closes them, the user should not miss them. */
-  errorDuration = 0;
+  public errorDuration = 0;
   /** The application shows the messages as toasts. */
-  toasts = true;
+  public toasts = true;
   /** The corner of the toasts. */
-  position: ToastPosition = 'top-right';
+  public position: ToastPosition = 'top-right';
 
   private timers = new Map<Flash, { timer: ReturnType<typeof setTimeout> | null; ends: number; left: number }>();
 
-  add(text: string, type = 'info', options: FlashOptions = {}): Flash {
+  public add(text: string, type = 'info', options: FlashOptions = {}): Flash {
     const duration = options.duration ?? (type === 'error' ? this.errorDuration : this.duration);
     const flash: Flash = { text, type, duration, ...(options.title ? { title: options.title } : {}) };
     this.messages.update(list => [...list, flash]);
@@ -66,20 +66,20 @@ export class FlashMessages {
     return flash;
   }
 
-  remove(flash: Flash): void {
+  public remove(flash: Flash): void {
     const running = this.timers.get(flash);
     if (running?.timer) clearTimeout(running.timer);
     this.timers.delete(flash);
     this.messages.update(list => list.filter(other => other !== flash));
   }
 
-  clear(): void {
+  public clear(): void {
     for (const flash of [...this.timers.keys()]) this.remove(flash);
     this.messages.set([]);
   }
 
   /** Stops the time of a message, while the user reads it (the pointer or the focus is on it). */
-  pause(flash: Flash): void {
+  public pause(flash: Flash): void {
     const running = this.timers.get(flash);
     if (!running?.timer) return;
     clearTimeout(running.timer);
@@ -87,7 +87,7 @@ export class FlashMessages {
     running.left = Math.max(0, running.ends - Date.now());
   }
 
-  resume(flash: Flash): void {
+  public resume(flash: Flash): void {
     const running = this.timers.get(flash);
     if (!running || running.timer) return;
     running.ends = Date.now() + running.left;
@@ -96,29 +96,29 @@ export class FlashMessages {
 }
 
 export class Application {
-  readonly router: Router;
-  readonly flashes: FlashMessages;
-  readonly user: User;
+  public readonly router: Router;
+  public readonly flashes: FlashMessages;
+  public readonly user: User;
   /** Classes of rendered forms and dialogs, see ui/theme.ts. */
-  readonly theme: Theme;
+  public readonly theme: Theme;
 
   /** The root presenter while the application is running. */
-  presenter: Presenter<any, any> | null = null;
+  public presenter: Presenter<any, any> | null = null;
 
   /**
    * The path the application lives under when it is not at the root of the site, like '/admin'.
    * Routes and links are relative to it, links outside it load another page. Set it before run().
    */
-  basePath = '';
+  public basePath = '';
 
   /**
    * Composes document.title from the title of the page (Presenter.pageTitle()). By default
    * "Page – <the title in index.html>", without a page only the title in index.html.
    */
-  formatTitle: (page: string | null) => string = page => (page ? `${page} – ${this.baseTitle}` : this.baseTitle);
+  public formatTitle: (page: string | null) => string = page => (page ? `${page} – ${this.baseTitle}` : this.baseTitle);
 
   /** Receives errors from navigation and from life cycle methods that nobody awaits. */
-  onError: (error: unknown) => void = error => console.error(error);
+  public onError: (error: unknown) => void = error => console.error(error);
 
   private scope: Scope | null = null;
   /** Versions of the tags of data, see invalidate(). */
@@ -131,7 +131,7 @@ export class Application {
   private announcer: HTMLElement | null = null;
 
   /** The container holds services of the application. Services of the framework are added unless it has its own. */
-  constructor(readonly container = new Container()) {
+  public constructor(public readonly container = new Container()) {
     container.add(this);
     if (!container.has(Dialogs)) container.add(NativeDialogs);
     if (!container.has(FlashMessages)) container.add(FlashMessages);
@@ -149,7 +149,7 @@ export class Application {
   }
 
   /** Creates the root presenter, routes the current URL and shows the result in the element. */
-  async run(root: Class<Presenter<any, any>>, element: Element): Promise<void> {
+  public async run(root: Class<Presenter<any, any>>, element: Element): Promise<void> {
     if (this.scope) throw new Error('The application is already running.');
     this.started = { root, element };
     this.scope = new Scope(null);
@@ -180,22 +180,22 @@ export class Application {
   }
 
   /** A message with OK, as a dialog or, with `anchor`, as a popover at an element. */
-  alert(message: Child, options: MessageOptions = {}, opener?: Component<any, any>): Promise<void> {
+  public alert(message: Child, options: MessageOptions = {}, opener?: Component<any, any>): Promise<void> {
     return showMessage(this.opener(opener), 'alert', message, options).then(() => undefined);
   }
 
   /** A question with OK and Cancel. True for OK; Escape, a click outside or Cancel is false. */
-  confirm(message: Child, options: MessageOptions = {}, opener?: Component<any, any>): Promise<boolean> {
+  public confirm(message: Child, options: MessageOptions = {}, opener?: Component<any, any>): Promise<boolean> {
     return showMessage(this.opener(opener), 'confirm', message, options) as Promise<boolean>;
   }
 
   /** A question for a text. The text for OK, null for Cancel. */
-  prompt(message: Child, options: PromptOptions = {}, opener?: Component<any, any>): Promise<string | null> {
+  public prompt(message: Child, options: PromptOptions = {}, opener?: Component<any, any>): Promise<string | null> {
     return showMessage(this.opener(opener), 'prompt', message, options) as Promise<string | null>;
   }
 
   /** A dialog without buttons while something runs; close it by the returned handle. */
-  showLoading(message: Child = undefined, opener?: Component<any, any>): LoadingHandle {
+  public showLoading(message: Child = undefined, opener?: Component<any, any>): LoadingHandle {
     return showLoading(this.opener(opener).scope, message);
   }
 
@@ -204,7 +204,7 @@ export class Application {
    * on whatever screen it is. Calls made at once go to the server as one batch.
    *   await this.api.call('task.update', …); this.app.invalidate('tasks');
    */
-  invalidate(...tags: string[]): void {
+  public invalidate(...tags: string[]): void {
     batch(() => {
       for (const tag of tags) this.version(tag).update(version => version + 1);
     });
@@ -214,13 +214,13 @@ export class Application {
    * A resource of the whole application, for services that hold data many screens show (users, projects).
    * It lives while the application runs. Components use Component.resource().
    */
-  resource<T>(load: () => Promise<T>, options: ResourceOptions = {}): Resource<T> {
+  public resource<T>(load: () => Promise<T>, options: ResourceOptions = {}): Resource<T> {
     if (!this.scope) throw new Error('app.resource() needs a running application.');
     return this.createResource(this.scope, load, options);
   }
 
   /** A resource owned by the scope, reading the versions of its tags. Used by resource() and Component.resource(). */
-  createResource<T>(scope: Scope, load: () => Promise<T>, options: ResourceOptions = {}): Resource<T> {
+  public createResource<T>(scope: Scope, load: () => Promise<T>, options: ResourceOptions = {}): Resource<T> {
     const tags = options.tags ?? [];
     return scope.run(() => createResource(() => {
       for (const tag of tags) this.version(tag)();
@@ -238,7 +238,7 @@ export class Application {
    * Whether the components may leave: true without unsaved changes in them, otherwise the user decides.
    * Null means the whole application. The router and Component.cancel() ask through it.
    */
-  async mayLeave(leaving: Component<any, any>[] | null, opener?: Component<any, any>): Promise<boolean> {
+  public async mayLeave(leaving: Component<any, any>[] | null, opener?: Component<any, any>): Promise<boolean> {
     if (!hasUnsaved(this, leaving)) return true;
     return this.confirm(messageTexts.unsaved, { danger: true, okText: messageTexts.leave }, opener);
   }
@@ -261,7 +261,7 @@ export class Application {
    * was on something the old page took away, it goes to the main heading of the new one; otherwise it stays
    * (a list with its detail would lose its place).
    */
-  navigated(): void {
+  public navigated(): void {
     const announcer = this.announcer;
     if (!announcer) return;
     // Emptied first, the same text twice would not be read again
@@ -278,7 +278,7 @@ export class Application {
   }
 
   /** Removes everything and stops routing. */
-  stop(): void {
+  public stop(): void {
     document.removeEventListener('click', this.onClick);
     window.removeEventListener('beforeunload', this.onBeforeUnload);
     this.router.stop();
@@ -294,7 +294,7 @@ export class Application {
   }
 
   /** Builds the whole tree of presenters again at the same URL, for example after a change of language. */
-  async restart(): Promise<void> {
+  public async restart(): Promise<void> {
     if (!this.started) throw new Error('The application has not been started.');
     const { root, element } = this.started;
     this.stop();

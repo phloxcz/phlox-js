@@ -19,30 +19,30 @@ export interface TreeSelectOptions<K extends TreeKey> extends Omit<TreeOptions<T
 
 /** One node (K | null) or several (K[]). Picked nodes deep in a lazy tree are shown with the `path` option. */
 export class TreeSelect<K extends TreeKey, T extends K | null | K[]> extends FormControl<T> {
-  readonly tree: Tree<TreeNode<K>>;
+  public readonly tree: Tree<TreeNode<K>>;
 
-  constructor(label = '', readonly options: TreeSelectOptions<K> = {}, readonly multiple = false) {
+  public constructor(label = '', public readonly options: TreeSelectOptions<K> = {}, public readonly multiple = false) {
     super(label);
     this.tree = new Tree<TreeNode<K>>({ ...options, pick: multiple ? 'multiple' : 'single' });
   }
 
-  getValue(): T {
+  public getValue(): T {
     const ids = this.tree.checked();
     return (this.multiple ? ids : (ids[0] ?? null)) as T;
   }
 
-  setValue(value: T): void {
+  public setValue(value: T): void {
     const ids = value === null || value === undefined ? [] : Array.isArray(value) ? [...value] : [value as K];
     this.tree.checked.set(ids);
     // Picked nodes are shown, also those deep in the tree
     for (const id of ids) void this.tree.reveal(id).catch(() => {});
   }
 
-  isFilled(): boolean {
+  public isFilled(): boolean {
     return this.tree.checked().length > 0;
   }
 
-  render(attributes: ExtraAttributes): Child {
+  public render(attributes: ExtraAttributes): Child {
     const { id, name, ref, onBlur, required: _required, disabled: _disabled, ...common } = this.attrs();
     const theme = currentTheme();
     let wrapper: HTMLElement;

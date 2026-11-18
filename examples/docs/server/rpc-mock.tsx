@@ -34,19 +34,19 @@ const api = new RpcClient<Methods>('/rpc', { fetch: server.fetch });
 
 /** Calls made at once go as one request; every failure is an RpcError with a code. */
 export default class RpcDemo extends Component {
-  readonly log = state<string[]>([]);
+  public readonly log = state<string[]>([]);
 
-  write(line: string) {
+  public write(line: string) {
     this.log.update(log => [...log.slice(-6), line]);
   }
 
-  async batch() {
+  public async batch() {
     const before = server.calls.length;
     const [first, second, count] = await Promise.all([api.call('task.read', { id: 1 }), api.call('task.read', { id: 2 }), api.call('task.count', {})]);
     this.write(`3 volání, ${server.calls.length - before} metody v jednom požadavku: ${first.title}, ${second.title}, celkem ${count}`);
   }
 
-  async failing() {
+  public async failing() {
     try {
       await api.call('task.create', { title: '' });
     } catch (error) {
@@ -59,7 +59,7 @@ export default class RpcDemo extends Component {
     }
   }
 
-  render() {
+  public render() {
     return (
       <div>
         <p style={{ display: 'flex', gap: '.5rem' }}>

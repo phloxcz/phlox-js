@@ -1,0 +1,16 @@
+{
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "files": {
+    "includes": ["src/**", "examples/**", "tests/**", "!examples/dist", "!**/*.css", "!**/*.json"]
+  },
+  "formatter": { "enabled": false },
+  "assist": { "enabled": false },
+  "linter": {
+    "rules": {
+      "preset": "none",
+      "style": {
+        "useConsistentMemberAccessibility": { "level": "error", "options": { "accessibility": "explicit" } }
+      }
+    }
+  }
+}

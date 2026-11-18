@@ -11,7 +11,7 @@ function Content() {
 }
 
 class Page extends Presenter {
-  render() {
+  public render() {
     return <main><Dropdown label="Menu" title="Uživatel" panelClass="own"><Content /></Dropdown><p id="outside">venku</p></main>;
   }
 }
@@ -65,7 +65,7 @@ describe('Dropdown', () => {
   test('DropdownItem: a link with href, otherwise a button; the active one and the classes of the theme', async () => {
     const picked = state('b');
     class Menu extends Presenter {
-      render() {
+      public render() {
         return (
           <Dropdown label="Menu">
             <DropdownItem href="/a">A</DropdownItem>
@@ -94,15 +94,15 @@ describe('Dropdown', () => {
 describe('Component.link', () => {
   test('a component makes links by its presenter, absolute or by the name of a route', async () => {
     class Card extends Component {
-      render() { return <><a id="absolute" href={this.link('/about')}>O nás</a><a id="route" href={this.link('detail', { id: 7 })}>Detail</a></>; }
+      public render() { return <><a id="absolute" href={this.link('/about')}>O nás</a><a id="route" href={this.link('detail', { id: 7 })}>Detail</a></>; }
     }
     class Items extends Presenter {
-      override routes: Route[] = [{ name: 'default', pattern: '/' }, { name: 'detail', pattern: '/<id>' }];
-      render() { return <section><Card /></section>; }
+      public override routes: Route[] = [{ name: 'default', pattern: '/' }, { name: 'detail', pattern: '/<id>' }];
+      public render() { return <section><Card /></section>; }
     }
     class Root extends Presenter {
-      override routes: Route[] = [{ name: 'items', pattern: '/items', presenter: Items }];
-      render() { return <RouteFrame />; }
+      public override routes: Route[] = [{ name: 'items', pattern: '/items', presenter: Items }];
+      public render() { return <RouteFrame />; }
     }
     const { element } = await boot(Root, '/items');
     expect(element.querySelector('#absolute')!.getAttribute('href')).toBe('/about');
@@ -112,7 +112,7 @@ describe('Component.link', () => {
 
 test('in a modal dialog the panel is inside the dialog, not under its backdrop', async () => {
   class Menu extends Component {
-    render() { return <Dropdown label="Více"><button type="button">Smazat</button></Dropdown>; }
+    public render() { return <Dropdown label="Více"><button type="button">Smazat</button></Dropdown>; }
   }
   const { app } = await boot(Page);
   void app.presenter!.openDialog(Menu, {});

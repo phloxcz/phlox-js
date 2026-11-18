@@ -11,63 +11,63 @@ import { boot, tick } from './helpers';
 const made: FakeWidget[] = [];
 
 class FakeWidget {
-  element: HTMLElement[];
-  handlers: Record<string, (event: any) => void> = {};
-  current: unknown = null;
-  enabled = true;
-  destroyed = false;
-  constructor(element: HTMLElement, readonly options: Record<string, any>) {
+  public element: HTMLElement[];
+  public handlers: Record<string, (event: any) => void> = {};
+  public current: unknown = null;
+  public enabled = true;
+  public destroyed = false;
+  public constructor(element: HTMLElement, public readonly options: Record<string, any>) {
     this.element = [element];
     made.push(this);
   }
-  bind(event: string, handler: (event: any) => void) { this.handlers[event] = handler; }
-  value(next?: unknown) {
+  public bind(event: string, handler: (event: any) => void) { this.handlers[event] = handler; }
+  public value(next?: unknown) {
     if (arguments.length === 0) return this.current;
     this.current = next;
     return undefined;
   }
-  enable(on: boolean) { this.enabled = on; }
-  destroy() { this.destroyed = true; }
+  public enable(on: boolean) { this.enabled = on; }
+  public destroy() { this.destroyed = true; }
   /** What the user does in the widget. */
-  userSets(next: unknown) {
+  public userSets(next: unknown) {
     this.current = next;
     this.handlers.change?.({});
   }
 }
 
 class FakeGrid extends FakeWidget {
-  rows: Record<string, any>[] = [];
-  selected: Element | null = null;
-  dataSource = { data: (items?: object[]) => { if (items) this.draw(items as Record<string, any>[]); return this.rows; } };
-  constructor(element: HTMLElement, options: Record<string, any>) {
+  public rows: Record<string, any>[] = [];
+  public selected: Element | null = null;
+  public dataSource = { data: (items?: object[]) => { if (items) this.draw(items as Record<string, any>[]); return this.rows; } };
+  public constructor(element: HTMLElement, options: Record<string, any>) {
     super(element, options);
     this.draw(options.dataSource?.data ?? []);
   }
-  draw(items: Record<string, any>[]) {
+  public draw(items: Record<string, any>[]) {
     this.rows = items;
     const cell = (column: Record<string, any>, item: Record<string, any>) => (column.template ? column.template(item) : String(item[column.field]));
     this.element[0]!.innerHTML = `<table>${items.map(item =>
       `<tr>${this.options.columns.map((column: Record<string, any>) => `<td>${cell(column, item)}</td>`).join('')}</tr>`).join('')}</table>`;
     this.options.dataBound?.({});
   }
-  dataItem(row: Element) { return this.rows[[...this.element[0]!.querySelectorAll('tr')].indexOf(row as HTMLTableRowElement)]; }
-  select() { return this.selected ? [this.selected] : []; }
+  public dataItem(row: Element) { return this.rows[[...this.element[0]!.querySelectorAll('tr')].indexOf(row as HTMLTableRowElement)]; }
+  public select() { return this.selected ? [this.selected] : []; }
 }
 
 class FakeWindow extends FakeWidget {
-  heading = '';
-  opened = false;
-  wrapper: HTMLElement[];
-  constructor(element: HTMLElement, options: Record<string, any>) {
+  public heading = '';
+  public opened = false;
+  public wrapper: HTMLElement[];
+  public constructor(element: HTMLElement, options: Record<string, any>) {
     super(element, options);
     this.wrapper = [document.createElement('div')];
   }
-  title(text: string) { this.heading = text; }
-  center() { return this; }
-  open() { this.opened = true; return this; }
-  override destroy() { super.destroy(); this.element[0]!.remove(); }
+  public title(text: string) { this.heading = text; }
+  public center() { return this; }
+  public open() { this.opened = true; return this; }
+  public override destroy() { super.destroy(); this.element[0]!.remove(); }
   /** × or Escape of Kendo. */
-  userCloses() {
+  public userCloses() {
     let prevented = false;
     this.options.close({ userTriggered: true, preventDefault: () => { prevented = true; } });
     return prevented;
@@ -84,7 +84,7 @@ describe('KendoWidget', () => {
     const editing = state(true);
     const shown = state(true);
     class Page extends Presenter {
-      render() {
+      public render() {
         return <main><If when={shown}><KendoWidget widget="DatePicker" options={{ format: 'd. M. yyyy' }} value={date} enabled={editing} id="due" /></If></main>;
       }
     }
@@ -111,7 +111,7 @@ describe('KendoWidget', () => {
   test('a widget without a value is made on a div; a missing widget is a clear error', async () => {
     made.length = 0;
     class Page extends Presenter {
-      render() { return <KendoWidget widget="Editor" />; }
+      public render() { return <KendoWidget widget="Editor" />; }
     }
     await boot(Page, '/', new Container().add(kendo()));
     await tick();
@@ -128,7 +128,7 @@ describe('KendoGrid', () => {
     const orders = state<Order[]>([{ id: 1, customer: 'Alza' }, { id: 2, customer: 'Rako' }]);
     let chosen: Order | null = null;
     class Page extends Presenter {
-      render() {
+      public render() {
         return (
           <KendoGrid<Order>
             data={orders}
@@ -159,17 +159,17 @@ describe('KendoGrid', () => {
 
 describe('KendoDialogs and KendoControl', () => {
   class Edit extends Component<{}, string> {
-    form = new Form<{ due: string | null; city: number | null }>();
-    due = this.form.addControl('due', new KendoControl<string>('DatePicker', 'Termín')).setRequired('Vyberte termín.');
-    override title() { return 'Úprava'; }
-    override actions() { return <button type="button" id="save" onClick={() => this.close('uloženo')}>Uložit</button>; }
-    render() { return <FormView form={this.form} />; }
+    public form = new Form<{ due: string | null; city: number | null }>();
+    public due = this.form.addControl('due', new KendoControl<string>('DatePicker', 'Termín')).setRequired('Vyberte termín.');
+    public override title() { return 'Úprava'; }
+    public override actions() { return <button type="button" id="save" onClick={() => this.close('uloženo')}>Uložit</button>; }
+    public render() { return <FormView form={this.form} />; }
   }
 
   test('the dialog in Kendo Window: title, content, buttons; × of Kendo asks the component, close() removes it', async () => {
     made.length = 0;
     class Page extends Presenter {
-      render() { return <main />; }
+      public render() { return <main />; }
     }
     const { app } = await boot(Page, '/', new Container().add(kendo(), KendoDialogs));
     const result = app.presenter!.openDialog(Edit, {});
@@ -198,7 +198,7 @@ describe('KendoDialogs and KendoControl', () => {
     const form = new Form<{ due: string | null }>();
     const due = form.addControl('due', new KendoControl<string>('DatePicker', 'Termín')).setRequired('Vyberte termín.');
     class Page extends Presenter {
-      render() { return <FormView form={form} />; }
+      public render() { return <FormView form={form} />; }
     }
     const { element } = await boot(Page, '/', new Container().add(kendo()));
     await tick();

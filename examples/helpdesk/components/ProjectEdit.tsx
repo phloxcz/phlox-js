@@ -9,9 +9,9 @@ const COLORS: [string, string][] = [
 
 /** A new project in a dialog. A name that already exists is refused by the server, the error shows at the field. */
 export class ProjectEdit extends Component<{}, ProjectResource> {
-  form = new Form<ProjectInput>();
+  public form = new Form<ProjectInput>();
 
-  constructor(private api: HelpdeskApi) {
+  public constructor(private api: HelpdeskApi) {
     super();
     this.form.addText('name', 'Název').setRequired('Vyplňte název.').addRule(Form.MaxLength, 'Nejvýš %d znaků.', 60);
     this.form.addText('subtitle', 'Popis', 60);
@@ -20,22 +20,22 @@ export class ProjectEdit extends Component<{}, ProjectResource> {
     this.form.onSuccess = async input => this.close(await this.api.call('project.create', { input }));
   }
 
-  override hasUnsavedChanges() {
+  public override hasUnsavedChanges() {
     return this.form.isChanged();
   }
 
-  override title() {
+  public override title() {
     return 'Nový projekt';
   }
 
-  override actions() {
+  public override actions() {
     return <>
       <Button onClick={() => this.cancel()}>Zrušit</Button>
       <Button primary disabled={this.form.submitting} onClick={() => this.form.submit()}>Založit</Button>
     </>;
   }
 
-  render() {
+  public render() {
     return <FormView form={this.form} class="hd-dialog-form hd-project-form" />;
   }
 }

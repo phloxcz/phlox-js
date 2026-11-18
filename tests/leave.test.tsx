@@ -12,34 +12,34 @@ const press = (text: string) => [...top()!.querySelectorAll('button')].find(butt
 const asking = () => top()?.textContent?.includes(messageTexts.unsaved) ?? false;
 
 class Field extends Component {
-  override hasUnsavedChanges() { return unsaved(); }
-  render() { return <input />; }
+  public override hasUnsavedChanges() { return unsaved(); }
+  public render() { return <input />; }
 }
 
 class Edit extends Presenter {
-  render() { return <section><h1>edit</h1><Field /></section>; }
+  public render() { return <section><h1>edit</h1><Field /></section>; }
 }
 
 class Other extends Presenter {
-  render() { return <h1>other</h1>; }
+  public render() { return <h1>other</h1>; }
 }
 
 class Note extends Component<{}, string> {
-  static last: Note | null = null;
-  override startup() { Note.last = this; }
-  override hasUnsavedChanges() { return unsaved(); }
-  override title() { return 'Poznámka'; }
-  render() { return <textarea />; }
+  public static last: Note | null = null;
+  public override startup() { Note.last = this; }
+  public override hasUnsavedChanges() { return unsaved(); }
+  public override title() { return 'Poznámka'; }
+  public render() { return <textarea />; }
 }
 
 class App extends Presenter {
-  override routes: Route[] = [
+  public override routes: Route[] = [
     { name: 'edit', pattern: '/edit', presenter: Edit },
     { name: 'other', pattern: '/other', presenter: Other },
     { name: 'note', pattern: '/note', dialog: () => [Note, {}] },
     { name: 'home', pattern: '/' },
   ];
-  render() { return <main><RouteFrame /></main>; }
+  public render() { return <main><RouteFrame /></main>; }
 }
 
 const heading = (element: Element) => element.querySelector('h1')?.textContent ?? null;

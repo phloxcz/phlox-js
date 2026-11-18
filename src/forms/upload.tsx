@@ -30,7 +30,7 @@ const sameFile = (a: File, b: File): boolean => a.name === b.name && a.size === 
 
 /** One file (File | null) or several (File[]). */
 export class UploadControl<T extends File | null | File[]> extends FormControl<T> {
-  static texts = texts('upload', {
+  public static texts = texts('upload', {
     dropzone: 'Upload area – click or drop files here',
     heading: 'Drop files here',
     or: 'or',
@@ -39,34 +39,34 @@ export class UploadControl<T extends File | null | File[]> extends FormControl<T
     remove: 'Remove %s',
   });
 
-  readonly files = state<File[]>([]);
+  public readonly files = state<File[]>([]);
 
   /** The accept attribute, from the rules MimeType and Image, as in Nette. */
-  readonly accept = computed(() => this.rules.active().flatMap(({ validator, arg }) => {
+  public readonly accept = computed(() => this.rules.active().flatMap(({ validator, arg }) => {
     if (validator === validators.Image) return IMAGE_TYPES;
     if (validator === validators.MimeType) return (Array.isArray(arg) ? arg : [arg]).map(String);
     return [];
   }).join(', '));
 
-  constructor(label = '', readonly multiple = false) {
+  public constructor(label = '', public readonly multiple = false) {
     super(label);
   }
 
-  getValue(): T {
+  public getValue(): T {
     const files = this.files();
     return (this.multiple ? files : (files[0] ?? null)) as T;
   }
 
-  setValue(value: T): void {
+  public setValue(value: T): void {
     this.files.set(value === null || value === undefined ? [] : Array.isArray(value) ? [...value] : [value as File]);
   }
 
-  isFilled(): boolean {
+  public isFilled(): boolean {
     return this.files().length > 0;
   }
 
   /** Adds chosen or dropped files. A single upload keeps only the last one. The rules are checked at once. */
-  addFiles(files: Iterable<File>): void {
+  public addFiles(files: Iterable<File>): void {
     const added = [...files];
     if (!added.length) return;
     if (this.multiple) {
@@ -78,17 +78,17 @@ export class UploadControl<T extends File | null | File[]> extends FormControl<T
     this.validate();
   }
 
-  removeFile(file: File): void {
+  public removeFile(file: File): void {
     this.files.update(current => current.filter(other => other !== file));
     this.changed();
   }
 
   /** Whether the file meets the rules about one file (size, type), for marking it in the list. */
-  isValidFile(file: File): boolean {
+  public isValidFile(file: File): boolean {
     return this.rules.active().every(({ validator, arg }) => fileChecks.get(validator)?.(file, arg) ?? true);
   }
 
-  render(attributes: ExtraAttributes): Child {
+  public render(attributes: ExtraAttributes): Child {
     const { id, name, ref, onBlur, required: _required, disabled: _disabled, ...common } = this.attrs();
     const theme = currentTheme();
     const slot = (part: string) => theme.class(`upload.${part}`);

@@ -30,13 +30,13 @@ services.add(new RpcApi('/rpc', {
 
 ```ts
 class TasksPresenter extends Presenter {
-  tasks = state<TaskResource[]>([]);
+  public tasks = state<TaskResource[]>([]);
 
-  constructor(private api: RpcApi) {
+  public constructor(private api: RpcApi) {
     super();
   }
 
-  override async startup() {
+  public override async startup() {
     const page = await this.api.call('stats.tasks', { query: { pageSize: 20, sort: [{ field: 'dueDate' }] } });
     this.tasks.set(page.data);
   }

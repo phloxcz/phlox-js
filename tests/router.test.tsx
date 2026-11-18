@@ -7,41 +7,41 @@ const log: string[] = [];
 const take = () => log.splice(0);
 
 class Home extends Presenter {
-  render() { return <h1>home</h1>; }
+  public render() { return <h1>home</h1>; }
 }
 
 class UserDetail extends Presenter {
-  override routes: Route[] = [
+  public override routes: Route[] = [
     { name: 'default', pattern: '/' },
     { name: 'orders', pattern: '/orders' },
     { name: 'order', pattern: '/orders/<year \\d+>/<number>' },
   ];
-  override startup() { log.push('detail startup'); }
-  override shutdown() { log.push('detail shutdown'); }
-  actionOrders(params: Params) { log.push(`orders ${JSON.stringify(params)}`); }
-  actionOrder(params: Params) { log.push(`order ${params.year}/${params.number}`); }
-  render() { return <h2>detail of {() => (this.parent as Users).params().id} {this.route}</h2>; }
+  public override startup() { log.push('detail startup'); }
+  public override shutdown() { log.push('detail shutdown'); }
+  public actionOrders(params: Params) { log.push(`orders ${JSON.stringify(params)}`); }
+  public actionOrder(params: Params) { log.push(`order ${params.year}/${params.number}`); }
+  public render() { return <h2>detail of {() => (this.parent as Users).params().id} {this.route}</h2>; }
 }
 
 class Users extends Presenter {
-  override routes: Route[] = [
+  public override routes: Route[] = [
     { name: 'default', pattern: '/' },
     { name: 'detail', pattern: '/<id \\d+>', presenter: UserDetail },
   ];
-  override startup() { log.push('users startup'); }
-  override shutdown() { log.push('users shutdown'); }
-  actionDefault(params: Params) { log.push(`users default ${JSON.stringify(params)}`); }
-  actionDetail(params: Params) { log.push(`users detail ${JSON.stringify(params)}`); }
-  render() { return <section><h1>users</h1><RouteFrame /></section>; }
+  public override startup() { log.push('users startup'); }
+  public override shutdown() { log.push('users shutdown'); }
+  public actionDefault(params: Params) { log.push(`users default ${JSON.stringify(params)}`); }
+  public actionDetail(params: Params) { log.push(`users detail ${JSON.stringify(params)}`); }
+  public render() { return <section><h1>users</h1><RouteFrame /></section>; }
 }
 
 class App extends Presenter {
-  override routes: Route[] = [
+  public override routes: Route[] = [
     { name: 'home', pattern: '/', presenter: Home },
     { name: 'users', pattern: '/users', presenter: Users },
     { name: 'lazy', pattern: '/lazy', presenter: async () => ({ default: Home }) },
   ];
-  render() {
+  public render() {
     return (
       <div>
         <nav>
@@ -135,16 +135,16 @@ describe('regressions from TraceJS', () => {
   test('a slower older navigation cannot overwrite a newer one', async () => {
     const slow = deferred();
     class Slow extends Presenter {
-      override async startup() { await slow.promise; }
-      render() { return <h1>slow</h1>; }
+      public override async startup() { await slow.promise; }
+      public render() { return <h1>slow</h1>; }
     }
     class Root extends Presenter {
-      override routes: Route[] = [
+      public override routes: Route[] = [
         { name: 'home', pattern: '/', presenter: Home },
         { name: 'slow', pattern: '/slow', presenter: Slow },
         { name: 'fast', pattern: '/fast', presenter: Users },
       ];
-      render() { return <RouteFrame />; }
+      public render() { return <RouteFrame />; }
     }
     const { element, go } = await boot(Root);
     const first = go('/slow');
@@ -245,13 +245,13 @@ describe('links', () => {
 describe('redirect, errors and the old screen', () => {
   test('redirect in an action leads to the target and leaves one history entry', async () => {
     class Root extends Presenter {
-      override routes: Route[] = [
+      public override routes: Route[] = [
         { name: 'home', pattern: '/', presenter: Home },
         { name: 'old', pattern: '/old' },
         { name: 'users', pattern: '/users', presenter: Users },
       ];
-      actionOld() { return this.redirect('users'); }
-      render() { return <RouteFrame />; }
+      public actionOld() { return this.redirect('users'); }
+      public render() { return <RouteFrame />; }
     }
     const { element, go } = await boot(Root);
     await go('/old');
@@ -266,10 +266,10 @@ describe('redirect, errors and the old screen', () => {
   test("redirect('this') runs the action again", async () => {
     let loads = 0;
     class Root extends Presenter {
-      override routes: Route[] = [{ name: 'default', pattern: '/' }];
-      actionDefault() { loads++; }
-      handleDelete() { this.redirect('this'); }
-      render() { return <b />; }
+      public override routes: Route[] = [{ name: 'default', pattern: '/' }];
+      public actionDefault() { loads++; }
+      public handleDelete() { this.redirect('this'); }
+      public render() { return <b />; }
     }
     const { app, go } = await boot(Root);
     expect(loads).toBe(1);
@@ -283,17 +283,17 @@ describe('redirect, errors and the old screen', () => {
   test('the old screen stays until the new one is ready, and when the new one fails', async () => {
     const data = deferred<boolean>();
     class Slow extends Presenter {
-      override async startup() {
+      public override async startup() {
         if (!(await data.promise)) this.error(500, 'no data');
       }
-      render() { return <h1>slow</h1>; }
+      public render() { return <h1>slow</h1>; }
     }
     class Root extends Presenter {
-      override routes: Route[] = [
+      public override routes: Route[] = [
         { name: 'home', pattern: '/', presenter: Home },
         { name: 'slow', pattern: '/slow', presenter: Slow },
       ];
-      render() { return <RouteFrame />; }
+      public render() { return <RouteFrame />; }
     }
     const { element, errors, go } = await boot(Root);
     const navigation = go('/slow');
@@ -308,10 +308,10 @@ describe('redirect, errors and the old screen', () => {
 
   test('notFound() can be overridden', async () => {
     class Root extends Presenter {
-      missing = state('');
-      override routes: Route[] = [{ name: 'home', pattern: '/', presenter: Home }];
-      override notFound(path: string) { this.missing.set(path); }
-      render() { return <div><RouteFrame /><p>{this.missing}</p></div>; }
+      public missing = state('');
+      public override routes: Route[] = [{ name: 'home', pattern: '/', presenter: Home }];
+      public override notFound(path: string) { this.missing.set(path); }
+      public render() { return <div><RouteFrame /><p>{this.missing}</p></div>; }
     }
     const { element, errors } = await boot(Root, '/nothing');
     expect(errors).toEqual([]);
@@ -373,24 +373,24 @@ describe('presenters in the middle of the chain', () => {
   test('props from the parameters of the route, persistent parameters in params', async () => {
     const seen: string[] = [];
     class Task extends Presenter<{ taskId: number }> {
-      override startup() { seen.push(`task ${this.props.taskId} at ${this.basePath()}`); }
-      render() { return <b>{this.props.taskId}</b>; }
+      public override startup() { seen.push(`task ${this.props.taskId} at ${this.basePath()}`); }
+      public render() { return <b>{this.props.taskId}</b>; }
     }
     class Tasks extends Presenter<{ projectId: number }> {
-      override persistent = ['status'];
-      override routes: Route[] = [
+      public override persistent = ['status'];
+      public override routes: Route[] = [
         { name: 'default', pattern: '/' },
         { name: 'detail', pattern: '/<task \\d+>', presenter: Task, props: ({ task }) => ({ taskId: Number(task) }) },
       ];
-      override startup() { seen.push(`project ${this.props.projectId} ${this.params().status}`); }
-      actionDetail(params: Params) { seen.push(`status ${params.status ?? '-'}`); }
-      render() { return <div><RouteFrame /></div>; }
+      public override startup() { seen.push(`project ${this.props.projectId} ${this.params().status}`); }
+      public actionDetail(params: Params) { seen.push(`status ${params.status ?? '-'}`); }
+      public render() { return <div><RouteFrame /></div>; }
     }
     class Root extends Presenter {
-      override routes: Route[] = [
+      public override routes: Route[] = [
         { name: 'project', pattern: '/<project \\d+>', presenter: Tasks, props: ({ project }) => ({ projectId: Number(project) }) },
       ];
-      render() { return <main><RouteFrame /></main>; }
+      public render() { return <main><RouteFrame /></main>; }
     }
     const { app, element, go, errors } = await boot(Root, '/3/7?status=open&other=1');
     expect(errors).toEqual([]);
@@ -413,17 +413,17 @@ describe('the title of the page and announcing navigation', () => {
     document.title = 'Aplikace';
     const name = state('Mléko');
     class Item extends Presenter {
-      override pageTitle() { return name(); }
-      render() { return <h1>{name}</h1>; }
+      public override pageTitle() { return name(); }
+      public render() { return <h1>{name}</h1>; }
     }
     class List extends Presenter {
-      override routes: Route[] = [{ name: 'default', pattern: '/' }, { name: 'item', pattern: '/<id>', presenter: Item }];
-      override pageTitle() { return 'Seznam'; }
-      render() { return <section><RouteFrame /></section>; }
+      public override routes: Route[] = [{ name: 'default', pattern: '/' }, { name: 'item', pattern: '/<id>', presenter: Item }];
+      public override pageTitle() { return 'Seznam'; }
+      public render() { return <section><RouteFrame /></section>; }
     }
     class Root extends Presenter {
-      override routes: Route[] = [{ name: 'list', pattern: '/list', presenter: List }, { name: 'home', pattern: '/' }];
-      render() { return <main><RouteFrame /></main>; }
+      public override routes: Route[] = [{ name: 'list', pattern: '/list', presenter: List }, { name: 'home', pattern: '/' }];
+      public render() { return <main><RouteFrame /></main>; }
     }
     const { app, go } = await boot(Root, '/');
     expect(document.title).toBe('Aplikace');
@@ -442,9 +442,9 @@ describe('the title of the page and announcing navigation', () => {
 
   test('another page is announced, other query parameters are not; a lost focus goes to the heading', async () => {
     class Page extends Presenter {
-      override routes: Route[] = [{ name: 'a', pattern: '/a' }, { name: 'b', pattern: '/b' }];
-      override pageTitle() { return this.route() === 'a' ? 'Stránka A' : 'Stránka B'; }
-      render() {
+      public override routes: Route[] = [{ name: 'a', pattern: '/a' }, { name: 'b', pattern: '/b' }];
+      public override pageTitle() { return this.route() === 'a' ? 'Stránka A' : 'Stránka B'; }
+      public render() {
         return <main><If when={() => this.route() === 'a'}><a id="link" href="/b">B</a></If><h1>{() => this.pageTitle()}</h1></main>;
       }
     }
@@ -471,16 +471,16 @@ describe('typed parameters of routes', () => {
     const { route } = await import('../src/index');
     const seen: unknown[] = [];
     class Task extends Presenter<{ taskId: number }> {
-      override startup() { seen.push(this.props.taskId); }
-      render() { return <b>{this.props.taskId}</b>; }
+      public override startup() { seen.push(this.props.taskId); }
+      public render() { return <b>{this.props.taskId}</b>; }
     }
     let page!: Tasks;
     class Tasks extends Presenter {
-      readonly detail = route('detail', '/<task:int>', { presenter: Task, props: ({ task }) => ({ taskId: task }) });
-      readonly bySlug = route('slug', '/by/<slug>');
-      override routes: Route[] = [{ name: 'default', pattern: '/' }, this.detail, this.bySlug];
-      override startup() { page = this; }
-      render() { return <main><RouteFrame /></main>; }
+      public readonly detail = route('detail', '/<task:int>', { presenter: Task, props: ({ task }) => ({ taskId: task }) });
+      public readonly bySlug = route('slug', '/by/<slug>');
+      public override routes: Route[] = [{ name: 'default', pattern: '/' }, this.detail, this.bySlug];
+      public override startup() { page = this; }
+      public render() { return <main><RouteFrame /></main>; }
     }
     const { go } = await boot(Tasks, '/12');
     expect(seen).toEqual([12]);
@@ -502,8 +502,8 @@ describe('typed parameters of routes', () => {
 
   test('a lost backslash in a pattern is an error, not a route that never matches', async () => {
     class Page extends Presenter {
-      override routes: Route[] = [{ name: 'default', pattern: '/' }, { name: 'detail', pattern: '/<id d+>' }];
-      render() { return <main />; }
+      public override routes: Route[] = [{ name: 'default', pattern: '/' }, { name: 'detail', pattern: '/<id d+>' }];
+      public render() { return <main />; }
     }
     const { errors } = await boot(Page, '/5');
     expect(String(errors[0])).toContain("write '\\\\d+' in the string, or <id:int>");

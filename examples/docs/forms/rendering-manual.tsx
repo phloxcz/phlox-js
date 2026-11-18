@@ -5,9 +5,9 @@ interface Category { name: string; description: string }
 
 /** Rendered by hand like {form} in Latte; the value of a control elsewhere on the page as a state. */
 export default class ManualForm extends Component {
-  readonly form = new Form<Category>();
+  public readonly form = new Form<Category>();
 
-  constructor() {
+  public constructor() {
     super();
     this.form.addText('name', 'Název').setRequired('Vyplňte název.').addRule(Form.MaxLength, 'Nejvýš %d znaků.', 40);
     this.form.addTextArea('description', 'Popis');
@@ -15,7 +15,7 @@ export default class ManualForm extends Component {
     this.form.onSuccess = () => this.flashMessage('Uloženo.', 'success');
   }
 
-  render() {
+  public render() {
     const name = this.form.get('name');
     const description = this.form.get('description');
     return (

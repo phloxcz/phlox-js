@@ -7,19 +7,19 @@ import type { ExtraAttributes } from '@phloxcz/phlox-js/forms';
 class RatingControl extends FormControl<number | null> {
   private readonly current = state<number | null>(null);
 
-  getValue(): number | null {
+  public getValue(): number | null {
     return this.current();
   }
 
-  setValue(value: number | null): void {
+  public setValue(value: number | null): void {
     this.current.set(value);
   }
 
-  isFilled(): boolean {
+  public isFilled(): boolean {
     return this.current() !== null;
   }
 
-  render(attributes: ExtraAttributes): Child {
+  public render(attributes: ExtraAttributes): Child {
     const { id, onBlur } = this.attrs();
     return (
       <span id={id as string} role="radiogroup" aria-label={this.label} class={this.classFor(attributes, 'rating')}
@@ -45,10 +45,10 @@ interface Review { rating: number | null; text: string }
 
 /** Rules, <Label>, errors and values work as with the controls of the framework. */
 export default class ReviewForm extends Component {
-  readonly form = new Form<Review>();
-  readonly result = state('');
+  public readonly form = new Form<Review>();
+  public readonly result = state('');
 
-  constructor() {
+  public constructor() {
     super();
     this.form.addControl('rating', new RatingControl('Hodnocení')).setRequired('Vyberte počet hvězd.');
     this.form.addTextArea('text', 'Recenze');
@@ -56,7 +56,7 @@ export default class ReviewForm extends Component {
     this.form.onSuccess = values => this.result.set(JSON.stringify(values));
   }
 
-  render() {
+  public render() {
     return <div><FormView form={this.form} /><p><code>{this.result}</code></p></div>;
   }
 }

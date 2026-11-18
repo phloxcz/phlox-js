@@ -7,8 +7,8 @@ const windows = () => [...document.querySelectorAll<HTMLElement>('dialog.phlox-d
 const press = (selector: string) => document.querySelector<HTMLElement>(selector)!.click();
 
 class Confirm extends Component<{ question: string }, boolean> {
-  override title() { return 'Confirm'; }
-  override actions() {
+  public override title() { return 'Confirm'; }
+  public override actions() {
     return (
       <>
         <button id="no" onClick={() => this.close(false)}>No</button>
@@ -16,17 +16,17 @@ class Confirm extends Component<{ question: string }, boolean> {
       </>
     );
   }
-  render() { return <p>{this.props.question}</p>; }
+  public render() { return <p>{this.props.question}</p>; }
 }
 
 class Edit extends Component<{ id: number }, string> {
-  override title() { return `Edit ${this.props.id}`; }
-  render() { return <button id="save" onClick={() => this.close('saved')}>save</button>; }
+  public override title() { return `Edit ${this.props.id}`; }
+  public render() { return <button id="save" onClick={() => this.close('saved')}>save</button>; }
 }
 
 class List extends Presenter {
-  static results: unknown[] = [];
-  override routes: Route[] = [
+  public static results: unknown[] = [];
+  public override routes: Route[] = [
     { name: 'default', pattern: '/' },
     {
       name: 'edit',
@@ -35,19 +35,19 @@ class List extends Presenter {
       closed: result => { List.results.push(result); },
     },
   ];
-  render() { return <h1>list</h1>; }
+  public render() { return <h1>list</h1>; }
 }
 
 class Home extends Presenter {
-  render() { return <h1>home</h1>; }
+  public render() { return <h1>home</h1>; }
 }
 
 class Root extends Presenter {
-  override routes: Route[] = [
+  public override routes: Route[] = [
     { name: 'home', pattern: '/', presenter: Home },
     { name: 'list', pattern: '/list', presenter: List },
   ];
-  render() { return <RouteFrame />; }
+  public render() { return <RouteFrame />; }
 }
 
 describe('openDialog', () => {
@@ -96,10 +96,10 @@ describe('openDialog', () => {
   test('a dialog waits for its startup and a failure opens nothing', async () => {
     const data = deferred<boolean>();
     class Loading extends Component<{}, void> {
-      override async startup() {
+      public override async startup() {
         if (!(await data.promise)) throw new Error('no data');
       }
-      render() { return <p>loaded</p>; }
+      public render() { return <p>loaded</p>; }
     }
     const { app } = await boot(Root);
     const opened = app.presenter!.openDialog(Loading, {});
@@ -169,12 +169,12 @@ describe('dialogs opened from dialogs, all with URL', () => {
   const log: string[] = [];
 
   class Change extends Component<{ id: number; index: number }, boolean> {
-    override title() { return `Change ${this.props.index}`; }
-    render() { return <button id="restore" onClick={() => this.close(true)}>restore</button>; }
+    public override title() { return `Change ${this.props.index}`; }
+    public render() { return <button id="restore" onClick={() => this.close(true)}>restore</button>; }
   }
 
   class History extends Presenter<{ id: number }, boolean> {
-    override routes: Route[] = [
+    public override routes: Route[] = [
       { name: 'default', pattern: '/' },
       {
         name: 'change',
@@ -183,12 +183,12 @@ describe('dialogs opened from dialogs, all with URL', () => {
         closed: restored => { log.push(`change closed ${restored}`); },
       },
     ];
-    override title() { return `History ${this.props.id}`; }
-    render() { return <a id="change-link" href={this.link('change', { index: 2 })}>change 2</a>; }
+    public override title() { return `History ${this.props.id}`; }
+    public render() { return <a id="change-link" href={this.link('change', { index: 2 })}>change 2</a>; }
   }
 
   class Item extends Presenter<{ id: number }, boolean> {
-    override routes: Route[] = [
+    public override routes: Route[] = [
       { name: 'default', pattern: '/' },
       {
         name: 'history',
@@ -197,12 +197,12 @@ describe('dialogs opened from dialogs, all with URL', () => {
         closed: changed => { log.push(`history closed ${changed}`); },
       },
     ];
-    override title() { return `Item ${this.props.id}`; }
-    render() { return <a id="history-link" href={this.link('history')}>history</a>; }
+    public override title() { return `Item ${this.props.id}`; }
+    public render() { return <a id="history-link" href={this.link('history')}>history</a>; }
   }
 
   class Items extends Presenter {
-    override routes: Route[] = [
+    public override routes: Route[] = [
       { name: 'default', pattern: '/' },
       {
         name: 'item',
@@ -211,12 +211,12 @@ describe('dialogs opened from dialogs, all with URL', () => {
         closed: saved => { log.push(`item closed ${saved}`); },
       },
     ];
-    render() { return <h1>items</h1>; }
+    public render() { return <h1>items</h1>; }
   }
 
   class App extends Presenter {
-    override routes: Route[] = [{ name: 'items', pattern: '/items', presenter: Items }];
-    render() { return <RouteFrame />; }
+    public override routes: Route[] = [{ name: 'items', pattern: '/items', presenter: Items }];
+    public render() { return <RouteFrame />; }
   }
 
   const titles = () => windows().map(dialog => dialog.querySelector('h2')!.textContent);
@@ -299,17 +299,17 @@ describe('leaving a presenter with an open routed dialog', () => {
 
 describe('the window of a dialog', () => {
   class Panel extends Component<{}, string> {
-    override title() { return 'Úprava'; }
-    render() { return <p class="inside">obsah</p>; }
+    public override title() { return 'Úprava'; }
+    public render() { return <p class="inside">obsah</p>; }
   }
 
   test('a panel at the side by openDialog() or by the route, own classes of the window', async () => {
     class Page extends Presenter {
-      override routes: Route[] = [
+      public override routes: Route[] = [
         { name: 'default', pattern: '/' },
         { name: 'edit', pattern: '/edit', dialog: () => [Panel, {}, { placement: 'end', class: 'wide' }] },
       ];
-      render() { return <main><RouteFrame /></main>; }
+      public render() { return <main><RouteFrame /></main>; }
     }
     const { app, go } = await boot(Page);
     void app.presenter!.openDialog(Panel, {}, { placement: 'start' });
@@ -326,7 +326,7 @@ describe('the window of a dialog', () => {
 
   test('a click on the backdrop closes it like Escape, a click or a selection inside does not', async () => {
     class Page extends Presenter {
-      render() { return <main />; }
+      public render() { return <main />; }
     }
     const { app } = await boot(Page);
     const result = app.presenter!.openDialog(Panel, {});
@@ -349,15 +349,15 @@ describe('the window of a dialog', () => {
 
 test('the focus goes to the first field of a dialog, or to the window, not to ×', async () => {
   class Form1 extends Component {
-    override title() { return 'S polem'; }
-    render() { return <p><input id="first" /></p>; }
+    public override title() { return 'S polem'; }
+    public render() { return <p><input id="first" /></p>; }
   }
   class Plain extends Component {
-    override title() { return 'Bez pole'; }
-    render() { return <p>text</p>; }
+    public override title() { return 'Bez pole'; }
+    public render() { return <p>text</p>; }
   }
   class Page extends Presenter {
-    render() { return <main />; }
+    public render() { return <main />; }
   }
   const { app } = await boot(Page);
   void app.presenter!.openDialog(Form1, {});

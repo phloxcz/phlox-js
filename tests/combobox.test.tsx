@@ -216,7 +216,7 @@ describe('ComboBox', () => {
     const form = new Form<Order>();
     form.addComboBox('country', 'Země:', { items: countries });
     class Page extends Presenter {
-      render() { return <FormView form={form} />; }
+      public render() { return <FormView form={form} />; }
     }
     const { element } = await boot(Page, '/', new Container().add(new BootstrapTheme()));
     const input = element.querySelector<HTMLInputElement>('input[role=combobox]')!;

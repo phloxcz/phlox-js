@@ -19,7 +19,7 @@ describe('themes', () => {
   test('without a theme in the container the default one is used', async () => {
     const form = formWithEveryKind();
     class Page extends Presenter {
-      render() { return <FormView form={form} />; }
+      public render() { return <FormView form={form} />; }
     }
     const { element, app } = await boot(Page);
     expect(app.theme).toBeInstanceOf(Theme);
@@ -31,7 +31,7 @@ describe('themes', () => {
   test('Bootstrap: forms get Bootstrap classes, an invalid control gets is-invalid', async () => {
     const form = formWithEveryKind();
     class Page extends Presenter {
-      render() { return <FormView form={form} />; }
+      public render() { return <FormView form={form} />; }
     }
     const { element } = await boot(Page, '/', new Container().add(new BootstrapTheme()));
     const name = element.querySelector('input[name=name]')!;
@@ -58,7 +58,7 @@ describe('themes', () => {
     const form = formWithEveryKind();
     const cancel = form.addSubmit('cancel', 'Cancel');
     class Page extends Presenter {
-      render() {
+      public render() {
         return (
           <FormTag form={form}>
             <Input control={form.get('name')} class="wide" />
@@ -76,12 +76,12 @@ describe('themes', () => {
 
   test('Bootstrap: dialogs get self-contained utility classes and an icon close button', async () => {
     class Hello extends Component {
-      override title() { return 'Hello'; }
-      override actions() { return <button>OK</button>; }
-      render() { return <p>body</p>; }
+      public override title() { return 'Hello'; }
+      public override actions() { return <button>OK</button>; }
+      public render() { return <p>body</p>; }
     }
     class Page extends Presenter {
-      render() { return <b />; }
+      public render() { return <b />; }
     }
     const { app } = await boot(Page, '/', new Container().add(new BootstrapTheme()));
     void app.presenter!.openDialog(Hello, {});
@@ -108,13 +108,13 @@ describe('themes', () => {
 
   test('another CSS framework is another map of classes', async () => {
     class FoundationTheme extends Theme {
-      constructor() {
+      public constructor() {
         super({ input: 'input-foundation', error: 'form-error is-visible', invalid: 'is-invalid-input' });
       }
     }
     const form = formWithEveryKind();
     class Page extends Presenter {
-      render() { return <FormView form={form} />; }
+      public render() { return <FormView form={form} />; }
     }
     const { element } = await boot(Page, '/', new Container().add(new FoundationTheme()));
     await form.submit();

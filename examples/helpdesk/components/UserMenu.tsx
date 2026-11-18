@@ -5,16 +5,16 @@ import { Avatar } from './ui';
 
 /** The avatar in the header with the menu of the user. */
 export class UserMenu extends Component {
-  constructor(private store: Store) {
+  public constructor(private store: Store) {
     super();
   }
 
-  handleSignOut(): void {
+  public handleSignOut(): void {
     this.user.logout();
     void this.app.router.navigate(this.link('/sign'));
   }
 
-  render() {
+  public render() {
     const me = () => this.store.user(Number(this.user.getId()));
     return (
       <Dropdown class="hd-user-button" panelClass="hd-menu" placement="bottom-right" title="Uživatel"

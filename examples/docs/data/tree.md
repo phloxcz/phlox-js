@@ -6,12 +6,12 @@ Strom jako [phloxcz/components-tree](https://github.com/phloxcz/components-tree)
 import { Tree, TreeView } from '@phloxcz/phlox-js/components';
 
 class CategoriesPresenter extends Presenter {
-  override routes: Route[] = [
+  public override routes: Route[] = [
     { name: 'default', pattern: '/' },
     { name: 'detail', pattern: '/<id \\d+>' },
   ];
 
-  tree = new Tree<CategoryNode>({
+  public tree = new Tree<CategoryNode>({
     load: parent => this.api.call('category.children', { parentId: parent?.id ?? null }),
     path: id => this.api.call('category.path', { id }),
     remember: 'categories',
@@ -19,19 +19,19 @@ class CategoriesPresenter extends Presenter {
     move: ({ node, parent, index }) => this.api.call('category.move', { id: node.id, parentId: parent?.id ?? null, index }),
   });
 
-  constructor(private api: RpcApi) {
+  public constructor(private api: RpcApi) {
     super();
   }
 
-  override async startup() {
+  public override async startup() {
     await this.tree.load();
   }
 
-  async actionDetail({ id }: Params) {
+  public async actionDetail({ id }: Params) {
     await this.tree.select(Number(id));   // označí uzel a rozbalí cestu k němu
   }
 
-  render() {
+  public render() {
     return <TreeView tree={this.tree} lines href={node => this.link('detail', { id: node.id })} />;
   }
 }

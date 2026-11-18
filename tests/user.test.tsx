@@ -5,7 +5,7 @@ import { Authenticator, Authorizator, BrowserUserStorage, Identity, Permission, 
 import { boot, tick } from './helpers';
 
 class FakeAuthenticator extends Authenticator {
-  async authenticate(username: string, password: string): Promise<Identity> {
+  public async authenticate(username: string, password: string): Promise<Identity> {
     if (password !== 'secret') throw new Error('Wrong password.');
     return new Identity(7, username === 'admin' ? ['admin'] : [], { name: username }, `token-${username}`);
   }
@@ -22,7 +22,7 @@ const acl = new Permission()
 const services = () => new Container().add(FakeAuthenticator, acl);
 
 class Root extends Presenter {
-  render() {
+  public render() {
     return (
       <div>
         <If when={() => this.user.isLoggedIn()}>
@@ -100,7 +100,7 @@ describe('User', () => {
 
   test('without an Authenticator or Authorizator in the container the error says what to add', async () => {
     class Plain extends Presenter {
-      render() { return <b />; }
+      public render() { return <b />; }
     }
     const { app } = await boot(Plain, '/', new Container());
     await expect(app.user.login('a', 'b')).rejects.toThrow('No Authenticator in the container');
@@ -109,7 +109,7 @@ describe('User', () => {
 
   test('the Authorizator can be own class, found by its abstract type', async () => {
     class Everything extends Authorizator {
-      isAllowed() { return true; }
+      public isAllowed() { return true; }
     }
     const { app } = await boot(Root, '/', new Container().add(Everything));
     expect(app.user.isAllowed('anything', 'at all')).toBe(true);
@@ -119,22 +119,22 @@ describe('User', () => {
 
 describe('protected presenters', () => {
   class Secret extends Presenter {
-    static actions = 0;
-    override startup() {
+    public static actions = 0;
+    public override startup() {
       if (!this.user.isLoggedIn()) this.redirect('/sign/in');
     }
-    actionDefault() { Secret.actions++; }
-    render() { return <h1>secret</h1>; }
+    public actionDefault() { Secret.actions++; }
+    public render() { return <h1>secret</h1>; }
   }
   class SignIn extends Presenter {
-    render() { return <h1>sign in</h1>; }
+    public render() { return <h1>sign in</h1>; }
   }
   class App extends Presenter {
-    override routes: Route[] = [
+    public override routes: Route[] = [
       { name: 'secret', pattern: '/secret', presenter: Secret },
       { name: 'signIn', pattern: '/sign/in', presenter: SignIn },
     ];
-    render() { return <RouteFrame />; }
+    public render() { return <RouteFrame />; }
   }
 
   test('a redirect from startup stops the navigation, the protected screen never appears', async () => {

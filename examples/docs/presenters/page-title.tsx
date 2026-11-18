@@ -4,19 +4,19 @@ import type { Route } from '@phloxcz/phlox-js';
 const PROJECTS = ['Apollo', 'Gemini', 'Mercury'];
 
 class ProjectPresenter extends Presenter<{ index: number }> {
-  readonly name = state(PROJECTS[this.props.index] ?? '');
+  public readonly name = state(PROJECTS[this.props.index] ?? '');
 
   // Like {block title} in Nette; it can read state, the title follows it
-  override pageTitle() {
+  public override pageTitle() {
     return this.name();
   }
 
-  override async startup() {
+  public override async startup() {
     // Navigation waits for startup(): the old screen stays until the new one is ready
     await new Promise(resolve => setTimeout(resolve, 400));
   }
 
-  render() {
+  public render() {
     return (
       <div>
         <h2>{this.name}</h2>
@@ -29,16 +29,16 @@ class ProjectPresenter extends Presenter<{ index: number }> {
 
 /** The title is given by the deepest presenter that has one. */
 export default class ProjectsPresenter extends Presenter {
-  override routes: Route[] = [
+  public override routes: Route[] = [
     { name: 'default', pattern: '/' },
     { name: 'detail', pattern: '/<index:int>', presenter: ProjectPresenter, props: ({ index }) => ({ index: Number(index) }) },
   ];
 
-  override pageTitle() {
+  public override pageTitle() {
     return 'Projekty';
   }
 
-  render() {
+  public render() {
     return (
       <div>
         <nav>

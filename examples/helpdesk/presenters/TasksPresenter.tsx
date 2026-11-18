@@ -27,27 +27,27 @@ const PRIORITIES: Priority[] = ['high', 'medium', 'low'];
  * The tab, the order and the filter are persistent parameters, so they stay in the URL when a task opens.
  */
 export class TasksPresenter extends Presenter<Props> {
-  override persistent = ['status', 'sort', 'priority'];
-  readonly detail = route('detail', '/<task:int>', { presenter: TaskDetailPresenter, props: ({ task }) => ({ taskId: task }) });
+  public override persistent = ['status', 'sort', 'priority'];
+  public readonly detail = route('detail', '/<task:int>', { presenter: TaskDetailPresenter, props: ({ task }) => ({ taskId: task }) });
 
-  override routes: Route[] = [
+  public override routes: Route[] = [
     { name: 'default', pattern: '/' },
     this.detail,
   ];
 
-  readonly status = computed(() => (this.params().status ?? null) as Status | null);
-  readonly sort = computed(() => (this.params().sort === 'priority' ? 'priority' : 'due'));
+  public readonly status = computed(() => (this.params().status ?? null) as Status | null);
+  public readonly sort = computed(() => (this.params().sort === 'priority' ? 'priority' : 'due'));
   /** As text, so that a click on a task (another parameter) does not load the list again. */
-  readonly priority = computed(() => this.params().priority ?? '');
+  public readonly priority = computed(() => this.params().priority ?? '');
   /** The width of the list, set by the user and remembered in the browser. */
-  readonly width = this.preference('helpdesk.tasks.width', 416);
-  tasks!: Resource<TaskPage>;
+  public readonly width = this.preference('helpdesk.tasks.width', 416);
+  public tasks!: Resource<TaskPage>;
 
-  constructor(private api: HelpdeskApi, private store: Store, private work: OfflineWork) {
+  public constructor(private api: HelpdeskApi, private store: Store, private work: OfflineWork) {
     super();
   }
 
-  override async startup() {
+  public override async startup() {
     // Here the parameters are known; the list loads again when a parameter or the data change
     this.tasks = this.resource(() => {
       const priority = this.priority().split(',').filter(Boolean) as Priority[];
@@ -66,7 +66,7 @@ export class TasksPresenter extends Presenter<Props> {
   }
 
   /** The tab of the browser shows the list, or the task when one is open (TaskDetailPresenter is deeper). */
-  override pageTitle() {
+  public override pageTitle() {
     return this.heading();
   }
 
@@ -78,20 +78,20 @@ export class TasksPresenter extends Presenter<Props> {
   }
 
   /** Downloads the tasks of this list with their details, for working without a network. */
-  async handlePrepare(): Promise<void> {
+  public async handlePrepare(): Promise<void> {
     const [key, query] = this.offlineList();
     const count = await this.work.prepare(key, query);
     this.flashMessage(`Připraveno pro offline: ${count} ${count === 1 ? 'úkol' : count < 5 ? 'úkoly' : 'úkolů'} s komentáři a historií.`, 'success');
   }
 
-  heading(): string {
+  public heading(): string {
     if (this.props.mine) return 'Moje úkoly';
     if (!this.props.projectId) return 'Všechny úkoly';
     return `Úkoly – ${this.store.project(this.props.projectId)?.name ?? ''}`;
   }
 
   /** The checkbox closes a task, or opens it again. */
-  async handleDone(task: TaskResource, done: boolean): Promise<void> {
+  public async handleDone(task: TaskResource, done: boolean): Promise<void> {
     await this.api.call('task.update', {
       id: task.id,
       input: { status: done ? 'closed' : 'open', priority: task.priority, assigneeId: task.assigneeId, due: task.due },
@@ -106,7 +106,7 @@ export class TasksPresenter extends Presenter<Props> {
     return chosen.size ? PRIORITIES.filter(item => chosen.has(item)).join(',') : null;
   }
 
-  render() {
+  public render() {
     const current = () => Number(this.params().task);
     return (
       <>

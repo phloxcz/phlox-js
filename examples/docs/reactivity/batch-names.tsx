@@ -2,12 +2,12 @@ import { Button, Component, batch, computed, effect, state } from '@phloxcz/phlo
 
 /** Two changes in one batch: the effect runs once, not with a half-changed name. */
 export default class Names extends Component {
-  readonly first = state('Jan');
-  readonly last = state('Novák');
-  readonly full = computed(() => `${this.first()} ${this.last()}`);
-  readonly log = state<string[]>([]);
+  public readonly first = state('Jan');
+  public readonly last = state('Novák');
+  public readonly full = computed(() => `${this.first()} ${this.last()}`);
+  public readonly log = state<string[]>([]);
 
-  constructor() {
+  public constructor() {
     super();
     effect(() => {
       const name = this.full();
@@ -15,7 +15,7 @@ export default class Names extends Component {
     });
   }
 
-  render() {
+  public render() {
     return (
       <div>
         <Button onClick={() => { this.first.set('Eva'); this.last.set('Dvořáková'); }}>Bez batch</Button>{' '}

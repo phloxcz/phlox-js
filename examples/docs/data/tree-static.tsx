@@ -4,7 +4,7 @@ import type { TreeNode } from '@phloxcz/phlox-js/components';
 
 /** All nodes at once, with icons; the selection is a state, selected by a click, Enter or the arrows. */
 export default class StaticTree extends Component {
-  readonly tree = new Tree<TreeNode<string>>({
+  public readonly tree = new Tree<TreeNode<string>>({
     nodes: [
       { id: 'src', label: 'src', children: [
         { id: 'src/ui', label: 'ui', children: [{ id: 'src/ui/dom.ts', label: 'dom.ts' }, { id: 'src/ui/flow.ts', label: 'flow.ts' }] },
@@ -17,7 +17,7 @@ export default class StaticTree extends Component {
     ],
   });
 
-  render() {
+  public render() {
     return (
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
         <TreeView tree={this.tree} lines aria-label="Soubory"

@@ -7,9 +7,9 @@ const money = new Intl.NumberFormat('cs', { style: 'currency', currency: 'CZK', 
 
 /** Data in the browser: the grid searches, filters, sorts, sums and pages by itself. */
 export default class LocalGrid extends Component {
-  readonly grid = new Grid<Order>({ rows: ORDERS, pageSize: 8 });
+  public readonly grid = new Grid<Order>({ rows: ORDERS, pageSize: 8 });
 
-  constructor() {
+  public constructor() {
     super();
     const grid = this.grid;
     grid.addNumberColumn('id', 'Číslo').sortable().width('6rem').format(id => String(id));
@@ -20,7 +20,7 @@ export default class LocalGrid extends Component {
     grid.addBoolColumn('paid', 'Zaplaceno').sortable().filterable();
   }
 
-  render() {
+  public render() {
     return <GridView grid={this.grid} search aria-label="Objednávky" />;
   }
 }

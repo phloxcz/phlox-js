@@ -24,13 +24,13 @@ export interface KendoWindowInstance extends KendoWidgetInstance {
 }
 
 export class KendoDialogs extends Dialogs {
-  static $inject = () => [Kendo];
+  public static $inject = () => [Kendo];
 
-  constructor(private kendo: Kendo) {
+  public constructor(private kendo: Kendo) {
     super();
   }
 
-  show(dialog: Component<any, any>, options: DialogOptions = {}): () => void {
+  public show(dialog: Component<any, any>, options: DialogOptions = {}): () => void {
     const element = document.createElement('div');
     element.className = ['phlox-kendo-window', options.class].filter(Boolean).join(' ');
     dialog.scope.run(() => insert(element, [

@@ -11,12 +11,12 @@ class TaskApi {
     { id: 3, title: 'Nový přehled', done: false },
   ];
 
-  async list(): Promise<Task[]> {
+  public async list(): Promise<Task[]> {
     await new Promise(resolve => setTimeout(resolve, 200));
     return this.tasks.map(task => ({ ...task }));
   }
 
-  async toggle(id: number): Promise<void> {
+  public async toggle(id: number): Promise<void> {
     await new Promise(resolve => setTimeout(resolve, 200));
     this.tasks = this.tasks.map(task => (task.id === id ? { ...task, done: !task.done } : task));
   }
@@ -28,22 +28,22 @@ export function services(container: Container) {
 
 /** One screen: the list changes the data and calls app.invalidate('tasks'). */
 class TaskList extends Component {
-  tasks!: Resource<Task[]>;
+  public tasks!: Resource<Task[]>;
 
-  constructor(private api: TaskApi) {
+  public constructor(private api: TaskApi) {
     super();
   }
 
-  override startup() {
+  public override startup() {
     this.tasks = this.resource(() => this.api.list(), { tags: ['tasks'] });
   }
 
-  async handleToggle(task: Task) {
+  public async handleToggle(task: Task) {
     await this.api.toggle(task.id);
     this.app.invalidate('tasks');
   }
 
-  render() {
+  public render() {
     return (
       <ul>
         <For each={() => this.tasks() ?? []} key={task => task.id}>
@@ -62,27 +62,27 @@ class TaskList extends Component {
 
 /** Another place on the screen, it knows nothing about the list: its resource has the same tag. */
 class OpenCount extends Component {
-  readonly reloads = state(0);
-  tasks!: Resource<Task[]>;
+  public readonly reloads = state(0);
+  public tasks!: Resource<Task[]>;
 
-  constructor(private api: TaskApi) {
+  public constructor(private api: TaskApi) {
     super();
   }
 
-  override startup() {
+  public override startup() {
     this.tasks = this.resource(() => {
       this.reloads.update(n => n + 1);
       return this.api.list();
     }, { tags: ['tasks'] });
   }
 
-  render() {
+  public render() {
     return <p>Otevřených: <strong>{() => this.tasks()?.filter(task => !task.done).length ?? '…'}</strong> <small>(načteno {this.reloads}×)</small></p>;
   }
 }
 
 export default class SharedData extends Component {
-  render() {
+  public render() {
     return (
       <div>
         <OpenCount />

@@ -16,7 +16,7 @@ import { TasksPresenter } from './TasksPresenter';
 
 /** The layout after sign-in: the header, the menu on the left and the screen of the current route. */
 export class WorkspacePresenter extends Presenter {
-  override routes: Route[] = [
+  public override routes: Route[] = [
     { name: 'projects', pattern: '/projects', presenter: ProjectsPresenter },
     // The same presenter as in a project, with other props
     { name: 'my', pattern: '/my', presenter: TasksPresenter, props: () => ({ mine: true }) },
@@ -27,12 +27,12 @@ export class WorkspacePresenter extends Presenter {
   ];
 
   /** The menu on the left shows icons only; the user's choice is remembered in the browser. */
-  readonly collapsed = this.preference('helpdesk.nav.collapsed', false);
+  public readonly collapsed = this.preference('helpdesk.nav.collapsed', false);
 
   /** A question about a changed record is open, the next one waits for it. */
   private asking = false;
 
-  constructor(private store: Store, private work: OfflineWork) {
+  public constructor(private store: Store, private work: OfflineWork) {
     super();
     // Changes of records changed meanwhile: the user decides one by one
     effect(() => {
@@ -40,7 +40,7 @@ export class WorkspacePresenter extends Presenter {
     });
   }
 
-  async handleConflicts(): Promise<void> {
+  public async handleConflicts(): Promise<void> {
     this.asking = true;
     try {
       for (const change of untrack(this.work.offline.conflicts)) {
@@ -67,11 +67,11 @@ export class WorkspacePresenter extends Presenter {
   }
 
   /** On a phone the menu is a panel sliding in from the left. */
-  handleMenu(): void {
+  public handleMenu(): void {
     void this.openDialog(MainMenu, { entries: this.entries() }, { placement: 'start', class: 'hd-menu-dialog' });
   }
 
-  override async startup() {
+  public override async startup() {
     if (!this.user.isLoggedIn()) return this.redirect('/sign');
     await this.store.start();
     // After changes made offline were sent: lists and counts load again
@@ -79,15 +79,15 @@ export class WorkspacePresenter extends Presenter {
     void this.work.offline.sync();
   }
 
-  actionHome() {
+  public actionHome() {
     return this.redirect('projects');
   }
 
-  async handleSupport(): Promise<void> {
+  public async handleSupport(): Promise<void> {
     if (await this.openDialog(SupportContact, {})) this.flashMessage('Zpráva odešla, podpora se vám ozve.', 'success');
   }
 
-  render() {
+  public render() {
     return (
       <div class={() => `hd-shell ${this.collapsed() ? 'hd-nav-collapsed' : ''}`}>
         <header class="hd-header">

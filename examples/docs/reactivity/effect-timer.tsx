@@ -2,10 +2,10 @@ import { Component, effect, state } from '@phloxcz/phlox-js';
 
 /** An effect with its own cleanup: the timer starts again whenever the delay changes. */
 export default class Timer extends Component {
-  readonly delay = state(1000);
-  readonly ticks = state(0);
+  public readonly delay = state(1000);
+  public readonly ticks = state(0);
 
-  constructor() {
+  public constructor() {
     super();
     effect(() => {
       const timer = setInterval(() => this.ticks.update(n => n + 1), this.delay());
@@ -13,7 +13,7 @@ export default class Timer extends Component {
     });
   }
 
-  render() {
+  public render() {
     return (
       <p>
         <label>

@@ -4,17 +4,17 @@ Komponenta je třída se stavem, životním cyklem a šablonou. V šabloně se p
 
 ```tsx
 class UserCard extends Component<{ userId: number }> {
-  user = state<User | null>(null);
+  public user = state<User | null>(null);
 
-  constructor(private api: UserApi) {
+  public constructor(private api: UserApi) {
     super();
   }
 
-  override async startup() {
+  public override async startup() {
     this.user.set(await this.api.get(this.props.userId));
   }
 
-  render() {
+  public render() {
     return <article>{() => this.user()?.name}</article>;
   }
 }

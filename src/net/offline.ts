@@ -78,14 +78,14 @@ const isNetworkError = (error: unknown) => error instanceof RpcError && error.co
 
 export class RpcOffline<M extends { [K in keyof M]: RpcMethod } = any> {
   /** Changes waiting to be sent. */
-  readonly pending: State<OfflineChange[]> = state([]);
+  public readonly pending: State<OfflineChange[]> = state([]);
   /** Changes of records that changed on the server meanwhile; resolve() decides each. */
-  readonly conflicts: State<OfflineChange[]> = state([]);
+  public readonly conflicts: State<OfflineChange[]> = state([]);
   /** Changes the server refused (validation, permission); retry() or drop(). */
-  readonly failed: State<OfflineChange[]> = state([]);
-  readonly syncing = state(false);
+  public readonly failed: State<OfflineChange[]> = state([]);
+  public readonly syncing = state(false);
   /** When the data for offline were last downloaded, ISO, null when never. */
-  readonly downloaded = state<string | null>(null);
+  public readonly downloaded = state<string | null>(null);
 
   private send: Send | null = null;
   private listeners: (() => void)[] = [];
@@ -96,28 +96,28 @@ export class RpcOffline<M extends { [K in keyof M]: RpcMethod } = any> {
    * @param scope the owner of the data, e.g. `() => String(user.getId())`: data and changes of one user
    *              are never shown to or sent for another one
    */
-  constructor(private store: OfflineStore, private rules: OfflineRules<M>, private scope: () => string = () => '') {
+  public constructor(private store: OfflineStore, private rules: OfflineRules<M>, private scope: () => string = () => '') {
     if (typeof window !== 'undefined') window.addEventListener('online', () => void this.sync());
   }
 
   /** Whether the client should ask this object about the method. */
-  handles(method: string): boolean {
+  public handles(method: string): boolean {
     return method in (this.rules.reads ?? {}) || method in (this.rules.writes ?? {});
   }
 
   /** Called by RpcClient with its way of calling the server. */
-  attach(send: Send): void {
+  public attach(send: Send): void {
     this.send = send;
   }
 
   /** After changes were sent: lists can load again, e.g. app.invalidate('tasks'). Returns a function that stops it. */
-  onSynced(listener: () => void): () => void {
+  public onSynced(listener: () => void): () => void {
     this.listeners.push(listener);
     return () => { this.listeners = this.listeners.filter(other => other !== listener); };
   }
 
   /** A call of a method in the rules, from RpcClient. */
-  async call(method: string, params: any): Promise<unknown> {
+  public async call(method: string, params: any): Promise<unknown> {
     await this.load();
     const read = (this.rules.reads as Record<string, ReadRule<any, any>> | undefined)?.[method];
     if (read) return this.read(method, params, read);
@@ -136,7 +136,7 @@ export class RpcOffline<M extends { [K in keyof M]: RpcMethod } = any> {
    * Downloads data for working offline: each call is made and kept, e.g. the tasks of the chosen project
    * and the detail of each of them. Calls made at once go as one batch.
    */
-  async download(calls: [method: keyof M & string, params?: object][]): Promise<void> {
+  public async download(calls: [method: keyof M & string, params?: object][]): Promise<void> {
     await this.load();
     await Promise.all(calls.map(async ([method, params]) => this.cache.set(method, params, await this.send!(method, params))));
     const now = new Date().toISOString();
@@ -145,7 +145,7 @@ export class RpcOffline<M extends { [K in keyof M]: RpcMethod } = any> {
   }
 
   /** Sends the waiting changes one by one. Changes of records changed meanwhile go to `conflicts`. */
-  async sync(): Promise<void> {
+  public async sync(): Promise<void> {
     await this.load();
     if (untrack(this.syncing) || !this.send || !untrack(online)) return;
     this.syncing.set(true);
@@ -178,7 +178,7 @@ export class RpcOffline<M extends { [K in keyof M]: RpcMethod } = any> {
   }
 
   /** The user decided about a change of a record changed meanwhile: send it anyway, or drop it. */
-  async resolve(change: OfflineChange, decision: 'send' | 'drop'): Promise<void> {
+  public async resolve(change: OfflineChange, decision: 'send' | 'drop'): Promise<void> {
     this.conflicts.update(list => list.filter(other => other.key !== change.key));
     if (decision === 'drop') {
       await this.store.delete(this.key(`change:${change.key}`));
@@ -188,26 +188,26 @@ export class RpcOffline<M extends { [K in keyof M]: RpcMethod } = any> {
   }
 
   /** Sends a refused change again, e.g. after the user fixed what the server refused. */
-  async retry(change: OfflineChange): Promise<void> {
+  public async retry(change: OfflineChange): Promise<void> {
     this.failed.update(list => list.filter(other => other.key !== change.key));
     if (await this.deliver(change)) for (const listener of this.listeners) listener();
   }
 
   /** Drops a refused change. */
-  async drop(change: OfflineChange): Promise<void> {
+  public async drop(change: OfflineChange): Promise<void> {
     this.failed.update(list => list.filter(other => other.key !== change.key));
     await this.store.delete(this.key(`change:${change.key}`));
   }
 
   /** Forgets the kept data of the current user (not the changes waiting to be sent). */
-  async clearCache(): Promise<void> {
+  public async clearCache(): Promise<void> {
     for (const [key] of await this.store.entries(this.key('read:'))) await this.store.delete(key);
     this.downloaded.set(null);
     await this.store.delete(this.key('meta:downloaded'));
   }
 
   /** The kept data, also for code of the application. */
-  readonly cache: OfflineCache = {
+  public readonly cache: OfflineCache = {
     get: async (method, params) => (await this.store.get<{ value: any }>(this.readKey(method, params)))?.value,
     set: (method, params, value) => this.store.set(this.readKey(method, params), { params: params ?? {}, value }),
     all: async method => (await this.store.entries<{ params: any; value: any }>(this.key(`read:${method}:`))).map(([, entry]) => entry),

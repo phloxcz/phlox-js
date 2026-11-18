@@ -13,10 +13,10 @@ interface Hit {
 
 /** Search in projects and tasks in the header. Ctrl+K anywhere jumps into it, arrows choose a result. */
 export class SearchBox extends Component {
-  readonly text = state('');
-  readonly active = state(0);
-  readonly results: Resource<SearchResult | null>;
-  readonly hits = computed<Hit[]>(() => {
+  public readonly text = state('');
+  public readonly active = state(0);
+  public readonly results: Resource<SearchResult | null>;
+  public readonly hits = computed<Hit[]>(() => {
     const found = this.results();
     if (!found || !this.text().trim()) return [];
     return [
@@ -26,7 +26,7 @@ export class SearchBox extends Component {
   });
   private input!: HTMLInputElement;
 
-  constructor(private api: HelpdeskApi) {
+  public constructor(private api: HelpdeskApi) {
     super();
     // Again with every change of the text; an older answer never overwrites a newer one
     this.results = this.resource(async () => {
@@ -35,7 +35,7 @@ export class SearchBox extends Component {
     });
   }
 
-  override afterRender() {
+  public override afterRender() {
     const shortcut = (event: KeyboardEvent) => {
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
         event.preventDefault();
@@ -67,7 +67,7 @@ export class SearchBox extends Component {
     }
   }
 
-  render() {
+  public render() {
     return (
       <div class="hd-search" role="search">
         <Icon name="search" size={19} />

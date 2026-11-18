@@ -82,6 +82,7 @@
     "build": "vite build --config build.config.ts && tsc -p tsconfig.build.json",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
+    "lint": "biome lint",
     "dev": "vite --config examples/vite.config.ts",
     "build:examples": "vite build --config examples/vite.config.ts",
     "rpc:types": "node src/net/rpc-types.ts"
@@ -93,6 +94,7 @@
     "vite": ">=7"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.6.5",
     "@types/jsdom": "^30.0.0",
     "@types/node": "^26.6.6",
     "bootstrap": "^5.3.8",

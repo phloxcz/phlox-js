@@ -12,9 +12,9 @@ const ACCOUNTS = ['lucie@helpdesk.cz', 'jan@helpdesk.cz', 'petra@helpdesk.cz'];
 
 /** Sign-in at /sign. The identity with the token is kept by User, see services.ts. */
 export class SignPresenter extends Presenter {
-  form = new Form<SignIn>();
+  public form = new Form<SignIn>();
 
-  constructor() {
+  public constructor() {
     super();
     this.form.addEmail('email', 'E-mail').setRequired('Vyplňte e-mail.');
     this.form.addPassword('password', 'Heslo').setRequired('Vyplňte heslo.');
@@ -22,15 +22,15 @@ export class SignPresenter extends Presenter {
     this.form.onSuccess = values => this.handleSignIn(values);
   }
 
-  override pageTitle() {
+  public override pageTitle() {
     return 'Přihlášení';
   }
 
-  override startup() {
+  public override startup() {
     if (this.user.isLoggedIn()) this.redirect('/projects');
   }
 
-  async handleSignIn({ email, password }: SignIn): Promise<void> {
+  public async handleSignIn({ email, password }: SignIn): Promise<void> {
     try {
       await this.user.login(email, password);
     } catch (error) {
@@ -44,7 +44,7 @@ export class SignPresenter extends Presenter {
     this.redirect('/projects');
   }
 
-  render() {
+  public render() {
     const email = this.form.get('email');
     const password = this.form.get('password');
     return (

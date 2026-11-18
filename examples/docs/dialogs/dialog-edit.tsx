@@ -2,20 +2,20 @@ import { Button, Component, state } from '@phloxcz/phlox-js';
 
 /** A component for a dialog: its title, its buttons, and close(result). The result type is the second type parameter. */
 class NameEdit extends Component<{ name: string }, string> {
-  readonly name = state(this.props.name);
+  public readonly name = state(this.props.name);
 
-  override title() {
+  public override title() {
     return 'Úprava jména';
   }
 
-  override actions() {
+  public override actions() {
     return <>
       <Button onClick={() => this.close()}>Zrušit</Button>
       <Button primary onClick={() => this.close(this.name())}>Uložit</Button>
     </>;
   }
 
-  render() {
+  public render() {
     return (
       <label>
         Jméno{' '}
@@ -28,14 +28,14 @@ class NameEdit extends Component<{ name: string }, string> {
 
 /** openDialog() waits for the dialog and returns its result; the same component in a side panel. */
 export default class Dialogs extends Component {
-  readonly name = state('Jana Nováková');
+  public readonly name = state('Jana Nováková');
 
-  async edit(placement: 'center' | 'end') {
+  public async edit(placement: 'center' | 'end') {
     const name = await this.openDialog(NameEdit, { name: this.name() }, { placement });
     if (name !== undefined) this.name.set(name);
   }
 
-  render() {
+  public render() {
     return (
       <p>
         Jméno: <strong>{this.name}</strong>{' '}

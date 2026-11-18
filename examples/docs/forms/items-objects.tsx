@@ -18,10 +18,10 @@ const Avatar = (props: { person: Person }) => (
 
 /** Items as objects straight from the server, drawn by a template; a saved value passed with its object. */
 export default class ObjectItems extends Component {
-  readonly form = new Form<Values>();
-  readonly values = computed(() => JSON.stringify(this.form.getValues()));
+  public readonly form = new Form<Values>();
+  public readonly values = computed(() => JSON.stringify(this.form.getValues()));
 
-  constructor() {
+  public constructor() {
     super();
     this.form.addDropDownList('assigneeId', 'Řešitel', {
       items: PEOPLE.slice(0, 12),
@@ -48,7 +48,7 @@ export default class ObjectItems extends Component {
     watchers.setValue([5, 270]);
   }
 
-  render() {
+  public render() {
     return <div><FormView form={this.form} /><p><code>{this.values}</code></p></div>;
   }
 }

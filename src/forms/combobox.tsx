@@ -21,38 +21,38 @@ export type ComboBoxOptions<T, O = never> = ListOptions<T, O> & {
 /** With item objects the template shows in the list only, the field shows the text of the item. */
 export class ComboBox<T = string> extends ListControl<T> {
   /** Texts of the list. Replace them for the language of the application. */
-  static texts = texts('combobox', {
+  public static texts = texts('combobox', {
     noResults: 'No results',
   });
 
   /** True while the field shows what the user is typing, not the label of the value. */
-  readonly editing = state(false);
+  public readonly editing = state(false);
   private previous: { value: T | null; label: string; custom: boolean } = { value: null, label: '', custom: false };
   private custom = false;
 
-  constructor(label = '', protected override options: ComboBoxOptions<T, any> = {}) {
+  public constructor(label = '', protected override options: ComboBoxOptions<T, any> = {}) {
     super(label, options, 'combobox');
   }
 
   /** Whether the value is a typed text, not an item. Only with `allowCustom`. */
-  isCustom(): boolean {
+  public isCustom(): boolean {
     return this.custom;
   }
 
-  override setValue(value: T | null, label?: unknown): void {
+  public override setValue(value: T | null, label?: unknown): void {
     this.editing.set(false);
     this.custom = false;
     super.setValue(value, label);
   }
 
-  override pick(value: T, label: string): void {
+  public override pick(value: T, label: string): void {
     this.editing.set(false);
     this.custom = false;
     super.pick(value, label);
   }
 
   /** The field gets the focus: the list opens with the first items, the current value is remembered for Escape. */
-  open(): void {
+  public open(): void {
     if (untrack(this.opened) || !this.changeable()) return;
     this.remember();
     this.opened.set(true);
@@ -66,7 +66,7 @@ export class ComboBox<T = string> extends ListControl<T> {
   }
 
   /** Escape: back to the value before editing. */
-  restore(): void {
+  public restore(): void {
     this.editing.set(false);
     this.selected.set(this.previous.value);
     this.selectedLabel.set(this.previous.label);
@@ -78,7 +78,7 @@ export class ComboBox<T = string> extends ListControl<T> {
    * Settles typed text: an item with exactly this label is picked, otherwise the text becomes the value
    * (with allowCustom), or it is thrown away and the previous value returns.
    */
-  commit(): void {
+  public commit(): void {
     if (!untrack(this.editing)) return;
     const typed = untrack(this.query).trim();
     const match = untrack(this.items).find(([, label]) => foldText(label) === foldText(typed));
@@ -100,7 +100,7 @@ export class ComboBox<T = string> extends ListControl<T> {
   }
 
   /** Typed text is settled before the rules are checked, e.g. when Enter sends the form. */
-  override validate(): boolean {
+  public override validate(): boolean {
     this.commit();
     return super.validate();
   }
@@ -138,7 +138,7 @@ export class ComboBox<T = string> extends ListControl<T> {
     }
   }
 
-  render(attributes: ExtraAttributes): Child {
+  public render(attributes: ExtraAttributes): Child {
     const theme = currentTheme();
     const slot = (name: string) => theme.class(`combobox.${name}`);
     const { id, ref, onBlur, ...common } = this.attrs();

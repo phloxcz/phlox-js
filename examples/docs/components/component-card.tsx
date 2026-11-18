@@ -5,7 +5,7 @@ interface User { id: number; name: string; role: string }
 
 /** A stand-in for an API: answers after a while, like a server. */
 class UserApi {
-  async get(id: number): Promise<User> {
+  public async get(id: number): Promise<User> {
     await new Promise(resolve => setTimeout(resolve, 300 + id * 200));
     return { id, name: ['Jana Nováková', 'Petr Svoboda', 'Eva Dvořáková'][id - 1]!, role: id === 1 ? 'správce' : 'uživatel' };
   }
@@ -17,17 +17,17 @@ export function services(container: Container) {
 
 /** Props from the tag, a service in the constructor, data loaded in startup(), content between the tags. */
 class UserCard extends Component<{ userId: number; children?: Child }> {
-  readonly detail = state<User | null>(null);
+  public readonly detail = state<User | null>(null);
 
-  constructor(private api: UserApi) {
+  public constructor(private api: UserApi) {
     super();
   }
 
-  override async startup() {
+  public override async startup() {
     this.detail.set(await this.api.get(this.props.userId));
   }
 
-  render() {
+  public render() {
     return (
       <article style={{ border: '1px solid #8886', borderRadius: '8px', padding: '.5rem .75rem' }}>
         <strong>{() => this.detail()?.name}</strong> ({() => this.detail()?.role})
@@ -39,7 +39,7 @@ class UserCard extends Component<{ userId: number; children?: Child }> {
 
 /** startup() is async: every card shows once its data are there. */
 export default class Cards extends Component {
-  render() {
+  public render() {
     return (
       <div style={{ display: 'grid', gap: '.5rem' }}>
         <For each={() => [1, 2, 3]}>

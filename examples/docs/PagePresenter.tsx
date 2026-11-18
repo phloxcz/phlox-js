@@ -22,10 +22,10 @@ function parts(html: string): Part[] {
 
 /** One page of the documentation at /<section>/<page>. */
 export class PagePresenter extends Presenter<{ route: string }> {
-  readonly page = state<PageModule | null>(null);
-  readonly missing = state(false);
+  public readonly page = state<PageModule | null>(null);
+  public readonly missing = state(false);
 
-  override async startup() {
+  public override async startup() {
     const load = PAGE_FILES[`.${this.props.route}.md`];
     if (!load) {
       this.missing.set(true);
@@ -35,17 +35,17 @@ export class PagePresenter extends Presenter<{ route: string }> {
   }
 
   // A new page starts at its top (the router does not restore scrolling yet), a link with #part goes to it
-  override afterRender() {
+  public override afterRender() {
     const target = location.hash && document.getElementById(decodeURIComponent(location.hash.slice(1)));
     if (target) target.scrollIntoView();
     else window.scrollTo(0, 0);
   }
 
-  override pageTitle() {
+  public override pageTitle() {
     return this.page()?.title ?? (this.missing() ? 'Stránka neexistuje' : null);
   }
 
-  render() {
+  public render() {
     const index = PAGES.findIndex(page => page.route === this.props.route);
     const previous = PAGES[index - 1];
     const next = PAGES[index + 1];

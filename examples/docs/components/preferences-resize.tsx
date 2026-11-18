@@ -2,10 +2,10 @@ import { Button, Component, ResizeHandle } from '@phloxcz/phlox-js';
 
 /** Preferences remembered in the browser: the width of a column and a collapsed note. Reload the page, they stay. */
 export default class Layout extends Component {
-  readonly width = this.preference('docs.demo.width', 240);
-  readonly collapsed = this.preference('docs.demo.collapsed', false);
+  public readonly width = this.preference('docs.demo.width', 240);
+  public readonly collapsed = this.preference('docs.demo.collapsed', false);
 
-  render() {
+  public render() {
     return (
       <div style={{ display: 'flex', minHeight: '9rem', border: '1px solid #8886', borderRadius: '8px', overflow: 'hidden' }}>
         <section style={() => ({ width: `${this.width()}px`, padding: '.75rem', background: '#8881' })}>

@@ -22,14 +22,14 @@ const TYPES = new Set(['info', 'success', 'warning', 'error']);
 export class CapifyFlashMessages extends FlashMessages {
   private handles = new Map<Flash, { close(): void }>();
 
-  constructor(private capify: CapifyNotify, private options: CapifyNotifyOptions = {}) {
+  public constructor(private capify: CapifyNotify, private options: CapifyNotifyOptions = {}) {
     super();
     // Capify shows the messages, not the toasts of the framework
     this.toasts = false;
   }
 
   /** Shows the message as a toast. It is not kept in `messages`, capify takes care of it and of its timer. */
-  override add(text: string, type = 'info', options: FlashOptions = {}): Flash {
+  public override add(text: string, type = 'info', options: FlashOptions = {}): Flash {
     const duration = options.duration ?? (type === 'error' ? this.errorDuration : this.duration);
     const flash: Flash = { text, type, duration, ...(options.title ? { title: options.title } : {}) };
     const handle = this.capify.notify(text, {
@@ -42,12 +42,12 @@ export class CapifyFlashMessages extends FlashMessages {
     return flash;
   }
 
-  override remove(flash: Flash): void {
+  public override remove(flash: Flash): void {
     this.handles.get(flash)?.close();
     this.handles.delete(flash);
   }
 
-  override clear(): void {
+  public override clear(): void {
     for (const handle of this.handles.values()) handle.close();
     this.handles.clear();
   }

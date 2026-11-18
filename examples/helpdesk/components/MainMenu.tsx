@@ -29,11 +29,11 @@ export function MenuLinks(props: { entries: MenuEntry[]; onPick?: () => void }):
 
 /** The menu of a phone in a panel sliding in from the left. A click on a link goes there and closes it. */
 export class MainMenu extends Component<{ entries: MenuEntry[] }> {
-  override title() {
+  public override title() {
     return 'Menu';
   }
 
-  render() {
+  public render() {
     return <nav class="hd-nav hd-nav-panel" aria-label="Hlavní menu"><MenuLinks entries={this.props.entries} onPick={() => this.close()} /></nav>;
   }
 }

@@ -80,53 +80,53 @@ export interface RoutedDialog {
 }
 
 export class BadRequestError extends Error {
-  constructor(readonly code = 404, message = `Bad request (${code}).`) {
+  public constructor(public readonly code = 404, message = `Bad request (${code}).`) {
     super(message);
     this.name = 'BadRequestError';
   }
 }
 
 export abstract class Presenter<P extends object = {}, R = void> extends Component<P, R> {
-  readonly [IS_PRESENTER] = true;
+  public readonly [IS_PRESENTER] = true;
 
   /** Routes of the presenter, tried in this order. */
-  routes: Route[] = [];
+  public routes: Route[] = [];
 
   /**
    * Query parameters the links of this presenter and of those below it keep, like #[Persistent] in Nette:
    * with ['page'], link('detail', { id: 5 }) on ?page=2 leads to /5?page=2. A name ending with * stands
    * for all that start with it, e.g. 'filter.*'. A parameter given to link() wins, null leaves it out.
    */
-  persistent: string[] = [];
+  public persistent: string[] = [];
 
   /** Name of the current route, null when no route matches. */
-  readonly route = state<string | null>(null);
+  public readonly route = state<string | null>(null);
 
   /** Parameters of the current route. A presenter whose route has no child presenter gets query parameters too. */
-  readonly params = state<Params>({});
+  public readonly params = state<Params>({});
 
   /** Presenter shown in <RouteFrame />. */
-  readonly child = state<AnyPresenter | null>(null);
+  public readonly child = state<AnyPresenter | null>(null);
 
   /** The part of the URL handled by the presenters above. */
-  readonly basePath = state('');
+  public readonly basePath = state('');
 
   /** Used by the router to tell what has changed since the last navigation. */
-  readonly routing = { matchKey: '', actionKey: '', dialog: null as RoutedDialog | null };
+  public readonly routing = { matchKey: '', actionKey: '', dialog: null as RoutedDialog | null };
 
   /**
    * Goes to another URL, the arguments are the same as in link(). It replaces the current history entry
    * and runs the action of this presenter again. Unlike in Nette it does not end the method,
    * write `return this.redirect(...)`.
    */
-  redirect<P extends object>(destination: TypedRoute<P>, ...params: LinkArgs<P>): void;
-  redirect(destination: string, params?: LinkParams): void;
-  redirect(destination: string | Route, params?: LinkParams): void {
+  public redirect<P extends object>(destination: TypedRoute<P>, ...params: LinkArgs<P>): void;
+  public redirect(destination: string, params?: LinkParams): void;
+  public redirect(destination: string | Route, params?: LinkParams): void {
     void this.app.router.navigate(this.app.router.link(this, destination, params), { replace: true, refresh: this });
   }
 
   /** Ends the action with an error, like $this->error() in Nette. */
-  error(code = 404, message?: string): never {
+  public error(code = 404, message?: string): never {
     throw new BadRequestError(code, message);
   }
 
@@ -134,12 +134,12 @@ export abstract class Presenter<P extends object = {}, R = void> extends Compone
    * The title of the page, like {block title} in Nette. The deepest presenter with a title gives
    * document.title, composed by app.formatTitle(). It may read state: `() => this.task()?.name`.
    */
-  pageTitle(): string | null {
+  public pageTitle(): string | null {
     return null;
   }
 
   /** Called when the rest of the URL matches no route of this presenter. Override it to show something else. */
-  notFound(path: string): void {
+  public notFound(path: string): void {
     this.error(404, `No route of ${this.constructor.name} matches '${path}'.`);
   }
 }

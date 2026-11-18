@@ -2,24 +2,24 @@ import { Button, Component, state } from '@phloxcz/phlox-js';
 
 /** alert, confirm and prompt as dialogs of the application, confirm as a popover by its button, loading. */
 export default class Messages extends Component {
-  readonly result = state('');
+  public readonly result = state('');
 
-  async ask() {
+  public async ask() {
     const yes = await this.confirm('Smazat položku?', { danger: true, okText: 'Smazat' });
     this.result.set(`confirm: ${yes}`);
   }
 
-  async rename() {
+  public async rename() {
     const name = await this.prompt('Nový název:', { value: 'Mléko', placeholder: 'název' });
     this.result.set(`prompt: ${JSON.stringify(name)}`);
   }
 
-  async askHere(button: HTMLElement) {
+  public async askHere(button: HTMLElement) {
     const yes = await this.confirm('Opravdu?', { anchor: button, danger: true, okText: 'Ano' });
     this.result.set(`popover: ${yes}`);
   }
 
-  async save() {
+  public async save() {
     const loading = this.showLoading('Ukládám…');
     for (let step = 1; step <= 3; step++) {
       await new Promise(resolve => setTimeout(resolve, 600));
@@ -29,7 +29,7 @@ export default class Messages extends Component {
     await this.alert('Uloženo.');
   }
 
-  render() {
+  public render() {
     return (
       <div>
         <p style={{ display: 'flex', flexWrap: 'wrap', gap: '.5rem' }}>

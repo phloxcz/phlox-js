@@ -31,7 +31,7 @@ export class RpcError extends Error {
    * @param code Error code from the server, an HTTP status when the HTTP request failed, 0 for a network error
    * @param data Other members of the error object, e.g. `fields` with invalid parameters
    */
-  constructor(readonly code: number, message: string, readonly data: Record<string, unknown> = {}, readonly method = '') {
+  public constructor(public readonly code: number, message: string, public readonly data: Record<string, unknown> = {}, public readonly method = '') {
     super(method ? `${method}: ${message}` : message);
     this.name = 'RpcError';
   }
@@ -75,12 +75,12 @@ export class RpcClient<M extends { [K in keyof M]: RpcMethod } = Record<string, 
   private queue: Pending[] = [];
   private lastId = 0;
 
-  constructor(readonly url: string, private options: RpcOptions = {}) {
+  public constructor(public readonly url: string, private options: RpcOptions = {}) {
     options.offline?.attach((method, params) => this.request(method, params));
   }
 
   /** Calls a method and returns its result, or rejects with RpcError. */
-  call<K extends keyof M & string>(method: K, ...[params]: ParamsArgs<M[K]['params']>): Promise<M[K]['result']> {
+  public call<K extends keyof M & string>(method: K, ...[params]: ParamsArgs<M[K]['params']>): Promise<M[K]['result']> {
     const offline = this.options.offline;
     if (offline?.handles(method)) return offline.call(method, params) as Promise<M[K]['result']>;
     return this.request(method, params);
@@ -92,7 +92,7 @@ export class RpcClient<M extends { [K in keyof M]: RpcMethod } = Record<string, 
   }
 
   /** Calls a method without waiting for its result. The server answers nothing, not even an error. */
-  notify<K extends keyof M & string>(method: K, ...[params]: ParamsArgs<M[K]['params']>): Promise<void> {
+  public notify<K extends keyof M & string>(method: K, ...[params]: ParamsArgs<M[K]['params']>): Promise<void> {
     return new Promise((resolve, reject) => this.enqueue({ method, params, id: undefined, resolve, reject }));
   }
 

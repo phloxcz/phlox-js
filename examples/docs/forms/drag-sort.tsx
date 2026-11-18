@@ -4,10 +4,10 @@ interface Card { id: number; name: string }
 
 /** dragToSort for any list: cards in a grid that wraps; the order is in the data, <For> moves the elements. */
 export default class Cards extends Component {
-  readonly cards = state<Card[]>(['Návrh', 'Vývoj', 'Testy', 'Nasazení', 'Dokumentace', 'Školení'].map((name, id) => ({ id, name })));
-  readonly saved = state('');
+  public readonly cards = state<Card[]>(['Návrh', 'Vývoj', 'Testy', 'Nasazení', 'Dokumentace', 'Školení'].map((name, id) => ({ id, name })));
+  public readonly saved = state('');
 
-  render() {
+  public render() {
     let list!: HTMLElement;
     return (
       <div>

@@ -5,9 +5,9 @@ interface Note { text: string }
 
 /** The WYSIWYG editor as a control: its value is HTML, the same in every browser; shown cleaned by <Html>. */
 export default class EditorDemo extends Component {
-  readonly form = new Form<Note>();
+  public readonly form = new Form<Note>();
 
-  constructor() {
+  public constructor() {
     super();
     this.form.addEditor('text', 'Poznámka', {
       toolbar: 'format,align,lists,link,image,table,emoji',
@@ -18,7 +18,7 @@ export default class EditorDemo extends Component {
     this.form.setDefaults({ text: '<p>Text může být <strong>tučně</strong> a <em>kurzívou</em>.</p>' });
   }
 
-  render() {
+  public render() {
     const text = this.form.get('text');
     return (
       <div>

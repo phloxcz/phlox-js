@@ -14,7 +14,7 @@ Kdo službu potřebuje, napíše si ji do konstruktoru. Platí to pro služby, p
 
 ```ts
 class UsersPresenter extends Presenter {
-  constructor(private api: UserApi, private auth: Authorizator) {
+  public constructor(private api: UserApi, private auth: Authorizator) {
     super();
   }
 }

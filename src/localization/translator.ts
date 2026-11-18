@@ -13,7 +13,7 @@ export type MessageKey<M> = string extends keyof M ? string : {
 }[keyof M & string];
 
 export abstract class Translator {
-  abstract translate(key: string, params?: MessageParams): string;
+  public abstract translate(key: string, params?: MessageParams): string;
 }
 
 function escapeHtml(text: string): string {
@@ -26,18 +26,18 @@ function escapeHtml(text: string): string {
  * - A plural is an object such as `{ one, few, other }`, the form is chosen by the parameter `count`.
  */
 export class IntlTranslator<M extends Messages = Messages> extends Translator {
-  locale!: string;
+  public locale!: string;
   private messages!: Messages;
   private plural!: Intl.PluralRules;
   private number!: Intl.NumberFormat;
 
-  constructor(locale: string, messages: M) {
+  public constructor(locale: string, messages: M) {
     super();
     this.setLocale(locale, messages);
   }
 
   /** Switches the language. What is already rendered keeps its texts, call app.restart() afterwards. */
-  setLocale(locale: string, messages: M): void {
+  public setLocale(locale: string, messages: M): void {
     this.locale = locale;
     this.messages = messages;
     this.plural = new Intl.PluralRules(locale);
@@ -45,16 +45,16 @@ export class IntlTranslator<M extends Messages = Messages> extends Translator {
   }
 
   /** The same as translate(), with checked keys and bound, so it can be exported as `t`. */
-  readonly t = (key: MessageKey<M>, params?: MessageParams): string => this.translate(key, params);
+  public readonly t = (key: MessageKey<M>, params?: MessageParams): string => this.translate(key, params);
 
   /** For messages that contain HTML. The message is trusted, parameters are escaped. */
-  readonly html = (key: MessageKey<M>, params?: MessageParams): DocumentFragment => {
+  public readonly html = (key: MessageKey<M>, params?: MessageParams): DocumentFragment => {
     const template = document.createElement('template');
     template.innerHTML = this.format(key, params, escapeHtml);
     return template.content;
   };
 
-  translate(key: string, params?: MessageParams): string {
+  public translate(key: string, params?: MessageParams): string {
     return this.format(key, params, text => text);
   }
 

@@ -258,7 +258,7 @@ describe('TagInput', () => {
     const form = new Form<Article>();
     const control = form.addTagInput('labels', 'Štítky:', { items: [['bio', 'bio']], allowNew: true });
     class Page extends Presenter {
-      render() { return <FormView form={form} />; }
+      public render() { return <FormView form={form} />; }
     }
     const { element } = await boot(Page, '/', new Container().add(new BootstrapTheme()));
     control.setValue(['bio']);

@@ -9,14 +9,14 @@ describe('Component.resource', () => {
     const calls: string[] = [];
     let tasks!: Resource<string[]>;
     class Page extends Presenter {
-      override async startup() {
+      public override async startup() {
         tasks = this.resource(async () => {
           calls.push(tab());
           return [`${tab()} 1`, `${tab()} 2`];
         });
         await tasks.ready();
       }
-      render() { return <p>{() => tasks()?.join(', ')}</p>; }
+      public render() { return <p>{() => tasks()?.join(', ')}</p>; }
     }
     const { element } = await boot(Page);
     expect(element.textContent).toBe('open 1, open 2');
@@ -37,7 +37,7 @@ describe('Component.resource', () => {
     const answers = new Map<string, ReturnType<typeof deferred<string>>>();
     let found!: Resource<string>;
     class Search extends Presenter {
-      constructor() {
+      public constructor() {
         super();
         found = this.resource(() => {
           const answer = deferred<string>();
@@ -45,7 +45,7 @@ describe('Component.resource', () => {
           return answer.promise;
         });
       }
-      render() { return <p>{() => found() ?? ''}</p>; }
+      public render() { return <p>{() => found() ?? ''}</p>; }
     }
     const { element } = await boot(Search);
     text.set('ab');
@@ -62,7 +62,7 @@ describe('Component.resource', () => {
     let loads = 0;
     let detail!: Resource<string>;
     class Detail extends Component {
-      constructor() {
+      public constructor() {
         super();
         detail = this.resource(async () => {
           loads++;
@@ -70,10 +70,10 @@ describe('Component.resource', () => {
           return `task ${id()}`;
         });
       }
-      render() { return <b>{() => detail()}</b>; }
+      public render() { return <b>{() => detail()}</b>; }
     }
     class Page extends Presenter {
-      render() { return <If when={shown}><Detail /></If>; }
+      public render() { return <If when={shown}><Detail /></If>; }
     }
     const { element, errors } = await boot(Page);
     await detail.ready();
@@ -98,21 +98,21 @@ describe('tags of data and app.invalidate', () => {
       return name;
     };
     class List extends Component {
-      tasks = this.resource(load('list'), { tags: ['tasks'] });
-      render() { return <i>{() => this.tasks()}</i>; }
+      public tasks = this.resource(load('list'), { tags: ['tasks'] });
+      public render() { return <i>{() => this.tasks()}</i>; }
     }
     class Count extends Component {
-      count = this.resource(load('count'), { tags: ['tasks', 'projects'] });
-      other = this.resource(load('users'), { tags: ['users'] });
-      plain = this.resource(load('plain'));
-      render() { return <b>{() => this.count()}</b>; }
+      public count = this.resource(load('count'), { tags: ['tasks', 'projects'] });
+      public other = this.resource(load('users'), { tags: ['users'] });
+      public plain = this.resource(load('plain'));
+      public render() { return <b>{() => this.count()}</b>; }
     }
     let shared!: Resource<string>;
     class Page extends Presenter {
-      override startup() {
+      public override startup() {
         shared = this.app.resource(load('app'), { tags: ['projects'] });
       }
-      render() { return <main><List /><Count /></main>; }
+      public render() { return <main><List /><Count /></main>; }
     }
     const { app } = await boot(Page);
     await tick();

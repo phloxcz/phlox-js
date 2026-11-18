@@ -19,10 +19,10 @@ interface Values {
 
 /** The basic controls and the value each of them gives, live. */
 export default class AllControls extends Component {
-  readonly form = new Form<Values>();
-  readonly values = computed(() => JSON.stringify(this.form.getValues(), null, 1));
+  public readonly form = new Form<Values>();
+  public readonly values = computed(() => JSON.stringify(this.form.getValues(), null, 1));
 
-  constructor() {
+  public constructor() {
     super();
     const f = this.form;
     f.addText('text', 'addText');
@@ -40,7 +40,7 @@ export default class AllControls extends Component {
     f.addHidden('token', 'abc123');
   }
 
-  render() {
+  public render() {
     return (
       <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 14rem)', gap: '1rem' }}>
         <FormView form={this.form} />

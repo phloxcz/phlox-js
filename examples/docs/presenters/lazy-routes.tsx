@@ -2,19 +2,19 @@ import { Presenter, RouteFrame } from '@phloxcz/phlox-js';
 import type { Route } from '@phloxcz/phlox-js';
 
 class HomePresenter extends Presenter {
-  render() {
+  public render() {
     return <p>Úvod je v hlavním balíku, ukáže se hned.</p>;
   }
 }
 
 /** A class is in the main bundle, a function with import() is downloaded on the first visit of its route. */
 export default class AppPresenter extends Presenter {
-  override routes: Route[] = [
+  public override routes: Route[] = [
     { name: 'reports', pattern: '/reports', presenter: () => import('./_lazy-reports') },
     { name: 'home', pattern: '', presenter: HomePresenter },
   ];
 
-  render() {
+  public render() {
     return (
       <div>
         <nav>

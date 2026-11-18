@@ -13,15 +13,15 @@ export function services(container: Container) {
  * on the server; the server refuses to move "Výprodej" and the node goes back.
  */
 export default class CategoriesPresenter extends Presenter {
-  override routes: Route[] = [
+  public override routes: Route[] = [
     { name: 'default', pattern: '/' },
     { name: 'detail', pattern: '/<id:int>' },
   ];
 
-  readonly name = state('');
-  readonly tree: Tree<CategoryNode>;
+  public readonly name = state('');
+  public readonly tree: Tree<CategoryNode>;
 
-  constructor(private store: CategoryStore) {
+  public constructor(private store: CategoryStore) {
     super();
     this.tree = new Tree<CategoryNode>({
       load: parent => this.store.children(parent?.id ?? null),
@@ -32,22 +32,22 @@ export default class CategoriesPresenter extends Presenter {
     });
   }
 
-  override async startup() {
+  public override async startup() {
     await this.tree.load();
   }
 
-  async actionDefault() {
+  public async actionDefault() {
     this.name.set('');
     await this.tree.select(null);
   }
 
   // Also Back and Forward come here: the tree selects the node from the URL and opens the way to it
-  async actionDetail({ id }: Params) {
+  public async actionDetail({ id }: Params) {
     await this.tree.select(Number(id));
     this.name.set(this.store.name(Number(id)));
   }
 
-  render() {
+  public render() {
     return (
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
         <TreeView tree={this.tree} lines aria-label="Kategorie" href={node => this.link('detail', { id: node.id })}

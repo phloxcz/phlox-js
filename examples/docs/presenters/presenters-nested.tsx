@@ -11,13 +11,13 @@ const USERS: User[] = [
 
 /** /users/2: the list takes /users, the detail gets /2. */
 class UserDetailPresenter extends Presenter<{ userId: number }> {
-  readonly detail = state<User | null>(null);
+  public readonly detail = state<User | null>(null);
 
-  override startup() {
+  public override startup() {
     this.detail.set(USERS.find(user => user.id === this.props.userId) ?? null);
   }
 
-  render() {
+  public render() {
     return (
       <If when={this.detail}>
         {user => <p><strong>{() => user().name}</strong>, {() => user().email}</p>}
@@ -27,12 +27,12 @@ class UserDetailPresenter extends Presenter<{ userId: number }> {
 }
 
 class UsersPresenter extends Presenter {
-  override routes: Route[] = [
+  public override routes: Route[] = [
     { name: 'default', pattern: '/' },
     { name: 'detail', pattern: '/<id:int>', presenter: UserDetailPresenter, props: ({ id }) => ({ userId: Number(id) }) },
   ];
 
-  render() {
+  public render() {
     return (
       <div>
         <h3>Uživatelé</h3>
@@ -48,24 +48,24 @@ class UsersPresenter extends Presenter {
 }
 
 class AboutPresenter extends Presenter {
-  render() {
+  public render() {
     return <p>Stránka bez dalších rout.</p>;
   }
 }
 
 /** The root: a menu and the place for the presenter of the current route. */
 export default class AppPresenter extends Presenter {
-  override routes: Route[] = [
+  public override routes: Route[] = [
     { name: 'users', pattern: '/users', presenter: UsersPresenter },
     { name: 'about', pattern: '/about', presenter: AboutPresenter },
     { name: 'home', pattern: '/' },
   ];
 
-  actionHome() {
+  public actionHome() {
     this.redirect('users');
   }
 
-  render() {
+  public render() {
     return (
       <div>
         <nav>

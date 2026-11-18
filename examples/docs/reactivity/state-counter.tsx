@@ -2,10 +2,10 @@ import { Button, Component, computed, state } from '@phloxcz/phlox-js';
 
 /** A state, a computed value from it, and a template that follows both. */
 export default class Counter extends Component {
-  readonly count = state(0);
-  readonly double = computed(() => this.count() * 2);
+  public readonly count = state(0);
+  public readonly double = computed(() => this.count() * 2);
 
-  render() {
+  public render() {
     return (
       <p>
         <Button onClick={() => this.count.update(n => n - 1)}>−</Button>{' '}

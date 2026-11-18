@@ -24,13 +24,13 @@ Odkaz je obyčejné `<a href>`. Kliknutí zachytí aplikace a přejde bez načte
 `link('název')` zná jen routy vlastního presenteru. Do hlubší úrovně vede absolutní cesta, nebo `link()` zavolaný na cílovém presenteru.
 
 ```ts
-async handleDelete(id: number) {
+public async handleDelete(id: number) {
   await this.api.delete(id);
   this.flashMessage('Smazáno.');
   this.redirect('this');          // znovu spustí akci, i když se URL nezměnila
 }
 
-actionOld() {
+public actionOld() {
   return this.redirect('users');  // rozdíl proti Nette: redirect metodu neukončí, napiš return
 }
 ```

@@ -4,25 +4,25 @@ import type { ReportRow } from '../api';
 
 /** Tasks of projects by state at /reports. Loaded lazily with the first visit, see the route in WorkspacePresenter. */
 export default class ReportsPresenter extends Presenter {
-  readonly rows = state<ReportRow[]>([]);
-  readonly totals = computed(() => this.rows().reduce(
+  public readonly rows = state<ReportRow[]>([]);
+  public readonly totals = computed(() => this.rows().reduce(
     (sum, row) => ({ open: sum.open + row.open, progress: sum.progress + row.progress, closed: sum.closed + row.closed, overdue: sum.overdue + row.overdue }),
     { open: 0, progress: 0, closed: 0, overdue: 0 },
   ));
 
-  constructor(private api: HelpdeskApi) {
+  public constructor(private api: HelpdeskApi) {
     super();
   }
 
-  override pageTitle() {
+  public override pageTitle() {
     return 'Reporty';
   }
 
-  override async startup() {
+  public override async startup() {
     this.rows.set(await this.api.call('report.projects'));
   }
 
-  render() {
+  public render() {
     const card = (text: string, value: () => number, kind: string) => (
       <div class={`hd-stat hd-stat-${kind}`}><span>{text}</span><strong>{value}</strong></div>
     );

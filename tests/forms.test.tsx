@@ -306,7 +306,7 @@ describe('submit', () => {
     form.addSubmit('save');
     form.onSuccess = async () => { throw new Error('server down'); };
     class Page extends Presenter {
-      render() { return <FormView form={form} />; }
+      public render() { return <FormView form={form} />; }
     }
     const { element, errors } = await boot(Page);
     element.querySelector('button')!.click();
@@ -531,7 +531,7 @@ test('<Input ref> gets the element, the control keeps it too', async () => {
   const form = new Form<{ note: string }>();
   const note = form.addTextArea('note', 'Note');
   class Page extends Presenter {
-    render() { return <Input control={note} ref={(el: HTMLElement) => { element = el; }} />; }
+    public render() { return <Input control={note} ref={(el: HTMLElement) => { element = el; }} />; }
   }
   await boot(Page);
   expect(element).toBeInstanceOf(HTMLTextAreaElement);

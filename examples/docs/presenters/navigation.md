@@ -8,7 +8,7 @@
 
 ```ts
 class TaskDetailPresenter extends Presenter {
-  override pageTitle() {
+  public override pageTitle() {
     return this.task()?.title ?? null;   // jako {block title} v Nette, může číst state
   }
 }

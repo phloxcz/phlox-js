@@ -2,7 +2,7 @@ import { For, Presenter, RouteFrame, route } from '@phloxcz/phlox-js';
 import type { Route } from '@phloxcz/phlox-js';
 
 class TaskPresenter extends Presenter<{ taskId: number }> {
-  render() {
+  public render() {
     // taskId is a number already, <task:int> in the pattern
     return <p>Úkol číslo <strong>{this.props.taskId}</strong>, typ: {typeof this.props.taskId}</p>;
   }
@@ -10,11 +10,11 @@ class TaskPresenter extends Presenter<{ taskId: number }> {
 
 /** route(): the types of parameters come from the pattern, link() with a missing or wrong one does not compile. */
 export default class TasksPresenter extends Presenter {
-  readonly detail = route('detail', '/<task:int>', { presenter: TaskPresenter, props: ({ task }) => ({ taskId: task }) });
+  public readonly detail = route('detail', '/<task:int>', { presenter: TaskPresenter, props: ({ task }) => ({ taskId: task }) });
 
-  override routes: Route[] = [{ name: 'default', pattern: '/' }, this.detail];
+  public override routes: Route[] = [{ name: 'default', pattern: '/' }, this.detail];
 
-  render() {
+  public render() {
     return (
       <div>
         <nav>

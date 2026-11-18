@@ -6,7 +6,7 @@ const busy = state(false);
 const clicked = vi.fn();
 
 class Page extends Presenter {
-  render() {
+  public render() {
     return (
       <p>
         <Button onClick={clicked}>Zrušit</Button>

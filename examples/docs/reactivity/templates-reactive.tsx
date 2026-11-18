@@ -2,9 +2,9 @@ import { Button, Component, state } from '@phloxcz/phlox-js';
 
 /** What is a state or a function follows changes; a value read in the template is read once. */
 export default class Reactive extends Component {
-  readonly count = state(1);
+  public readonly count = state(1);
 
-  render() {
+  public render() {
     return (
       <div>
         <Button onClick={() => this.count.update(n => n + 1)}>Přidat</Button>

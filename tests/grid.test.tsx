@@ -138,13 +138,13 @@ describe('the URL', () => {
   const grid = ordersGrid({ rows: ORDERS, pageSize: 2 });
 
   class Orders extends Presenter {
-    override routes: Route[] = [{ name: 'default', pattern: '/' }, { name: 'detail', pattern: '/<id \\d+>' }];
-    readonly grid = grid;
-    constructor() {
+    public override routes: Route[] = [{ name: 'default', pattern: '/' }, { name: 'detail', pattern: '/<id \\d+>' }];
+    public readonly grid = grid;
+    public constructor() {
       super();
       grid.bind(this);
     }
-    render() { return <GridView grid={grid} />; }
+    public render() { return <GridView grid={grid} />; }
   }
 
   test('the state is in the URL, Back returns it, links of the presenter keep it', async () => {
@@ -292,7 +292,7 @@ describe('the view', () => {
   test('Bootstrap: the classes of phloxcz/components-grid', async () => {
     const grid = ordersGrid();
     class Page extends Presenter {
-      render() { return <GridView grid={grid} />; }
+      public render() { return <GridView grid={grid} />; }
     }
     const { element } = await boot(Page, '/', new Container().add(new BootstrapTheme()));
     await tick();

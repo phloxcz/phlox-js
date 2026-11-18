@@ -22,6 +22,7 @@ Příručka je web s živými ukázkami, sám postavený na PhloxJS. Spustí se 
 | `npm run build:examples` | sestaví obojí do `examples/dist`; `npx vite preview --config examples/vite.config.ts` ho spustí i s mock serverem |
 | `npm test` | testy, mezi nimi `tests/docs.test.tsx`: každá stránka je v menu, každá ukázka existuje a vykreslí se bez chyby |
 | `npm run typecheck` | kontrola typů, i ukázek |
+| `npm run lint` | styl kódu: členy tříd s modifikátorem viditelnosti (Biome) |
 
 ## Jak psát stránku
 

@@ -55,13 +55,13 @@ interface BoxProps {
 
 /** The content of alert, confirm and prompt in a dialog of the framework. */
 export class MessageBox extends Component<BoxProps, boolean | string> {
-  readonly value = state(this.props.options.value ?? '');
+  public readonly value = state(this.props.options.value ?? '');
 
-  override title() {
+  public override title() {
     return this.props.options.title ?? '';
   }
 
-  override actions() {
+  public override actions() {
     const { kind, options } = this.props;
     const theme = currentTheme();
     // A dangerous question focuses Cancel, so that Enter does not destroy anything
@@ -83,7 +83,7 @@ export class MessageBox extends Component<BoxProps, boolean | string> {
     ];
   }
 
-  render() {
+  public render() {
     const theme = currentTheme();
     return (
       <div class={theme.class('message.body')}>

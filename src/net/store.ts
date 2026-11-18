@@ -4,30 +4,30 @@
  */
 
 export abstract class OfflineStore {
-  abstract get<T>(key: string): Promise<T | undefined>;
-  abstract set(key: string, value: unknown): Promise<void>;
-  abstract delete(key: string): Promise<void>;
+  public abstract get<T>(key: string): Promise<T | undefined>;
+  public abstract set(key: string, value: unknown): Promise<void>;
+  public abstract delete(key: string): Promise<void>;
   /** All entries whose keys start with the prefix, ordered by key. */
-  abstract entries<T>(prefix: string): Promise<[string, T][]>;
+  public abstract entries<T>(prefix: string): Promise<[string, T][]>;
 }
 
 /** Keeps the data in memory: for tests, or when IndexedDB is not available. */
 export class MemoryStore extends OfflineStore {
   private data = new Map<string, unknown>();
 
-  async get<T>(key: string): Promise<T | undefined> {
+  public async get<T>(key: string): Promise<T | undefined> {
     return structuredClone(this.data.get(key)) as T | undefined;
   }
 
-  async set(key: string, value: unknown): Promise<void> {
+  public async set(key: string, value: unknown): Promise<void> {
     this.data.set(key, structuredClone(value));
   }
 
-  async delete(key: string): Promise<void> {
+  public async delete(key: string): Promise<void> {
     this.data.delete(key);
   }
 
-  async entries<T>(prefix: string): Promise<[string, T][]> {
+  public async entries<T>(prefix: string): Promise<[string, T][]> {
     return [...this.data.entries()].filter(([key]) => key.startsWith(prefix)).sort(([a], [b]) => a.localeCompare(b))
       .map(([key, value]) => [key, structuredClone(value) as T]);
   }
@@ -37,23 +37,23 @@ export class MemoryStore extends OfflineStore {
 export class IndexedDbStore extends OfflineStore {
   private db: Promise<IDBDatabase> | null = null;
 
-  constructor(private name: string) {
+  public constructor(private name: string) {
     super();
   }
 
-  async get<T>(key: string): Promise<T | undefined> {
+  public async get<T>(key: string): Promise<T | undefined> {
     return this.request<T | undefined>('readonly', store => store.get(key));
   }
 
-  async set(key: string, value: unknown): Promise<void> {
+  public async set(key: string, value: unknown): Promise<void> {
     await this.request('readwrite', store => store.put(value, key));
   }
 
-  async delete(key: string): Promise<void> {
+  public async delete(key: string): Promise<void> {
     await this.request('readwrite', store => store.delete(key));
   }
 
-  async entries<T>(prefix: string): Promise<[string, T][]> {
+  public async entries<T>(prefix: string): Promise<[string, T][]> {
     const range = IDBKeyRange.bound(prefix, `${prefix}￿`);
     const [keys, values] = await Promise.all([
       this.request<IDBValidKey[]>('readonly', store => store.getAllKeys(range)),

@@ -22,7 +22,7 @@ let lastRow = 0;
 
 export class Multiplier<R extends object> implements Owner {
   /** Texts of the rows. Replace them for the language of the application. %d is the limit. */
-  static texts = texts('multiplier', {
+  public static texts = texts('multiplier', {
     add: 'Add',
     remove: 'Remove',
     moveUp: 'Move up',
@@ -33,16 +33,16 @@ export class Multiplier<R extends object> implements Owner {
   });
 
   /** The rows in their order. */
-  readonly rows = state<Container<R>[]>([]);
+  public readonly rows = state<Container<R>[]>([]);
   /** Errors of the rows as a whole, e.g. too few of them. */
-  readonly errors = state<string[]>([]);
-  readonly label: string;
-  readonly min: number;
-  readonly max: number;
+  public readonly errors = state<string[]>([]);
+  public readonly label: string;
+  public readonly min: number;
+  public readonly max: number;
 
-  constructor(
+  public constructor(
     private container: Container<any>,
-    readonly name: string,
+    public readonly name: string,
     private factory: (row: Container<R>) => void,
     options: MultiplierOptions = {},
   ) {
@@ -52,28 +52,28 @@ export class Multiplier<R extends object> implements Owner {
     for (let row = 0; row < this.min; row++) this.add();
   }
 
-  get form(): Form<any> {
+  public get form(): Form<any> {
     return this.container.form;
   }
 
-  get idPrefix(): string {
+  public get idPrefix(): string {
     return `${this.container.idPrefix}-${this.name}`;
   }
 
-  htmlName(key: string): string {
+  public htmlName(key: string): string {
     return `${this.container.htmlName(this.name)}[${key}]`;
   }
 
-  canAdd(): boolean {
+  public canAdd(): boolean {
     return this.max === 0 || this.rows().length < this.max;
   }
 
-  canRemove(): boolean {
+  public canRemove(): boolean {
     return this.rows().length > this.min;
   }
 
   /** Adds a row at the end, or at the given position. Returns it, or null when the limit is reached. */
-  add(values?: DeepPartial<R>, at?: number): Container<R> | null {
+  public add(values?: DeepPartial<R>, at?: number): Container<R> | null {
     if (!untrack(() => this.canAdd())) return null;
     const row = new Container<R>(this, String(++lastRow));
     this.factory(row);
@@ -88,7 +88,7 @@ export class Multiplier<R extends object> implements Owner {
   }
 
   /** Removes a row unless it would leave fewer than `min`. Returns whether it was removed. */
-  remove(row: Container<R>): boolean {
+  public remove(row: Container<R>): boolean {
     if (!untrack(() => this.canRemove())) return false;
     this.rows.update(rows => rows.filter(other => other !== row));
     this.recheck();
@@ -96,7 +96,7 @@ export class Multiplier<R extends object> implements Owner {
   }
 
   /** Moves a row to another position. */
-  move(row: Container<R>, to: number): void {
+  public move(row: Container<R>, to: number): void {
     this.rows.update(rows => {
       const next = rows.filter(other => other !== row);
       next.splice(Math.max(0, Math.min(to, next.length)), 0, row);
@@ -104,12 +104,12 @@ export class Multiplier<R extends object> implements Owner {
     });
   }
 
-  getValues(): R[] {
+  public getValues(): R[] {
     return this.rows().map(row => row.getValues());
   }
 
   /** As many rows as values (at least `min`), each filled with its values. */
-  setValues(values: DeepPartial<R>[]): void {
+  public setValues(values: DeepPartial<R>[]): void {
     batch(() => {
       const rows = untrack(this.rows).slice(0, values.length);
       while (rows.length < Math.max(values.length, this.min)) {
@@ -127,7 +127,7 @@ export class Multiplier<R extends object> implements Owner {
   }
 
   /** Checks the number of rows and every row. */
-  validateAll(): boolean {
+  public validateAll(): boolean {
     const count = untrack(this.rows).length;
     const error = count < this.min
       ? Multiplier.texts.min.replace('%d', String(this.min))
@@ -138,32 +138,32 @@ export class Multiplier<R extends object> implements Owner {
     return valid;
   }
 
-  hasErrors(): boolean {
+  public hasErrors(): boolean {
     return this.errors().length > 0 || this.rows().some(row => row.hasErrors());
   }
 
-  addError(message: string): void {
+  public addError(message: string): void {
     this.errors.update(errors => [...errors, message]);
   }
 
   /** Back to `min` empty rows. */
-  reset(): void {
+  public reset(): void {
     this.setValues([]);
   }
 
   /** A path from the server: the index of a row, then the path inside it. */
-  resolve(path: string[]): Member | null {
+  public resolve(path: string[]): Member | null {
     const [index, ...rest] = path;
     const row = untrack(this.rows)[Number(index)];
     if (!row || !/^\d+$/.test(index ?? '')) return null;
     return rest.length === 0 ? row : row.resolve(rest);
   }
 
-  focusFirstError(): boolean {
+  public focusFirstError(): boolean {
     return untrack(this.rows).some(row => row.focusFirstError());
   }
 
-  collectToggles(into: Map<string, boolean>): void {
+  public collectToggles(into: Map<string, boolean>): void {
     for (const row of this.rows()) row.collectToggles(into);
   }
 

@@ -316,7 +316,7 @@ describe('the view', () => {
     const tree = new Tree({ nodes: NODES });
     tree.selected.set(1);
     class Page extends Presenter {
-      render() { return <TreeView tree={tree} />; }
+      public render() { return <TreeView tree={tree} />; }
     }
     const { element } = await boot(Page, '/', new Container().add(new BootstrapTheme()));
     expect(itemOf(element, 'Ovoce').querySelector('.pt-row')!.className).toBe('pt-row active');
@@ -650,7 +650,7 @@ describe('addDropDownTreeSelect', () => {
     const form = new Form<Product>();
     form.addDropDownTreeSelect('categoryId', 'Kategorie:', { nodes: NODES });
     class Page extends Presenter {
-      render() { return <FormView form={form} />; }
+      public render() { return <FormView form={form} />; }
     }
     const { element } = await boot(Page, '/', new Container().add(new BootstrapTheme()));
     const trigger = element.querySelector<HTMLButtonElement>('[role=combobox]')!;

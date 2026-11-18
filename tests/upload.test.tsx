@@ -240,7 +240,7 @@ describe('the drop zone', () => {
     const attachments = form.addMultiUpload('attachments').addRule(Form.MaxFileSize, null, 1);
     attachments.addFiles([file('big.txt', 5, 'text/plain')]);
     class Page extends Presenter {
-      render() { return <Input control={attachments} />; }
+      public render() { return <Input control={attachments} />; }
     }
     const { element } = await boot(Page, '/', new Container().add(new BootstrapTheme()));
     expect(element.querySelector('.pu-dropzone')!.className)

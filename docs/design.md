@@ -133,13 +133,13 @@ Komponenta sama určuje titulek a tlačítka a zavírá se přes `this.close(vý
 
 ```tsx
 class UserEdit extends Component<{ userId: number | null }, boolean> {
-  constructor(private api: UserApi) { super(); }
+  public constructor(private api: UserApi) { super(); }
 
-  override title() {
+  public override title() {
     return this.props.userId ? 'Upravit uživatele' : 'Nový uživatel';
   }
 
-  override actions() {
+  public override actions() {
     return (
       <>
         <button onClick={() => this.close(false)}>Zavřít</button>
@@ -148,12 +148,12 @@ class UserEdit extends Component<{ userId: number | null }, boolean> {
     );
   }
 
-  async handleSave() {
+  public async handleSave() {
     await this.api.save(/* ... */);
     this.close(true);
   }
 
-  render() {
+  public render() {
     return <form>{/* ... */}</form>;
   }
 }
@@ -169,7 +169,7 @@ if (saved) this.grid.reload();
 **Dialog s URL** se deklaruje u routy:
 
 ```ts
-override routes: Route[] = [
+public override routes: Route[] = [
   { name: 'default', pattern: '/' },
   {
     name: 'edit',
@@ -231,7 +231,7 @@ Závislosti se píšou do konstruktoru jako v Nette, bez dekorátorů a tokenů:
 
 ```ts
 class UsersPresenter extends Presenter {
-  constructor(private api: UserApi, private auth: Authorizator) { super(); }
+  public constructor(private api: UserApi, private auth: Authorizator) { super(); }
 }
 
 const services = new Container().add(Http, UserApi, AppAuthorizator);
@@ -244,7 +244,7 @@ Služby se registrují (obdoba `services` v NEONu). Presentery a komponenty se n
 TypeScript za běhu typy nezná, proto typy čte malý plugin pro Vite a do každé takové třídy doplní seznam závislostí:
 
 ```ts
-static $inject = () => [UserApi, Authorizator];
+public static $inject = () => [UserApi, Authorizator];
 ```
 
 Ten seznam je celé rozhraní mezi pluginem a kontejnerem. Bez pluginu jde napsat ručně, takže plugin není nutná podmínka a kontejner na něm nezávisí.
@@ -527,26 +527,26 @@ Odpadá `configure()`, `bound()` a `queryChanged()` z TraceJS: `bound()` ani `qu
 
 ```tsx
 class UsersPresenter extends Presenter {
-  users = state<User[]>([]);
+  public users = state<User[]>([]);
 
-  override routes: Route[] = [
+  public override routes: Route[] = [
     { name: 'default', pattern: '/' },
     { name: 'detail', pattern: '/<id \\d+>', presenter: () => import('./UserDetailPresenter') },
   ];
 
-  constructor(private api: UserApi) { super(); }
+  public constructor(private api: UserApi) { super(); }
 
-  async actionDefault({ page = '1' }: Params) {
+  public async actionDefault({ page = '1' }: Params) {
     this.users.set(await this.api.list(Number(page)));
   }
 
-  async handleDelete(id: number) {
+  public async handleDelete(id: number) {
     await this.api.delete(id);
     this.flashMessage(t('user.deleted'));
     this.redirect('this');
   }
 
-  render() {
+  public render() {
     return (
       <For each={this.users}>
         {user => <a href={this.link('detail', { id: user.id })}>{user.name}</a>}
@@ -685,7 +685,7 @@ Ukázka `examples/helpdesk` je celá aplikace podle návrhu autora (`d:\Projekty
 - **Po navigaci ohlášení, ne vždy fokus.** Pravidlo „vždy fokus na `<h1>`“ by v seznamu s detailem po každém kliknutí odneslo fokus ze seznamu. Proto se titulek ohlásí přes `aria-live` (jako route announcer v Next.js) a fokus se přesune jen tehdy, když prvek s ním zmizel se starou stránkou. Ohlašuje se jen změna routy, ne query.
 
 **Body 5 a 6 z TODO (implementováno, čeká na review):**
-- **Typované routy přes `route()`, ne přes typ pole `routes`.** `routes: Route[]` typy literálů ztrácí, a kdyby byl presenter generický podle svých rout, každá třída by musela psát své routy dvakrát. Routa jako pole třídy (`readonly detail = route(…)`) nese typ parametrů z šablonového literálu vzoru a `link(this.detail, …)` ho kontroluje. Odkaz podle názvu (`link('detail')`) zůstává, jen bez kontroly.
+- **Typované routy přes `route()`, ne přes typ pole `routes`.** `routes: Route[]` typy literálů ztrácí, a kdyby byl presenter generický podle svých rout, každá třída by musela psát své routy dvakrát. Routa jako pole třídy (`public readonly detail = route(…)`) nese typ parametrů z šablonového literálu vzoru a `link(this.detail, …)` ho kontroluje. Odkaz podle názvu (`link('detail')`) zůstává, jen bez kontroly.
 - **`this.params()` a akce zůstaly texty.** Změna `Params` na `string | number` by rozbila kód, který s parametry zachází jako s textem (query, `split`). Převod podle typu dostávají `props` a `dialog`, kde se parametry stejně převáděly ručně (`Number(id)`).
 - **Ztracené lomítko je chyba:** výraz `d+`, `w+`, `s+` ve vzoru je skoro jistě `'\\d+'` s jedním lomítkem. Chyba s radou je lepší než routa, která tiše nesedí (stalo se dvakrát v helpdesku).
 - **`@phloxcz/phlox-js/testing` nezávisí na Vitestu:** `bootApp`/`cleanup` místo `afterEach` uvnitř, aby šly použít s jiným nástrojem. Testy frameworku je používají taky (`tests/helpers.ts`).
@@ -922,3 +922,9 @@ Tabulka je z verze, kde `h()` tvořilo uzly hned. Po přechodu na šablony vyšl
 - **Zakázané položky dvojím zápisem.** Prosté výběry (`addSelect`, `addRadioList`…) berou `setDisabled([hodnoty])` jako Nette, protože položky jsou pevný seznam. DropDownList, ComboBox a TagInput mají volbu `itemDisabled`, funkci nad položkou, protože položky chodí i ze serveru a o zákazu rozhoduje vlastnost objektu (`user => !user.active`), ne známý seznam hodnot.
 - **Strom** se zamyká stavem `tree.locked` (`'disabled'` / `'readonly'`), aby TreeView o formuláři nevěděl. Dřív `addTreeSelect().setDisabled()` strom vůbec nezamkl.
 - **Zjištěno:** u položek bez `itemValue` kompilátor nedá parametru `itemDisabled` typ (unie dvou tvarů voleb s generickým `O`). Přetížení metod `add*` to nevyřešilo a znepřehlednilo API, proto se typ parametru píše ručně. Vrátit se k tomu, kdyby to v aplikacích vadilo.
+
+## Styl kódu (autor 18. 11.)
+
+- **Modifikátory viditelnosti u všech členů tříd, i `public`,** jako v Nette. Autor: trápí ho nejvíc. Programátor z PHP hned vidí, co je veřejné API. Hlídá to Biome (`npm run lint`, pravidlo `useConsistentMemberAccessibility`), protože `typescript-eslint` potřebuje JS API TypeScriptu, které TypeScript 7 nemá.
+- **Dvě mezery a závorka na konci řádku zůstávají** podle zvyku TypeScriptu, tabulátory ani závorky na novém řádku podle Nette ne. Kód má vypadat jako příklady, ze kterých se programátor učí jinde, a u `return` by závorka na novém řádku vrátila `undefined`.
+- **Formátovač Biome je vypnutý,** lint hlídá jen tohle pravidlo. Další pravidla jen po dohodě s autorem.

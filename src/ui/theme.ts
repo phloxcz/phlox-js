@@ -197,28 +197,28 @@ export const THEME = Symbol('theme');
 
 export class Theme {
   /** Text of the close button of a dialog. Bootstrap draws an icon instead, so it has none. */
-  closeText = '×';
+  public closeText = '×';
   /** The look of the WYSIWYG editor (addEditor), a preset of phlox-editor. */
-  editorTheme: 'default' | 'bootstrap' = 'default';
+  public editorTheme: 'default' | 'bootstrap' = 'default';
   private classes: Record<string, string>;
 
   /** Without arguments it is the default theme. `overrides` change single slots. */
-  constructor(classes: ThemeClasses = DEFAULT_CLASSES, overrides: ThemeClasses = {}) {
+  public constructor(classes: ThemeClasses = DEFAULT_CLASSES, overrides: ThemeClasses = {}) {
     this.classes = { ...classes, ...overrides };
   }
 
   /** Classes of the slot, '' when the theme has none. */
-  class(slot: ThemeSlot | (string & {})): string {
+  public class(slot: ThemeSlot | (string & {})): string {
     return this.classes[slot] ?? '';
   }
 }
 
 /** Bootstrap 5: the elements get Bootstrap classes and Bootstrap takes care of the look, also of dark mode. */
 export class BootstrapTheme extends Theme {
-  override closeText = '';
-  override editorTheme = 'bootstrap' as const;
+  public override closeText = '';
+  public override editorTheme = 'bootstrap' as const;
 
-  constructor(overrides: ThemeClasses = {}) {
+  public constructor(overrides: ThemeClasses = {}) {
     super({
       form: '',
       formRow: 'mb-3',

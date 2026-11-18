@@ -4,7 +4,7 @@ Komponenta, která drží rozpracované změny, to řekne metodou `hasUnsavedCha
 
 ```ts
 class ItemEdit extends Presenter {
-  override hasUnsavedChanges() {
+  public override hasUnsavedChanges() {
     return this.form.isChanged();
   }
 }

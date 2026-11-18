@@ -5,7 +5,7 @@
 
 export abstract class Authorizator {
   /** Whether the role may do the privilege with the resource. `null` means all of them. */
-  abstract isAllowed(role: string | null, resource: string | null, privilege: string | null): boolean;
+  public abstract isAllowed(role: string | null, resource: string | null, privilege: string | null): boolean;
 }
 
 export type Assertion = (acl: Permission, role: string | null, resource: string | null, privilege: string | null) => boolean;
@@ -27,7 +27,7 @@ export class Permission extends Authorizator {
   private rules = new Map<string, Map<string, Map<string, Rule>>>();
 
   /** Adds a role. It inherits the rules of its parents, a parent added later wins in a conflict. */
-  addRole(role: string, parents: string | string[] = []): this {
+  public addRole(role: string, parents: string | string[] = []): this {
     if (this.roles.has(role)) throw new Error(`Role '${role}' already exists.`);
     const list = Array.isArray(parents) ? parents : [parents];
     for (const parent of list) this.checkRole(parent);
@@ -36,27 +36,27 @@ export class Permission extends Authorizator {
   }
 
   /** Adds a resource. It inherits the rules of its parent. */
-  addResource(resource: string, parent: string | null = null): this {
+  public addResource(resource: string, parent: string | null = null): this {
     if (this.resources.has(resource)) throw new Error(`Resource '${resource}' already exists.`);
     if (parent !== null) this.checkResource(parent);
     this.resources.set(resource, parent);
     return this;
   }
 
-  hasRole(role: string): boolean {
+  public hasRole(role: string): boolean {
     return this.roles.has(role);
   }
 
-  hasResource(resource: string): boolean {
+  public hasResource(resource: string): boolean {
     return this.resources.has(resource);
   }
 
   /** Allows privileges. An assertion makes the rule apply only when it returns true. */
-  allow(roles: Names = null, resources: Names = null, privileges: Names = null, assertion: Assertion | null = null): this {
+  public allow(roles: Names = null, resources: Names = null, privileges: Names = null, assertion: Assertion | null = null): this {
     return this.setRule(true, roles, resources, privileges, assertion);
   }
 
-  deny(roles: Names = null, resources: Names = null, privileges: Names = null, assertion: Assertion | null = null): this {
+  public deny(roles: Names = null, resources: Names = null, privileges: Names = null, assertion: Assertion | null = null): this {
     return this.setRule(false, roles, resources, privileges, assertion);
   }
 
@@ -64,7 +64,7 @@ export class Permission extends Authorizator {
    * Looks for the most specific rule: the resource before its parents, the role before its parents
    * and before "all roles", the privilege before "all privileges". With no rule the answer is no.
    */
-  isAllowed(role: string | null = null, resource: string | null = null, privilege: string | null = null): boolean {
+  public isAllowed(role: string | null = null, resource: string | null = null, privilege: string | null = null): boolean {
     if (role !== null) this.checkRole(role);
     if (resource !== null) this.checkResource(resource);
 

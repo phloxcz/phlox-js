@@ -29,7 +29,7 @@ Bez aplikace a presenterů jde šablonu vložit do stránky funkcí `render`, kt
 <span>{() => count() * 2}</span>            // aktualizuje se
 <span>{count() * 2}</span>                  // přečte se jednou, dál se nemění
 
-<li class={() => (done() ? 'done' : '')} /> // aktualizuje se
+<li class={() => (public done() ? 'done' : '')} /> // aktualizuje se
 <input disabled={saving} />                 // aktualizuje se
 ```
 

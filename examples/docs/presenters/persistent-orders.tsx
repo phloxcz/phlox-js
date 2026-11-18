@@ -2,21 +2,21 @@ import { For, Presenter, RouteFrame } from '@phloxcz/phlox-js';
 import type { Route } from '@phloxcz/phlox-js';
 
 class OrderPresenter extends Presenter<{ id: number }> {
-  render() {
+  public render() {
     return <p>Objednávka {this.props.id}. <a href={this.link('/')}>Zpět na seznam</a> (absolutní cesta nenese nic)</p>;
   }
 }
 
 /** page and sort are persistent: links of the presenter carry them on, tab is not. */
 export default class OrdersPresenter extends Presenter {
-  override persistent = ['page', 'sort'];
+  public override persistent = ['page', 'sort'];
 
-  override routes: Route[] = [
+  public override routes: Route[] = [
     { name: 'default', pattern: '/' },
     { name: 'detail', pattern: '/<id:int>', presenter: OrderPresenter, props: ({ id }) => ({ id: Number(id) }) },
   ];
 
-  render() {
+  public render() {
     return (
       <div>
         <p>

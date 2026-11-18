@@ -5,9 +5,9 @@ Jako `Nette\Forms`. Importuje se z `@phloxcz/phlox-js/forms`.
 ```tsx
 // CreateTask je DTO vygenerované z PHP (npm run rpc:types)
 class TaskCreatePresenter extends Presenter {
-  form = new Form<CreateTask>();
+  public form = new Form<CreateTask>();
 
-  constructor(private api: RpcApi) {
+  public constructor(private api: RpcApi) {
     super();
     this.form.addText('name', 'Název:')
       .setRequired('Vyplňte název.')
@@ -19,13 +19,13 @@ class TaskCreatePresenter extends Presenter {
     this.form.onSuccess = values => this.handleSave(values);
   }
 
-  async handleSave(values: CreateTask) {
+  public async handleSave(values: CreateTask) {
     await this.api.call('task.create', { input: values });
     this.flashMessage('Uloženo.');
     this.redirect('default');
   }
 
-  render() {
+  public render() {
     return <FormView form={this.form} />;
   }
 }
@@ -34,7 +34,7 @@ class TaskCreatePresenter extends Presenter {
 <!-- demo: form-basic -->
 
 - **Typ hodnot je DTO.** Kompilátor hlídá názvy prvků i jejich druh: `addText('nmae')` je chyba, stejně jako `addText('priority')`, když je priorita číslo. `onSuccess` dostane hodnoty typu `CreateTask`.
-- **Prvek, se kterým budeš dál pracovat, si nech z `addXxx()`:** `readonly shop = this.form.addComboBox('shop', …)`. Ten má svůj typ, takže jsou vidět i jeho vlastní metody (`isCustom()`, `getSplitValue()`, `setValue(hodnota, objekt)`, `editor`, `tree`). `form.get('shop')` vrací obecný `FormControl` s hodnotou, pravidly a chybami, na `<Input>`, `<Label>` a `.value` stačí.
+- **Prvek, se kterým budeš dál pracovat, si nech z `addXxx()`:** `public readonly shop = this.form.addComboBox('shop', …)`. Ten má svůj typ, takže jsou vidět i jeho vlastní metody (`isCustom()`, `getSplitValue()`, `setValue(hodnota, objekt)`, `editor`, `tree`). `form.get('shop')` vrací obecný `FormControl` s hodnotou, pravidly a chybami, na `<Input>`, `<Label>` a `.value` stačí.
 - **Formulář se tvoří v konstruktoru** nebo jako pole třídy, obdoba `createComponentXxx()`.
 - **Data ze serveru** se do prvků dostanou přes `form.setDefaults({ name: task.name })`, typicky ve `startup()`.
 - **`form.isChanged()`** je `true`, když se hodnoty liší od uložených (reaktivně, jde dát do šablony). Uložené jsou hodnoty z `setDefaults()`, po úspěšném `onSuccess`, po `reset()`, jinak ty, které měl formulář při prvním vykreslení. Změna tam a zpět se nepočítá. `form.markSaved()` označí aktuální hodnoty za uložené, když se ukládá mimo `onSuccess`. Slouží hlavně pro `hasUnsavedChanges()`, viz Odchod s neuloženými změnami.

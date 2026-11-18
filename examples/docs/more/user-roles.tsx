@@ -15,18 +15,18 @@ export function services(container: Container) {
 
 /** Checked in startup() like in Nette: the protected screen does not appear even for a moment. */
 class AdminPresenter extends Presenter {
-  override startup() {
+  public override startup() {
     if (!this.user.isLoggedIn()) return this.redirect('/');
     if (!this.user.isInRole('admin')) this.error(403, 'Jen pro správce.');
   }
 
-  render() {
+  public render() {
     return <p>Administrace, jen pro správce.</p>;
   }
 }
 
 class TasksPresenter extends Presenter {
-  render() {
+  public render() {
     const can = (privilege: string) => () => this.user.isAllowed('task', privilege);
     return (
       <ul>
@@ -41,17 +41,17 @@ class TasksPresenter extends Presenter {
 
 /** Sign in as somebody: the templates follow, because the methods of User read state. */
 export default class AppPresenter extends Presenter {
-  override routes: Route[] = [
+  public override routes: Route[] = [
     { name: 'admin', pattern: '/admin', presenter: AdminPresenter },
     { name: 'tasks', pattern: '', presenter: TasksPresenter },
   ];
 
-  async signIn(roles: string[]) {
+  public async signIn(roles: string[]) {
     await this.user.login(new Identity(1, roles, { name: roles[0] ?? 'uživatel' }));
     this.redirect('this');
   }
 
-  render() {
+  public render() {
     return (
       <div>
         <p style={{ display: 'flex', flexWrap: 'wrap', gap: '.5rem', alignItems: 'center' }}>

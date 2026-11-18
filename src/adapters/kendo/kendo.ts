@@ -24,10 +24,10 @@ export interface KendoLike {
 }
 
 export class Kendo {
-  constructor(readonly kendo: KendoLike) {}
+  public constructor(public readonly kendo: KendoLike) {}
 
   /** Makes a widget, e.g. create('DatePicker', input, { format: 'd. M. yyyy' }). */
-  create<W extends object = KendoWidgetInstance>(name: string, element: HTMLElement, options: object = {}): W {
+  public create<W extends object = KendoWidgetInstance>(name: string, element: HTMLElement, options: object = {}): W {
     const Widget = this.kendo.ui[name] as (new (element: HTMLElement, options: object) => W) | undefined;
     if (typeof Widget !== 'function') throw new Error(`Kendo UI has no widget '${name}', is it loaded?`);
     return new Widget(element, options);

@@ -8,10 +8,10 @@ const CATEGORIES = ['Nápoje', 'Pečivo', 'Mléčné výrobky', 'Ovoce a zelenin
 
 /** Fixed items searched in the browser, and items from a server with the label of a saved value. */
 export default class DropDownLists extends Component {
-  readonly form = new Form<Values>();
-  readonly values = computed(() => JSON.stringify(this.form.getValues()));
+  public readonly form = new Form<Values>();
+  public readonly values = computed(() => JSON.stringify(this.form.getValues()));
 
-  constructor() {
+  public constructor() {
     super();
     this.form.addDropDownList('category', 'Kategorie (items)', { items: CATEGORIES, placeholder: 'Vyberte' });
     this.form.addDropDownList('assignee', 'Řešitel (search ze serveru)', {
@@ -23,7 +23,7 @@ export default class DropDownLists extends Component {
     this.form.setDefaults({ assignee: 250 });
   }
 
-  render() {
+  public render() {
     return <div><FormView form={this.form} /><p><code>{this.values}</code></p></div>;
   }
 }
