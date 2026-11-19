@@ -27,6 +27,21 @@ this.form.addEditor('text', 'Komentář', {
 - **Vložené HTML** z Wordu, Google Docs a webů se vyčistí: zahodí se písma, okraje, třídy `Mso…`, skripty, komentáře a obsluhy událostí.
 - **Úpravy vzhledu:** CSS editoru se načte až s ním, tedy za CSS aplikace. Vlastní pravidla proto potřebují silnější selektor než ta jeho (`.moje-pole .phx-editor-toolbar .phx-editor-toolbar-row`). Barvy jde měnit proměnnými `--phx-editor-*` na `.phx-editor-wrapper`. Kdo chce CSS hned, naimportuje ho sám: `import '@phloxcz/forms-editor/wysiwyg.css'`.
 
+## Plovoucí lišta
+
+V úzkém místě (sloupec, karta) by se pevná lišta zalomila do mnoha řádků a zabrala víc místa než text. S volbou `floatingToolbar` je lišta vidět, jen když má editor fokus. Ukáže se nad ním, přes to, co je nad ním, a nezabírá místo:
+
+```ts
+this.form.addEditor('perex', 'Perex', { floatingToolbar: true, minHeight: 90 });
+```
+
+<!-- demo: editor-floating -->
+
+- **Šířka podle tlačítek, ne podle editoru,** nejvýš 44rem a šířka okna. V úzkém editoru tak stačí jeden nebo dva řádky.
+- **Drží se v okně:** u pravého okraje se posune doleva. Když nad editorem není místo, ukáže se pod ním.
+- **Fokus** může být i na tlačítku nebo výběru lišty, lišta při klikání nezmizí. Po opuštění editoru zmizí.
+- **Na celou obrazovku** je lišta pevná jako jindy.
+
 Bez formuláře, HTML vázané na stav oběma směry:
 
 ```tsx

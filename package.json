@@ -1,6 +1,6 @@
 {
   "name": "@phloxcz/phlox-js",
-  "version": "0.6.2",
+  "version": "0.6.3",
   "description": "Frontendový framework, který přenáší způsob práce z Nette do prohlížeče.",
   "license": "MIT",
   "homepage": "https://github.com/phloxcz/phlox-js",
@@ -88,7 +88,7 @@
     "rpc:types": "node src/net/rpc-types.ts"
   },
   "dependencies": {
-    "@phloxcz/forms-editor": "github:phloxcz/forms-editor#v0.2.1"
+    "@phloxcz/forms-editor": "github:phloxcz/forms-editor#v0.3.0"
   },
   "peerDependencies": {
     "vite": ">=7"
