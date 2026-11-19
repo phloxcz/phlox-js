@@ -32,13 +32,19 @@ this.form.addEditor('text', 'Komentář', {
 V úzkém místě (sloupec, karta) by se pevná lišta zalomila do mnoha řádků a zabrala víc místa než text. S volbou `floatingToolbar` je lišta vidět, jen když má editor fokus. Ukáže se nad ním, přes to, co je nad ním, a nezabírá místo:
 
 ```ts
-this.form.addEditor('perex', 'Perex', { floatingToolbar: true, minHeight: 90 });
+this.form.addEditor('perex', 'Perex', {
+  floatingToolbar: 'top',  // nebo true; 'caret': nad řádkem s kurzorem
+  toolbarOffset: 70,       // při posouvání se zastaví 70 px od horního okraje okna, třeba pod pevnou lištou stránky
+  autoHeight: true,        // editor vysoký podle obsahu
+});
 ```
 
 <!-- demo: editor-floating -->
 
-- **Šířka podle tlačítek, ne podle editoru,** nejvýš 44rem a šířka okna. V úzkém editoru tak stačí jeden nebo dva řádky.
-- **Drží se v okně:** u pravého okraje se posune doleva. Když nad editorem není místo, ukáže se pod ním.
+- **`'top'` (nebo `true`):** lišta je nad editorem. Když se editor posune nad okno, lišta se zastaví `toolbarOffset` px od horního okraje okna (výchozí 8) a drží se nad editorem, dokud je vidět. Je pak přichycená k oknu, takže při posouvání neposkakuje. Když z editoru zbude jen kousek, dá se pod něj.
+- **`'caret'`:** lišta je kousek nad řádkem s kurzorem a jde s ním při psaní, posouvání i kliknutí jinam. Když nad řádkem není místo, je pod ním.
+- **`autoHeight`:** editor roste a zmenšuje se podle obsahu, bez výchozí minimální (300 px) a maximální výšky (700 px). Posouvá se stránka, ne editor. Hodí se k plovoucí liště u dlouhých textů.
+- **Šířka podle tlačítek, ne podle editoru,** nejvýš 44rem a šířka okna. V úzkém editoru tak stačí jeden nebo dva řádky. U pravého okraje se lišta posune doleva.
 - **Fokus** může být i na tlačítku nebo výběru lišty, lišta při klikání nezmizí. Po opuštění editoru zmizí.
 - **Na celou obrazovku** je lišta pevná jako jindy.
 

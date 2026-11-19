@@ -3,16 +3,20 @@ import { Form, FormTag, Input, Label } from '@phloxcz/phlox-js/forms';
 
 interface Columns { left: string; right: string }
 
-/** Editors in narrow columns: the toolbar floats over the page only while the editor has the focus. */
+/**
+ * Editors in narrow columns, as high as their text: the toolbar floats over the page only while the editor has the
+ * focus, above the editor on the left (held at the top of the window while it is scrolled), above the caret on the right.
+ */
 export default class FloatingToolbarDemo extends Component {
   public readonly form = new Form<Columns>();
 
   public constructor() {
     super();
-    const options = { floatingToolbar: true, minHeight: 90, toolbar: 'format,align,lists,link,emoji' };
-    this.form.addEditor('left', 'Levý sloupec', options);
-    this.form.addEditor('right', 'Pravý sloupec', options);
-    this.form.setDefaults({ left: '<p>Klikněte sem, lišta se ukáže nad editorem.</p>', right: '<p>Tady také.</p>' });
+    const toolbar = 'format,align,lists,link,emoji';
+    this.form.addEditor('left', 'Lišta nad editorem', { floatingToolbar: 'top', autoHeight: true, toolbar });
+    this.form.addEditor('right', 'Lišta u kurzoru', { floatingToolbar: 'caret', autoHeight: true, toolbar });
+    const lines = Array.from({ length: 8 }, (_, index) => `<p>Řádek ${index + 1}: klikněte sem a lišta bude nad ním.</p>`).join('');
+    this.form.setDefaults({ left: '<p>Klikněte sem a pište, editor poroste s textem.</p>', right: lines });
   }
 
   public render() {
