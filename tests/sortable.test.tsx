@@ -146,7 +146,7 @@ test('near an edge the nearest scrolling element scrolls, and the item keeps its
   }
 });
 
-/** Two lists side by side, 0–100 and 100–200 px; items 20 px high one under another. jsdom has no elementsFromPoint. */
+/** Two lists side by side, 0–100 and 100–200 px, nothing right of them; items 20 px high one under another. jsdom has no elementsFromPoint. */
 function twoLists() {
   const make = (left: number, names: string[]) => {
     const list = document.createElement('ul');
@@ -168,7 +168,8 @@ function twoLists() {
   // A list inside the dragged item A: the item cannot go into itself
   const inner = document.createElement('ul');
   home.children[0]!.append(inner);
-  document.elementsFromPoint = (x: number) => (x < 100 ? [inner, home, document.body] : [other, document.body]);
+  // Right of both lists (from 200 px) there is no list
+  document.elementsFromPoint = (x: number) => (x < 100 ? [inner, home, document.body] : x < 200 ? [other, document.body] : [document.body]);
   const pointer = (type: string, x: number, y: number) =>
     document.body.dispatchEvent(new MouseEvent(type, { bubbles: true, cancelable: true, clientX: x, clientY: y, button: 0 }));
   return { home, other, inner, pointer };
@@ -197,6 +198,13 @@ test('lists: over another list the item stays in its data, the list is marked, l
   pointer('pointermove', 150, 25);
   expect(move).not.toHaveBeenCalled();
   expect(other.classList.contains('phlox-drop-target')).toBe(true);
+  // A copy on <body> follows the pointer, so no scrolling list cuts it off; the item waits hidden in its place
+  const copy = document.querySelector<HTMLElement>('body > .phlox-drag-copy')!;
+  expect(copy.textContent).toBe('A');
+  expect(copy.style.position).toBe('fixed');
+  expect([copy.style.left, copy.style.top]).toEqual(['140px', '15px']);
+  expect(copy.inert).toBe(true);
+  expect(item.style.visibility).toBe('hidden');
   const marker = document.querySelector<HTMLElement>('.phlox-drop-marker')!;
   expect(marker.style.top).toBe('18px');
   expect(marker.style.width).toBe('100px');
@@ -213,12 +221,24 @@ test('lists: over another list the item stays in its data, the list is marked, l
   expect(other.classList.contains('phlox-drop-target')).toBe(false);
   expect(document.querySelector('.phlox-drop-marker')).toBeNull();
   expect(item.style.transform).toBe('');
+  expect(document.querySelector('.phlox-drag-copy')).toBeNull();
+  expect(item.style.visibility).toBe('');
 
   // Escape over another list drops nothing
   start(10, 10);
   pointer('pointermove', 150, 25);
   document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
   expect(drop).toHaveBeenCalledOnce();
+
+  // Out of all lists after another one: the mark goes, letting go there drops nothing and orders nothing
+  start(10, 10);
+  pointer('pointermove', 150, 25);
+  pointer('pointermove', 300, 25);
+  expect(other.classList.contains('phlox-drop-target')).toBe(false);
+  expect(document.querySelector('.phlox-drop-marker')).toBeNull();
+  pointer('pointerup', 300, 25);
+  expect(drop).toHaveBeenCalledOnce();
+  expect(move).toHaveBeenCalledOnce();
 });
 
 test('anchor pointer: the pointer decides, not the middle of the item, for items of different sizes', () => {

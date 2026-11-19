@@ -138,6 +138,8 @@ dragToSort(event, element, {
 - **Ve vlastním seznamu** se řadí jako dřív, průběžně přes `move`.
 - **Nad jiným seznamem** se položka v datech nehýbe, protože by ji šablona toho seznamu vytvořila jako nový prvek a tažení by se ztratilo. Jede dál za ukazatelem, seznam dostane třídu `phlox-drop-target` (čárkovaný obrys) a čára `phlox-drop-marker` ukáže, kam položka půjde. Barvu obojího mění proměnná `--phlox-drop-color`, výchozí je zvýraznění systému.
 - **Po puštění nad jiným seznamem** se zavolá jeho `drop(to)`, kde `to` je pozice mezi jeho položkami. Položku v datech přesune aplikace sama: vyjme ji ze svého seznamu a vloží do cílového.
+- **Za ukazatelem jede kopie položky** v top layer stránky, takže ji neořízne seznam, který se posouvá (`overflow: auto`), a je i nad modálním dialogem. Kopie má třídu `phlox-drag-copy` a vypočtené styly položky; styly závislé na předcích uvnitř položky se ale v kopii neuplatní. Položka mezitím zůstává neviditelná na svém místě. Ve sloupcích ukázky si to můžete vyzkoušet, posouvají se.
+- **Mimo všechny seznamy** se označení zruší a puštění nic nezmění: položka se vrátí, kde byla.
 - **Rozhoduje nejvnitřnější seznam pod ukazatelem,** takže vnořené seznamy fungují. Seznam uvnitř tažené položky se nenabízí: položka nejde pustit sama do sebe.
 - **`lists` se volá při každém pohybu,** takže může nabídnout jen seznamy, kam položka smí (třeba sloupec jen do svého řádku).
 - **Escape** nad jiným seznamem tažení zruší a položka zůstane, kde byla.

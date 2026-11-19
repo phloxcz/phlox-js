@@ -10,12 +10,60 @@ import { followPointer, slide } from "./drag.js";
 * With `lists` it can also go to other lists, e.g. to another level of a tree of boxes. Over such a list
 * it does not move in the data (another template would make a new element for it): the list is marked,
 * a line shows the place, and when it is let go there, the list's drop() moves it in the data.
+* Between lists a copy of the item follows the pointer in the top layer, so a scrolling list does not cut it off;
+* the item itself stays hidden in its place.
 */
 /** Class of the dragged item while it is dragged. */
 var DRAGGING = "phlox-dragging";
 /** Class of another list while the dragged item is over it, and of the line that shows the place. */
 var DROP_TARGET = "phlox-drop-target";
 var MARKER = "phlox-drop-marker";
+/** Class of the copy that follows the pointer when the item can go to other lists. */
+var COPY = "phlox-drag-copy";
+/** Puts an element on <body> into the top layer: above everything, also a modal dialog, and no overflow cuts it. */
+function toTopLayer(element) {
+	if (typeof element.showPopover !== "function") return;
+	element.popover = "manual";
+	element.showPopover();
+}
+/**
+* A copy of the dragged item on <body>, in the top layer. It takes the computed style of the item, so it looks
+* the same out of its list; without ids and names (a copied radio would take the choice of the original),
+* it cannot be focused and the pointer goes through it.
+*/
+function dragCopy(item) {
+	const copy = item.cloneNode(true);
+	for (const element of [copy, ...copy.querySelectorAll("[id], [name]")]) {
+		element.removeAttribute("id");
+		element.removeAttribute("name");
+	}
+	const computed = getComputedStyle(item);
+	for (const name of Array.from(computed)) copy.style.setProperty(name, computed.getPropertyValue(name));
+	const box = item.getBoundingClientRect();
+	Object.assign(copy.style, {
+		position: "fixed",
+		left: `${box.left}px`,
+		top: `${box.top}px`,
+		right: "auto",
+		bottom: "auto",
+		width: `${box.width}px`,
+		height: `${box.height}px`,
+		boxSizing: "border-box",
+		margin: "0",
+		transform: "none",
+		transition: "none",
+		animation: "none",
+		pointerEvents: "none",
+		visibility: "visible",
+		zIndex: "2147482999"
+	});
+	copy.classList.add(COPY);
+	copy.inert = true;
+	copy.setAttribute("aria-hidden", "true");
+	document.body.append(copy);
+	toTopLayer(copy);
+	return copy;
+}
 var middle = (box) => ({
 	x: box.left + box.width / 2,
 	y: box.top + box.height / 2
@@ -60,6 +108,9 @@ function dragToSort(event, item, options) {
 	let other = null;
 	let marker = null;
 	item.classList.add(DRAGGING);
+	const copy = options.lists ? dragCopy(item) : null;
+	const visibility = item.style.visibility;
+	if (copy) item.style.visibility = "hidden";
 	/** Moves the item under the pointer: its place in the layout plus a shift by transform. */
 	const follow = () => {
 		const box = item.getBoundingClientRect();
@@ -70,6 +121,10 @@ function dragToSort(event, item, options) {
 		shift.x = lockAxis && layout === "vertical" ? 0 : last.x - grab.x - place.x;
 		shift.y = lockAxis && layout === "horizontal" ? 0 : last.y - grab.y - place.y;
 		item.style.transform = `translate(${shift.x}px, ${shift.y}px)`;
+		if (copy) Object.assign(copy.style, {
+			left: `${place.x + shift.x}px`,
+			top: `${place.y + shift.y}px`
+		});
 	};
 	/** The point compared with the middles of the other items. */
 	const at = () => anchor === "pointer" ? last : middle(item.getBoundingClientRect());
@@ -94,7 +149,10 @@ function dragToSort(event, item, options) {
 			return;
 		}
 		next.list.element.classList.add(DROP_TARGET);
-		marker ??= document.body.appendChild(Object.assign(document.createElement("div"), { className: MARKER }));
+		if (!marker) {
+			marker = document.body.appendChild(Object.assign(document.createElement("div"), { className: MARKER }));
+			toTopLayer(marker);
+		}
 		const items = next.list.items().filter((element) => element !== item);
 		const across = (next.list.layout ?? "vertical") === "horizontal";
 		const area = next.list.element.getBoundingClientRect();
@@ -124,8 +182,8 @@ function dragToSort(event, item, options) {
 				to: positionAmong(items, target.layout, at())
 			});
 		}
-		if (target === "home") mark(null);
-		if (other) return;
+		mark(null);
+		if (!target) return;
 		const items = options.items();
 		const others = items.filter((element) => element !== item);
 		const before = positionAmong(others, layout, at());
@@ -149,6 +207,8 @@ function dragToSort(event, item, options) {
 			mark(null);
 			item.classList.remove(DRAGGING);
 			item.style.transform = "";
+			copy?.remove();
+			if (copy) item.style.visibility = visibility;
 			if (dropped && !cancelled) dropped.list.drop(dropped.to);
 			else if (shift.x || shift.y) slide(item, shift);
 			options.done?.();

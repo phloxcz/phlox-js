@@ -2,6 +2,12 @@
 
 Všechny podstatné změny projektu. Formát podle [Keep a Changelog](https://keepachangelog.com/cs/1.1.0/), verze podle [Semantic Versioning](https://semver.org/lang/cs/).
 
+## [0.6.2] – 2026-11-19
+
+### Opraveno
+- **`dragToSort` mezi seznamy už položku neořízne:** s `lists` jede za ukazatelem kopie položky (`phlox-drag-copy`) v top layer, nad seznamy, které se posouvají, i nad modálním dialogem. Položka zůstává neviditelná na svém místě. Čára místa je také v top layer.
+- **`dragToSort` mimo všechny seznamy:** označení cílového seznamu a čára zmizí, puštění tam nic nezmění.
+
 ## [0.6.1] – 2026-11-18
 
 ### Přidáno
@@ -65,6 +71,7 @@ První vydání.
 - **Server** (`@phloxcz/phlox-js/net`): JSON-RPC klient pro `phlox-rpc-api` s typy z OpenRPC (`phlox-rpc-types`), dávky, soubory po částech, mock server, práce offline s frontou změn.
 - **Další:** uživatel a oprávnění (`@phloxcz/phlox-js/security`), překlady (`@phloxcz/phlox-js/localization`), texty frameworku česky (`setTexts`, `@phloxcz/phlox-js/locales/cs`), HTML od uživatelů (`<Html>`, `sanitizeHtml`), témata (výchozí, Bootstrap), adaptéry pro Kendo UI a capify, pomocníci pro testy (`@phloxcz/phlox-js/testing`).
 
+[0.6.2]: https://github.com/phloxcz/phlox-js/compare/v0.6.1...v0.6.2
 [0.6.1]: https://github.com/phloxcz/phlox-js/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/phloxcz/phlox-js/compare/v0.5.1...v0.6.0
 [0.5.1]: https://github.com/phloxcz/phlox-js/compare/v0.5.0...v0.5.1

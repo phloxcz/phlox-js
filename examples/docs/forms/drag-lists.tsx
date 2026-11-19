@@ -3,10 +3,19 @@ import type { SortList, State } from '@phloxcz/phlox-js';
 
 interface Card { id: number; name: string }
 
-/** dragToSort with `lists`: cards ordered within a column and dragged to another one, like a board of tasks. */
+/**
+ * dragToSort with `lists`: cards ordered within a column and dragged to another one, like a board of tasks.
+ * The columns scroll; a card on its way to another column is a copy above the page, so they do not cut it off.
+ */
 export default class Board extends Component {
   public readonly columns: { title: string; cards: State<Card[]>; element?: HTMLElement }[] = [
-    { title: 'Udělat', cards: state([{ id: 1, name: 'Návrh' }, { id: 2, name: 'Rozpočet' }, { id: 3, name: 'Smlouva' }]) },
+    {
+      title: 'Udělat',
+      cards: state([
+        { id: 1, name: 'Návrh' }, { id: 2, name: 'Rozpočet' }, { id: 3, name: 'Smlouva' },
+        { id: 6, name: 'Zadání' }, { id: 7, name: 'Harmonogram' }, { id: 8, name: 'Tým' },
+      ]),
+    },
     { title: 'Dělá se', cards: state([{ id: 4, name: 'Vývoj' }]) },
     { title: 'Hotovo', cards: state([{ id: 5, name: 'Analýza' }]) },
   ];
@@ -18,7 +27,7 @@ export default class Board extends Component {
           <div>
             <strong>{column.title}</strong>
             <ul ref={element => { column.element = element; }}
-              style={{ display: 'grid', gap: '.4rem', minHeight: '6rem', margin: '.4rem 0 0', padding: '.4rem', listStyle: 'none', borderRadius: '8px', background: '#8881' }}>
+              style={{ display: 'grid', alignContent: 'start', gap: '.4rem', height: '11rem', overflowY: 'auto', margin: '.4rem 0 0', padding: '.4rem', listStyle: 'none', borderRadius: '8px', background: '#8881' }}>
               <For each={column.cards}>
                 {card => {
                   let element!: HTMLElement;

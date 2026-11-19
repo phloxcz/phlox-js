@@ -338,9 +338,14 @@ form [hidden] {
   outline-offset: 2px;
 }
 
+/* In the top layer as a popover: without the inset, margin, padding and border browsers give a popover */
 .phlox-drop-marker {
   position: fixed;
+  inset: auto;
   z-index: 2147483000;
+  margin: 0;
+  padding: 0;
+  border: 0;
   border-radius: 2px;
   background: var(--phlox-drop-color, Highlight);
   pointer-events: none;

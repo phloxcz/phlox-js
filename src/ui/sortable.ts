@@ -8,6 +8,8 @@
  * With `lists` it can also go to other lists, e.g. to another level of a tree of boxes. Over such a list
  * it does not move in the data (another template would make a new element for it): the list is marked,
  * a line shows the place, and when it is let go there, the list's drop() moves it in the data.
+ * Between lists a copy of the item follows the pointer in the top layer, so a scrolling list does not cut it off;
+ * the item itself stays hidden in its place.
  */
 
 import { followPointer, slide } from './drag';
@@ -57,6 +59,44 @@ export const DRAGGING = 'phlox-dragging';
 /** Class of another list while the dragged item is over it, and of the line that shows the place. */
 export const DROP_TARGET = 'phlox-drop-target';
 const MARKER = 'phlox-drop-marker';
+/** Class of the copy that follows the pointer when the item can go to other lists. */
+const COPY = 'phlox-drag-copy';
+
+/** Puts an element on <body> into the top layer: above everything, also a modal dialog, and no overflow cuts it. */
+function toTopLayer(element: HTMLElement): void {
+  if (typeof element.showPopover !== 'function') return;
+  element.popover = 'manual';
+  element.showPopover();
+}
+
+/**
+ * A copy of the dragged item on <body>, in the top layer. It takes the computed style of the item, so it looks
+ * the same out of its list; without ids and names (a copied radio would take the choice of the original),
+ * it cannot be focused and the pointer goes through it.
+ */
+function dragCopy(item: HTMLElement): HTMLElement {
+  const copy = item.cloneNode(true) as HTMLElement;
+  for (const element of [copy, ...copy.querySelectorAll('[id], [name]')]) {
+    element.removeAttribute('id');
+    element.removeAttribute('name');
+  }
+  const computed = getComputedStyle(item);
+  for (const name of Array.from(computed)) copy.style.setProperty(name, computed.getPropertyValue(name));
+  const box = item.getBoundingClientRect();
+  Object.assign(copy.style, {
+    position: 'fixed', left: `${box.left}px`, top: `${box.top}px`, right: 'auto', bottom: 'auto',
+    width: `${box.width}px`, height: `${box.height}px`, boxSizing: 'border-box', margin: '0',
+    transform: 'none', transition: 'none', animation: 'none', pointerEvents: 'none', visibility: 'visible',
+    // Below the line of the place; matters only where the top layer is missing
+    zIndex: '2147482999',
+  });
+  copy.classList.add(COPY);
+  copy.inert = true;
+  copy.setAttribute('aria-hidden', 'true');
+  document.body.append(copy);
+  toTopLayer(copy);
+  return copy;
+}
 
 const middle = (box: DOMRect): Point => ({ x: box.left + box.width / 2, y: box.top + box.height / 2 });
 
@@ -97,6 +137,10 @@ export function dragToSort(event: PointerEvent, item: HTMLElement, options: Sort
   let other: { list: SortList; to: number } | null = null;
   let marker: HTMLElement | null = null;
   item.classList.add(DRAGGING);
+  // Between lists the item would leave its list, and a list that scrolls would cut it off: a copy is seen instead
+  const copy = options.lists ? dragCopy(item) : null;
+  const visibility = item.style.visibility;
+  if (copy) item.style.visibility = 'hidden';
 
   /** Moves the item under the pointer: its place in the layout plus a shift by transform. */
   const follow = (): void => {
@@ -105,6 +149,7 @@ export function dragToSort(event: PointerEvent, item: HTMLElement, options: Sort
     shift.x = lockAxis && layout === 'vertical' ? 0 : last.x - grab.x - place.x;
     shift.y = lockAxis && layout === 'horizontal' ? 0 : last.y - grab.y - place.y;
     item.style.transform = `translate(${shift.x}px, ${shift.y}px)`;
+    if (copy) Object.assign(copy.style, { left: `${place.x + shift.x}px`, top: `${place.y + shift.y}px` });
   };
 
   /** The point compared with the middles of the other items. */
@@ -132,7 +177,11 @@ export function dragToSort(event: PointerEvent, item: HTMLElement, options: Sort
       return;
     }
     next.list.element.classList.add(DROP_TARGET);
-    marker ??= document.body.appendChild(Object.assign(document.createElement('div'), { className: MARKER }));
+    if (!marker) {
+      marker = document.body.appendChild(Object.assign(document.createElement('div'), { className: MARKER }));
+      // Above the copy of the item, which is in the top layer too
+      toTopLayer(marker);
+    }
     const items = next.list.items().filter(element => element !== item);
     const across = (next.list.layout ?? 'vertical') === 'horizontal';
     const area = next.list.element.getBoundingClientRect();
@@ -154,8 +203,9 @@ export function dragToSort(event: PointerEvent, item: HTMLElement, options: Sort
       const items = target.items().filter(element => element !== item);
       return mark({ list: target, to: positionAmong(items, target.layout, at()) });
     }
-    if (target === 'home') mark(null);
-    if (other) return;
+    mark(null);
+    // Out of all lists: nothing is marked, letting go there changes nothing and the item returns
+    if (!target) return;
 
     const items = options.items();
     const others = items.filter(element => element !== item);
@@ -181,6 +231,8 @@ export function dragToSort(event: PointerEvent, item: HTMLElement, options: Sort
       mark(null);
       item.classList.remove(DRAGGING);
       item.style.transform = '';
+      copy?.remove();
+      if (copy) item.style.visibility = visibility;
       if (dropped && !cancelled) {
         // Into another list: its template makes the element there
         dropped.list.drop(dropped.to);

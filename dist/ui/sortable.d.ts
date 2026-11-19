@@ -8,6 +8,8 @@
  * With `lists` it can also go to other lists, e.g. to another level of a tree of boxes. Over such a list
  * it does not move in the data (another template would make a new element for it): the list is marked,
  * a line shows the place, and when it is let go there, the list's drop() moves it in the data.
+ * Between lists a copy of the item follows the pointer in the top layer, so a scrolling list does not cut it off;
+ * the item itself stays hidden in its place.
  */
 type Layout = 'vertical' | 'horizontal' | 'grid';
 export interface SortOptions {
