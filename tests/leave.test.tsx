@@ -32,8 +32,17 @@ class Note extends Component<{}, string> {
   public render() { return <textarea />; }
 }
 
+/** One record at a time in the same presenter: another record is another route of a presenter that stays. */
+class Records extends Presenter {
+  public override routes: Route[] = [{ name: 'default', pattern: '/' }, { name: 'detail', pattern: '/<id:int>' }];
+  public readonly shown = state('');
+  public actionDetail({ id }: { id: string }) { this.shown.set(id); }
+  public render() { return <section><h1>{this.shown}</h1>{() => (this.shown(), <Field />)}</section>; }
+}
+
 class App extends Presenter {
   public override routes: Route[] = [
+    { name: 'records', pattern: '/records', presenter: Records },
     { name: 'edit', pattern: '/edit', presenter: Edit },
     { name: 'other', pattern: '/other', presenter: Other },
     { name: 'note', pattern: '/note', dialog: () => [Note, {}] },
@@ -135,6 +144,36 @@ describe('leaving with unsaved changes', () => {
     await tick();
     expect(top()).toBeNull();
     expect(element.querySelector('textarea')).toBeNull();
+    unsaved.set(false);
+  });
+
+  test('another record in a presenter that stays asks before its action; another query does not', async () => {
+    unsaved.set(false);
+    const { element, go } = await boot(App, '/records/1');
+    expect(heading(element)).toBe('1');
+    unsaved.set(true);
+    const other = go('/records/2');
+    await until(asking);
+    // Asked before the action: the record and what is written in it are still there
+    expect(heading(element)).toBe('1');
+    expect(element.querySelector('input')).not.toBeNull();
+    press(messageTexts.cancel);
+    await other;
+    expect(heading(element)).toBe('1');
+    expect(location.pathname).toBe('/records/1');
+
+    // Only another query (a search, a page of a grid) renders nothing anew: no question
+    await go('/records/1?q=a');
+    expect(top()).toBeNull();
+    expect(heading(element)).toBe('1');
+
+    const again = go('/records/2');
+    await until(asking);
+    press(messageTexts.leave);
+    await again;
+    expect(heading(element)).toBe('2');
+    // Asked once, not again for the content that leaves
+    expect(top()).toBeNull();
     unsaved.set(false);
   });
 

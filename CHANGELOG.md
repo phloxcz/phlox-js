@@ -2,6 +2,11 @@
 
 Všechny podstatné změny projektu. Formát podle [Keep a Changelog](https://keepachangelog.com/cs/1.1.0/), verze podle [Semantic Versioning](https://semver.org/lang/cs/).
 
+## [0.6.6] – 2026-11-20
+
+### Opraveno
+- **Neuložené změny v presenteru, který zůstává:** přechod na jiný záznam nebo jinou routu téhož presenteru (`/pages/5` → `/pages/6`) se nezeptal a rozepsané změny v jeho obsahu zmizely, protože akce překreslila obsah před kontrolou. Router se teď zeptá před akcí, jednou za presenter i všechno v něm. Změna jen query se neptá.
+
 ## [0.6.5] – 2026-11-19
 
 ### Opraveno
@@ -86,6 +91,7 @@ První vydání.
 - **Server** (`@phloxcz/phlox-js/net`): JSON-RPC klient pro `phlox-rpc-api` s typy z OpenRPC (`phlox-rpc-types`), dávky, soubory po částech, mock server, práce offline s frontou změn.
 - **Další:** uživatel a oprávnění (`@phloxcz/phlox-js/security`), překlady (`@phloxcz/phlox-js/localization`), texty frameworku česky (`setTexts`, `@phloxcz/phlox-js/locales/cs`), HTML od uživatelů (`<Html>`, `sanitizeHtml`), témata (výchozí, Bootstrap), adaptéry pro Kendo UI a capify, pomocníci pro testy (`@phloxcz/phlox-js/testing`).
 
+[0.6.6]: https://github.com/phloxcz/phlox-js/compare/v0.6.5...v0.6.6
 [0.6.5]: https://github.com/phloxcz/phlox-js/compare/v0.6.4...v0.6.5
 [0.6.4]: https://github.com/phloxcz/phlox-js/compare/v0.6.3...v0.6.4
 [0.6.3]: https://github.com/phloxcz/phlox-js/compare/v0.6.2...v0.6.3

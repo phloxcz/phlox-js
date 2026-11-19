@@ -289,6 +289,8 @@ export class Router {
       let base = this.base;
       let rest = path.slice(base.length) || '/';
       let refresh = false;
+      /** The user was asked about a presenter that stays; what leaves is inside it, so no second question */
+      let asked = false;
 
       while (presenter) {
         const current: AnyPresenter = presenter;
@@ -334,6 +336,17 @@ export class Router {
         const actionChanged = actionKey !== routing.actionKey;
         if (routeChanged || actionChanged) changed.push({ presenter: current, matchKey: routing.matchKey });
         undo.push(this.snapshot(current));
+        // A presenter that stays shows another route or record (not only another query): its action changes its
+        // state and its content renders anew, so what is being written in it would be lost before the check at the
+        // end. The user decides now, once for the presenter with everything in it.
+        if (routeChanged && !asked && routing.matchKey && !this.pending.has(current) && !refresh) {
+          asked = true;
+          if (!(await this.app.mayLeave([current]))) {
+            if (navigation.pop) this.returnBack();
+            throw CANCELLED;
+          }
+          check();
+        }
         routing.matchKey = matchKey;
         routing.actionKey = actionKey;
         batch(() => {
@@ -384,7 +397,7 @@ export class Router {
       }
       check();
       // The new page is ready aside; components with unsaved changes would be lost, so the user decides
-      if (leaving.length && !(await this.app.mayLeave(leaving))) {
+      if (leaving.length && !asked && !(await this.app.mayLeave(leaving))) {
         if (navigation.pop) this.returnBack();
         throw CANCELLED;
       }

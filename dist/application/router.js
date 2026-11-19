@@ -255,6 +255,8 @@ var Router = class {
 			let base = this.base;
 			let rest = path.slice(base.length) || "/";
 			let refresh = false;
+			/** The user was asked about a presenter that stays; what leaves is inside it, so no second question */
+			let asked = false;
 			while (presenter) {
 				const current = presenter;
 				const routing = current.routing;
@@ -307,6 +309,14 @@ var Router = class {
 					matchKey: routing.matchKey
 				});
 				undo.push(this.snapshot(current));
+				if (routeChanged && !asked && routing.matchKey && !this.pending.has(current) && !refresh) {
+					asked = true;
+					if (!await this.app.mayLeave([current])) {
+						if (navigation.pop) this.returnBack();
+						throw CANCELLED;
+					}
+					check();
+				}
 				routing.matchKey = matchKey;
 				routing.actionKey = actionKey;
 				batch(() => {
@@ -349,7 +359,7 @@ var Router = class {
 				presenter = next;
 			}
 			check();
-			if (leaving.length && !await this.app.mayLeave(leaving)) {
+			if (leaving.length && !asked && !await this.app.mayLeave(leaving)) {
 				if (navigation.pop) this.returnBack();
 				throw CANCELLED;
 			}

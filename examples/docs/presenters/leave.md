@@ -21,6 +21,8 @@ Než taková komponenta odejde, framework se uživatele zeptá „Odejít bez ul
 
 Platí to pro komponentu a všechno uvnitř ní: komponentu v presenteru, který odchází, i dialog otevřený z něj. Komponenta, která zůstává, se neptá.
 
+- **Presenter, který zůstává a ukáže jiný záznam:** `/pages/5` → `/pages/6`, jiný režim `/pages/5/template` nebo jiná routa téhož presenteru. Jeho akce změní stav a obsah se vykreslí znovu, takže rozepsané změny v něm by zmizely. Router se proto zeptá ještě před akcí, jednou za presenter i všechno v něm. Změna jen query (hledání, stránka gridu) se neptá, obsah zůstává.
+
 - **`close()` z kódu se neptá:** tlačítka Uložit a Zrušit v dialogu zavírají záměrně. Kdo chce i u svého Zrušit otázku, zavolá `this.cancel()`.
-- **Akce presenterů, které zůstávají,** proběhnou ještě před otázkou, jako každá příprava nové obrazovky. Při Zrušit se nic nezmění.
+- **Akce presenterů, které zůstávají** a mění jen query, proběhnou ještě před otázkou, jako každá příprava nové obrazovky. Při Zrušit se nic nezmění.
 - **Texty:** `messageTexts.unsaved` a `messageTexts.leave`. Ptá se `app.mayLeave(components)`, které jde zavolat i z vlastního kódu.
