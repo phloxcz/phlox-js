@@ -2,6 +2,11 @@
 
 Všechny podstatné změny projektu. Formát podle [Keep a Changelog](https://keepachangelog.com/cs/1.1.0/), verze podle [Semantic Versioning](https://semver.org/lang/cs/).
 
+## [0.6.5] – 2026-11-19
+
+### Opraveno
+- **Stránka o pixel vyšší než okno:** oblast pro čtečky obrazovky (`.phlox-announcer`) zůstávala na konci stránky a prodlužovala ji o 1 px, takže se celá stránka posouvala a ukazoval se posuvník, i když se obsah vešel. Je teď vlevo nahoře.
+
 ## [0.6.4] – 2026-11-19
 
 ### Přidáno
@@ -81,6 +86,7 @@ První vydání.
 - **Server** (`@phloxcz/phlox-js/net`): JSON-RPC klient pro `phlox-rpc-api` s typy z OpenRPC (`phlox-rpc-types`), dávky, soubory po částech, mock server, práce offline s frontou změn.
 - **Další:** uživatel a oprávnění (`@phloxcz/phlox-js/security`), překlady (`@phloxcz/phlox-js/localization`), texty frameworku česky (`setTexts`, `@phloxcz/phlox-js/locales/cs`), HTML od uživatelů (`<Html>`, `sanitizeHtml`), témata (výchozí, Bootstrap), adaptéry pro Kendo UI a capify, pomocníci pro testy (`@phloxcz/phlox-js/testing`).
 
+[0.6.5]: https://github.com/phloxcz/phlox-js/compare/v0.6.4...v0.6.5
 [0.6.4]: https://github.com/phloxcz/phlox-js/compare/v0.6.3...v0.6.4
 [0.6.3]: https://github.com/phloxcz/phlox-js/compare/v0.6.2...v0.6.3
 [0.6.2]: https://github.com/phloxcz/phlox-js/compare/v0.6.1...v0.6.2

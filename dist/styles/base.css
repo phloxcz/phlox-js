@@ -131,8 +131,11 @@
 }
 
 /* The announcer of navigation: read by screen readers, not seen */
+/* At the top left of the page: at its own place, the end of the page, it would make the page 1px higher and scroll */
 .phlox-announcer {
   position: absolute;
+  top: 0;
+  left: 0;
   width: 1px;
   height: 1px;
   overflow: hidden;
