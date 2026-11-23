@@ -35,7 +35,7 @@ export type { Motion } from './ui/motion';
 export type { SortList, SortOptions } from './ui/sortable';
 export type { ThemeClasses, ThemeSlot } from './ui/theme';
 export { Application, FlashMessages } from './application/application';
-export type { Flash, FlashOptions, ToastPosition } from './application/application';
+export type { ErrorSource, Flash, FlashOptions, ToastPosition } from './application/application';
 export { Router } from './application/router';
 export { Container } from './di/container';
 export type { Class, Type } from './di/container';

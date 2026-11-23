@@ -20,6 +20,14 @@ import { Authenticator, User, UserStorage, userDefaults } from '../security/user
 import { BrowserPreferences, Preferences } from '../ui/preferences';
 import { Authorizator } from '../security/permission';
 
+/**
+ * Where an error came from: 'navigation' (actions, startup of presenters and dialogs on the way to a page),
+ * 'lifecycle' (startup() of a component inside a view, afterRender()), 'event' (a handler of an event, also an
+ * async one, actions of grids and trees, submitting a form), 'resource' (loading of a resource), 'global'
+ * (anything else the browser reports: a timer, a promise nobody awaits, an effect run by one of them).
+ */
+export type ErrorSource = 'navigation' | 'lifecycle' | 'event' | 'resource' | 'global';
+
 export interface Flash {
   text: string;
   /** `info`, `success`, `warning` or `error`. */
@@ -117,8 +125,11 @@ export class Application {
    */
   public formatTitle: (page: string | null) => string = page => (page ? `${page} – ${this.baseTitle}` : this.baseTitle);
 
-  /** Receives errors from navigation and from life cycle methods that nobody awaits. */
-  public onError: (error: unknown) => void = error => console.error(error);
+  /**
+   * Receives every error of the running application: from navigation, handlers of events, resources and, as
+   * 'global', the errors and rejected promises the browser reports on `window`. The place to show and log them.
+   */
+  public onError: (error: unknown, source: ErrorSource) => void = error => console.error(error);
 
   private scope: Scope | null = null;
   /** Versions of the tags of data, see invalidate(). */
@@ -156,7 +167,10 @@ export class Application {
     this.scope.provide(APP, this);
     this.scope.provide(THEME, this.theme);
     // Errors of event handlers, also of async ones, go to onError like errors of navigation
-    this.scope.provide(ERRORS, (error: unknown) => this.onError(error));
+    this.scope.provide(ERRORS, (error: unknown) => this.onError(error, 'event'));
+    // Everything else goes there too, so the application has one place for its errors
+    window.addEventListener('error', this.onWindowError);
+    window.addEventListener('unhandledrejection', this.onRejection);
 
     const presenter = this.presenter = createComponent(root, {}, null, this, this.scope);
     document.addEventListener('click', this.onClick);
@@ -225,7 +239,7 @@ export class Application {
     return scope.run(() => createResource(() => {
       for (const tag of tags) this.version(tag)();
       return load();
-    }, error => this.onError(error)));
+    }, error => this.onError(error, 'resource')));
   }
 
   private version(tag: string): State<number> {
@@ -281,6 +295,8 @@ export class Application {
   public stop(): void {
     document.removeEventListener('click', this.onClick);
     window.removeEventListener('beforeunload', this.onBeforeUnload);
+    window.removeEventListener('error', this.onWindowError);
+    window.removeEventListener('unhandledrejection', this.onRejection);
     this.router.stop();
     this.toastHost?.remove();
     this.toastHost = null;
@@ -302,6 +318,30 @@ export class Application {
   }
 
   /** Closing or reloading the page, a link to another site: the browser asks with its own question. */
+  /**
+   * An error nobody caught. Not the noise of ResizeObserver (a loop the browser reports and recovers from), nor
+   * errors of loading images and scripts (they do not bubble to window). The browser does not print it again.
+   */
+  private onWindowError = (event: ErrorEvent): void => {
+    if (event.message?.startsWith('ResizeObserver loop')) return;
+    event.preventDefault();
+    this.reportGlobal(event.error ?? new Error(event.message || 'Unknown error'));
+  };
+
+  private onRejection = (event: PromiseRejectionEvent): void => {
+    event.preventDefault();
+    this.reportGlobal(event.reason);
+  };
+
+  /** A failing onError must not report itself again and again. */
+  private reportGlobal(error: unknown): void {
+    try {
+      this.onError(error, 'global');
+    } catch (failure) {
+      console.error(error, failure);
+    }
+  }
+
   private onBeforeUnload = (event: BeforeUnloadEvent): void => {
     if (hasUnsaved(this, null)) event.preventDefault();
   };

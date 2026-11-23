@@ -950,3 +950,14 @@ Potřeba vzešla z konfigurátoru rozvržení v CMS: uzel se má dát přetáhno
 - **Kopie v top layer (autor 19. 11.: „nechci, aby měl framework problémy“):** v CMS se položka palety widgetů při tažení do rozvržení schovala. Seznam palety se posouvá a jeho `overflow` ořízne všechno, co z něj vyjede přes `transform`. S `lists` proto za ukazatelem jede kopie položky na `<body>`, otevřená jako popover (`popover="manual"`). Top layer ji dá nad všechno, i nad modální dialog, a žádný `overflow` ji neořízne. Kopie vezme vypočtené styly položky, aby vypadala stejně i mimo svůj seznam. Původní položka zůstává neviditelná na svém místě, takže dál drží místo a pořadí a celé tažení počítá jako dřív. Kopie nemá `id` ani `name` (kopie zaškrtnutého přepínače by vzala volbu originálu) a je `inert`. Čára místa je v top layer taky, otevřená až po kopii, takže je nad ní. Ve vlastním seznamu bez `lists` se dál táhne přímo položka, tam ořez okrajem seznamu nevadí a položka si nechá kontext svých stylů.
 - **Mimo seznamy se nic neoznačuje (19. 11.):** dřív zůstal označený poslední cílový seznam, dokud tažení nezrušil Escape. Teď se označení zruší, jakmile ukazatel opustí všechny seznamy, a puštění tam položku vrátí na místo.
 - **`anchor: 'pointer'` (0.6.1):** ověření v CMS ukázalo, že sloupec 9/12 nejde přetáhnout před sloupec 3/12, protože jeho střed by musel ujet půl řádku, i za okraj okna. Pro položky hodně různé velikosti proto rozhoduje ukazatel. Výchozí zůstal střed položky, u stejně velkých položek působí přirozeněji a nemění chování stávajících seznamů.
+
+## Všechny chyby aplikace v `app.onError` (0.6.7, autor 23. 11.: „udělej to ve frameworku a pak v CMS“)
+
+CMS chce posílat chyby JS na server (`log.save`), jako starý klient přes `window.onerror`. Aplikace ale do `onError` dostávala jen chyby, které framework sám zachytil (navigace, obsluhy událostí, zdroje, životní cyklus). Chyby v časovačích, v promisech pouštěných přes `void` a v efektech spuštěných z nich končily na `window` a aplikace o nich nevěděla.
+
+- **`run()` poslouchá `error` a `unhandledrejection` na `window`** a posílá je do `onError` se zdrojem `'global'`; `stop()` posluchače odebere. Jedno místo pro všechny chyby, jako Tracy v Nette, místo aby si každá aplikace věšela vlastní `window.onerror`.
+- **Druhý parametr `source`** (`'navigation' | 'lifecycle' | 'event' | 'resource' | 'global'`). Kód s jedním parametrem dál funguje. Log na serveru pak ví, kde chyba vznikla, a aplikace může zdroje rozlišit (třeba globální chyby jen logovat, ne ukazovat).
+- **`preventDefault()`** u globálních chyb: prohlížeč by je jinak vypsal do konzole podruhé vedle `onError`.
+- **Hláška `ResizeObserver loop…` se přeskočí.** Prohlížeč ji hlásí jako chybu, ale aplikace za ni nemůže a stránka funguje dál; v logu by byla jen šumem.
+- **Chyba v `onError` se jen vypíše**, aby selhávající logování nehlásilo samo sebe dokola.
+

@@ -115,7 +115,7 @@ function GridView(props) {
 	const slot = (part) => theme.class(`grid.${part}`);
 	const texts = Grid.texts;
 	const app = getScope()?.find(APP);
-	const fail = (error) => app ? app.onError(error) : console.error(error);
+	const fail = (error) => app ? app.onError(error, "event") : console.error(error);
 	const run = (work) => void work.catch(fail);
 	const filterForm = new Form();
 	grid.follow();

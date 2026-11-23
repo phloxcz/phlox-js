@@ -234,7 +234,7 @@ export abstract class Component<P extends object = {}, R = void> {
 
     // The view appears when the data is loaded
     const ready = state(false);
-    started.then(() => component.scope.disposed || ready.set(true), error => app.onError(error));
+    started.then(() => component.scope.disposed || ready.set(true), error => app.onError(error, 'lifecycle'));
     return () => (ready() ? renderComponent(component) : null);
   }
 }
@@ -276,7 +276,7 @@ export function renderComponent(component: AnyComponent): Node {
     try {
       await component.afterRender();
     } catch (error) {
-      component.app.onError(error);
+      component.app.onError(error, 'lifecycle');
     }
   });
   return fragment;

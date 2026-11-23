@@ -32,7 +32,7 @@ var Editor = class Editor extends Component {
 		});
 	}
 	afterRender() {
-		loadEditor().then((library) => this.scope.disposed || this.create(library), (error) => this.app.onError(error));
+		loadEditor().then((library) => this.scope.disposed || this.create(library), (error) => this.app.onError(error, "lifecycle"));
 	}
 	create(library) {
 		const { value, enabled, readOnly, options, name, label } = this.props;

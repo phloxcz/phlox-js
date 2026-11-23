@@ -64,7 +64,7 @@ export class Editor extends Component<EditorProps> {
   public override afterRender() {
     loadEditor().then(
       library => this.scope.disposed || this.create(library),
-      error => this.app.onError(error),
+      error => this.app.onError(error, 'lifecycle'),
     );
   }
 

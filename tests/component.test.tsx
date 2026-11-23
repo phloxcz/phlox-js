@@ -182,3 +182,67 @@ describe('errors of event handlers', () => {
     expect(errors.map(String)).toEqual(['Error: broken', 'Error: server is down']);
   });
 });
+
+describe('all errors of the application in app.onError', () => {
+  test('with their source: an event handler, navigation, and what the browser reports on window', async () => {
+    class Page extends Presenter {
+      public override routes = [{ name: 'default', pattern: '/' }, { name: 'broken', pattern: '/broken' }];
+      public actionBroken() {
+        throw new Error('no such page');
+      }
+      public render() {
+        return <button onClick={() => { throw new Error('broken'); }}>Rozbité</button>;
+      }
+    }
+    const { app, element } = await boot(Page);
+    const seen: string[] = [];
+    app.onError = (error, source) => seen.push(`${source}: ${String(error)}`);
+
+    element.querySelector('button')!.click();
+    await app.router.navigate('/broken');
+    const thrown = new ErrorEvent('error', { error: new Error('in a timer'), message: 'in a timer', cancelable: true });
+    window.dispatchEvent(thrown);
+    const rejected = Object.assign(new Event('unhandledrejection', { cancelable: true }), { reason: new Error('nobody awaits') });
+    window.dispatchEvent(rejected);
+    // The noise of ResizeObserver is no error of the application
+    window.dispatchEvent(new ErrorEvent('error', { message: 'ResizeObserver loop completed with undelivered notifications.', cancelable: true }));
+    await tick();
+
+    expect(seen).toEqual([
+      'event: Error: broken',
+      'navigation: Error: no such page',
+      'global: Error: in a timer',
+      'global: Error: nobody awaits',
+    ]);
+    // The browser does not print them again
+    expect(thrown.defaultPrevented).toBe(true);
+    expect(rejected.defaultPrevented).toBe(true);
+  });
+
+  test('a failing onError does not report itself; after stop() window errors are not the application\'s', async () => {
+    const { app } = await boot(class extends Presenter {
+      public render() { return <p />; }
+    });
+    const logged: unknown[] = [];
+    const log = console.error;
+    console.error = (...args: unknown[]) => logged.push(args);
+    let calls = 0;
+    app.onError = () => {
+      calls++;
+      throw new Error('the log is down');
+    };
+    try {
+      window.dispatchEvent(new ErrorEvent('error', { error: new Error('first'), cancelable: true }));
+      expect(calls).toBe(1);
+      expect(logged).toHaveLength(1);
+
+      app.stop();
+      const rejected = Object.assign(new Event('unhandledrejection', { cancelable: true }), { reason: new Error('after stop') });
+      window.dispatchEvent(rejected);
+      expect(calls).toBe(1);
+      expect(rejected.defaultPrevented).toBe(false);
+    } finally {
+      console.error = log;
+    }
+  });
+});

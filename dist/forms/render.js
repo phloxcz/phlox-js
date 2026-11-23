@@ -28,7 +28,7 @@ function FormTag(props) {
 			event.preventDefault();
 			const button = form.clickedButton;
 			form.clickedButton = null;
-			form.submit(button).catch((error) => app ? app.onError(error) : console.error(error));
+			form.submit(button).catch((error) => app ? app.onError(error, "event") : console.error(error));
 		},
 		onKeydown: (event) => {
 			const target = event.target;
@@ -36,7 +36,7 @@ function FormTag(props) {
 			if (!(target instanceof HTMLInputElement) || /^(button|submit|reset|checkbox|radio|file|image)$/.test(target.type)) return;
 			if (event.currentTarget.querySelector("[type=submit], input[type=image]")) return;
 			event.preventDefault();
-			form.submit().catch((error) => app ? app.onError(error) : console.error(error));
+			form.submit().catch((error) => app ? app.onError(error, "event") : console.error(error));
 		},
 		children
 	});

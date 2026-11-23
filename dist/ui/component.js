@@ -169,7 +169,7 @@ var Component = class {
 		const started = startComponent(component);
 		if (!(started instanceof Promise)) return renderComponent(component);
 		const ready = state(false);
-		started.then(() => component.scope.disposed || ready.set(true), (error) => app.onError(error));
+		started.then(() => component.scope.disposed || ready.set(true), (error) => app.onError(error, "lifecycle"));
 		return () => ready() ? renderComponent(component) : null;
 	}
 };
@@ -209,7 +209,7 @@ function renderComponent(component) {
 		try {
 			await component.afterRender();
 		} catch (error) {
-			component.app.onError(error);
+			component.app.onError(error, "lifecycle");
 		}
 	});
 	return fragment;

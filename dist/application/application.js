@@ -90,7 +90,10 @@ var Application = class {
 	* "Page – <the title in index.html>", without a page only the title in index.html.
 	*/
 	formatTitle = (page) => page ? `${page} – ${this.baseTitle}` : this.baseTitle;
-	/** Receives errors from navigation and from life cycle methods that nobody awaits. */
+	/**
+	* Receives every error of the running application: from navigation, handlers of events, resources and, as
+	* 'global', the errors and rejected promises the browser reports on `window`. The place to show and log them.
+	*/
 	onError = (error) => console.error(error);
 	scope = null;
 	/** Versions of the tags of data, see invalidate(). */
@@ -129,7 +132,9 @@ var Application = class {
 		this.scope = new Scope(null);
 		this.scope.provide(APP, this);
 		this.scope.provide(THEME, this.theme);
-		this.scope.provide(ERRORS, (error) => this.onError(error));
+		this.scope.provide(ERRORS, (error) => this.onError(error, "event"));
+		window.addEventListener("error", this.onWindowError);
+		window.addEventListener("unhandledrejection", this.onRejection);
 		const presenter = this.presenter = createComponent(root, {}, null, this, this.scope);
 		document.addEventListener("click", this.onClick);
 		window.addEventListener("beforeunload", this.onBeforeUnload);
@@ -190,7 +195,7 @@ var Application = class {
 		return scope.run(() => resource(() => {
 			for (const tag of tags) this.version(tag)();
 			return load();
-		}, (error) => this.onError(error)));
+		}, (error) => this.onError(error, "resource")));
 	}
 	version(tag) {
 		let version = this.versions.get(tag);
@@ -242,6 +247,8 @@ var Application = class {
 	stop() {
 		document.removeEventListener("click", this.onClick);
 		window.removeEventListener("beforeunload", this.onBeforeUnload);
+		window.removeEventListener("error", this.onWindowError);
+		window.removeEventListener("unhandledrejection", this.onRejection);
 		this.router.stop();
 		this.toastHost?.remove();
 		this.toastHost = null;
@@ -261,6 +268,27 @@ var Application = class {
 		await this.run(root, element);
 	}
 	/** Closing or reloading the page, a link to another site: the browser asks with its own question. */
+	/**
+	* An error nobody caught. Not the noise of ResizeObserver (a loop the browser reports and recovers from), nor
+	* errors of loading images and scripts (they do not bubble to window). The browser does not print it again.
+	*/
+	onWindowError = (event) => {
+		if (event.message?.startsWith("ResizeObserver loop")) return;
+		event.preventDefault();
+		this.reportGlobal(event.error ?? new Error(event.message || "Unknown error"));
+	};
+	onRejection = (event) => {
+		event.preventDefault();
+		this.reportGlobal(event.reason);
+	};
+	/** A failing onError must not report itself again and again. */
+	reportGlobal(error) {
+		try {
+			this.onError(error, "global");
+		} catch (failure) {
+			console.error(error, failure);
+		}
+	}
 	onBeforeUnload = (event) => {
 		if (hasUnsaved(this, null)) event.preventDefault();
 	};

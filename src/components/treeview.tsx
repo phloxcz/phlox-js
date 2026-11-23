@@ -54,7 +54,7 @@ export function TreeView<N extends TreeNode<any>>(props: TreeViewProps<N>): Chil
   const theme = currentTheme();
   const slot = (part: string) => theme.class(`tree.${part}`);
   const app = getScope()?.find<Application>(APP);
-  const fail = (error: unknown) => (app ? app.onError(error) : console.error(error));
+  const fail = (error: unknown) => (app ? app.onError(error, 'event') : console.error(error));
   const pick = tree.options.pick;
   const items = new WeakMap<Element, TreeItem<N>>();
 

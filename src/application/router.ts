@@ -252,7 +252,7 @@ export class Router {
     try {
       await this.run(navigation);
     } catch (error) {
-      if (error !== SUPERSEDED && error !== CANCELLED) this.app.onError(error);
+      if (error !== SUPERSEDED && error !== CANCELLED) this.app.onError(error, 'navigation');
     } finally {
       this.running = null;
       const next = this.queued;

@@ -31,7 +31,7 @@ function TreeView(props) {
 	const theme = currentTheme();
 	const slot = (part) => theme.class(`tree.${part}`);
 	const app = getScope()?.find(APP);
-	const fail = (error) => app ? app.onError(error) : console.error(error);
+	const fail = (error) => app ? app.onError(error, "event") : console.error(error);
 	const pick = tree.options.pick;
 	const items = /* @__PURE__ */ new WeakMap();
 	tree.load().catch(fail);

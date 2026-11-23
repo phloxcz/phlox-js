@@ -11,6 +11,13 @@ import { Theme } from '../ui/theme';
 import type { Presenter } from '../ui/presenter';
 import { Router } from './router';
 import { User } from '../security/user';
+/**
+ * Where an error came from: 'navigation' (actions, startup of presenters and dialogs on the way to a page),
+ * 'lifecycle' (startup() of a component inside a view, afterRender()), 'event' (a handler of an event, also an
+ * async one, actions of grids and trees, submitting a form), 'resource' (loading of a resource), 'global'
+ * (anything else the browser reports: a timer, a promise nobody awaits, an effect run by one of them).
+ */
+export type ErrorSource = 'navigation' | 'lifecycle' | 'event' | 'resource' | 'global';
 export interface Flash {
     text: string;
     /** `info`, `success`, `warning` or `error`. */
@@ -67,8 +74,11 @@ export declare class Application {
      * "Page – <the title in index.html>", without a page only the title in index.html.
      */
     formatTitle: (page: string | null) => string;
-    /** Receives errors from navigation and from life cycle methods that nobody awaits. */
-    onError: (error: unknown) => void;
+    /**
+     * Receives every error of the running application: from navigation, handlers of events, resources and, as
+     * 'global', the errors and rejected promises the browser reports on `window`. The place to show and log them.
+     */
+    onError: (error: unknown, source: ErrorSource) => void;
     private scope;
     /** Versions of the tags of data, see invalidate(). */
     private versions;
@@ -123,6 +133,14 @@ export declare class Application {
     /** Builds the whole tree of presenters again at the same URL, for example after a change of language. */
     restart(): Promise<void>;
     /** Closing or reloading the page, a link to another site: the browser asks with its own question. */
+    /**
+     * An error nobody caught. Not the noise of ResizeObserver (a loop the browser reports and recovers from), nor
+     * errors of loading images and scripts (they do not bubble to window). The browser does not print it again.
+     */
+    private onWindowError;
+    private onRejection;
+    /** A failing onError must not report itself again and again. */
+    private reportGlobal;
     private onBeforeUnload;
     /** A click on an ordinary link to this site becomes a navigation without a page reload. */
     private onClick;

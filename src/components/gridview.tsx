@@ -134,7 +134,7 @@ export function GridView<R extends object>(props: GridViewProps<R>): Child {
   const slot = (part: string) => theme.class(`grid.${part}`);
   const texts = Grid.texts;
   const app = getScope()?.find<Application>(APP);
-  const fail = (error: unknown) => (app ? app.onError(error) : console.error(error));
+  const fail = (error: unknown) => (app ? app.onError(error, 'event') : console.error(error));
   const run = (work: Promise<unknown>) => void work.catch(fail);
   // Controls of filters that are form controls (a DropDownList), in a form of their own
   const filterForm = new Form();

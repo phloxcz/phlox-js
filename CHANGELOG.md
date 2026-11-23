@@ -2,6 +2,12 @@
 
 Všechny podstatné změny projektu. Formát podle [Keep a Changelog](https://keepachangelog.com/cs/1.1.0/), verze podle [Semantic Versioning](https://semver.org/lang/cs/).
 
+## [0.6.7] – 2026-11-23
+
+### Přidáno
+- **Všechny chyby aplikace v `app.onError`:** od `run()` do `stop()` aplikace poslouchá `error` a `unhandledrejection` na `window` (chyby v časovačích, promisy, na které nikdo nečeká) a posílá je do `onError` jako ostatní. Hlášku `ResizeObserver loop…` přeskočí, chyba v `onError` se jen vypíše do konzole.
+- **Zdroj chyby:** `onError(error, source)` dostane druhý parametr `'navigation' | 'lifecycle' | 'event' | 'resource' | 'global'`, typ `ErrorSource`. Kód s jedním parametrem funguje dál.
+
 ## [0.6.6] – 2026-11-20
 
 ### Opraveno
