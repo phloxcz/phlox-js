@@ -956,7 +956,7 @@ Potřeba vzešla z konfigurátoru rozvržení v CMS: uzel se má dát přetáhno
 CMS chce posílat chyby JS na server (`log.save`), jako starý klient přes `window.onerror`. Aplikace ale do `onError` dostávala jen chyby, které framework sám zachytil (navigace, obsluhy událostí, zdroje, životní cyklus). Chyby v časovačích, v promisech pouštěných přes `void` a v efektech spuštěných z nich končily na `window` a aplikace o nich nevěděla.
 
 - **`run()` poslouchá `error` a `unhandledrejection` na `window`** a posílá je do `onError` se zdrojem `'global'`; `stop()` posluchače odebere. Jedno místo pro všechny chyby, jako Tracy v Nette, místo aby si každá aplikace věšela vlastní `window.onerror`.
-- **Druhý parametr `source`** (`'navigation' | 'lifecycle' | 'event' | 'resource' | 'global'`). Kód s jedním parametrem dál funguje. Log na serveru pak ví, kde chyba vznikla, a aplikace může zdroje rozlišit (třeba globální chyby jen logovat, ne ukazovat).
+- **Druhý parametr `source`** (`'navigation' | 'lifecycle' | 'event' | 'resource' | 'global'`). Kód s jedním parametrem dál funguje. Pro volající je nepovinný (0.6.8): v 0.6.7 byl povinný a aplikace, která `onError` volá sama, se přestala překládat (CMS při načítání webů). Log na serveru pak ví, kde chyba vznikla, a aplikace může zdroje rozlišit (třeba globální chyby jen logovat, ne ukazovat).
 - **`preventDefault()`** u globálních chyb: prohlížeč by je jinak vypsal do konzole podruhé vedle `onError`.
 - **Hláška `ResizeObserver loop…` se přeskočí.** Prohlížeč ji hlásí jako chybu, ale aplikace za ni nemůže a stránka funguje dál; v logu by byla jen šumem.
 - **Chyba v `onError` se jen vypíše**, aby selhávající logování nehlásilo samo sebe dokola.

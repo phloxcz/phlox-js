@@ -93,6 +93,7 @@ var Application = class {
 	/**
 	* Receives every error of the running application: from navigation, handlers of events, resources and, as
 	* 'global', the errors and rejected promises the browser reports on `window`. The place to show and log them.
+	* The framework always gives the source; code of the application calling onError itself may leave it out.
 	*/
 	onError = (error) => console.error(error);
 	scope = null;

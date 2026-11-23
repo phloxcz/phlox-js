@@ -246,3 +246,15 @@ describe('all errors of the application in app.onError', () => {
     }
   });
 });
+
+describe('app.onError called by the application', () => {
+  test('the source may be left out', async () => {
+    const { app } = await boot(class extends Presenter {
+      public render() { return <p />; }
+    });
+    const seen: unknown[] = [];
+    app.onError = (error, source) => seen.push([String(error), source]);
+    app.onError(new Error('own'));
+    expect(seen).toEqual([['Error: own', undefined]]);
+  });
+});

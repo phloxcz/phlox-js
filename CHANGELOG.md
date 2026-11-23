@@ -2,6 +2,11 @@
 
 Všechny podstatné změny projektu. Formát podle [Keep a Changelog](https://keepachangelog.com/cs/1.1.0/), verze podle [Semantic Versioning](https://semver.org/lang/cs/).
 
+## [0.6.8] – 2026-11-23
+
+### Opraveno
+- **`app.onError(error)` bez zdroje:** v 0.6.7 byl druhý parametr povinný i pro kód aplikace, který `onError` volá sám, takže takové volání přestalo jít přeložit. Zdroj je pro volající zase nepovinný; framework ho předává vždy.
+
 ## [0.6.7] – 2026-11-23
 
 ### Přidáno

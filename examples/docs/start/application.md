@@ -49,5 +49,6 @@ app.onError = (error, source) => {
 
 - **Globální chyby** (`error` a `unhandledrejection` na `window`) aplikace poslouchá od `run()` do `stop()`. Prohlížeč je pak sám nevypíše znovu do konzole, vypisuje je `onError`.
 - **Hlášku ResizeObserveru** (`ResizeObserver loop…`) aplikace přeskočí: prohlížeč ji hlásí jako chybu, ale není to chyba aplikace a sám se z ní vzpamatuje.
+- **Vlastní volání** `app.onError(error)` zdroj vynechat smí, obsluha ho pak dostane jako `undefined`. Framework ho předává vždy.
 - **Chyba v `onError`** se jen vypíše do konzole, znovu do `onError` nejde, aby nevznikla smyčka.
 - **Chyby načtení obrázků a skriptů** na `window` nebublají, `onError` je nedostane.
